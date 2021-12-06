@@ -1,4 +1,4 @@
-import Users from "./Users";
+import User from "./User";
 import UsersDev from "./UsersDev";
 
-export default [Users, UsersDev];
+export default [User, UsersDev];

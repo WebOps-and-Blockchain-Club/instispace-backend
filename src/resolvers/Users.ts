@@ -3,7 +3,7 @@ import { UserRole, usersDevList } from "../utils";
 import { Arg, Mutation, Query, Resolver } from "type-graphql";
 import jwt from "jsonwebtoken";
 import UsersDev from "../entities/UsersDev";
-import Users from "../entities/Users";
+import Users from "../entities/User";
 import { LoginOutput } from "../types/objects/users";
 
 @Resolver()
