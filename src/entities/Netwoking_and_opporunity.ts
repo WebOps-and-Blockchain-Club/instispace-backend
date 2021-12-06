@@ -20,7 +20,7 @@ import Comment from "./Common/Comment";
   stars varchar [ref: < star.post] // one to many 
   "photo" varchar
   "tag" varchar
-  created_on datetime
+  created_at datetime
   likes int [ref: < Like.id]
   noOfLikes int
   comments varchar [ref: < comment.id]
