@@ -69,7 +69,7 @@ class NetwokingAndOpporunity extends BaseEntity {
   comments: Comment[];
 
   //reports
-  @OneToMany(() => User, (user) => user.likedNetwokingAndOpporunity)
+  @OneToMany(() => User, (user) => user.reportedNetwokingAndOpporunity)
   reported_by: User;
 }
 
