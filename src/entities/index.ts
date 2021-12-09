@@ -1,4 +1,5 @@
-import Users from "./Users";
+import Tag from "./Tag";
+import User from "./User";
 import UsersDev from "./UsersDev";
 
-export default [Users, UsersDev];
+export default [User, Tag, UsersDev];
