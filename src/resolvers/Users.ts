@@ -142,6 +142,7 @@ class UsersResolver {
       }
       user.password = bcrypt.hashSync(autoGenPass(8), salt);
       await user.save();
+      console.log(user.password);
       //this password is going to be emailed to lead
       var token = jwt.sign(user.id, process.env.JWT_SECRET!);
       return `Lead Created Succesfully, acessToken : ${token}!`;
