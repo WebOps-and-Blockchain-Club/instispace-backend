@@ -35,8 +35,8 @@ class User extends BaseEntity {
   @Field({ nullable: true })
   hostel: string;
 
-  @Column({type : "boolean"})
-  @Field(_type => Boolean)
+  @Column({ type: "boolean" })
+  @Field((_type) => Boolean)
   isNewUser: Boolean;
 
   @ManyToMany((_type) => Tag, (Tag) => Tag.users, { nullable: true })

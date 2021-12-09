@@ -1,9 +1,17 @@
-import { Authorized, Mutation, Resolver, Query, Arg, FieldResolver, Root } from "type-graphql";
+import {
+  Authorized,
+  Mutation,
+  Resolver,
+  Query,
+  Arg,
+  FieldResolver,
+  Root,
+} from "type-graphql";
 import TagInput from "../types/inputs/tags";
 import Tag from "../entities/Tag";
 import User from "../entities/User";
 
-@Resolver(_type => Tag)
+@Resolver((_type) => Tag)
 class TagsResolver {
   @Mutation(() => Boolean)
   @Authorized(["ADMIN"])
@@ -23,8 +31,8 @@ class TagsResolver {
   }
 
   @FieldResolver(() => [User])
-  async users(@Root() {id} : Tag){
-    const tag = await Tag.findOne({where : {id} , relations : ["users"]});
+  async users(@Root() { id }: Tag) {
+    const tag = await Tag.findOne({ where: { id }, relations: ["users"] });
     return tag?.users;
   }
 }

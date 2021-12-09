@@ -100,16 +100,14 @@ class UsersResolver {
             await admin.save();
           }
         }
-        const user = await User.findOne({ where: { roll } }); //try checking whether we are gettng this message or not.
+        const user = await User.findOne({ where: { roll } }); 
         if (!user) throw new Error("Email Not Registered!");
         else {
           var passwordIsValid = await bcrypt.compare(pass, user.password);
-          //console.log(user.password, pass);
           if (passwordIsValid === true) {
             const token = jwt.sign(user.id, process.env.JWT_SECRET!);
             return { isNewUser: user.isNewUser, role: user.role, token };
           } else {
-            //console.log(passwordIsValid);
             throw new Error("Invalid Credentials");
           }
         }
@@ -142,10 +140,8 @@ class UsersResolver {
         }
         return result;
       }
-      //make second parameter saved in .env file
       user.password = bcrypt.hashSync(autoGenPass(8), salt);
       await user.save();
-      console.log(user.password);
       //this password is going to be emailed to lead
       var token = jwt.sign(user.id, process.env.JWT_SECRET!);
       return `Lead Created Succesfully, acessToken : ${token}!`;
@@ -194,7 +190,7 @@ class UsersResolver {
     } catch (e) {
       throw new Error(`messsage : ${e}`);
     }
-    //write field resolver for interest if tests are not working.
+    
   }
 
   @Mutation(() => String)

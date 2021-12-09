@@ -1,7 +1,7 @@
-import User from '../entities/User'
+import User from "../entities/User";
 
 interface MyContext {
-    user: User;
+  user: User;
 }
 
 export default MyContext;

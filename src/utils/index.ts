@@ -1,4 +1,4 @@
-import bcryptjs from 'bcryptjs';
+import bcryptjs from "bcryptjs";
 
 export enum UserRole {
   ADMIN = "ADMIN",
@@ -8,7 +8,8 @@ export enum UserRole {
   USER = "USER",
 }
 
-export const emailExpresion = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+export const emailExpresion =
+  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 export const adminEmail = "myhostel@gmail.com";
 
