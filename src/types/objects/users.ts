@@ -15,28 +15,27 @@ class LoginOutput {
 }
 
 @ObjectType()
-class CreateLeadOutput{
+class CreateLeadOutput {
   @Field(() => Boolean)
-  isNewLead : boolean;
+  isNewLead: boolean;
 
   @Field(() => UserRole)
-  role : UserRole;
+  role: UserRole;
 
   @Field()
-  autogenpass : string;
-
+  autogenpass: string;
 }
 
 @ObjectType()
-class GetUserOutput{
+class GetUserOutput {
   @Field()
   name: string;
 
   @Field()
   hostel: string;
 
-  @Field(_type => [String])
+  @Field((_type) => [String])
   interest: [string];
 }
 
-export { LoginOutput, CreateLeadOutput, GetUserOutput}
+export { LoginOutput, CreateLeadOutput, GetUserOutput };

@@ -10,33 +10,31 @@ class LoginInput {
 }
 
 @InputType()
-class CreateLeadInput{
+class CreateLeadInput {
   @Field()
-  roll: string; 
-} 
+  roll: string;
+}
 
 @InputType()
-class UserInput{
+class UserInput {
   @Field()
-  name : string;
+  name: string;
 
   @Field()
   hostel: string;
 
-  @Field(_type => [String])
+  @Field((_type) => [String])
   interest: string[];
-
 }
 
 @InputType()
-class LeadInput{
+class LeadInput {
   @Field()
-  newPassword: string; 
-
+  newPassword: string;
 }
 
 @InputType()
-class ModeratorInput{
+class ModeratorInput {
   @Field()
   roll: string;
 }
@@ -47,4 +45,11 @@ class GetUserInput {
   id: string;
 }
 
-export { LoginInput, CreateLeadInput, UserInput, LeadInput, ModeratorInput, GetUserInput};
+export {
+  LoginInput,
+  CreateLeadInput,
+  UserInput,
+  LeadInput,
+  ModeratorInput,
+  GetUserInput,
+};
