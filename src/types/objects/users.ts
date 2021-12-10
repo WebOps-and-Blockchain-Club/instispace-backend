@@ -14,28 +14,4 @@ class LoginOutput {
   token: string;
 }
 
-@ObjectType()
-class CreateLeadOutput {
-  @Field(() => Boolean)
-  isNewLead: boolean;
-
-  @Field(() => UserRole)
-  role: UserRole;
-
-  @Field()
-  autogenpass: string;
-}
-
-@ObjectType()
-class GetUserOutput {
-  @Field()
-  name: string;
-
-  @Field()
-  hostel: string;
-
-  @Field((_type) => [String])
-  interest: [string];
-}
-
-export { LoginOutput, CreateLeadOutput, GetUserOutput };
+export { LoginOutput };

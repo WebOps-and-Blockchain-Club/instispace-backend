@@ -28,7 +28,7 @@ import jwt from "jsonwebtoken";
 import UsersDev from "../entities/UsersDev";
 import User from "../entities/User";
 import Tag from "../entities/Tag";
-import { LoginOutput, GetUserOutput } from "../types/objects/users";
+import { LoginOutput } from "../types/objects/users";
 import MyContext from "src/utils/context";
 import bcrypt from "bcryptjs";
 import { In } from "typeorm";
@@ -68,21 +68,14 @@ class UsersResolver {
           newUser.roll = roll;
           newUser.role = UserRole.USER;
           newUser.isNewUser = true;
-          newUser.password = bcrypt.hashSync(pass, salt);
           await newUser.save();
           const token = jwt.sign(newUser.id, process.env.JWT_SECRET!);
-          return { isNewUser: true, role: UserRole.USER, token };
+          return { isNewUser: newUser.isNewUser, role: UserRole.USER, token };
         }
         //If user exists
         else {
-          var passwordIsValid = await bcrypt.compare(pass, user.password);
-          if (passwordIsValid) {
-            const token = jwt.sign(user.id, process.env.JWT_SECRET!);
-            return { isNewUser: user.isNewUser, role: user.role, token };
-          } else {
-            console.log(passwordIsValid);
-            throw new Error("Invalid Credentials");
-          }
+          const token = jwt.sign(user.id, process.env.JWT_SECRET!);
+          return { isNewUser: user.isNewUser, role: user.role, token };
         }
       }
       //For admins and leads
@@ -98,7 +91,7 @@ class UsersResolver {
             await admin.save();
           }
         }
-        const user = await User.findOne({ where: { roll } }); 
+        const user = await User.findOne({ where: { roll } });
         if (!user) throw new Error("Email Not Registered!");
         else {
           var passwordIsValid = await bcrypt.compare(pass, user.password);
@@ -137,22 +130,27 @@ class UsersResolver {
         }
         return result;
       }
-      user.password = bcrypt.hashSync(autoGenPass(8), salt);
+      var password = autoGenPass(8);
+      user.password = bcrypt.hashSync(password, salt);
       await user.save();
-      console.log(user.password);
+      console.log(password);
       //this password is going to be emailed to lead
       return !!user;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
   }
-  
+
   @Query(() => [User])
   @Authorized(["ADMIN", "LEADS", "MODERATOR"])
   async getAdminLeadAndMods(
     @Arg("RolesFilter", () => [UserRole]) roles: [UserRole]
   ) {
-    return await User.find({ where: { role: In(roles) } });
+    try {
+      return await User.find({ where: { role: In(roles) } });
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
   }
 
   @Query(() => [User])
@@ -171,23 +169,17 @@ class UsersResolver {
     return user;
   }
 
-  @Query(() => GetUserOutput)
+  @Query(() => User)
   @Authorized()
   async getUser(@Arg("GetUserInput") { id }: GetUserInput) {
     try {
       const user = await User.findOne({
         where: { id },
-        relations: ["interest"],
       });
-      if (!user) throw new Error("Invalid Username");
-      const interests: string[] = [];
-      for (let i = 0; i < user.interest.length; i++)
-        interests.push(user.interest[i].title);
-      return { name: user.name, hostel: user.hostel, interest: interests };
+      return user;
     } catch (e) {
       throw new Error(`messsage : ${e}`);
     }
-    
   }
 
   @Mutation(() => Boolean)
@@ -222,16 +214,16 @@ class UsersResolver {
     }
   }
 
-  @Mutation(() => String)
+  @Mutation(() => User)
   @Authorized(["USER"])
   async updateUser(
     @Ctx() { user }: MyContext,
     @Arg("UserInput") userInput: UserInput
   ) {
     try {
-      let response: string;
       user.name = userInput.name;
       user.hostel = userInput.hostel;
+      if (user.isNewUser === true) user.isNewUser = false;
       let tags: Tag[] = [];
       for (let i = 0; i < userInput.interest.length; i++) {
         const tag = await Tag.findOne({
@@ -244,12 +236,8 @@ class UsersResolver {
         tags.push(tag);
       }
       user.interest = tags;
-      if (user.isNewUser === true) {
-        user.isNewUser = false;
-        response = "New User Signed In";
-      } else response = "Updated User";
       await user.save();
-      return response;
+      return user;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -257,11 +245,15 @@ class UsersResolver {
 
   @FieldResolver(() => [Tag], { nullable: true })
   async interest(@Root() { id }: User) {
-    const user = await User.findOne({
-      where: { id },
-      relations: ["interest"],
-    });
-    return user?.interest;
+    try {
+      const user = await User.findOne({
+        where: { id },
+        relations: ["interest"],
+      });
+      return user?.interest;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
   }
 }
 
