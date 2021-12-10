@@ -16,24 +16,34 @@ class TagsResolver {
   @Mutation(() => Boolean)
   @Authorized(["ADMIN"])
   async createTag(@Arg("TagInput") { title }: TagInput) {
-    const findTag = await Tag.findOne({ where: { title } });
-    if (findTag) throw new Error("Tag Alraedy Exits");
-    const tag = new Tag();
-    tag.title = title;
-    await tag.save();
-    return !!tag;
+    try {
+      const tag = new Tag();
+      tag.title = title;
+      await tag.save();
+      return !!tag;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
   }
 
   @Query(() => [Tag])
   @Authorized()
   async getTags() {
-    return await Tag.find();
+    try {
+      return await Tag.find();
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
   }
 
   @FieldResolver(() => [User])
   async users(@Root() { id }: Tag) {
-    const tag = await Tag.findOne({ where: { id }, relations: ["users"] });
-    return tag?.users;
+    try {
+      const tag = await Tag.findOne({ where: { id }, relations: ["users"] });
+      return tag?.users;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
   }
 }
 export default TagsResolver;

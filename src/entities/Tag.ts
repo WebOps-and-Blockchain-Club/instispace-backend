@@ -12,7 +12,7 @@ import User from "./User";
 @Entity("Tag")
 @ObjectType("Tag")
 class Tag extends BaseEntity {
-  @PrimaryGeneratedColumn() // add uuid here
+  @PrimaryGeneratedColumn("uuid")
   @Field()
   id: string;
 
