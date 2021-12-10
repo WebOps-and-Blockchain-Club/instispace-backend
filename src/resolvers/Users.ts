@@ -75,7 +75,7 @@ class UsersResolver {
         }
         //If user exists
         else {
-          var passwordIsValid = await bcrypt.compare(user.password, pass);
+          var passwordIsValid = await bcrypt.compare(pass, user.password);
           if (passwordIsValid) {
             const token = jwt.sign(user.id, process.env.JWT_SECRET!);
             return { isNewUser: user.isNewUser, role: user.role, token };
@@ -88,8 +88,6 @@ class UsersResolver {
       //For admins and leads
       else {
         if (process.env.NODE_ENV === "development") {
-          //see if admin exists
-          //if it doesn't exists create myhostel@gmail.com
           const admins = await User.find({ where: { roll } });
           if (admins.length === 0) {
             const admin = new User();
@@ -117,8 +115,7 @@ class UsersResolver {
     }
   }
 
-  // use try catch in every mutation
-  @Mutation(() => String)
+  @Mutation(() => Boolean)
   @Authorized(["ADMIN"])
   async createLead(@Arg("CreateLeadInput") createLeadInput: CreateLeadInput) {
     try {
@@ -144,13 +141,12 @@ class UsersResolver {
       await user.save();
       console.log(user.password);
       //this password is going to be emailed to lead
-      var token = jwt.sign(user.id, process.env.JWT_SECRET!);
-      return `Lead Created Succesfully, acessToken : ${token}!`;
+      return !!user;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
   }
-  // modify this
+  
   @Query(() => [User])
   @Authorized(["ADMIN", "LEADS", "MODERATOR"])
   async getAdminLeadAndMods(
@@ -194,7 +190,7 @@ class UsersResolver {
     
   }
 
-  @Mutation(() => String)
+  @Mutation(() => Boolean)
   @Authorized(["LEADS"])
   async updateLead(
     @Ctx() { user }: MyContext,
@@ -205,13 +201,13 @@ class UsersResolver {
       user.isNewUser = false;
       user.password = bcrypt.hashSync(leadInput.newPassword, salt);
       await user.save();
-      return "Updated Lead";
+      return !!user;
     } catch (e) {
       throw new Error(`message: ${e}`);
     }
   }
 
-  @Mutation(() => String)
+  @Mutation(() => Boolean)
   @Authorized(["ADMIN", "LEADS"])
   async updateRole(@Arg("ModeratorInput") { roll }: ModeratorInput) {
     try {
@@ -220,7 +216,7 @@ class UsersResolver {
       if (user.role !== UserRole.USER) throw new Error("Invalid Role");
       user.role = UserRole.MODERATOR;
       await user.save();
-      return "Changed Role to Moderator";
+      return !!user;
     } catch (e) {
       throw new Error(`message: ${e}`);
     }
