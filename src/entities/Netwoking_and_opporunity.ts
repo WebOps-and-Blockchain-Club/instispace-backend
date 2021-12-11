@@ -8,7 +8,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import Star from "./Common/Star";
 import User from "./User";
 import Comment from "./Common/Comment";
 
@@ -44,9 +43,6 @@ class NetwokingAndOpporunity extends BaseEntity {
   @Field()
   content: string;
 
-  @OneToMany(() => Star, (star) => star.post)
-  stars: Star[];
-
   @Column()
   @Field()
   photo: string;
@@ -71,6 +67,9 @@ class NetwokingAndOpporunity extends BaseEntity {
   //reports
   @OneToMany(() => User, (user) => user.reportedNetwokingAndOpporunity)
   reported_by: User;
+
+  @OneToMany(() => User, (user) => user.staredNetwokingAndOpporunity)
+  stared_by: User;
 
   @Column()
   @Field()
