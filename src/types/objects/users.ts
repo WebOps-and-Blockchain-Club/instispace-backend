@@ -1,6 +1,5 @@
 import { UserRole } from "../../utils";
 import { Field, ObjectType, registerEnumType } from "type-graphql";
-
 registerEnumType(UserRole, { name: "UserRole" });
 
 @ObjectType()
