@@ -9,7 +9,6 @@ import {
   ManyToMany,
 } from "typeorm";
 import NetwokingAndOpporunity from "./Netwoking_and_opporunity";
-import Star from "./Common/Star";
 import Comment from "./Common/Comment";
 import Tag from "./Tag";
 
@@ -43,9 +42,6 @@ class User extends BaseEntity {
   )
   networking_and_opportunities: NetwokingAndOpporunity[];
 
-  @OneToMany(() => Star, (star) => star.user)
-  stars: Star[];
-
   @OneToMany(
     () => NetwokingAndOpporunity,
     (netwokingAndOpporunity) => netwokingAndOpporunity.liked_by
@@ -57,6 +53,12 @@ class User extends BaseEntity {
     (netwokingAndOpporunity) => netwokingAndOpporunity.reported_by
   )
   reportedNetwokingAndOpporunity: NetwokingAndOpporunity[];
+
+  @OneToMany(
+    () => NetwokingAndOpporunity,
+    (netwokingAndOpporunity) => netwokingAndOpporunity.stared_by
+  )
+  staredNetwokingAndOpporunity: NetwokingAndOpporunity[];
 
   @OneToMany(() => Comment, (comment) => comment.user)
   comments: Comment[];
