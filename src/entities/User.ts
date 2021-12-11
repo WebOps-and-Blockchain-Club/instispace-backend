@@ -33,7 +33,7 @@ class User extends BaseEntity {
 
   @OneToMany(
     () => NetwokingAndOpporunity,
-    (netwokingAndOpporunity) => netwokingAndOpporunity.created_by
+    (netwokingAndOpporunity) => netwokingAndOpporunity.createdBy
   )
   networking_and_opportunities: NetwokingAndOpporunity[];
 

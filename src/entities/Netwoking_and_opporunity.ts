@@ -34,7 +34,7 @@ class NetwokingAndOpporunity extends BaseEntity {
   id: string;
 
   @ManyToOne(() => User, (user) => user.networking_and_opportunities)
-  created_by: User;
+  createdBy: User;
 
   @Column()
   @Field()
@@ -71,6 +71,10 @@ class NetwokingAndOpporunity extends BaseEntity {
   //reports
   @OneToMany(() => User, (user) => user.reportedNetwokingAndOpporunity)
   reported_by: User;
+
+  @Column()
+  @Field()
+  isHidden: boolean;
 }
 
 export default NetwokingAndOpporunity;
