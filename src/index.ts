@@ -5,17 +5,38 @@ import resolvers from "./resolvers";
 import dotenv from "dotenv";
 import { createConnection } from "typeorm";
 import entities from "./entities";
+import User from "./entities/User";
+import jwt from "jsonwebtoken";
+import authChecker from "./utils/authcheker";
 
 dotenv.config();
 
 const main = async () => {
-  const schema = await buildSchema({ resolvers });
+  const schema = await buildSchema({ resolvers, authChecker });
 
-  const server = new ApolloServer({ schema });
+  const server = new ApolloServer({
+    schema,
+    context: async ({ req }: { req: any }) => {
+      let user;
+      if (req.headers.authorization) {
+        const token = req.headers.authorization;
+        const decoded: any = jwt.verify(
+          token.split("Bearer ")[1],
+          process.env.JWT_SECRET!
+        );
+        user = await User.findOne({ id: decoded });
+        console.log(user);
+      }
+      return { user: user };
+    },
+  });
 
   server
     .listen(8000)
-    .then(({ url }) => console.log(`Server running at ${url}`));
+    .then(({ url }) => console.log(`Server running at ${url}`))
+    .catch((e) => {
+      console.log(e);
+    });
 };
 
 createConnection({
