@@ -15,13 +15,4 @@ class CreateNetopsInput {
   tags: string[];
 }
 
-@InputType()
-class createCommentData {
-  @Field()
-  title: string;
-
-  @Field()
-  content: string;
-}
-̀
-export default [CreateNetopsInput, createCommentData];
+export default [CreateNetopsInput];

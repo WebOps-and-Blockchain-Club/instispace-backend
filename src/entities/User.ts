@@ -48,7 +48,7 @@ class User extends BaseEntity {
   @OneToMany(() => Netop, (netop) => netop.staredBy)
   staredNetop: Netop[];
 
-  @OneToMany(() => Comment, (comment) => comment.user)
+  @OneToMany(() => Comment, (comment) => comment.createdBy)
   comments: Comment[];
   @Column({ nullable: true })
   @Field({ nullable: true })
