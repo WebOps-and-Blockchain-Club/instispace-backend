@@ -59,9 +59,9 @@ class Netop extends BaseEntity {
   @OneToMany(() => User, (user) => user.likedNetop)
   likedBy: User[];
 
-  @Column()
-  @Field()
-  noOfLikes: number;
+  @Column(() => Number)
+  @Field(() => Number)
+  likeCount: number;
 
   //comments
   @OneToMany(() => Comment, (comment) => comment.netop)

@@ -1,7 +1,7 @@
 import { Field, InputType } from "type-graphql";
 
 @InputType()
-class CreateNetopsInput {
+class createNetopsInput {
   @Field()
   title: string;
 
@@ -15,4 +15,19 @@ class CreateNetopsInput {
   tags: string[];
 }
 
-export default CreateNetopsInput;
+@InputType()
+class editNetopsInput {
+  @Field({ nullable: true })
+  title: string;
+
+  @Field({ nullable: true })
+  content: string;
+
+  @Field({ nullable: true })
+  photo: string;
+
+  @Field(() => [String], { nullable: true })
+  tags: string[];
+}
+
+export { createNetopsInput, editNetopsInput };
