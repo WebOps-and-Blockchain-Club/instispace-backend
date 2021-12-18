@@ -1,9 +1,11 @@
 import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
 
+
 import MyContext from "../utils/context";
 import createNetopsInput from "../types/inputs/netop";
 import Tag from "../entities/Tag";
 import Netop from "../entities/Netop";
+import Comment from "../entities/Common/Comment";
 @Resolver()
 class NetopResolver {
   @Mutation(() => Boolean)
@@ -183,22 +185,16 @@ class NetopResolver {
   async addComment(
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext
-    @Arg("createCommentData") createCommentData:createCommentData
+    @Arg("content") content: string
   ) {
     try {
-      const netop = await Netop.findOne(netopId, { relations: ["likedBy"] });
-      if (netop) {
-        if (netop.likedBy.includes(user)) {
-          netop.likedBy.filter((e) => e !== user);
-          netop.save();
-        } else {
-          netop.likedBy.push(user);
-          netop.save();
-        }
-        return netop!!;
-      } else {
-        throw new Error("Invalid netop id");
+      const netop = await Netop.findOne(netopId, { relations: ["comments"] });
+      if(netop){
+        const comment = Comment.create({content,netop,createdBy:user});
+        comment.save();
+        return !!comment;
       }
+      throw new Error("Post not found");
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
@@ -270,34 +266,6 @@ class NetopResolver {
     });
     return netop?.comments;
   }
-
-  // @Mutation(() => Boolean)
-  // async createPost(
-  //   @Arg("title") title: string,
-  //   @Arg("content") content: string,
-  //   @Ctx() { user }: MyContext
-  // ) {
-  //   const Netop = Netop.create({
-  //     title,
-  //     content,
-  //     createdBy: user,
-  //     isHidden: false,
-  //   });
-  //   Netop.save();
-  //   return !!Netop;
-  // }
-
-  //ToDo: edit Netop from debo
-  // @Mutation(() => Boolean)
-  // async editPost(
-  //   @Arg("postId") postId: string,
-  //   @Arg("newPost") newPost: Netop
-  // ) {
-  //   const Netop = await Netop.update(postId, newPost);
-  //   Netop.save();
-
-  //   return !!Netop;
-  // }
 }
 
 export default NetopResolver;

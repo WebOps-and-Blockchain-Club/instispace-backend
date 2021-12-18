@@ -6,7 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import NetwokingAndOpporunity from "../Netop";
+import Netop from "../Netop";
 import User from "../User";
 
 @Entity("Comment")
@@ -16,14 +16,11 @@ class Comment extends BaseEntity {
   @Field()
   id: string;
 
-  @ManyToOne(
-    () => NetwokingAndOpporunity,
-    (NetwokingAndOpporunity) => NetwokingAndOpporunity.comments
-  )
-  post: NetwokingAndOpporunity;
+  @ManyToOne(() => Netop, (Netop) => Netop.comments)
+  netop: Netop;
 
   @ManyToOne(() => User, (User) => User.comments)
-  user: User[];
+  createdBy: User;
 
   @Column()
   @Field()

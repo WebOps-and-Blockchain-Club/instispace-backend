@@ -64,7 +64,7 @@ class Netop extends BaseEntity {
   noOfLikes: number;
 
   //comments
-  @OneToMany(() => Comment, (comment) => comment.post)
+  @OneToMany(() => Comment, (comment) => comment.netop)
   comments: Comment[];
 
   //reports
