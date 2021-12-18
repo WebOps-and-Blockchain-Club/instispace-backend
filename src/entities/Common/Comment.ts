@@ -6,7 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import NetwokingAndOpporunity from "../Netwoking_and_opporunity";
+import NetwokingAndOpporunity from "../Netop";
 import User from "../User";
 
 @Entity("Comment")
