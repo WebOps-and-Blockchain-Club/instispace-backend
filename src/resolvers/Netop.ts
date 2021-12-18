@@ -1,11 +1,20 @@
-import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  Authorized,
+  Ctx,
+  FieldResolver,
+  Mutation,
+  Query,
+  Resolver,
+  Root,
+} from "type-graphql";
 
 import MyContext from "../utils/context";
-import createNetopsInput from "../types/inputs/netop";
+import { createNetopsInput, editNetopsInput } from "../types/inputs/netop";
 import Tag from "../entities/Tag";
 import Netop from "../entities/Netop";
 import Comment from "../entities/Common/Comment";
-@Resolver()
+@Resolver(Netop)
 class NetopResolver {
   @Mutation(() => Boolean)
   @Authorized()
@@ -22,6 +31,8 @@ class NetopResolver {
         photo,
         createdBy: user,
         isHidden: false,
+        likeCount: 0,
+        tags: [],
       });
 
       createNetopsInput.tags.forEach(async (tagName) => {
@@ -30,6 +41,8 @@ class NetopResolver {
       });
 
       netop.save();
+      console.log("myNetop saved", netop);
+
       return !!netop;
     } catch (e) {
       console.log(e.message);
@@ -39,13 +52,15 @@ class NetopResolver {
 
   @Mutation(() => Boolean)
   @Authorized()
-  async editEvent(
-    @Arg("EditNetopsData") editNetopsInput: createNetopsInput,
+  async editNetop(
+    @Arg("EditNetopsData") editNetopsInput: editNetopsInput,
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext
   ) {
     try {
-      const netop = await Netop.findOne(netopId);
+      const netop = await Netop.findOne({ id: netopId });
+      console.log("your netopId is " + netop);
+
       if (netop && user === netop.createdBy) {
         const { title, content, photo } = editNetopsInput;
         const { affected } = await Netop.update(netopId, {
@@ -204,7 +219,11 @@ class NetopResolver {
   @Authorized()
   async getNetopById(@Arg("NetopId") netopId: string) {
     try {
-      const netop = await Netop.findOne(netopId);
+      console.log(netopId);
+      // const netop = await Netop.findOne(netopId, { relations: ["createdBy"] })
+      const netop = await Netop.findOne(netopId, {
+        where: { isHidden: false },
+      });
       return netop;
     } catch (e) {
       console.log(e.message);
@@ -242,7 +261,7 @@ class NetopResolver {
 
       switch (sortingCondition) {
         case MOSTLIKED:
-          netopList.sort((a, b) => b.noOfLikes - a.noOfLikes);
+          netopList.sort((a, b) => b.likeCount - a.likeCount);
           break;
         case MOSTRECENT:
           // newList.sort((a, b) => b.time - a.time);
@@ -265,6 +284,14 @@ class NetopResolver {
       relations: ["comments"],
     });
     return netop?.comments;
+  }
+
+  @FieldResolver(() => Number)
+  async likeCount(@Root() { id }: Netop) {
+    const netop = await Netop.findOne(id, { relations: ["likedBy"] });
+    console.log("netop?.likedBy", netop?.likedBy);
+    const like_count = netop?.likedBy.length;
+    return like_count;
   }
 }
 
