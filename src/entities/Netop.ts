@@ -78,7 +78,7 @@ class Netop extends BaseEntity {
   @Field()
   isHidden: boolean;
 
-  @ManyToMany((_type) => Tag, (tag) => tag.Netops, { cascade: true })
+  @ManyToMany((_type) => Tag, (tag) => tag.Netops)
   @JoinTable()
   tags: Tag[];
 }
