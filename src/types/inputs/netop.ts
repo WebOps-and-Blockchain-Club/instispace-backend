@@ -15,4 +15,4 @@ class CreateNetopsInput {
   tags: string[];
 }
 
-export default [CreateNetopsInput];
+export default CreateNetopsInput;

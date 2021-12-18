@@ -1,6 +1,5 @@
 import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
 
-
 import MyContext from "../utils/context";
 import createNetopsInput from "../types/inputs/netop";
 import Tag from "../entities/Tag";
@@ -184,13 +183,13 @@ class NetopResolver {
   @Authorized()
   async addComment(
     @Arg("NetopId") netopId: string,
-    @Ctx() { user }: MyContext
+    @Ctx() { user }: MyContext,
     @Arg("content") content: string
   ) {
     try {
       const netop = await Netop.findOne(netopId, { relations: ["comments"] });
-      if(netop){
-        const comment = Comment.create({content,netop,createdBy:user});
+      if (netop) {
+        const comment = Comment.create({ content, netop, createdBy: user });
         comment.save();
         return !!comment;
       }
