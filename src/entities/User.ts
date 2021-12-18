@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   ManyToMany,
 } from "typeorm";
-import NetwokingAndOpporunity from "./Netwoking_and_opporunity";
+import Netop from "./Netop";
 import Comment from "./Common/Comment";
 import Tag from "./Tag";
 
@@ -36,29 +36,17 @@ class User extends BaseEntity {
 
   // networking and opportunity
 
-  @OneToMany(
-    () => NetwokingAndOpporunity,
-    (netwokingAndOpporunity) => netwokingAndOpporunity.createdBy
-  )
-  networking_and_opportunities: NetwokingAndOpporunity[];
+  @OneToMany(() => Netop, (netop) => netop.createdBy)
+  networking_and_opportunities: Netop[];
 
-  @OneToMany(
-    () => NetwokingAndOpporunity,
-    (netwokingAndOpporunity) => netwokingAndOpporunity.liked_by
-  )
-  likedNetwokingAndOpporunity: NetwokingAndOpporunity[];
+  @OneToMany(() => Netop, (netop) => netop.likedBy)
+  likedNetop: Netop[];
 
-  @OneToMany(
-    () => NetwokingAndOpporunity,
-    (netwokingAndOpporunity) => netwokingAndOpporunity.reported_by
-  )
-  reportedNetwokingAndOpporunity: NetwokingAndOpporunity[];
+  @OneToMany(() => Netop, (netop) => netop.reportedBy)
+  reportedNetop: Netop[];
 
-  @OneToMany(
-    () => NetwokingAndOpporunity,
-    (netwokingAndOpporunity) => netwokingAndOpporunity.stared_by
-  )
-  staredNetwokingAndOpporunity: NetwokingAndOpporunity[];
+  @OneToMany(() => Netop, (netop) => netop.staredBy)
+  staredNetop: Netop[];
 
   @OneToMany(() => Comment, (comment) => comment.user)
   comments: Comment[];

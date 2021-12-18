@@ -4,12 +4,15 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import User from "./User";
 import Comment from "./Common/Comment";
+import Tag from "./Tag";
 
 /*
 "id" varchar
@@ -26,9 +29,9 @@ import Comment from "./Common/Comment";
   reports varchar [ref: < Report.id]
 */
 
-@Entity("NetwokingAndOpporunity")
-@ObjectType("NetwokingAndOpporunity")
-class NetwokingAndOpporunity extends BaseEntity {
+@Entity("Netop")
+@ObjectType("Netop")
+class Netop extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
@@ -50,11 +53,11 @@ class NetwokingAndOpporunity extends BaseEntity {
   //tags
 
   @CreateDateColumn({ type: "timestamptz" })
-  created_at: Date;
+  createdAt: Date;
 
   //likes
-  @OneToMany(() => User, (user) => user.likedNetwokingAndOpporunity)
-  liked_by: User;
+  @OneToMany(() => User, (user) => user.likedNetop)
+  likedBy: User[];
 
   @Column()
   @Field()
@@ -65,15 +68,19 @@ class NetwokingAndOpporunity extends BaseEntity {
   comments: Comment[];
 
   //reports
-  @OneToMany(() => User, (user) => user.reportedNetwokingAndOpporunity)
-  reported_by: User;
+  @OneToMany(() => User, (user) => user.reportedNetop)
+  reportedBy: User[];
 
-  @OneToMany(() => User, (user) => user.staredNetwokingAndOpporunity)
-  stared_by: User;
+  @OneToMany(() => User, (user) => user.staredNetop)
+  staredBy: User[];
 
   @Column()
   @Field()
   isHidden: boolean;
+
+  @ManyToMany((_type) => Tag, (tag) => tag.Netops, { cascade: true })
+  @JoinTable()
+  tags: Tag[];
 }
 
-export default NetwokingAndOpporunity;
+export default Netop;
