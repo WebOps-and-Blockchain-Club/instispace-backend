@@ -11,7 +11,7 @@ class CreateNetopsInput {
   @Field()
   photo: string;
 
-  @Field()
+  @Field(() => [String])
   tags: string[];
 }
 

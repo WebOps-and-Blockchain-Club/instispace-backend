@@ -9,7 +9,7 @@ import Comment from "../entities/Common/Comment";
 class NetopResolver {
   @Mutation(() => Boolean)
   @Authorized()
-  async createPost(
+  async createNetop(
     @Arg("NewEventData") createNetopsInput: createNetopsInput,
     @Ctx() { user }: MyContext
   ) {
@@ -68,7 +68,7 @@ class NetopResolver {
   async editTags(
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext,
-    @Arg("Tags") Tags: string[]
+    @Arg("Tags", () => [String]) Tags: string[]
   ) {
     try {
       const netop = await Netop.findOne(netopId, { relations: ["tags"] });
@@ -215,7 +215,8 @@ class NetopResolver {
   @Query(() => [Netop])
   @Authorized()
   async getNetop(
-    @Arg("FileringCondition", { nullable: true }) fileringConditions: string[],
+    @Arg("FileringCondition", () => [String], { nullable: true })
+    fileringConditions: string[],
     @Arg("SortingCondition", { nullable: true }) sortingCondition: string
   ) {
     try {
