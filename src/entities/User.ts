@@ -14,6 +14,7 @@ import Tag from "./Tag";
 
 @Entity("User")
 @ObjectType("User")
+//TODO: add duration of the netop
 class User extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   @Field()
@@ -39,7 +40,7 @@ class User extends BaseEntity {
   @OneToMany(() => Netop, (netop) => netop.createdBy)
   networking_and_opportunities: Netop[];
 
-  @OneToMany(() => Netop, (netop) => netop.likedBy)
+  @ManyToMany(() => Netop, (netop) => netop.likedBy)
   likedNetop: Netop[];
 
   @OneToMany(() => Netop, (netop) => netop.reportedBy)

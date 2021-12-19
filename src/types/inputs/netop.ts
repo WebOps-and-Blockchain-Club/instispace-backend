@@ -25,9 +25,6 @@ class editNetopsInput {
 
   @Field({ nullable: true })
   photo: string;
-
-  @Field(() => [String], { nullable: true })
-  tags: string[];
 }
 
 export { createNetopsInput, editNetopsInput };

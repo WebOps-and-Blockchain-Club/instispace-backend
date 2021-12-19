@@ -26,9 +26,7 @@ class Tag extends BaseEntity {
   @Field((_type) => [User], { nullable: true })
   users: [User];
 
-  @ManyToMany((_type) => Netop, (Netop) => Netop.tags)
-  @JoinTable()
-  @Field((_type) => [Netop])
+  @ManyToMany(() => Netop, (Netop) => Netop.tags, { cascade: true })
   Netops: Netop[];
 }
 

@@ -56,29 +56,31 @@ class Netop extends BaseEntity {
   createdAt: Date;
 
   //likes
-  @OneToMany(() => User, (user) => user.likedNetop)
+  @ManyToMany(() => User, (user) => user.likedNetop, { nullable: true })
+  @JoinTable()
   likedBy: User[];
 
-  @Column(() => Number)
   @Field(() => Number)
   likeCount: number;
 
   //comments
-  @OneToMany(() => Comment, (comment) => comment.netop)
+  @OneToMany(() => Comment, (comment) => comment.netop, { nullable: true })
   comments: Comment[];
 
   //reports
-  @OneToMany(() => User, (user) => user.reportedNetop)
+  @ManyToMany(() => User, (user) => user.reportedNetop, { nullable: true })
+  @JoinTable()
   reportedBy: User[];
 
-  @OneToMany(() => User, (user) => user.staredNetop)
+  @ManyToMany(() => User, (user) => user.staredNetop, { nullable: true })
+  @JoinTable()
   staredBy: User[];
 
   @Column()
   @Field()
   isHidden: boolean;
 
-  @ManyToMany((_type) => Tag, (tag) => tag.Netops)
+  @ManyToMany((_type) => Tag, (tag) => tag.Netops, { nullable: true })
   @JoinTable()
   tags: Tag[];
 }
