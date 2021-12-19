@@ -6,8 +6,10 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   ManyToMany,
+  ManyToOne,
 } from "typeorm";
 import Tag from "./Tag";
+import Hostel from "./Hostel";
 
 @Entity("User")
 @ObjectType("User")
@@ -31,13 +33,13 @@ class User extends BaseEntity {
   @Field(() => UserRole)
   role: UserRole;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  hostel: string;
-
   @Column({ type: "boolean" })
   @Field((_type) => Boolean)
   isNewUser: Boolean;
+
+  @ManyToOne((_type) => Hostel, (hostel) => hostel.users, { nullable: true })
+  @Field({ nullable: true })
+  hostel: Hostel;
 
   @ManyToMany((_type) => Tag, (Tag) => Tag.users, { nullable: true })
   @Field((_type) => [Tag], { nullable: true })

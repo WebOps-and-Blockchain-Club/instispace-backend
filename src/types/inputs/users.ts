@@ -1,3 +1,4 @@
+import { UserRole } from "../../utils";
 import { Field, InputType } from "type-graphql";
 
 @InputType()
@@ -10,9 +11,12 @@ class LoginInput {
 }
 
 @InputType()
-class CreateLeadInput {
+class CreateAccountInput {
   @Field()
   roll: string;
+
+  @Field()
+  role: UserRole;
 }
 
 @InputType()
@@ -28,7 +32,7 @@ class UserInput {
 }
 
 @InputType()
-class LeadInput {
+class NewPass {
   @Field()
   newPassword: string;
 }
@@ -45,11 +49,25 @@ class GetUserInput {
   id: string;
 }
 
+@InputType()
+class CreateSecInput {
+  @Field()
+  roll: string;
+}
+
+@InputType()
+class CreateHostelInput {
+  @Field()
+  name: string;
+}
+
 export {
   LoginInput,
-  CreateLeadInput,
+  CreateAccountInput,
   UserInput,
-  LeadInput,
+  CreateSecInput,
+  NewPass,
   ModeratorInput,
+  CreateHostelInput,
   GetUserInput,
 };

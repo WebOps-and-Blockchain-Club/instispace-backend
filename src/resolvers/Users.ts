@@ -1,10 +1,10 @@
 import {
   ModeratorInput,
-  LeadInput,
   UserInput,
-  CreateLeadInput,
+  CreateAccountInput,
   LoginInput,
   GetUserInput,
+  NewPass,
 } from "../types/inputs/users";
 import {
   adminEmail,
@@ -32,6 +32,7 @@ import { LoginOutput } from "../types/objects/users";
 import MyContext from "src/utils/context";
 import bcrypt from "bcryptjs";
 import { In } from "typeorm";
+import Hostel from "../entities/Hostel";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -110,14 +111,16 @@ class UsersResolver {
 
   @Mutation(() => Boolean)
   @Authorized(["ADMIN"])
-  async createLead(@Arg("CreateLeadInput") createLeadInput: CreateLeadInput) {
+  async createAccount(
+    @Arg("CreateAccountInput") createAccountInput: CreateAccountInput
+  ) {
     try {
-      if (emailExpresion.test(createLeadInput.roll) === false)
+      if (emailExpresion.test(createAccountInput.roll) === false)
         throw new Error("Invalid Email");
       const user = new User();
-      user.roll = createLeadInput.roll;
+      user.role = createAccountInput.role;
+      user.roll = createAccountInput.roll;
       user.isNewUser = true;
-      user.role = UserRole.LEADS;
       function autoGenPass(length: number) {
         var result = "";
         var characters =
@@ -142,8 +145,8 @@ class UsersResolver {
   }
 
   @Query(() => [User])
-  @Authorized(["ADMIN", "LEADS", "MODERATOR"])
-  async getAdminLeadAndMods(
+  @Authorized(["ADMIN", "LEADS", "MODERATOR", "HAS", "HOSTEL_SEC"])
+  async getSuperUsers(
     @Arg("RolesFilter", () => [UserRole]) roles: [UserRole]
   ) {
     try {
@@ -183,15 +186,15 @@ class UsersResolver {
   }
 
   @Mutation(() => Boolean)
-  @Authorized(["LEADS"])
-  async updateLead(
+  @Authorized(["LEADS", "HAS", "HOSTEL_SEC"])
+  async updatePassword(
     @Ctx() { user }: MyContext,
-    @Arg("LeadInput") leadInput: LeadInput
+    @Arg("NewPass") newPass: NewPass
   ) {
     try {
       if (user.isNewUser === false) throw new Error("Already Signed");
       user.isNewUser = false;
-      user.password = bcrypt.hashSync(leadInput.newPassword, salt);
+      user.password = bcrypt.hashSync(newPass.newPassword, salt);
       await user.save();
       return !!user;
     } catch (e) {
@@ -214,7 +217,7 @@ class UsersResolver {
     }
   }
 
-  @Mutation(() => User)
+  @Mutation(() => Boolean)
   @Authorized(["USER"])
   async updateUser(
     @Ctx() { user }: MyContext,
@@ -222,7 +225,14 @@ class UsersResolver {
   ) {
     try {
       user.name = userInput.name;
-      user.hostel = userInput.hostel;
+      const hostel = await Hostel.findOne({
+        where: { name: userInput.hostel },
+        relations: ["users"],
+      });
+      if (!hostel) throw new Error("invalid hostel name");
+      if (hostel.users.includes(user) === false) hostel.users.push(user);
+      await hostel.save();
+      user.hostel = hostel;
       if (user.isNewUser === true) user.isNewUser = false;
       let tags: Tag[] = [];
       for (let i = 0; i < userInput.interest.length; i++) {
@@ -237,7 +247,7 @@ class UsersResolver {
       }
       user.interest = tags;
       await user.save();
-      return user;
+      return !!user;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -251,6 +261,16 @@ class UsersResolver {
         relations: ["interest"],
       });
       return user?.interest;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => Hostel, { nullable: true })
+  async hostel(@Root() { id }: User) {
+    try {
+      const user = await User.findOne({ where: { id }, relations: ["hostel"] });
+      return user?.hostel;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
