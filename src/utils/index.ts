@@ -6,6 +6,8 @@ export enum UserRole {
   LEADS = "LEADS",
   MODERATOR = "MODERATOR",
   USER = "USER",
+  HOSTEL_SEC = "HOSTEL_SEC",
+  HAS = "HAS",
 }
 
 export const emailExpresion =
