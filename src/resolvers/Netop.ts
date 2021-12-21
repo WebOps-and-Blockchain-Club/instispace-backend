@@ -182,7 +182,7 @@ class NetopResolver {
 
   @Mutation(() => Boolean)
   @Authorized()
-  async addComment(
+  async createComment(
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext,
     @Arg("content") content: string
