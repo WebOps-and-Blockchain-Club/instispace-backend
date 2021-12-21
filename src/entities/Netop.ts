@@ -55,6 +55,9 @@ class Netop extends BaseEntity {
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date;
 
+  @Column({ type: "timestamptz" })
+  endTime: number;
+
   //likes
   @ManyToMany(() => User, (user) => user.likedNetop, { nullable: true })
   @JoinTable()
