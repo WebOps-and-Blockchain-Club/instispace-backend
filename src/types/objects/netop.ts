@@ -4,7 +4,7 @@ import { Field, ObjectType } from "type-graphql";
 @ObjectType("getNetopOutput")
 class getNetopOutput {
   @Field(() => [Netop], { nullable: true })
-  netop: Netop[];
+  netopList: Netop[];
 
   @Field(() => Number)
   total: number;

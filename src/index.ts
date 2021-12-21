@@ -25,7 +25,7 @@ const main = async () => {
           process.env.JWT_SECRET!
         );
         user = await User.findOne({ id: decoded });
-        console.log(user);
+        // console.log(user);
       }
       return { user: user };
     },
@@ -44,7 +44,6 @@ createConnection({
   url: process.env.DATABASE_URL,
   entities,
   synchronize: true,
-  logging: true,
 })
   .then(() => {
     console.log("Database connected");
