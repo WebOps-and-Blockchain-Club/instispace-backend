@@ -13,6 +13,9 @@ class createNetopsInput {
 
   @Field(() => [String])
   tags: string[];
+
+  @Field(() => Number)
+  endTime: number;
 }
 
 @InputType()
@@ -25,6 +28,9 @@ class editNetopsInput {
 
   @Field({ nullable: true })
   photo: string;
+
+  @Field(() => Number)
+  endTime: number;
 }
 
 export { createNetopsInput, editNetopsInput };

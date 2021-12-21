@@ -27,7 +27,7 @@ class NetopResolver {
   ) {
     try {
       //TODO: tags are not get added here
-      const { title, content, photo } = createNetopsInput;
+      const { title, content, photo, endTime } = createNetopsInput;
 
       var tags: Tag[] = [];
       await Promise.all(
@@ -47,6 +47,7 @@ class NetopResolver {
         isHidden: false,
         likeCount: 0,
         tags,
+        endTime,
       });
 
       await netop.save();
@@ -236,6 +237,7 @@ class NetopResolver {
       if (fileringConditions) {
         netopList = netopList.filter(
           (n) =>
+            n.endTime < Date.now() &&
             n.tags.filter((tag) => fileringConditions.includes(tag.id)).length
         );
       }
