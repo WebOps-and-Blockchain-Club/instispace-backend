@@ -36,14 +36,14 @@ class User extends BaseEntity {
   @Column({ type: "boolean" })
   @Field((_type) => Boolean)
   isNewUser: Boolean;
-
-  @ManyToOne((_type) => Hostel, (hostel) => hostel.users, { nullable: true })
-  @Field({ nullable: true })
-  hostel: Hostel;
-
-  @ManyToMany((_type) => Tag, (Tag) => Tag.users, { nullable: true })
+  
+  @ManyToMany((_type) => Tag, interest => interest.users, { nullable: true })
   @Field((_type) => [Tag], { nullable: true })
   interest: Tag[];
+
+  @ManyToOne((_type) => Hostel, hostel => hostel.users, { nullable: true })
+  @Field({ nullable: true })
+  hostel: Hostel;
 
   // @ManyToMany(_type => event, event => event.liked_by)
   // @Field(_type => [event])
