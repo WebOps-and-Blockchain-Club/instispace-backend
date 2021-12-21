@@ -15,6 +15,8 @@ import { createNetopsInput, editNetopsInput } from "../types/inputs/netop";
 import Tag from "../entities/Tag";
 import Netop from "../entities/Netop";
 import Comment from "../entities/Common/Comment";
+import getNetopOutput from "../types/objects/netop";
+
 @Resolver(Netop)
 class NetopResolver {
   @Mutation(() => Boolean)
@@ -30,7 +32,6 @@ class NetopResolver {
       var tags: Tag[] = [];
       await Promise.all(
         createNetopsInput.tags.map(async (id) => {
-          console.log(id);
           const tag = await Tag.findOne(id, { relations: ["Netops"] });
           if (tag) {
             tags = tags.concat([tag]);
@@ -81,7 +82,6 @@ class NetopResolver {
         const { affected } = await Netop.update(netopId, {
           ...editNetopsInput,
         });
-        console.log(affected);
         return affected === 1;
       } else {
         throw new Error("Unauthorized");
@@ -112,13 +112,7 @@ class NetopResolver {
     try {
       const netop = await Netop.findOne(netopId, { relations: ["likedBy"] });
       if (netop) {
-        // TODO:  remove like is not working
-        console.log(netop.likedBy);
-        console.log(user);
-        console.log(netop.likedBy.includes(user));
-
         if (netop.likedBy.filter((u) => u.id === user.id).length) {
-          console.log("previousaly liked", user);
           netop.likedBy = netop.likedBy.filter((e) => e.id !== user.id);
           await netop.save();
         } else {
@@ -210,7 +204,6 @@ class NetopResolver {
   @Authorized()
   async getNetopById(@Arg("NetopId") netopId: string) {
     try {
-      console.log(netopId);
       // const netop = await Netop.findOne(netopId, { relations: ["createdBy"] })
       const netop = await Netop.findOne(netopId, {
         where: { isHidden: false },
@@ -222,42 +215,50 @@ class NetopResolver {
     }
   }
 
-  @Query(() => [Netop])
+  @Query(() => getNetopOutput)
   @Authorized()
   async getNetop(
+    @Arg("take") take: number,
+    @Arg("skip") skip: number,
     @Arg("FileringCondition", () => [String], { nullable: true })
-    fileringConditions: string[]
-    // @Arg("take") take: number,
-    // @Arg("skip") skip: number
-    // @Arg("OrderByLikes", (_type) => Boolean, { nullable: true })
-    // orderByLikes?: Boolean
+    fileringConditions?: string[],
+    @Arg("OrderByLikes", (_type) => Boolean, { nullable: true })
+    orderByLikes?: Boolean
   ) {
     try {
       var netopList = await Netop.find({
         where: { isHidden: false },
-        relations: ["tags"],
-        // order: { likeCount: "DESC" },
+        relations: ["tags", "likedBy"],
       });
 
-      console.log(fileringConditions);
+      console.log(orderByLikes);
 
       if (fileringConditions) {
-        // var newList: Netop[] = [];
-        // fileringConditions.forEach(async (id) => {
-        //   var tag = await Tag.findOne(id);
-        //   if (tag) {
-        //     // still duplicates will be there
-        //     newList.concat(netopList.filter((e) => e.tags.includes(tag!)));
-        //   }
-        // });
-        // newList = arrayUnique(newList);
-        // netopList = newList;
-        //*** */
-        netopList = netopList.filter((n) =>
-          n.tags.filter((tag) => fileringConditions.includes(tag.id))
+        netopList = netopList.filter(
+          (n) =>
+            n.tags.filter((tag) => fileringConditions.includes(tag.id)).length
         );
       }
-      return netopList;
+
+      const total = netopList.length;
+
+      if (orderByLikes) {
+        netopList.sort((a, b) =>
+          a.likedBy.length > b.likedBy.length
+            ? -1
+            : a.likedBy.length < b.likedBy.length
+            ? 1
+            : 0
+        );
+      } else {
+        netopList.sort((a, b) =>
+          a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+        );
+      }
+
+      const finalList = netopList.splice(skip, take);
+
+      return { netopList: finalList, total };
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
@@ -267,55 +268,42 @@ class NetopResolver {
   @Query(() => Boolean)
   async isStared(@Arg("NetopId") netopId: string, @Ctx() { user }: MyContext) {
     const netop = await Netop.findOne(netopId, { relations: ["staredBy"] });
-    console.log(netop?.staredBy);
     return netop?.staredBy.filter((u) => u.id === user.id).length;
   }
 
   @Query(() => Boolean)
   async isLiked(@Arg("NetopId") netopId: string, @Ctx() { user }: MyContext) {
     const netop = await Netop.findOne(netopId, { relations: ["likedBy"] });
-    console.log(netop?.likedBy);
-    console.log(netop?.likedBy.includes(user));
     return netop?.likedBy.filter((u) => u.id === user.id).length;
   }
 
   @FieldResolver(() => [Comment], { nullable: true })
   async comments(@Root() { id }: Netop) {
-    console.log("inside comments");
-
     const netop = await Netop.findOne(id, {
       relations: ["comments"],
     });
-    console.log(netop?.comments);
     return netop?.comments;
   }
 
   @FieldResolver(() => Number)
   async likeCount(@Root() { id }: Netop) {
-    console.log("inside likeCount", id);
     const netop = await Netop.findOne(id, { relations: ["likedBy"] });
-    console.log(netop);
     const like_count = netop?.likedBy.length;
     return like_count;
   }
 
   @FieldResolver(() => Number)
   async reportCount(@Root() { id }: Netop) {
-    console.log("inside likeCount", id);
     const netop = await Netop.findOne(id, { relations: ["reportedBy"] });
-    console.log(netop);
     const report_count = netop?.reportedBy.length;
     return report_count;
   }
 
   @FieldResolver(() => [Tag], { nullable: true })
   async tags(@Root() { id }: Netop) {
-    console.log("inside tags");
-
     const netop = await Netop.findOne(id, {
       relations: ["tags"],
     });
-    console.log(netop?.tags);
     return netop?.tags;
   }
 }
@@ -323,13 +311,12 @@ class NetopResolver {
 export default NetopResolver;
 
 //*** My Helpers */
-// function arrayUnique(array: Netop[]): Netop[] {
-//   var a = array.concat();
-//   for (var i = 0; i < a.length; ++i) {
-//     for (var j = i + 1; j < a.length; ++j) {
-//       if (a[i] === a[j]) a.splice(j--, 1);
-//     }
+// function compare(a: Netop, b: Netop) {
+//   if (a.likeCount < b.likeCount) {
+//     return 1;
 //   }
-
-//   return a;
+//   if (a.likeCount > b.likeCount) {
+//     return -1;
+//   }
+//   return 0;
 // }
