@@ -9,7 +9,12 @@ import {
   Root,
 } from "type-graphql";
 import User from "../entities/User";
-import { emailExpresion, salt, UserRole } from "../utils/index";
+import {
+  accountPassword,
+  emailExpresion,
+  salt,
+  UserRole,
+} from "../utils/index";
 import bcrypt from "bcryptjs";
 import { CreateSecInput, CreateHostelInput } from "../types/inputs/hostel";
 
@@ -37,7 +42,10 @@ class HostelResolver {
         }
         return result;
       }
-      var password = autoGenPass(8);
+      var password =
+        process.env.NODE_ENV === "development"
+          ? accountPassword
+          : autoGenPass(8);
       user.password = bcrypt.hashSync(password, salt);
       await user.save();
       console.log(password);

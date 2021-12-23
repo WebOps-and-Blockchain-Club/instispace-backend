@@ -17,6 +17,8 @@ export const adminEmail = "myhostel@gmail.com";
 
 export const adminPassword = "123456";
 
+export const accountPassword =  "123456";
+
 export var salt = bcryptjs.genSaltSync(Number(process.env.ITERATIONS!));
 
 export const usersDevList = [
