@@ -11,7 +11,7 @@ import {
 import User from "../entities/User";
 import { emailExpresion, salt, UserRole } from "../utils/index";
 import bcrypt from "bcryptjs";
-import { CreateSecInput, CreateHostelInput } from "../types/inputs/users";
+import { CreateSecInput, CreateHostelInput } from "../types/inputs/hostel";
 
 @Resolver((_type) => Hostel)
 class HostelResolver {

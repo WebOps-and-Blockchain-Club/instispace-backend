@@ -49,25 +49,12 @@ class GetUserInput {
   id: string;
 }
 
-@InputType()
-class CreateSecInput {
-  @Field()
-  roll: string;
-}
-
-@InputType()
-class CreateHostelInput {
-  @Field()
-  name: string;
-}
 
 export {
   LoginInput,
   CreateAccountInput,
   UserInput,
-  CreateSecInput,
   NewPass,
   ModeratorInput,
-  CreateHostelInput,
   GetUserInput,
 };
