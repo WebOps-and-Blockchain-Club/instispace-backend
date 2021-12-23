@@ -7,6 +7,7 @@ import {
   NewPass,
 } from "../types/inputs/users";
 import {
+  accountPassword,
   adminEmail,
   adminPassword,
   emailExpresion,
@@ -133,7 +134,10 @@ class UsersResolver {
         }
         return result;
       }
-      var password = autoGenPass(8);
+      var password =
+        process.env.NODE_ENV === "development"
+          ? accountPassword
+          : autoGenPass(8);
       user.password = bcrypt.hashSync(password, salt);
       await user.save();
       console.log(password);
