@@ -146,9 +146,7 @@ class UsersResolver {
 
   @Query(() => [User])
   @Authorized(["ADMIN", "LEADS", "MODERATOR", "HAS", "HOSTEL_SEC"])
-  async getSuperUsers(
-    @Arg("RolesFilter", () => [UserRole]) roles: [UserRole]
-  ) {
+  async getSuperUsers(@Arg("RolesFilter", () => [UserRole]) roles: [UserRole]) {
     try {
       return await User.find({ where: { role: In(roles) } });
     } catch (e) {
@@ -160,7 +158,9 @@ class UsersResolver {
   @Authorized()
   async getUsers() {
     try {
-      return await User.find();
+      return await User.find({
+        where: { role: In([UserRole.USER, UserRole.MODERATOR]) },
+      });
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
