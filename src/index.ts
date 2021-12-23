@@ -31,7 +31,7 @@ const main = async () => {
   });
 
   server
-    .listen(8000)
+    .listen(process.env.PORT || 8000)
     .then(({ url }) => console.log(`Server running at ${url}`))
     .catch((e) => {
       console.log(e);
@@ -44,6 +44,7 @@ createConnection({
   entities,
   synchronize: true,
   logging: true,
+  ssl: true,
 })
   .then(() => {
     console.log("Database connected");
