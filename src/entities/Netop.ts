@@ -14,23 +14,8 @@ import User from "./User";
 import Comment from "./Common/Comment";
 import Tag from "./Tag";
 
-/*
-"id" varchar
-  "created_by" varchar [ref: > user.id]
-  "title" varchar
-  content varchar
-  stars varchar [ref: < star.post] // one to many 
-  "photo" varchar
-  "tag" varchar
-  created_at datetime
-  likes int [ref: < Like.id]
-  noOfLikes int
-  comments varchar [ref: < comment.id]
-  reports varchar [ref: < Report.id]
-*/
-
 @Entity("Netop")
-@ObjectType("Netop")
+@ObjectType("Netop", { description: "networking and opportunity" })
 class Netop extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
@@ -51,11 +36,13 @@ class Netop extends BaseEntity {
   photo: string;
 
   //tags
-
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date;
 
   @Column({ type: "timestamptz" })
+  @Field({
+    description: "time at which this network and opportunity will be end",
+  })
   endTime: number;
 
   //likes
@@ -63,7 +50,7 @@ class Netop extends BaseEntity {
   @JoinTable()
   likedBy: User[];
 
-  @Field(() => Number)
+  @Field(() => Number, { description: "number of likes" })
   likeCount: number;
 
   //comments

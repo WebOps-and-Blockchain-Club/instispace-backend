@@ -19,7 +19,10 @@ import getNetopOutput from "../types/objects/netop";
 
 @Resolver(Netop)
 class NetopResolver {
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description:
+      "create network and opportunity, Restrictions:{any authorized user}",
+  })
   @Authorized()
   async createNetop(
     @Arg("NewEventData") createNetopsInput: createNetopsInput,
@@ -58,7 +61,10 @@ class NetopResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description:
+      "edit network and opportunity, Restrictions:{user who created}",
+  })
   @Authorized()
   async editNetop(
     @Arg("EditNetopsData") editNetopsInput: editNetopsInput,
@@ -92,7 +98,10 @@ class NetopResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description:
+      "edit network and opportunity, Restrictions:{user who created}",
+  })
   @Authorized()
   async deleteNetop(@Arg("NetopId") netopId: string) {
     try {
@@ -104,7 +113,10 @@ class NetopResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description:
+      "like or unlike (if it's previously liked) network and opportunity, Restrictions:{any authorized user}",
+  })
   @Authorized()
   async toggleLike(
     @Arg("NetopId") netopId: string,
@@ -131,7 +143,10 @@ class NetopResolver {
   }
 
   @Mutation(() => Boolean)
-  @Authorized()
+  @Authorized({
+    description:
+      "star or unstar (if it's previously star) network and opportunity, Restrictions:{any authorized user}",
+  })
   async toggleStar(
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext
@@ -140,9 +155,11 @@ class NetopResolver {
       const netop = await Netop.findOne(netopId, { relations: ["staredBy"] });
       if (netop) {
         if (netop.staredBy.filter((u) => u.id === user.id).length) {
+          // if it's stared then unstar
           netop.staredBy = netop.staredBy.filter((e) => e.id !== user.id);
           await netop.save();
         } else {
+          // else star
           netop.staredBy.push(user);
           await netop.save();
         }
@@ -156,7 +173,10 @@ class NetopResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description:
+      "report network and opportunity, Restrictions:{any authorized user}",
+  })
   @Authorized()
   async reportNetop(
     @Arg("NetopId") netopId: string,
@@ -180,7 +200,10 @@ class NetopResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description:
+      "comment on network and opportunity, Restrictions:{any authorized user}",
+  })
   @Authorized()
   async createComment(
     @Arg("NetopId") netopId: string,
@@ -191,7 +214,7 @@ class NetopResolver {
       const netop = await Netop.findOne(netopId, { relations: ["comments"] });
       if (netop) {
         const comment = Comment.create({ content, netop, createdBy: user });
-        comment.save();
+        await comment.save();
         return !!comment;
       }
       throw new Error("Post not found");
@@ -201,7 +224,9 @@ class NetopResolver {
     }
   }
 
-  @Query(() => Netop)
+  @Query(() => Netop, {
+    description: "get an netop by id network and opportunity",
+  })
   @Authorized()
   async getNetopById(@Arg("NetopId") netopId: string) {
     try {
@@ -216,7 +241,9 @@ class NetopResolver {
     }
   }
 
-  @Query(() => getNetopOutput)
+  @Query(() => getNetopOutput, {
+    description: "get a list of netops by filer and order conditions",
+  })
   @Authorized()
   async getNetop(
     @Arg("take") take: number,
@@ -230,6 +257,7 @@ class NetopResolver {
       var netopList = await Netop.find({
         where: { isHidden: false },
         relations: ["tags", "likedBy"],
+        order: { createdAt: "DESC" },
       });
 
       console.log(orderByLikes);
@@ -267,19 +295,26 @@ class NetopResolver {
     }
   }
 
-  @Query(() => Boolean)
+  @Query(() => Boolean, {
+    description: "check if network and opportunity is stared by current user",
+  })
   async isStared(@Arg("NetopId") netopId: string, @Ctx() { user }: MyContext) {
     const netop = await Netop.findOne(netopId, { relations: ["staredBy"] });
     return netop?.staredBy.filter((u) => u.id === user.id).length;
   }
 
-  @Query(() => Boolean)
+  @Query(() => Boolean, {
+    description: "check if network and opportunity is liked by current user",
+  })
   async isLiked(@Arg("NetopId") netopId: string, @Ctx() { user }: MyContext) {
     const netop = await Netop.findOne(netopId, { relations: ["likedBy"] });
     return netop?.likedBy.filter((u) => u.id === user.id).length;
   }
 
-  @FieldResolver(() => [Comment], { nullable: true })
+  @FieldResolver(() => [Comment], {
+    nullable: true,
+    description: "get list of comments",
+  })
   async comments(@Root() { id }: Netop) {
     const netop = await Netop.findOne(id, {
       relations: ["comments"],
@@ -287,21 +322,24 @@ class NetopResolver {
     return netop?.comments;
   }
 
-  @FieldResolver(() => Number)
+  @FieldResolver(() => Number, { description: "get number of likes" })
   async likeCount(@Root() { id }: Netop) {
     const netop = await Netop.findOne(id, { relations: ["likedBy"] });
     const like_count = netop?.likedBy.length;
     return like_count;
   }
 
-  @FieldResolver(() => Number)
+  @FieldResolver(() => Number, { description: "get number of likes" })
   async reportCount(@Root() { id }: Netop) {
     const netop = await Netop.findOne(id, { relations: ["reportedBy"] });
     const report_count = netop?.reportedBy.length;
     return report_count;
   }
 
-  @FieldResolver(() => [Tag], { nullable: true })
+  @FieldResolver(() => [Tag], {
+    nullable: true,
+    description: "get all the tags associated",
+  })
   async tags(@Root() { id }: Netop) {
     const netop = await Netop.findOne(id, {
       relations: ["tags"],
