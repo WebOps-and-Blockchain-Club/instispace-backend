@@ -1,6 +1,6 @@
 import { Field, InputType } from "type-graphql";
 
-@InputType()
+@InputType({ description: "user" })
 class createNetopsInput {
   @Field()
   title: string;
