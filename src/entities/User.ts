@@ -14,7 +14,7 @@ import Hostel from "./Hostel";
 import Announcement from "./Announcement";
 
 @Entity("User")
-@ObjectType("User", {description :"User Entity"})
+@ObjectType("User", { description: "User Entity" })
 class User extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   @Field({ description: "User's Id" })

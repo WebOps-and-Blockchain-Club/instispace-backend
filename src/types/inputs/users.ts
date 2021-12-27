@@ -19,33 +19,35 @@ class CreateAccountInput {
   role: UserRole;
 }
 
-@InputType({description: "Input for Update-User Mutation"})
+@InputType({ description: "Input for Update-User Mutation" })
 class UserInput {
-  @Field({description: "User's name"})
+  @Field({ description: "User's name" })
   name: string;
 
-  @Field({description : "User's hostel"})
+  @Field({ description: "User's hostel" })
   hostel: string;
 
-  @Field((_type) => [String], {description : "User's interests, collection of tags"})
+  @Field((_type) => [String], {
+    description: "User's interests, collection of tags",
+  })
   interest: string[];
 }
 
-@InputType({description: "Input for Change-Password Mutation"})
+@InputType({ description: "Input for Change-Password Mutation" })
 class NewPass {
-  @Field({description: "New Password"})
+  @Field({ description: "New Password" })
   newPassword: string;
 }
 
-@InputType({description: "Input for updateRole Mutation"})
+@InputType({ description: "Input for updateRole Mutation" })
 class ModeratorInput {
-  @Field({description: "Roll-Number of the user"})
+  @Field({ description: "Roll-Number of the user" })
   roll: string;
 }
 
-@InputType({description: "Input for Query get User"})
+@InputType({ description: "Input for Query get User" })
 class GetUserInput {
-  @Field({description : "User's Id"})
+  @Field({ description: "User's Id" })
   id: string;
 }
 
