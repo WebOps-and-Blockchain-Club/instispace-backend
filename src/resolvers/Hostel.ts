@@ -17,10 +17,14 @@ import {
 } from "../utils/index";
 import bcrypt from "bcryptjs";
 import { CreateSecInput, CreateHostelInput } from "../types/inputs/hostel";
+import Announcement from "../entities/Announcement";
 
 @Resolver((_type) => Hostel)
 class HostelResolver {
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description:
+      "Mutation to create Hostel secretory, Restrictions : {Admin, Hostel Affair Secretory}",
+  })
   @Authorized(["HAS", "ADMIN"])
   async createSec(@Arg("CreateSecInput") createSecInput: CreateSecInput) {
     try {
@@ -56,7 +60,10 @@ class HostelResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description:
+      "Mutation to create Hostels, Restrictions : {Admin, Hostel Secretory and Hostel Affair Secretory}",
+  })
   @Authorized(["ADMIN", "HAS", "HOSTEL_SEC"])
   async createHostel(@Arg("CreateHostelInput") { name }: CreateHostelInput) {
     try {
@@ -69,7 +76,10 @@ class HostelResolver {
     }
   }
 
-  @Query(() => [Hostel])
+  @Query(() => [Hostel], {
+    description:
+      "query to fetch hostels, Restrictions : {anyone who is authorized}",
+  })
   @Authorized()
   async getHostels() {
     try {
@@ -79,11 +89,24 @@ class HostelResolver {
     }
   }
 
-  @FieldResolver(() => [User])
+  @FieldResolver(() => [User], { nullable: true })
   async users(@Root() { id }: Hostel) {
     try {
       const hostel = await Hostel.findOne({ where: id, relations: ["users"] });
       return hostel?.users;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [Announcement], { nullable: true })
+  async announcements(@Root() { id }: Hostel) {
+    try {
+      const hostel = await Hostel.findOne({
+        where: { id },
+        relations: ["announcements"],
+      });
+      return hostel?.announcements;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

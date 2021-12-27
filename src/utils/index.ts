@@ -1,7 +1,7 @@
 import bcryptjs from "bcryptjs";
 
 export enum UserRole {
-  ADMIN = "ADMIN",
+  ADMIN = "ADMIN", 
   DEV_TEAM = "DEV_TEAM",
   LEADS = "LEADS",
   MODERATOR = "MODERATOR",

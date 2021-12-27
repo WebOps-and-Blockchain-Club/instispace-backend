@@ -1,54 +1,53 @@
 import { UserRole } from "../../utils";
 import { Field, InputType } from "type-graphql";
 
-@InputType()
+@InputType({ description: "Input for Login Mutation" })
 class LoginInput {
-  @Field()
+  @Field({ description: "User's Email/Roll-Number" })
   roll: string;
 
-  @Field()
+  @Field({ description: "User's Password" })
   pass: string;
 }
 
-@InputType()
+@InputType({ description: "Input For Create Account Mutation" })
 class CreateAccountInput {
-  @Field()
+  @Field({ description: "Super-User's email" })
   roll: string;
 
-  @Field()
+  @Field({ description: "Super-User's role" })
   role: UserRole;
 }
 
-@InputType()
+@InputType({description: "Input for Update-User Mutation"})
 class UserInput {
-  @Field()
+  @Field({description: "User's name"})
   name: string;
 
-  @Field()
+  @Field({description : "User's hostel"})
   hostel: string;
 
-  @Field((_type) => [String])
+  @Field((_type) => [String], {description : "User's interests, collection of tags"})
   interest: string[];
 }
 
-@InputType()
+@InputType({description: "Input for Change-Password Mutation"})
 class NewPass {
-  @Field()
+  @Field({description: "New Password"})
   newPassword: string;
 }
 
-@InputType()
+@InputType({description: "Input for updateRole Mutation"})
 class ModeratorInput {
-  @Field()
+  @Field({description: "Roll-Number of the user"})
   roll: string;
 }
 
-@InputType()
+@InputType({description: "Input for Query get User"})
 class GetUserInput {
-  @Field()
+  @Field({description : "User's Id"})
   id: string;
 }
-
 
 export {
   LoginInput,

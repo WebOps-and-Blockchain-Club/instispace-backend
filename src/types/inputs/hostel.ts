@@ -1,14 +1,14 @@
 import { Field, InputType } from "type-graphql";
 
-@InputType()
+@InputType({description : "Input for createSec Mutation"})
 class CreateSecInput {
-  @Field()
+  @Field({description :"Hostel Secretory Email"})
   roll: string;
 }
 
-@InputType()
+@InputType({description : "Input for Hostel"})
 class CreateHostelInput {
-  @Field()
+  @Field({description : "Hostel's name"})
   name: string;
 }
 
