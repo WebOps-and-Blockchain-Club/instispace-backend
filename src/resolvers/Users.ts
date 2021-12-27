@@ -30,14 +30,17 @@ import UsersDev from "../entities/UsersDev";
 import User from "../entities/User";
 import Tag from "../entities/Tag";
 import { LoginOutput } from "../types/objects/users";
-import MyContext from "src/utils/context";
+import MyContext from "../utils/context";
 import bcrypt from "bcryptjs";
 import { In } from "typeorm";
 import Hostel from "../entities/Hostel";
+import Announcement from "../entities/Announcement";
 
 @Resolver((_type) => User)
 class UsersResolver {
-  @Mutation(() => LoginOutput)
+  @Mutation(() => LoginOutput, {
+    description: "Mutation to login, Restrictions : {none}",
+  })
   async login(@Arg("LoginInputs") { roll, pass }: LoginInput) {
     /************ Checking the user credentials ************/
     //For users
@@ -110,7 +113,10 @@ class UsersResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description:
+      "Mutation to create a Super-User account, Restrictions : {Admin}",
+  })
   @Authorized(["ADMIN"])
   async createAccount(
     @Arg("CreateAccountInput") createAccountInput: CreateAccountInput
@@ -148,7 +154,10 @@ class UsersResolver {
     }
   }
 
-  @Query(() => [User])
+  @Query(() => [User], {
+    description:
+      "Query to fetch Super-Users, Restrictions : {Admins, Leads, Moderators, Hostel Affair Secretory and Hostel Secretory}",
+  })
   @Authorized(["ADMIN", "LEADS", "MODERATOR", "HAS", "HOSTEL_SEC"])
   async getSuperUsers(@Arg("RolesFilter", () => [UserRole]) roles: [UserRole]) {
     try {
@@ -158,7 +167,10 @@ class UsersResolver {
     }
   }
 
-  @Query(() => [User])
+  @Query(() => [User], {
+    description:
+      "Query to fetch ldap Users, Restrictions : {anyone who is authorized}",
+  })
   @Authorized()
   async getUsers() {
     try {
@@ -170,13 +182,19 @@ class UsersResolver {
     }
   }
 
-  @Query(() => User)
+  @Query(() => User, {
+    description:
+      "Query to fetch personal profile, Restrictions : {anyone who is authoried}",
+  })
   @Authorized()
   async getMe(@Ctx() { user }: MyContext) {
     return user;
   }
 
-  @Query(() => User)
+  @Query(() => User, {
+    description:
+      "Query to Fetch a User by id, Restroctions : {anyone who is authorised}",
+  })
   @Authorized()
   async getUser(@Arg("GetUserInput") { id }: GetUserInput) {
     try {
@@ -189,7 +207,10 @@ class UsersResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description:
+      "Mutation to change Super-Users passwords, Restrictions : {Leads, Hostel Affair Secretory and Hostel Secretory}",
+  })
   @Authorized(["LEADS", "HAS", "HOSTEL_SEC"])
   async updatePassword(
     @Ctx() { user }: MyContext,
@@ -206,7 +227,9 @@ class UsersResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description: "Mutation to change role of an ldap User to Moderator, Restrictions : {Admins and Leads}",
+  })
   @Authorized(["ADMIN", "LEADS"])
   async updateRole(@Arg("ModeratorInput") { roll }: ModeratorInput) {
     try {
@@ -221,7 +244,7 @@ class UsersResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {description : "Mutation to Update/Add User's name, interest, password, Restrictions : {User}"})
   @Authorized(["USER"])
   async updateUser(
     @Ctx() { user }: MyContext,
@@ -275,6 +298,19 @@ class UsersResolver {
     try {
       const user = await User.findOne({ where: { id }, relations: ["hostel"] });
       return user?.hostel;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [Announcement], { nullable: true })
+  async announcements(@Root() { id }: User) {
+    try {
+      const user = await User.findOne({
+        where: { id },
+        relations: ["announcements"],
+      });
+      return user?.announcements;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

@@ -2,15 +2,15 @@ import { UserRole } from "../../utils";
 import { Field, ObjectType, registerEnumType } from "type-graphql";
 registerEnumType(UserRole, { name: "UserRole" });
 
-@ObjectType()
+@ObjectType({description : "Output for Login Mutation"})
 class LoginOutput {
-  @Field(() => Boolean)
+  @Field(() => Boolean, {description: "true if the user is logging in for the first time"})
   isNewUser: boolean;
 
-  @Field(() => UserRole)
+  @Field(() => UserRole, {description: "User's role"})
   role: UserRole;
 
-  @Field(() => String)
+  @Field(() => String, {description: "jwt token, used for authorization"})
   token: string;
 }
 

@@ -2,14 +2,14 @@ import { Field, ObjectType } from "type-graphql";
 import { BaseEntity, Column, Entity, PrimaryColumn } from "typeorm";
 
 @Entity("UsersDev")
-@ObjectType("UsersDev")
+@ObjectType("UsersDev", {description : "User's Dev List"})
 class UsersDev extends BaseEntity {
   @PrimaryColumn()
-  @Field()
+  @Field({ description: "Roll-Number" })
   roll: string;
 
   @Column()
-  @Field()
+  @Field({ description: "Password" })
   pass: string;
 }
 

@@ -13,7 +13,10 @@ import User from "../entities/User";
 
 @Resolver((_type) => Tag)
 class TagsResolver {
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description:
+      "Mutation to Create Tags, Restrictions : {Admin}",
+  })
   @Authorized(["ADMIN"])
   async createTag(@Arg("TagInput") { title }: TagInput) {
     try {
@@ -26,7 +29,10 @@ class TagsResolver {
     }
   }
 
-  @Query(() => [Tag])
+  @Query(() => [Tag], {
+    description:
+      "Query to Fetch all the tags, Restrictions : {anyone who is authorized}",
+  })
   @Authorized()
   async getTags() {
     try {

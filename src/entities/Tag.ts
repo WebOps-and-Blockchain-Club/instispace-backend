@@ -10,19 +10,19 @@ import {
 import User from "./User";
 
 @Entity("Tag")
-@ObjectType("Tag")
+@ObjectType("Tag", {description : "Tag Entity, Users will follow these tags"})
 class Tag extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
-  @Field()
+  @Field({description: "Tag Id"})
   id: string;
 
   @Column({ unique: true })
-  @Field()
+  @Field({description : "Tag's Title"})
   title: string;
 
   @ManyToMany((_type) => User, (users) => users.interest, { cascade: true })
   @JoinTable()
-  @Field((_type) => [User], { nullable: true })
+  @Field((_type) => [User], { nullable: true , description : "User's That follow that Tag"})
   users: [User];
 
   // @ManyToMany(_type => event, event => event.Tags, {cascade :true})
