@@ -14,8 +14,7 @@ import User from "../entities/User";
 @Resolver((_type) => Tag)
 class TagsResolver {
   @Mutation(() => Boolean, {
-    description:
-      "Mutation to Create Tags, Restrictions : {Admin}",
+    description: "Mutation to Create Tags, Restrictions : {Admin}",
   })
   @Authorized(["ADMIN"])
   async createTag(@Arg("TagInput") { title }: TagInput) {

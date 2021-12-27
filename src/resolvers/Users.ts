@@ -228,7 +228,8 @@ class UsersResolver {
   }
 
   @Mutation(() => Boolean, {
-    description: "Mutation to change role of an ldap User to Moderator, Restrictions : {Admins and Leads}",
+    description:
+      "Mutation to change role of an ldap User to Moderator, Restrictions : {Admins and Leads}",
   })
   @Authorized(["ADMIN", "LEADS"])
   async updateRole(@Arg("ModeratorInput") { roll }: ModeratorInput) {
@@ -244,7 +245,10 @@ class UsersResolver {
     }
   }
 
-  @Mutation(() => Boolean, {description : "Mutation to Update/Add User's name, interest, password, Restrictions : {User}"})
+  @Mutation(() => Boolean, {
+    description:
+      "Mutation to Update/Add User's name, interest, password, Restrictions : {User}",
+  })
   @Authorized(["USER"])
   async updateUser(
     @Ctx() { user }: MyContext,

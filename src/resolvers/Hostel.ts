@@ -23,7 +23,7 @@ import Announcement from "../entities/Announcement";
 class HostelResolver {
   @Mutation(() => Boolean, {
     description:
-      "Mutation to create Hostel secretory, Restrictions : {Admin, Hostel Affair Secretory}",
+      " Mutation to create Hostel secretory, Restrictions : {Admin, Hostel Affair Secretory} ",
   })
   @Authorized(["HAS", "ADMIN"])
   async createSec(@Arg("CreateSecInput") createSecInput: CreateSecInput) {
