@@ -260,21 +260,16 @@ class UsersResolver {
         where: { name: userInput.hostel },
         relations: ["users"],
       });
-      if (!hostel) throw new Error("invalid hostel name");
-      if (hostel.users.includes(user) === false) hostel.users.push(user);
-      await hostel.save();
+      if (!hostel) throw new Error("Invalid Hostel");
       user.hostel = hostel;
       if (user.isNewUser === true) user.isNewUser = false;
       let tags: Tag[] = [];
       for (let i = 0; i < userInput.interest.length; i++) {
         const tag = await Tag.findOne({
-          where: { title: userInput.interest[i] },
+          where: { id: userInput.interest[i] },
           relations: ["users"],
         });
-        if (!tag) throw new Error("No Such Tag");
-        tag.users.push(user);
-        await tag.save();
-        tags.push(tag);
+        tags.push(tag!);
       }
       user.interest = tags;
       await user.save();
