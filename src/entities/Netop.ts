@@ -13,15 +13,13 @@ import {
 import User from "./User";
 import Comment from "./Common/Comment";
 import Tag from "./Tag";
+import Report from "./Common/Report";
 
 @Entity("Netop")
 @ObjectType("Netop", { description: "networking and opportunity" })
 class Netop extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
-
-  @ManyToOne(() => User, (user) => user.networking_and_opportunities)
-  createdBy: User;
 
   @Column()
   @Field()
@@ -39,11 +37,11 @@ class Netop extends BaseEntity {
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date;
 
-  @Column({ type: "timestamptz" })
-  @Field({
-    description: "time at which this network and opportunity will be end",
-  })
-  endTime: number;
+  // @Column({ type: "timestamptz" })
+  // @Field({
+  //   description: "time at which this network and opportunity will be end",
+  // })
+  // endTime: number;
 
   //likes
   @ManyToMany(() => User, (user) => user.likedNetop, { nullable: true })
@@ -53,26 +51,31 @@ class Netop extends BaseEntity {
   @Field(() => Number, { description: "number of likes" })
   likeCount: number;
 
-  //comments
-  @OneToMany(() => Comment, (comment) => comment.netop, { nullable: true })
-  comments: Comment[];
-
-  //reports
-  @ManyToMany(() => User, (user) => user.reportedNetop, { nullable: true })
-  @JoinTable()
-  reportedBy: User[];
-
-  @ManyToMany(() => User, (user) => user.staredNetop, { nullable: true })
-  @JoinTable()
-  staredBy: User[];
+  @Field(() => Boolean, { description: "is this netop is stared" })
+  isStared: boolean;
 
   @Column()
   @Field()
   isHidden: boolean;
 
+  //comments
+  @OneToMany(() => Comment, (comment) => comment.netop, { nullable: true })
+  comments: Comment[];
+
+  //reports
+  @OneToMany(() => Report, (report) => report.netop, { nullable: true })
+  reports: Report[];
+
+  @ManyToMany(() => User, (user) => user.staredNetop, { nullable: true })
+  @JoinTable()
+  staredBy: User[];
+
   @ManyToMany((_type) => Tag, (tag) => tag.Netops, { nullable: true })
   @JoinTable()
   tags: Tag[];
+
+  @ManyToOne(() => User, (user) => user.networking_and_opportunities)
+  createdBy: User;
 }
 
 export default Netop;

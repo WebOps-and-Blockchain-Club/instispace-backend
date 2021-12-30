@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { ApolloServer } from "apollo-server";
+import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import resolvers from "./resolvers";
 import dotenv from "dotenv";
@@ -8,6 +8,11 @@ import entities from "./entities";
 import User from "./entities/User";
 import jwt from "jsonwebtoken";
 import authChecker from "./utils/authcheker";
+import express from "express";
+import cors from "cors";
+
+import { graphqlUploadExpress } from "graphql-upload";
+import { FILE_SIZE_LIMIT_MB } from "./utils/config";
 
 dotenv.config();
 
@@ -31,12 +36,29 @@ const main = async () => {
     },
   });
 
-  server
-    .listen(8000)
-    .then(({ url }) => console.log(`Server running at ${url}`))
-    .catch((e) => {
-      console.log(e);
-    });
+  await server.start();
+
+  const app = express();
+
+  app.use(
+    graphqlUploadExpress({
+      maxFileSize: FILE_SIZE_LIMIT_MB * 1000000, // 10MB
+      maxFiles: 1,
+    })
+  );
+
+  app.use(
+    cors({
+      credentials: true,
+      origin: ["https://studio.apollographql.com", "http://localhost:8000"],
+    })
+  );
+
+  server.applyMiddleware({ app });
+
+  app.use(express.static("public"));
+
+  app.listen(8000);
 };
 
 createConnection({
