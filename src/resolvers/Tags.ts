@@ -10,13 +10,14 @@ import {
 import TagInput from "../types/inputs/tags";
 import Tag from "../entities/Tag";
 import User from "../entities/User";
+import { UserRole } from "../utils";
 
 @Resolver((_type) => Tag)
 class TagsResolver {
   @Mutation(() => Boolean, {
     description: "Mutation to Create Tags, Restrictions : {Admin}",
   })
-  @Authorized(["ADMIN"])
+  @Authorized([UserRole.ADMIN])
   async createTag(@Arg("TagInput") { title }: TagInput) {
     try {
       const tag = new Tag();
