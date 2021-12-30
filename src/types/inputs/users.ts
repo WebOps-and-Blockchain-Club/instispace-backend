@@ -1,5 +1,6 @@
 import { UserRole } from "../../utils";
 import { Field, InputType } from "type-graphql";
+import { IsEmail } from "class-validator";
 
 @InputType({ description: "Input for Login Mutation" })
 class LoginInput {
@@ -13,6 +14,7 @@ class LoginInput {
 @InputType({ description: "Input For Create Account Mutation" })
 class CreateAccountInput {
   @Field({ description: "Super-User's email" })
+  @IsEmail()
   roll: string;
 
   @Field({ description: "Super-User's role" })
