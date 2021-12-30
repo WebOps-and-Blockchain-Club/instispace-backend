@@ -9,12 +9,7 @@ import {
   Root,
 } from "type-graphql";
 import User from "../entities/User";
-import {
-  accountPassword,
-  emailExpresion,
-  salt,
-  UserRole,
-} from "../utils/index";
+import { accountPassword, autoGenPass, salt, UserRole } from "../utils/index";
 import bcrypt from "bcryptjs";
 import { CreateSecInput, CreateHostelInput } from "../types/inputs/hostel";
 import Announcement from "../entities/Announcement";
@@ -25,33 +20,31 @@ class HostelResolver {
     description:
       " Mutation to create Hostel secretory, Restrictions : {Admin, Hostel Affair Secretory} ",
   })
-  @Authorized(["HAS", "ADMIN"])
-  async createSec(@Arg("CreateSecInput") createSecInput: CreateSecInput) {
+  @Authorized([UserRole.HAS, UserRole.ADMIN])
+  async createSec(
+    @Arg("CreateSecInput") createSecInput: CreateSecInput,
+    @Arg("HostelId") id: string
+  ) {
     try {
-      if (emailExpresion.test(createSecInput.roll) === false)
-        throw new Error("Invalid Email");
-      const user = new User();
-      user.role = UserRole.HOSTEL_SEC;
-      user.roll = createSecInput.roll;
-      user.isNewUser = true;
-      function autoGenPass(length: number) {
-        var result = "";
-        var characters =
-          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        var charactersLength = characters.length;
-        for (var i = 0; i < length; i++) {
-          result += characters.charAt(
-            Math.floor(Math.random() * charactersLength)
-          );
-        }
-        return result;
-      }
+      // Finding the hostel
+      const hostel = await Hostel.findOne({ where: { id: id } });
+
+      // Autogenerating the password
       var password =
         process.env.NODE_ENV === "development"
           ? accountPassword
           : autoGenPass(8);
+
+      // Creating the user
+      const user = new User();
+      user.role = UserRole.HOSTEL_SEC;
+      user.roll = createSecInput.roll;
+      user.hostel = hostel!;
+      user.isNewUser = true;
       user.password = bcrypt.hashSync(password, salt);
       await user.save();
+
+      // Sending the mail
       console.log(password);
       //this password is going to be emailed to Hostel_SEC
       return !!user;
@@ -64,7 +57,7 @@ class HostelResolver {
     description:
       "Mutation to create Hostels, Restrictions : {Admin, Hostel Secretory and Hostel Affair Secretory}",
   })
-  @Authorized(["ADMIN", "HAS", "HOSTEL_SEC"])
+  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
   async createHostel(@Arg("CreateHostelInput") { name }: CreateHostelInput) {
     try {
       const hostel = new Hostel();
