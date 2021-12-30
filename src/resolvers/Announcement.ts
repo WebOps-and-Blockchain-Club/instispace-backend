@@ -14,18 +14,18 @@ import {
 } from "type-graphql";
 import MyContext from "src/utils/context";
 import { UserRole } from "../utils";
- 
+
 @Resolver((_type) => Announcement)
 class AnnouncementResolver {
   @Mutation(() => Boolean, {
     description:
       "Mutation to create Announcements, Restrictions : {Admin, Hostel Secretary, and Hostel Affair Secretary}",
   })
-  @Authorized(["HAS", "HOSTEL_SEC", "ADMIN"])
+  @Authorized([UserRole.HAS, UserRole.HOSTEL_SEC, UserRole.ADMIN])
   async createAnnouncement(
     @Ctx() { user }: MyContext,
     @Arg("AnnouncementInput")
-    announcementInput: AnnouncementInput,
+    announcementInput: AnnouncementInput
   ) {
     try {
       const announcement = new Announcement();
@@ -34,8 +34,11 @@ class AnnouncementResolver {
       announcement.user = user;
       announcement.endTime = announcementInput.endTime;
       announcement.image = announcementInput.image;
-      const hostel = await Hostel.findOne({ where: { id: announcementInput.hostelId }, relations : ["announcements"] });
-      if(!hostel) throw new Error("Invalid hostel Id");
+      const hostel = await Hostel.findOne({
+        where: { id: announcementInput.hostelId },
+        relations: ["announcements"],
+      });
+      if (!hostel) throw new Error("Invalid hostel Id");
       announcement.hostel = hostel;
       await announcement.save();
       return !!announcement;
@@ -65,7 +68,7 @@ class AnnouncementResolver {
   async getAnnouncements(@Arg("HostelId") hostelId: string) {
     try {
       let announcements = await Announcement.find({
-        where: { hostel: hostelId},
+        where: { hostel: hostelId },
       });
       //announcements = announcements.filter((n) => n.endTime < Date.now());
       return announcements;
@@ -79,19 +82,47 @@ class AnnouncementResolver {
       "Mutataion to update Announcement, Restrictions : {Admin, Hostel Affair Secretory, Hostel Secretory}",
   })
   @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
-  async updateAnnouncement(
+  async editAnnouncement(
     @Ctx() { user }: MyContext,
     @Arg("UpdateAnnouncementInput")
-    announcementInput : AnnouncementInput,
-    @Arg("AnnouncementId") id: string,
+    announcementInput: AnnouncementInput,
+    @Arg("AnnouncementId") id: string
   ) {
     try {
-      const announcement = await Announcement.findOne({where: {id}, relations : ["user"]});
-      if(announcement && announcement.user.id === user.id){
-        const { affected } = await Announcement.update(id, {...announcementInput});
+      const announcement = await Announcement.findOne({
+        where: { id },
+        relations: ["user"],
+      });
+      if (announcement && announcement.user.id === user.id) {
+        const { affected } = await Announcement.update(id, {
+          ...announcementInput,
+        });
         return !!affected;
       }
       console.log("Announcement");
+      return !!announcement;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @Mutation(() => Boolean, {
+    description:
+      "hide Announcement Mutation, Restrictions : {Admin, Hostel Affair Secretory and Hostel secretory }",
+  })
+  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
+  async deleteAnnouncement(
+    @Ctx() { user }: MyContext,
+    @Arg("AnnouncementId") id: string
+  ) {
+    try {
+      const announcement = await Announcement.findOne({ where: { id: id } });
+      if (
+        announcement!.user.role === UserRole.HOSTEL_SEC &&
+        user.hostel.name !== announcement!.hostel.name
+      )
+        return false;
+      announcement!.isHidden = true;
       return !!announcement;
     } catch (e) {
       throw new Error(`message : ${e}`);
