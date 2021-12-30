@@ -13,9 +13,6 @@ class createNetopsInput {
 
   @Field(() => [String])
   tags: string[];
-
-  @Field(() => Number)
-  endTime: number;
 }
 
 @InputType()
@@ -28,9 +25,15 @@ class editNetopsInput {
 
   @Field({ nullable: true })
   photo: string;
-
-  @Field(() => Number)
-  endTime: number;
 }
 
-export { createNetopsInput, editNetopsInput };
+@InputType()
+class fileringConditions {
+  @Field(() => [String], { nullable: true })
+  tags: string[];
+
+  @Field(() => Boolean, { nullable: true })
+  isStared: boolean;
+}
+
+export { createNetopsInput, editNetopsInput, fileringConditions };

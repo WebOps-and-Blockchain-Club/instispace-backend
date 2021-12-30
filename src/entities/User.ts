@@ -11,6 +11,7 @@ import {
 import Netop from "./Netop";
 import Comment from "./Common/Comment";
 import Tag from "./Tag";
+import Report from "./Common/Report";
 
 @Entity("User")
 @ObjectType("User")
@@ -43,14 +44,15 @@ class User extends BaseEntity {
   @ManyToMany(() => Netop, (netop) => netop.likedBy)
   likedNetop: Netop[];
 
-  @OneToMany(() => Netop, (netop) => netop.reportedBy)
-  reportedNetop: Netop[];
-
   @OneToMany(() => Netop, (netop) => netop.staredBy)
   staredNetop: Netop[];
 
   @OneToMany(() => Comment, (comment) => comment.createdBy)
   comments: Comment[];
+
+  @OneToMany(() => Report, (report) => report.by)
+  reports: Report[];
+
   @Column({ nullable: true })
   @Field({ nullable: true })
   hostel: string;

@@ -1,4 +1,3 @@
-//TODO: tag as id
 import {
   Arg,
   Authorized,
@@ -11,11 +10,22 @@ import {
 } from "type-graphql";
 
 import MyContext from "../utils/context";
-import { createNetopsInput, editNetopsInput } from "../types/inputs/netop";
+import {
+  createNetopsInput,
+  editNetopsInput,
+  fileringConditions,
+} from "../types/inputs/netop";
 import Tag from "../entities/Tag";
 import Netop from "../entities/Netop";
 import Comment from "../entities/Common/Comment";
+import { GraphQLUpload } from "graphql-upload";
 import getNetopOutput from "../types/objects/netop";
+// import { FILE_EXTENSIONS } from "../utils/config";
+// import path from "path";
+import { createWriteStream } from "fs";
+import { UserRole } from "../utils";
+import { Upload } from "../types/inputs/Uploads";
+import Report from "../entities/Common/Report";
 
 @Resolver(Netop)
 class NetopResolver {
@@ -29,8 +39,7 @@ class NetopResolver {
     @Ctx() { user }: MyContext
   ) {
     try {
-      //TODO: tags are not get added here
-      const { title, content, photo, endTime } = createNetopsInput;
+      const { title, content, photo } = createNetopsInput;
 
       var tags: Tag[] = [];
       await Promise.all(
@@ -50,7 +59,6 @@ class NetopResolver {
         isHidden: false,
         likeCount: 0,
         tags,
-        endTime,
       });
 
       await netop.save();
@@ -59,6 +67,19 @@ class NetopResolver {
       console.log(e.message);
       throw new Error(e.message);
     }
+  }
+
+  @Mutation(() => Boolean)
+  async addPicture(
+    @Arg("picture", () => GraphQLUpload)
+    { createReadStream, filename }: Upload
+  ): Promise<boolean> {
+    return new Promise(async (resolve, reject) =>
+      createReadStream()
+        .pipe(createWriteStream(__dirname + `../public/images/${filename}`))
+        .on("finish", () => resolve(true))
+        .on("error", () => reject(false))
+    );
   }
 
   @Mutation(() => Boolean, {
@@ -79,11 +100,15 @@ class NetopResolver {
 
       if (netop && user.id === netop?.createdBy.id) {
         if (Tags) {
-          netop.tags = [];
-          Tags.forEach(async (id) => {
-            const tag = await Tag.findOne(id);
-            if (tag) netop.tags.push(tag);
-          });
+          var tags: Tag[] = [];
+          await Promise.all(
+            Tags.map(async (id) => {
+              const tag = await Tag.findOne(id, { relations: ["Netops"] });
+              if (tag) {
+                tags = tags.concat([tag]);
+              }
+            })
+          );
         }
 
         const { affected } = await Netop.update(netopId, {
@@ -155,11 +180,9 @@ class NetopResolver {
       const netop = await Netop.findOne(netopId, { relations: ["staredBy"] });
       if (netop) {
         if (netop.staredBy.filter((u) => u.id === user.id).length) {
-          // if it's stared then unstar
           netop.staredBy = netop.staredBy.filter((e) => e.id !== user.id);
           await netop.save();
         } else {
-          // else star
           netop.staredBy.push(user);
           await netop.save();
         }
@@ -180,19 +203,18 @@ class NetopResolver {
   @Authorized()
   async reportNetop(
     @Arg("NetopId") netopId: string,
-    @Ctx() { user }: MyContext
+    @Ctx() { user }: MyContext,
+    @Arg("description") description: string
   ) {
     try {
-      const netop = await Netop.findOne(netopId, { relations: ["reportedBy"] });
+      const netop = await Netop.findOne(netopId, { relations: ["reports"] });
       if (netop) {
-        if (!netop.reportedBy.filter((u) => u.id === user.id).length) {
-          netop.reportedBy.push(user);
-          // TODO: inform to moderators
-          await netop.save();
-        }
-        return !!netop;
+        const report = Report.create({ netop, description, by: user });
+        await report.save();
+        return !!report;
       } else {
-        throw new Error("Invalid netop id");
+        console.log("netop not found");
+        return false;
       }
     } catch (e) {
       console.log(e.message);
@@ -224,13 +246,24 @@ class NetopResolver {
     }
   }
 
+  @Mutation(() => Boolean)
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.LEADS,
+    UserRole.HAS,
+    UserRole.HOSTEL_SEC,
+  ])
+  async removeNetop(@Arg("NetopId") netopId: string) {
+    let { affected } = await Netop.update(netopId, { isHidden: true });
+    return affected === 1;
+  }
+
   @Query(() => Netop, {
     description: "get an netop by id network and opportunity",
   })
   @Authorized()
-  async getNetopById(@Arg("NetopId") netopId: string) {
+  async getNetop(@Arg("NetopId") netopId: string) {
     try {
-      // const netop = await Netop.findOne(netopId, { relations: ["createdBy"] })
       const netop = await Netop.findOne(netopId, {
         where: { isHidden: false },
       });
@@ -245,12 +278,12 @@ class NetopResolver {
     description: "get a list of netops by filer and order conditions",
   })
   @Authorized()
-  async getNetop(
+  async getNetops(
     @Arg("take") take: number,
     @Arg("skip") skip: number,
-    @Arg("FileringCondition", () => [String], { nullable: true })
-    fileringConditions?: string[],
-    @Arg("OrderByLikes", (_type) => Boolean, { nullable: true })
+    @Arg("FileringCondition", { nullable: true })
+    fileringConditions?: fileringConditions,
+    @Arg("OrderByLikes", () => Boolean, { nullable: true })
     orderByLikes?: Boolean
   ) {
     try {
@@ -263,11 +296,20 @@ class NetopResolver {
       console.log(orderByLikes);
 
       if (fileringConditions) {
-        netopList = netopList.filter(
-          (n) =>
-            n.endTime < Date.now() &&
-            n.tags.filter((tag) => fileringConditions.includes(tag.id)).length
-        );
+        if (fileringConditions.isStared) {
+          netopList = netopList.filter(
+            (n) =>
+              n.isStared &&
+              n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
+                .length
+          );
+        } else {
+          netopList = netopList.filter(
+            (n) =>
+              n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
+                .length
+          );
+        }
       }
 
       const total = netopList.length;
@@ -295,7 +337,20 @@ class NetopResolver {
     }
   }
 
-  @Query(() => Boolean, {
+  @Query(() => [Report], { nullable: true })
+  async getReports() {
+    let netopList = await Netop.find({
+      where: { isHidden: false },
+      relations: ["reports"],
+    });
+    let reports: Report[] = [];
+    netopList.forEach((n) => {
+      reports.concat(n.reports);
+    });
+    return reports;
+  }
+
+  @FieldResolver(() => Boolean, {
     description: "check if network and opportunity is stared by current user",
   })
   async isStared(@Arg("NetopId") netopId: string, @Ctx() { user }: MyContext) {
@@ -329,13 +384,6 @@ class NetopResolver {
     return like_count;
   }
 
-  @FieldResolver(() => Number, { description: "get number of likes" })
-  async reportCount(@Root() { id }: Netop) {
-    const netop = await Netop.findOne(id, { relations: ["reportedBy"] });
-    const report_count = netop?.reportedBy.length;
-    return report_count;
-  }
-
   @FieldResolver(() => [Tag], {
     nullable: true,
     description: "get all the tags associated",
@@ -349,14 +397,3 @@ class NetopResolver {
 }
 
 export default NetopResolver;
-
-//*** My Helpers */
-// function compare(a: Netop, b: Netop) {
-//   if (a.likeCount < b.likeCount) {
-//     return 1;
-//   }
-//   if (a.likeCount > b.likeCount) {
-//     return -1;
-//   }
-//   return 0;
-// }
