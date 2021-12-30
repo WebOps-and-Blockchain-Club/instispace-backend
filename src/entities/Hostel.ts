@@ -14,7 +14,7 @@ import User from "./User";
 @ObjectType("Hostel", { description: "Hostel entity" })
 class Hostel extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
-  @Field({ description: "Hostel's id" })
+  @Field({ description: "Unique uuid generated for each Hostel" })
   id: string;
 
   @Column({ unique: true })
