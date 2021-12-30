@@ -17,7 +17,7 @@ import User from "./User";
 })
 class Announcement extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
-  @Field({ description: "Announcement's Id" })
+  @Field({ description: "Unique uuid generated for each announcement" })
   id: string;
 
   @Column()
