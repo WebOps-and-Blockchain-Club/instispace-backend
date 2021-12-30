@@ -116,14 +116,15 @@ class AnnouncementResolver {
     @Arg("AnnouncementId") id: string
   ) {
     try {
-      const announcement = await Announcement.findOne({ where: { id: id } });
-      if (
-        announcement!.user.role === UserRole.HOSTEL_SEC &&
-        user.hostel.name !== announcement!.hostel.name
-      )
-        return false;
-      announcement!.isHidden = true;
-      return !!announcement;
+      if (user.role === UserRole.HOSTEL_SEC) {
+        const announcement = await Announcement.findOne({
+          where: { id },
+          relations: ["user"],
+        });
+        if (announcement?.user.id !== user.id) throw new Error("UnAuthorized");
+      }
+      const { affected } = await Announcement.update(id, { isHidden: true });
+      return !!affected;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
