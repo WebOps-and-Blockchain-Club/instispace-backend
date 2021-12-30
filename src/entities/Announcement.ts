@@ -26,20 +26,25 @@ class Announcement extends BaseEntity {
 
   @Column({ unique: true })
   @Field({
-    description:
-      "Announcement's Description, this may or may not include visual description",
+    description: "Announcement's Description, text",
   })
   description: string;
 
-  @Column({nullable: true})
-  @Field({ description : "Image description for announcement"})
-  image : string;
-  
+  @Column({ nullable: true })
+  @Field({ description: "Image description for announcement" })
+  image: string;
+
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date;
 
   @Column({ type: "timestamptz", nullable: true })
   endTime: number;
+
+  @Column({ type: Boolean, default: false })
+  @Field((_type) => Boolean, {
+    description: "Visiblity state of announcements",
+  })
+  isHidden: boolean;
 
   @ManyToOne((_type) => User, (user) => user.announcements, { cascade: true })
   @JoinTable()
