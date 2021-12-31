@@ -1,7 +1,7 @@
 import bcryptjs from "bcryptjs";
 
 export enum UserRole {
-  ADMIN = "ADMIN", 
+  ADMIN = "ADMIN",
   DEV_TEAM = "DEV_TEAM",
   LEADS = "LEADS",
   MODERATOR = "MODERATOR",
@@ -17,9 +17,20 @@ export const adminEmail = "myhostel@gmail.com";
 
 export const adminPassword = "123456";
 
-export const accountPassword =  "123456";
+export const accountPassword = "123456";
 
 export var salt = bcryptjs.genSaltSync(Number(process.env.ITERATIONS!));
+
+export function autoGenPass(length: number) {
+  var result = "";
+  var characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var charactersLength = characters.length;
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
 
 export const usersDevList = [
   {

@@ -10,6 +10,7 @@ import {
   accountPassword,
   adminEmail,
   adminPassword,
+  autoGenPass,
   emailExpresion,
   salt,
   UserRole,
@@ -117,33 +118,22 @@ class UsersResolver {
     description:
       "Mutation to create a Super-User account, Restrictions : {Admin}",
   })
-  @Authorized(["ADMIN"])
+  @Authorized([UserRole.ADMIN])
   async createAccount(
     @Arg("CreateAccountInput") createAccountInput: CreateAccountInput
   ) {
     try {
-      if (emailExpresion.test(createAccountInput.roll) === false)
-        throw new Error("Invalid Email");
-      const user = new User();
-      user.role = createAccountInput.role;
-      user.roll = createAccountInput.roll;
-      user.isNewUser = true;
-      function autoGenPass(length: number) {
-        var result = "";
-        var characters =
-          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        var charactersLength = characters.length;
-        for (var i = 0; i < length; i++) {
-          result += characters.charAt(
-            Math.floor(Math.random() * charactersLength)
-          );
-        }
-        return result;
-      }
+      //Autogenerating the password
       var password =
         process.env.NODE_ENV === "development"
           ? accountPassword
           : autoGenPass(8);
+
+      //Creating the User
+      const user = new User();
+      user.role = createAccountInput.role;
+      user.roll = createAccountInput.roll;
+      user.isNewUser = true;
       user.password = bcrypt.hashSync(password, salt);
       await user.save();
       console.log(password);
@@ -158,7 +148,13 @@ class UsersResolver {
     description:
       "Query to fetch Super-Users, Restrictions : {Admins, Leads, Moderators, Hostel Affair Secretory and Hostel Secretory}",
   })
-  @Authorized(["ADMIN", "LEADS", "MODERATOR", "HAS", "HOSTEL_SEC"])
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.LEADS,
+    UserRole.MODERATOR,
+    UserRole.HAS,
+    UserRole.HOSTEL_SEC,
+  ])
   async getSuperUsers(@Arg("RolesFilter", () => [UserRole]) roles: [UserRole]) {
     try {
       return await User.find({ where: { role: In(roles) } });
@@ -211,7 +207,7 @@ class UsersResolver {
     description:
       "Mutation to change Super-Users passwords, Restrictions : {Leads, Hostel Affair Secretory and Hostel Secretory}",
   })
-  @Authorized(["LEADS", "HAS", "HOSTEL_SEC"])
+  @Authorized([UserRole.LEADS, UserRole.HAS, UserRole.HOSTEL_SEC])
   async updatePassword(
     @Ctx() { user }: MyContext,
     @Arg("NewPass") newPass: NewPass
@@ -231,7 +227,7 @@ class UsersResolver {
     description:
       "Mutation to change role of an ldap User to Moderator, Restrictions : {Admins and Leads}",
   })
-  @Authorized(["ADMIN", "LEADS"])
+  @Authorized([UserRole.ADMIN, UserRole.LEADS])
   async updateRole(@Arg("ModeratorInput") { roll }: ModeratorInput) {
     try {
       const user = await User.findOne({ where: { roll } });
@@ -249,7 +245,7 @@ class UsersResolver {
     description:
       "Mutation to Update/Add User's name, interest, password, Restrictions : {User}",
   })
-  @Authorized(["USER"])
+  @Authorized([UserRole.USER])
   async updateUser(
     @Ctx() { user }: MyContext,
     @Arg("UserInput") userInput: UserInput
