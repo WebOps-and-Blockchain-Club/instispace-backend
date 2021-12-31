@@ -13,7 +13,7 @@ import User from "./User";
 @ObjectType("Tag", { description: "Tag Entity, Users will follow these tags" })
 class Tag extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
-  @Field({ description: "Tag Id" })
+  @Field({ description: "Unique uuid generated for each Tag" })
   id: string;
 
   @Column({ unique: true })
