@@ -43,7 +43,7 @@ const main = async () => {
   app.use(
     graphqlUploadExpress({
       maxFileSize: FILE_SIZE_LIMIT_MB * 1000000, // 10MB
-      maxFiles: 1,
+      maxFiles: 5,
     })
   );
 
