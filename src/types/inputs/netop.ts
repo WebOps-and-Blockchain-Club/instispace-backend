@@ -1,4 +1,6 @@
+import { GraphQLUpload } from "graphql-upload";
 import { Field, InputType } from "type-graphql";
+import { Upload } from "./Uploads";
 
 @InputType({ description: "user" })
 class createNetopsInput {
@@ -7,9 +9,6 @@ class createNetopsInput {
 
   @Field()
   content: string;
-
-  @Field()
-  photo: string;
 
   @Field(() => [String])
   tags: string[];
@@ -36,4 +35,15 @@ class fileringConditions {
   isStared: boolean;
 }
 
-export { createNetopsInput, editNetopsInput, fileringConditions };
+@InputType()
+class UploadImageInput {
+  @Field(() => GraphQLUpload)
+  image: Upload;
+}
+
+export {
+  createNetopsInput,
+  editNetopsInput,
+  fileringConditions,
+  UploadImageInput,
+};

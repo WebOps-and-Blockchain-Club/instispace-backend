@@ -20,12 +20,12 @@ import Netop from "../entities/Netop";
 import Comment from "../entities/Common/Comment";
 import { GraphQLUpload } from "graphql-upload";
 import getNetopOutput from "../types/objects/netop";
-// import { FILE_EXTENSIONS } from "../utils/config";
-// import path from "path";
+import { FILE_EXTENSIONS } from "../utils/config";
+import path from "path";
 import { createWriteStream } from "fs";
 import { UserRole } from "../utils";
-import { Upload } from "../types/inputs/Uploads";
 import Report from "../entities/Common/Report";
+import { Upload } from "../types/inputs/Uploads";
 
 @Resolver(Netop)
 class NetopResolver {
@@ -33,13 +33,14 @@ class NetopResolver {
     description:
       "create network and opportunity, Restrictions:{any authorized user}",
   })
-  @Authorized()
+  // @Authorized()
   async createNetop(
     @Arg("NewEventData") createNetopsInput: createNetopsInput,
-    @Ctx() { user }: MyContext
+    @Ctx() { user }: MyContext, // @Arg("image")? one // @Arg("Attachments")? array of media files
+    @Arg("image", () => GraphQLUpload) image: Upload
   ) {
     try {
-      const { title, content, photo } = createNetopsInput;
+      const { title, content } = createNetopsInput;
 
       var tags: Tag[] = [];
       await Promise.all(
@@ -51,10 +52,14 @@ class NetopResolver {
         })
       );
 
+      let link = await this.addImage(image);
+
+      console.log("image link is", link);
+
       const netop = Netop.create({
         title,
         content,
-        photo,
+        photo: link,
         createdBy: user,
         isHidden: false,
         likeCount: 0,
@@ -69,17 +74,39 @@ class NetopResolver {
     }
   }
 
-  @Mutation(() => Boolean)
-  async addPicture(
-    @Arg("picture", () => GraphQLUpload)
-    { createReadStream, filename }: Upload
-  ): Promise<boolean> {
-    return new Promise(async (resolve, reject) =>
-      createReadStream()
-        .pipe(createWriteStream(__dirname + `../public/images/${filename}`))
-        .on("finish", () => resolve(true))
-        .on("error", () => reject(false))
+  @Mutation(() => String, { nullable: true })
+  async addImage(@Arg("image", () => GraphQLUpload) image: Upload) {
+    const { createReadStream, filename } = image;
+    const stream = createReadStream();
+
+    const filetype = path.extname(filename);
+    if (!FILE_EXTENSIONS.includes(filetype.toLowerCase()))
+      throw new Error(
+        `Supported file extensions are ${FILE_EXTENSIONS.join(", ")}`
+      );
+
+    const name = Date.now() + "-" + Math.round(Math.random() * 1e9) + filetype;
+
+    return new Promise<string>(async (resolve, _reject) =>
+      stream
+        .pipe(createWriteStream(__dirname + `/../../public/images/${name}`))
+        .on("finish", async () => {
+          const link = process.env.SERVER + `images/${name}`;
+          resolve(link);
+        })
+        .on("error", (e: any) => {
+          console.log(e);
+          throw new Error("Image upload failed. Retry");
+        })
     );
+  }
+
+  @Mutation(() => [String], { nullable: true })
+  async addImages(@Arg("images", () => [GraphQLUpload]) images: Upload[]) {
+    let links: string[] = [];
+    images.forEach((image) => {
+      links.push(this.addImage(image).toString());
+    });
   }
 
   @Mutation(() => Boolean, {
