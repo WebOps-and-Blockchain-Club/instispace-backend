@@ -18,10 +18,11 @@ class TagsResolver {
     description: "Mutation to Create Tags, Restrictions : {Admin}",
   })
   @Authorized([UserRole.ADMIN])
-  async createTag(@Arg("TagInput") { title }: TagInput) {
+  async createTag(@Arg("TagInput") { title, category }: TagInput) {
     try {
       const tag = new Tag();
       tag.title = title;
+      tag.category = category;
       await tag.save();
       return !!tag;
     } catch (e) {
