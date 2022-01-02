@@ -18,14 +18,12 @@ import {
 import Tag from "../entities/Tag";
 import Netop from "../entities/Netop";
 import Comment from "../entities/Common/Comment";
-import { GraphQLUpload } from "graphql-upload";
+import { GraphQLUpload, Upload } from "graphql-upload";
 import getNetopOutput from "../types/objects/netop";
-import { FILE_EXTENSIONS } from "../utils/config";
-import path from "path";
-import { createWriteStream } from "fs";
 import { UserRole } from "../utils";
 import Report from "../entities/Common/Report";
-import { Upload } from "../types/inputs/Uploads";
+// import { Upload } from "../types/inputs/Uploads";
+import addAttachments from "../utils/uploads";
 
 @Resolver(Netop)
 class NetopResolver {
@@ -33,11 +31,12 @@ class NetopResolver {
     description:
       "create network and opportunity, Restrictions:{any authorized user}",
   })
-  // @Authorized()
+  @Authorized()
   async createNetop(
     @Arg("NewEventData") createNetopsInput: createNetopsInput,
-    @Ctx() { user }: MyContext, // @Arg("image")? one // @Arg("Attachments")? array of media files
-    @Arg("image", () => GraphQLUpload) image: Upload
+    @Ctx() { user }: MyContext,
+    @Arg("Image", () => GraphQLUpload) image: Upload,
+    @Arg("Attachments", () => [GraphQLUpload]) attachments: Upload[]
   ) {
     try {
       const { title, content } = createNetopsInput;
@@ -52,14 +51,16 @@ class NetopResolver {
         })
       );
 
-      let link = await this.addImage(image);
-
-      console.log("image link is", link);
+      const imageLink = (await addAttachments([image], true)).join(" AND ");
+      const attachmentsLink = (
+        await addAttachments([...attachments], false)
+      ).join(" AND ");
 
       const netop = Netop.create({
         title,
         content,
-        photo: link,
+        photo: imageLink,
+        attachments: attachmentsLink,
         createdBy: user,
         isHidden: false,
         likeCount: 0,
@@ -74,41 +75,6 @@ class NetopResolver {
     }
   }
 
-  @Mutation(() => String, { nullable: true })
-  async addImage(@Arg("image", () => GraphQLUpload) image: Upload) {
-    const { createReadStream, filename } = image;
-    const stream = createReadStream();
-
-    const filetype = path.extname(filename);
-    if (!FILE_EXTENSIONS.includes(filetype.toLowerCase()))
-      throw new Error(
-        `Supported file extensions are ${FILE_EXTENSIONS.join(", ")}`
-      );
-
-    const name = Date.now() + "-" + Math.round(Math.random() * 1e9) + filetype;
-
-    return new Promise<string>(async (resolve, _reject) =>
-      stream
-        .pipe(createWriteStream(__dirname + `/../../public/images/${name}`))
-        .on("finish", async () => {
-          const link = process.env.SERVER + `images/${name}`;
-          resolve(link);
-        })
-        .on("error", (e: any) => {
-          console.log(e);
-          throw new Error("Image upload failed. Retry");
-        })
-    );
-  }
-
-  @Mutation(() => [String], { nullable: true })
-  async addImages(@Arg("images", () => [GraphQLUpload]) images: Upload[]) {
-    let links: string[] = [];
-    images.forEach((image) => {
-      links.push(this.addImage(image).toString());
-    });
-  }
-
   @Mutation(() => Boolean, {
     description:
       "edit network and opportunity, Restrictions:{user who created}",
@@ -118,7 +84,10 @@ class NetopResolver {
     @Arg("EditNetopsData") editNetopsInput: editNetopsInput,
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext,
-    @Arg("Tags", () => [String], { nullable: true }) Tags?: string[]
+    @Arg("Tags", () => [String], { nullable: true }) Tags?: string[],
+    @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload,
+    @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
+    attachments?: Upload[]
   ) {
     try {
       const netop = await Netop.findOne(netopId, {
@@ -137,6 +106,15 @@ class NetopResolver {
             })
           );
         }
+
+        if (image)
+          editNetopsInput.photo = (await addAttachments([image], true)).join(
+            " AND "
+          );
+        if (attachments)
+          editNetopsInput.attachments = (
+            await addAttachments([...attachments], false)
+          ).join(" AND ");
 
         const { affected } = await Netop.update(netopId, {
           ...editNetopsInput,
@@ -236,7 +214,7 @@ class NetopResolver {
     try {
       const netop = await Netop.findOne(netopId, { relations: ["reports"] });
       if (netop) {
-        const report = Report.create({ netop, description, by: user });
+        const report = Report.create({ netop, description, createdBy: user });
         await report.save();
         return !!report;
       } else {
