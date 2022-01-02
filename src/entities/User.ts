@@ -35,6 +35,10 @@ class User extends BaseEntity {
   @Field(() => UserRole, { description: "User's role" })
   role: UserRole;
 
+  @Column({ nullable: true })
+  @Field({ nullable: true, description: "LDAP User's Phone number" })
+  mobile: string;
+
   @Column({ type: "boolean" })
   @Field((_type) => Boolean, {
     description: "This Field determines if User is a new User or not!",
