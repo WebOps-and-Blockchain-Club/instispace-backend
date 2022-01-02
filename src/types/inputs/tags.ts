@@ -4,6 +4,9 @@ import { Field, InputType } from "type-graphql";
 class TagInput {
   @Field({ description: "Tag's Title" })
   title: string;
+
+  @Field({ description: "Tag's Category" })
+  category: string;
 }
 
 export default TagInput;

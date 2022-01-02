@@ -20,6 +20,10 @@ class Tag extends BaseEntity {
   @Field({ description: "Tag's Title" })
   title: string;
 
+  @Column()
+  @Field({ description: "Tag's Category" })
+  category: string;
+
   @ManyToMany((_type) => User, (users) => users.interest, { cascade: true })
   @JoinTable()
   @Field((_type) => [User], {
