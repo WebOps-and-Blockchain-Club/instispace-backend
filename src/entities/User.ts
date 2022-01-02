@@ -39,7 +39,7 @@ class User extends BaseEntity {
   // networking and opportunity
 
   @OneToMany(() => Netop, (netop) => netop.createdBy)
-  networking_and_opportunities: Netop[];
+  networkingAndOpportunities: Netop[];
 
   @ManyToMany(() => Netop, (netop) => netop.likedBy)
   likedNetop: Netop[];
@@ -50,7 +50,7 @@ class User extends BaseEntity {
   @OneToMany(() => Comment, (comment) => comment.createdBy)
   comments: Comment[];
 
-  @OneToMany(() => Report, (report) => report.by)
+  @OneToMany(() => Report, (report) => report.createdBy)
   reports: Report[];
 
   @Column({ nullable: true })
