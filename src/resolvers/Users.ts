@@ -251,13 +251,17 @@ class UsersResolver {
     @Arg("UserInput") userInput: UserInput
   ) {
     try {
-      user.name = userInput.name;
+      //finding the hostel by name
       const hostel = await Hostel.findOne({
         where: { name: userInput.hostel },
         relations: ["users"],
       });
       if (!hostel) throw new Error("Invalid Hostel");
+
+      //updating user
+      user.name = userInput.name;
       user.hostel = hostel;
+      user.mobile = userInput.mobile;
       if (user.isNewUser === true) user.isNewUser = false;
       let tags: Tag[] = [];
       for (let i = 0; i < userInput.interest.length; i++) {

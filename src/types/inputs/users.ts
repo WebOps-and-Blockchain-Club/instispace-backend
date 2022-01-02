@@ -1,6 +1,6 @@
 import { UserRole } from "../../utils";
 import { Field, InputType } from "type-graphql";
-import { IsEmail } from "class-validator";
+import { IsEmail, IsMobilePhone } from "class-validator";
 
 @InputType({ description: "Input for Login Mutation" })
 class LoginInput {
@@ -23,16 +23,20 @@ class CreateAccountInput {
 
 @InputType({ description: "Input for Update-User Mutation" })
 class UserInput {
-  @Field({ description: "User's name" })
+  @Field({ description: "LDAP User's name" })
   name: string;
 
-  @Field({ description: "User's hostel" })
+  @Field({ description: "LDAP User's hostel" })
   hostel: string;
 
   @Field((_type) => [String], {
-    description: "User's interests, collection of tags",
+    description: "LDAP User's interests, collection of tags",
   })
   interest: string[];
+
+  @IsMobilePhone("en-IN")
+  @Field({ nullable: true, description: "LDAP User's Phone number" })
+  mobile: string;
 }
 
 @InputType({ description: "Input for Change-Password Mutation" })
