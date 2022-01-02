@@ -20,7 +20,7 @@ class Report extends BaseEntity {
   netop: Netop;
 
   @ManyToOne(() => User, (User) => User.reports)
-  by: User;
+  createdBy: User;
 
   @Column()
   @Field()

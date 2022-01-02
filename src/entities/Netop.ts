@@ -74,7 +74,7 @@ class Netop extends BaseEntity {
   @JoinTable()
   tags: Tag[];
 
-  @ManyToOne(() => User, (user) => user.networking_and_opportunities)
+  @ManyToOne(() => User, (user) => user.networkingAndOpportunities)
   createdBy: User;
 }
 
