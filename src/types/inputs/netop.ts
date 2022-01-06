@@ -10,6 +10,9 @@ class createNetopsInput {
 
   @Field(() => [String])
   tags: string[];
+
+  photo?: string;
+  attachments?: string;
 }
 
 @InputType()

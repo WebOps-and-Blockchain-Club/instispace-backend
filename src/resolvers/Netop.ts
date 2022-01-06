@@ -31,7 +31,7 @@ class NetopResolver {
     description:
       "create network and opportunity, Restrictions:{any authorized user}",
   })
-  // @Authorized()
+  @Authorized()
   async createNetop(
     @Arg("NewEventData") createNetopsInput: createNetopsInput,
     @Ctx() { user }: MyContext,
