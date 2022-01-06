@@ -31,16 +31,15 @@ class NetopResolver {
     description:
       "create network and opportunity, Restrictions:{any authorized user}",
   })
-  @Authorized()
+  // @Authorized()
   async createNetop(
     @Arg("NewEventData") createNetopsInput: createNetopsInput,
     @Ctx() { user }: MyContext,
-    @Arg("Image", () => GraphQLUpload) image: Upload,
-    @Arg("Attachments", () => [GraphQLUpload]) attachments: Upload[]
+    @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload,
+    @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
+    attachments?: Upload[]
   ) {
     try {
-      const { title, content } = createNetopsInput;
-
       var tags: Tag[] = [];
       await Promise.all(
         createNetopsInput.tags.map(async (id) => {
@@ -51,16 +50,17 @@ class NetopResolver {
         })
       );
 
-      const imageLink = (await addAttachments([image], true)).join(" AND ");
-      const attachmentsLink = (
-        await addAttachments([...attachments], false)
-      ).join(" AND ");
+      if (image)
+        createNetopsInput.photo = (await addAttachments([image], true)).join(
+          " AND "
+        );
+      if (attachments)
+        createNetopsInput.attachments = (
+          await addAttachments([...attachments], false)
+        ).join(" AND ");
 
       const netop = Netop.create({
-        title,
-        content,
-        photo: imageLink,
-        attachments: attachmentsLink,
+        ...createNetopsInput,
         createdBy: user,
         isHidden: false,
         likeCount: 0,
