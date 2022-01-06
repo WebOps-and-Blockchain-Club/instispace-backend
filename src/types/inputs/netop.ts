@@ -10,6 +10,9 @@ class createNetopsInput {
 
   @Field(() => [String])
   tags: string[];
+
+  @Field()
+  endTime: string;
 }
 
 @InputType()
