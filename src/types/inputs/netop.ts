@@ -13,6 +13,9 @@ class createNetopsInput {
 
   @Field()
   endTime: string;
+
+  photo?: string;
+  attachments?: string;
 }
 
 @InputType()

@@ -29,12 +29,12 @@ class Netop extends BaseEntity {
   @Field()
   content: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   photo: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   attachments: string;
 
   @Column({ type: "timestamptz" })
