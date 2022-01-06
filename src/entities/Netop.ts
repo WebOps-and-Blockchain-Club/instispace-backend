@@ -37,6 +37,9 @@ class Netop extends BaseEntity {
   @Field()
   attachments: string;
 
+  @Column({ type: "timestamptz" })
+  endTime: Date;
+
   //tags
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date;

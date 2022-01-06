@@ -39,7 +39,7 @@ class NetopResolver {
     @Arg("Attachments", () => [GraphQLUpload]) attachments: Upload[]
   ) {
     try {
-      const { title, content } = createNetopsInput;
+      const { title, content, endTime } = createNetopsInput;
 
       var tags: Tag[] = [];
       await Promise.all(
@@ -63,6 +63,7 @@ class NetopResolver {
         attachments: attachmentsLink,
         createdBy: user,
         isHidden: false,
+        endTime: new Date(endTime),
         likeCount: 0,
         tags,
       });
@@ -302,9 +303,11 @@ class NetopResolver {
 
       if (fileringConditions) {
         if (fileringConditions.isStared) {
+          const d = new Date();
           netopList = netopList.filter(
             (n) =>
               n.isStared &&
+              n.endTime > d &&
               n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
                 .length
           );
