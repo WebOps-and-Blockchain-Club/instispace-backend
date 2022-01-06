@@ -33,7 +33,7 @@ import Tag from "../entities/Tag";
 import { LoginOutput } from "../types/objects/users";
 import MyContext from "../utils/context";
 import bcrypt from "bcryptjs";
-import { In } from "typeorm";
+import { In, Like } from "typeorm";
 import Hostel from "../entities/Hostel";
 import Announcement from "../entities/Announcement";
 
@@ -239,6 +239,25 @@ class UsersResolver {
     } catch (e) {
       throw new Error(`message: ${e}`);
     }
+  }
+
+  @Query(() => [User], { nullable: true })
+  @Authorized()
+  async searchUser(@Arg("search") search: string) {
+    let users: User[] = [];
+    await Promise.all(
+      ["roll", "name"].map(async (field: string) => {
+        const filter = { [field]: Like(`%${search}%`) };
+        const userF = await User.find({ where: filter });
+        userF.forEach((user) => {
+          users.push(user);
+        });
+      })
+    );
+
+    const userStr = users.map((obj) => JSON.stringify(obj));
+    const uniqueUserStr = new Set(userStr);
+    return Array.from(uniqueUserStr).map((str) => JSON.parse(str));
   }
 
   @Mutation(() => Boolean, {
