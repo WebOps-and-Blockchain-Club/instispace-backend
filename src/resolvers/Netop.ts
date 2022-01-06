@@ -59,6 +59,11 @@ class NetopResolver {
           await addAttachments([...attachments], false)
         ).join(" AND ");
 
+      console.log(
+        new Date(createNetopsInput.endTime),
+        typeof new Date(createNetopsInput.endTime)
+      );
+
       const netop = Netop.create({
         ...createNetopsInput,
         createdBy: user,
@@ -299,25 +304,28 @@ class NetopResolver {
         order: { createdAt: "DESC" },
       });
 
-      console.log(orderByLikes);
-
+      const d = new Date();
       if (fileringConditions) {
         if (fileringConditions.isStared) {
-          const d = new Date();
           netopList = netopList.filter(
             (n) =>
               n.isStared &&
-              n.endTime > d &&
+              new Date(n.endTime).getTime() > d.getTime() &&
               n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
                 .length
           );
         } else {
           netopList = netopList.filter(
             (n) =>
+              new Date(n.endTime).getTime() > d.getTime() &&
               n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
                 .length
           );
         }
+      } else {
+        netopList = netopList.filter(
+          (n) => new Date(n.endTime).getTime() > d.getTime()
+        );
       }
 
       const total = netopList.length;
@@ -401,6 +409,15 @@ class NetopResolver {
       relations: ["tags"],
     });
     return netop?.tags;
+  }
+
+  @FieldResolver(() => Date)
+  async endTime(@Root() { id }: Netop) {
+    const netop = await Netop.findOne(id);
+    const e = netop?.endTime;
+    // console.log(new Date(e));
+
+    return e;
   }
 }
 
