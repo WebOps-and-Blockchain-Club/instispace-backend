@@ -21,6 +21,9 @@ class Netop extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt: Date;
+
   @Column()
   @Field()
   title: string;
@@ -37,23 +40,13 @@ class Netop extends BaseEntity {
   @Field({ nullable: true })
   attachments: string;
 
+  @Column()
+  @Field()
+  isHidden: boolean;
+
   @Column({ type: "timestamptz" })
+  @Field(() => Date)
   endTime: Date;
-
-  //tags
-  @CreateDateColumn({ type: "timestamptz" })
-  createdAt: Date;
-
-  // @Column({ type: "timestamptz" })
-  // @Field({
-  //   description: "time at which this network and opportunity will be end",
-  // })
-  // endTime: number;
-
-  //likes
-  @ManyToMany(() => User, (user) => user.likedNetop, { nullable: true })
-  @JoinTable()
-  likedBy: User[];
 
   @Field(() => Number, { description: "number of likes" })
   likeCount: number;
@@ -61,15 +54,9 @@ class Netop extends BaseEntity {
   @Field(() => Boolean, { description: "is this netop is stared" })
   isStared: boolean;
 
-  @Column()
-  @Field()
-  isHidden: boolean;
-
-  //comments
   @OneToMany(() => Comment, (comment) => comment.netop, { nullable: true })
   comments: Comment[];
 
-  //reports
   @OneToMany(() => Report, (report) => report.netop, { nullable: true })
   reports: Report[];
 
@@ -83,6 +70,10 @@ class Netop extends BaseEntity {
 
   @ManyToOne(() => User, (user) => user.networkingAndOpportunities)
   createdBy: User;
+
+  @ManyToMany(() => User, (user) => user.likedNetop, { nullable: true })
+  @JoinTable()
+  likedBy: User[];
 }
 
 export default Netop;

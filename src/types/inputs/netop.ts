@@ -26,7 +26,13 @@ class editNetopsInput {
   @Field({ nullable: true })
   content: string;
 
+  @Field()
+  endTime: string;
+
+  @Field()
   photo?: string;
+
+  @Field()
   attachments?: string;
 }
 

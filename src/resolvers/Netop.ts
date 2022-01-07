@@ -22,7 +22,6 @@ import { GraphQLUpload, Upload } from "graphql-upload";
 import getNetopOutput from "../types/objects/netop";
 import { UserRole } from "../utils";
 import Report from "../entities/Common/Report";
-// import { Upload } from "../types/inputs/Uploads";
 import addAttachments from "../utils/uploads";
 
 @Resolver(Netop)
@@ -58,11 +57,6 @@ class NetopResolver {
         createNetopsInput.attachments = (
           await addAttachments([...attachments], false)
         ).join(" AND ");
-
-      console.log(
-        new Date(createNetopsInput.endTime),
-        typeof new Date(createNetopsInput.endTime)
-      );
 
       const netop = Netop.create({
         ...createNetopsInput,
@@ -178,11 +172,11 @@ class NetopResolver {
     }
   }
 
-  @Mutation(() => Boolean)
-  @Authorized({
+  @Mutation(() => Boolean, {
     description:
       "star or unstar (if it's previously star) network and opportunity, Restrictions:{any authorized user}",
   })
+  @Authorized()
   async toggleStar(
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext
@@ -222,6 +216,7 @@ class NetopResolver {
       if (netop) {
         const report = Report.create({ netop, description, createdBy: user });
         await report.save();
+        console.log(report);
         return !!report;
       } else {
         console.log("netop not found");
@@ -355,23 +350,7 @@ class NetopResolver {
 
   @Query(() => [Report], { nullable: true })
   async getReports() {
-    let netopList = await Netop.find({
-      where: { isHidden: false },
-      relations: ["reports"],
-    });
-    let reports: Report[] = [];
-    netopList.forEach((n) => {
-      reports.concat(n.reports);
-    });
-    return reports;
-  }
-
-  @FieldResolver(() => Boolean, {
-    description: "check if network and opportunity is stared by current user",
-  })
-  async isStared(@Arg("NetopId") netopId: string, @Ctx() { user }: MyContext) {
-    const netop = await Netop.findOne(netopId, { relations: ["staredBy"] });
-    return netop?.staredBy.filter((u) => u.id === user.id).length;
+    return await Report.find({});
   }
 
   @Query(() => Boolean, {
@@ -411,13 +390,12 @@ class NetopResolver {
     return netop?.tags;
   }
 
-  @FieldResolver(() => Date)
-  async endTime(@Root() { id }: Netop) {
-    const netop = await Netop.findOne(id);
-    const e = netop?.endTime;
-    // console.log(new Date(e));
-
-    return e;
+  @FieldResolver(() => Boolean, {
+    description: "check if network and opportunity is stared by current user",
+  })
+  async isStared(@Arg("NetopId") netopId: string, @Ctx() { user }: MyContext) {
+    const netop = await Netop.findOne(netopId, { relations: ["staredBy"] });
+    return netop?.staredBy.filter((u) => u.id === user.id).length;
   }
 }
 
