@@ -57,7 +57,7 @@ class Announcement extends BaseEntity {
   })
   @JoinTable()
   @Field((_type) => [Hostel], {
-    description: "Hostel on which the announcement needs to be diplayed",
+    description: "Hostels on which the announcement needs to be diplayed",
   })
   hostels: Hostel[];
 }
