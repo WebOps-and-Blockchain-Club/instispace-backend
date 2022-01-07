@@ -285,6 +285,7 @@ class NetopResolver {
   })
   @Authorized()
   async getNetops(
+    @Ctx() { user }: MyContext,
     @Arg("take") take: number,
     @Arg("skip") skip: number,
     @Arg("FileringCondition", { nullable: true })
@@ -295,21 +296,30 @@ class NetopResolver {
     try {
       var netopList = await Netop.find({
         where: { isHidden: false },
-        relations: ["tags", "likedBy"],
+        relations: ["tags", "likedBy", "staredBy"],
         order: { createdAt: "DESC" },
       });
 
       const d = new Date();
       if (fileringConditions) {
         if (fileringConditions.isStared) {
-          netopList = netopList.filter(
-            (n) =>
-              n.isStared &&
-              new Date(n.endTime).getTime() > d.getTime() &&
-              n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
-                .length
-          );
-        } else {
+          netopList = netopList.filter((n) => {
+            console.log("inside isStared");
+            console.log(
+              n.staredBy.length,
+              n.staredBy.filter((u) => u.id === user.id).length,
+              new Date(n.endTime).getTime() > d.getTime()
+            );
+            return fileringConditions.tags
+              ? n.staredBy.filter((u) => u.id === user.id).length &&
+                  new Date(n.endTime).getTime() > d.getTime() &&
+                  n.tags.filter((tag) =>
+                    fileringConditions.tags.includes(tag.id)
+                  ).length
+              : n.staredBy.filter((u) => u.id === user.id).length &&
+                  new Date(n.endTime).getTime() > d.getTime();
+          });
+        } else if (fileringConditions.tags) {
           netopList = netopList.filter(
             (n) =>
               new Date(n.endTime).getTime() > d.getTime() &&
@@ -393,9 +403,9 @@ class NetopResolver {
   @FieldResolver(() => Boolean, {
     description: "check if network and opportunity is stared by current user",
   })
-  async isStared(@Arg("NetopId") netopId: string, @Ctx() { user }: MyContext) {
-    const netop = await Netop.findOne(netopId, { relations: ["staredBy"] });
-    return netop?.staredBy.filter((u) => u.id === user.id).length;
+  async isStared(@Root() { id }: Netop, @Ctx() { user }: MyContext) {
+    const netop = await Netop.findOne(id, { relations: ["staredBy"] });
+    return netop?.staredBy?.filter((u) => u.id === user.id).length;
   }
 }
 
