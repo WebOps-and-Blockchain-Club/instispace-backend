@@ -11,11 +11,11 @@ class AnnouncementInput {
   @Field((_type) => Number, { description: "Announcement's Endtime" })
   endTime: number;
 
-  @Field({description: "Announcement's Image description" , nullable: true })
-  image : string;
+  @Field({ description: "Announcement's Image description", nullable: true })
+  image?: string;
 
-  @Field({description: "Hostel's Id" ,nullable: true})
-  hostelId: string;
+  @Field({ description: "Hostel's Id" })
+  hostelIds: string[];
 }
 
 export default AnnouncementInput;
