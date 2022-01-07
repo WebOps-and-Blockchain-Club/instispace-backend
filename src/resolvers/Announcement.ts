@@ -33,7 +33,7 @@ class AnnouncementResolver {
       announcement.description = announcementInput.description;
       announcement.user = user;
       announcement.endTime = announcementInput.endTime;
-      announcement.image = announcementInput.image;
+      if(announcementInput.image) announcement.image = announcementInput.image;
       let hostels : Hostel[] = [];
       for (let i = 0; i < announcementInput.hostelIds.length; i++) {
         const hostel = await Hostel.findOne({
