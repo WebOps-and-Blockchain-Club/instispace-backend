@@ -14,7 +14,7 @@ class AnnouncementInput {
   @Field({ description: "Announcement's Image description", nullable: true })
   image?: string;
 
-  @Field({ description: "Hostel's Id" })
+  @Field({ description: "Hostels' Ids" })
   hostelIds: string[];
 }
 
