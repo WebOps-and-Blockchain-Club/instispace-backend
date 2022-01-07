@@ -268,8 +268,6 @@ class UsersResolver {
           relations: ["users"],
         });
         if (!tag) throw new Error("No Such Tag");
-        tag.users.push(user);
-        await tag.save();
         tags.push(tag);
       }
       user.interest = tags;

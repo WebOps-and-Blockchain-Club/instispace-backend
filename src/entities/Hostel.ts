@@ -29,14 +29,14 @@ class Hostel extends BaseEntity {
   })
   users: User[];
 
-  @OneToMany((_type) => Announcement, (announcements) => announcements.hostel, {
+  @OneToMany((_type) => Announcement, (announcements) => announcements.hostels, {
     nullable: true,
   })
   @Field((_type) => [Announcement], {
     description:
       "Hostel's Announcement, they will be displayed on the notice board",
   })
-  announcements: Announcement[];
+  announcements?: Announcement[];
 }
 
 export default Hostel;
