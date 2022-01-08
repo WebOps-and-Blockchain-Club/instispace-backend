@@ -25,7 +25,7 @@ class Announcement extends BaseEntity {
   @Field({ description: "Announcement's Title" })
   title: string;
 
-  @Column({ unique: true })
+  @Column()
   @Field({
     description: "Announcement's Description, text",
   })
@@ -36,10 +36,12 @@ class Announcement extends BaseEntity {
   image?: string;
 
   @CreateDateColumn({ type: "timestamptz" })
+  @Field(() => Date)
   createdAt: Date;
 
   @Column({ type: "timestamptz" })
-  endTime: number;
+  @Field(() => Date)
+  endTime: Date;
 
   @Column({ type: Boolean, default: false })
   @Field((_type) => Boolean, {
@@ -48,13 +50,10 @@ class Announcement extends BaseEntity {
   isHidden: boolean;
 
   @ManyToOne((_type) => User, (user) => user.announcements, { cascade: true })
-  @JoinTable()
   @Field((_type) => User, { description: "User who created the announcement" })
   user: User;
 
-  @ManyToMany((_type) => Hostel, (hostels) => hostels.announcements, {
-    cascade: true,
-  })
+  @ManyToMany((_type) => Hostel, (hostels) => hostels.announcements)
   @JoinTable()
   @Field((_type) => [Hostel], {
     description: "Hostels on which the announcement needs to be diplayed",

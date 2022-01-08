@@ -70,20 +70,21 @@ class User extends BaseEntity {
     nullable: true,
     description: "User's Interest, collection of Tags",
   })
-  interest: Tag[];
+  interest?: Tag[];
 
   @ManyToOne((_type) => Hostel, (hostel) => hostel.users, { nullable: true })
   @Field({ nullable: true, description: "User's Hostel amd its details" })
-  hostel: Hostel;
+  hostel?: Hostel;
 
   @OneToMany((_type) => Announcement, (announcements) => announcements.user, {
     nullable: true,
   })
   @Field((_type) => [Announcement], {
+    nullable: true,
     description:
       "Announcements Created by User, can only be created if its a Super User",
   })
-  announcements: Announcement[];
+  announcements?: Announcement[];
 
   // @ManyToMany(_type => event, event => event.liked_by)
   // @Field(_type => [event])
