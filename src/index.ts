@@ -30,7 +30,6 @@ const main = async () => {
           process.env.JWT_SECRET!
         );
         user = await User.findOne({ id: decoded });
-        // console.log(user);
       }
       return { user: user };
     },
