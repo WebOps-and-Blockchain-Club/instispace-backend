@@ -33,13 +33,17 @@ class AnnouncementResolver {
       announcement.description = announcementInput.description;
       announcement.user = user;
       announcement.endTime = announcementInput.endTime;
-      announcement.image = announcementInput.image;
-      const hostel = await Hostel.findOne({
-        where: { id: announcementInput.hostelId },
-        relations: ["announcements"],
-      });
-      if (!hostel) throw new Error("Invalid hostel Id");
-      announcement.hostel = hostel;
+      if(announcementInput.image) announcement.image = announcementInput.image;
+      let hostels : Hostel[] = [];
+      for (let i = 0; i < announcementInput.hostelIds.length; i++) {
+        const hostel = await Hostel.findOne({
+          where: { id: announcementInput.hostelIds[i] },
+          relations: ["announcements"],
+        });
+        if(!hostel) throw new Error("Invalid Hostel id")
+        hostels.push(hostel);
+      }
+      announcement.hostels = hostels;
       await announcement.save();
       return !!announcement;
     } catch (e) {
@@ -135,9 +139,9 @@ class AnnouncementResolver {
     try {
       const announcement = await Announcement.findOne({
         where: { id },
-        relations: ["hostel"],
+        relations: ["hostels"],
       });
-      return announcement?.hostel;
+      return announcement?.hostels;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

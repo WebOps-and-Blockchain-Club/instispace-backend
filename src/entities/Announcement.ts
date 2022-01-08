@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
@@ -32,12 +33,12 @@ class Announcement extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ description: "Image description for announcement" })
-  image: string;
+  image?: string;
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date;
 
-  @Column({ type: "timestamptz", nullable: true })
+  @Column({ type: "timestamptz" })
   endTime: number;
 
   @Column({ type: Boolean, default: false })
@@ -51,14 +52,14 @@ class Announcement extends BaseEntity {
   @Field((_type) => User, { description: "User who created the announcement" })
   user: User;
 
-  @ManyToOne((_type) => Hostel, (hostel) => hostel.announcements, {
+  @ManyToMany((_type) => Hostel, (hostels) => hostels.announcements, {
     cascade: true,
   })
   @JoinTable()
-  @Field((_type) => Hostel, {
-    description: "Hostel on which the announcement needs to be diplayed",
+  @Field((_type) => [Hostel], {
+    description: "Hostels on which the announcement needs to be diplayed",
   })
-  hostel: Hostel;
+  hostels: Hostel[];
 }
 
 export default Announcement;
