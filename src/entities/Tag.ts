@@ -7,6 +7,7 @@ import {
   ManyToMany,
   JoinTable,
 } from "typeorm";
+import Netop from "./Netop";
 import User from "./User";
 
 @Entity("Tag")
@@ -32,10 +33,8 @@ class Tag extends BaseEntity {
   })
   users: [User];
 
-  // @ManyToMany(_type => event, event => event.Tags, {cascade :true})
-  // @JoinTable()
-  // @Field(_type =>  [event])
-  // events : event[];
+  @ManyToMany(() => Netop, (Netop) => Netop.tags, { cascade: true })
+  Netops: Netop[];
 }
 
 export default Tag;
