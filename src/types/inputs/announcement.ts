@@ -8,13 +8,12 @@ class AnnouncementInput {
   @Field({ description: "Announcement's Descriptions" })
   description: string;
 
-  @Field((_type) => Number, { description: "Announcement's Endtime" })
-  endTime: number;
+  @Field({ description: "Announcement's Endtime" })
+  endTime: string;
 
-  @Field({ description: "Announcement's Image description", nullable: true })
   image?: string;
 
-  @Field({ description: "Hostels' Ids" })
+  @Field(() => [String], { description: "Hostels' Ids" })
   hostelIds: string[];
 }
 

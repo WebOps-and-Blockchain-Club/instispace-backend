@@ -14,6 +14,8 @@ import {
 } from "type-graphql";
 import MyContext from "src/utils/context";
 import { UserRole } from "../utils";
+import addAttachments from "../utils/uploads";
+import { GraphQLUpload, Upload } from "graphql-upload";
 
 @Resolver((_type) => Announcement)
 class AnnouncementResolver {
@@ -25,25 +27,29 @@ class AnnouncementResolver {
   async createAnnouncement(
     @Ctx() { user }: MyContext,
     @Arg("AnnouncementInput")
-    announcementInput: AnnouncementInput
+    announcementInput: AnnouncementInput,
+    @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload
   ) {
     try {
+      let hostels: Hostel[] = [];
+      await Promise.all(
+        announcementInput.hostelIds.map(async (id) => {
+          const hostel = await Hostel.findOne(id);
+          if (hostel) hostels.push(hostel);
+        })
+      );
+
       const announcement = new Announcement();
       announcement.title = announcementInput.title;
       announcement.description = announcementInput.description;
       announcement.user = user;
-      announcement.endTime = announcementInput.endTime;
-      if(announcementInput.image) announcement.image = announcementInput.image;
-      let hostels : Hostel[] = [];
-      for (let i = 0; i < announcementInput.hostelIds.length; i++) {
-        const hostel = await Hostel.findOne({
-          where: { id: announcementInput.hostelIds[i] },
-          relations: ["announcements"],
-        });
-        if(!hostel) throw new Error("Invalid Hostel id")
-        hostels.push(hostel);
-      }
+      announcement.endTime = new Date(announcementInput.endTime);
+      if (image)
+        announcement.image = (await addAttachments([image], true)).join(
+          " AND "
+        );
       announcement.hostels = hostels;
+
       await announcement.save();
       return !!announcement;
     } catch (e) {
@@ -71,10 +77,15 @@ class AnnouncementResolver {
   @Authorized()
   async getAnnouncements(@Arg("HostelId") hostelId: string) {
     try {
-      let announcements = await Announcement.find({
-        where: { hostel: hostelId },
+      let hostel = await Hostel.findOne({
+        where: { id: hostelId },
+        relations: ["announcements"],
       });
-      //announcements = announcements.filter((n) => n.endTime < Date.now());
+
+      const d = new Date();
+      let announcements = hostel?.announcements?.filter(
+        (n) => new Date(n.endTime).getTime() > d.getTime()
+      );
       return announcements;
     } catch (e) {
       throw new Error(`message : ${e}`);
@@ -97,14 +108,18 @@ class AnnouncementResolver {
         where: { id },
         relations: ["user"],
       });
-      if (announcement && announcement.user.id === user.id) {
+      if (
+        announcement &&
+        (announcement.user.id === user.id ||
+          user.role === UserRole.HAS ||
+          user.role === UserRole.ADMIN)
+      ) {
         const { affected } = await Announcement.update(id, {
           ...announcementInput,
         });
-        return !!affected;
+        return affected === 1;
       }
-      console.log("Announcement");
-      return !!announcement;
+      throw new Error("Unauthorized");
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -120,22 +135,27 @@ class AnnouncementResolver {
     @Arg("AnnouncementId") id: string
   ) {
     try {
-      if (user.role === UserRole.HOSTEL_SEC) {
-        const announcement = await Announcement.findOne({
-          where: { id },
-          relations: ["user"],
-        });
-        if (announcement?.user.id !== user.id) throw new Error("UnAuthorized");
+      const announcement = await Announcement.findOne({
+        where: { id },
+        relations: ["user"],
+      });
+      if (
+        announcement &&
+        (announcement.user.id === user.id ||
+          user.role === UserRole.HAS ||
+          user.role === UserRole.ADMIN)
+      ) {
+        const { affected } = await Announcement.update(id, { isHidden: true });
+        return affected === 0;
       }
-      const { affected } = await Announcement.update(id, { isHidden: true });
-      return !!affected;
+      throw new Error("Unauthorized");
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
   }
 
   @FieldResolver(() => Hostel)
-  async hostel(@Root() { id }: Announcement) {
+  async hostels(@Root() { id }: Announcement) {
     try {
       const announcement = await Announcement.findOne({
         where: { id },

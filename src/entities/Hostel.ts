@@ -3,7 +3,7 @@ import {
   BaseEntity,
   Column,
   Entity,
-  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
@@ -22,16 +22,20 @@ class Hostel extends BaseEntity {
   name: string;
 
   @OneToMany((_type) => User, (users) => users.hostel, { cascade: true })
-  @JoinTable()
   @Field((_type) => [User], {
     nullable: true,
     description: "Residents of The Hostel",
   })
   users: User[];
 
-  @OneToMany((_type) => Announcement, (announcements) => announcements.hostels, {
-    nullable: true,
-  })
+  @ManyToMany(
+    (_type) => Announcement,
+    (announcements) => announcements.hostels,
+    {
+      nullable: true,
+      cascade: true,
+    }
+  )
   @Field((_type) => [Announcement], {
     description:
       "Hostel's Announcement, they will be displayed on the notice board",
