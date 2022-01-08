@@ -1,7 +1,7 @@
 import { Field, InputType } from "type-graphql";
 
 @InputType({ description: "Announcement Input" })
-class AnnouncementInput {
+class CreateAnnouncementInput {
   @Field({ description: "Announcement's Title" })
   title: string;
 
@@ -17,4 +17,21 @@ class AnnouncementInput {
   hostelIds: string[];
 }
 
-export default AnnouncementInput;
+@InputType({ description: "Announcement Input" })
+class EditAnnouncementInput {
+  @Field({ nullable: true, description: "Announcement's Title" })
+  title?: string;
+
+  @Field({ nullable: true, description: "Announcement's Descriptions" })
+  description?: string;
+
+  @Field({ nullable: true, description: "Announcement's Endtime" })
+  endTime?: string;
+
+  image?: string;
+
+  @Field(() => [String], { nullable: true, description: "Hostels' Ids" })
+  hostelIds?: string[];
+}
+
+export { CreateAnnouncementInput, EditAnnouncementInput };

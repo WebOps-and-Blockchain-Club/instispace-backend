@@ -1,7 +1,10 @@
 import Announcement from "../entities/Announcement";
 import Hostel from "../entities/Hostel";
 import User from "../entities/User";
-import AnnouncementInput from "../types/inputs/announcement";
+import {
+  CreateAnnouncementInput,
+  EditAnnouncementInput,
+} from "../types/inputs/announcement";
 import {
   Arg,
   Authorized,
@@ -27,8 +30,8 @@ class AnnouncementResolver {
   async createAnnouncement(
     @Ctx() { user }: MyContext,
     @Arg("AnnouncementInput")
-    announcementInput: AnnouncementInput,
-    @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload
+    announcementInput: CreateAnnouncementInput,
+    @Arg("Images", () => [GraphQLUpload], { nullable: true }) image?: Upload[]
   ) {
     try {
       let hostels: Hostel[] = [];
@@ -45,9 +48,7 @@ class AnnouncementResolver {
       announcement.user = user;
       announcement.endTime = new Date(announcementInput.endTime);
       if (image)
-        announcement.image = (await addAttachments([image], true)).join(
-          " AND "
-        );
+        announcement.image = (await addAttachments(image, true)).join(" AND ");
       announcement.hostels = hostels;
 
       await announcement.save();
@@ -99,9 +100,10 @@ class AnnouncementResolver {
   @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
   async editAnnouncement(
     @Ctx() { user }: MyContext,
-    @Arg("UpdateAnnouncementInput")
-    announcementInput: AnnouncementInput,
-    @Arg("AnnouncementId") id: string
+    @Arg("AnnouncementId") id: string,
+    @Arg("UpdateAnnouncementInput", { nullable: true })
+    announcementInput?: EditAnnouncementInput,
+    @Arg("Images", () => [GraphQLUpload], { nullable: true }) image?: Upload[]
   ) {
     try {
       const announcement = await Announcement.findOne({
@@ -114,6 +116,10 @@ class AnnouncementResolver {
           user.role === UserRole.HAS ||
           user.role === UserRole.ADMIN)
       ) {
+        if (image)
+          announcement.image = (await addAttachments(image, true)).join(
+            " AND "
+          );
         const { affected } = await Announcement.update(id, {
           ...announcementInput,
         });
