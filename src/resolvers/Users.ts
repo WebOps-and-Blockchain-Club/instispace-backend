@@ -288,7 +288,8 @@ class UsersResolver {
           where: { id: userInput.interest[i] },
           relations: ["users"],
         });
-        tags.push(tag!);
+        if (!tag) throw new Error("No Such Tag");
+        tags.push(tag);
       }
       user.interest = tags;
       await user.save();
