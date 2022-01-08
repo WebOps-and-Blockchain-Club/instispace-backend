@@ -216,10 +216,8 @@ class NetopResolver {
       if (netop) {
         const report = Report.create({ netop, description, createdBy: user });
         await report.save();
-        console.log(report);
         return !!report;
       } else {
-        console.log("netop not found");
         return false;
       }
     } catch (e) {
@@ -304,12 +302,6 @@ class NetopResolver {
       if (fileringConditions) {
         if (fileringConditions.isStared) {
           netopList = netopList.filter((n) => {
-            console.log("inside isStared");
-            console.log(
-              n.staredBy.length,
-              n.staredBy.filter((u) => u.id === user.id).length,
-              new Date(n.endTime).getTime() > d.getTime()
-            );
             return fileringConditions.tags
               ? n.staredBy.filter((u) => u.id === user.id).length &&
                   new Date(n.endTime).getTime() > d.getTime() &&
