@@ -9,9 +9,12 @@ import {
   ManyToOne,
   OneToMany,
 } from "typeorm";
+import Netop from "./Netop";
+import Comment from "./Common/Comment";
 import Tag from "./Tag";
 import Hostel from "./Hostel";
 import Announcement from "./Announcement";
+import Report from "./Common/Report";
 
 @Entity("User")
 @ObjectType("User", { description: "User Entity" })
@@ -34,6 +37,23 @@ class User extends BaseEntity {
   @Column("enum", { enum: UserRole, default: UserRole.USER })
   @Field(() => UserRole, { description: "User's role" })
   role: UserRole;
+
+  // networking and opportunity
+
+  @OneToMany(() => Netop, (netop) => netop.createdBy)
+  networkingAndOpportunities: Netop[];
+
+  @ManyToMany(() => Netop, (netop) => netop.likedBy)
+  likedNetop: Netop[];
+
+  @OneToMany(() => Netop, (netop) => netop.staredBy)
+  staredNetop: Netop[];
+
+  @OneToMany(() => Comment, (comment) => comment.createdBy)
+  comments: Comment[];
+
+  @OneToMany(() => Report, (report) => report.createdBy)
+  reports: Report[];
 
   @Column({ nullable: true })
   @Field({ nullable: true, description: "LDAP User's Phone number" })
