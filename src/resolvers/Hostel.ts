@@ -12,7 +12,6 @@ import User from "../entities/User";
 import { accountPassword, autoGenPass, salt, UserRole } from "../utils/index";
 import bcrypt from "bcryptjs";
 import { CreateSecInput, CreateHostelInput } from "../types/inputs/hostel";
-import Announcement from "../entities/Announcement";
 
 @Resolver((_type) => Hostel)
 class HostelResolver {
@@ -87,19 +86,6 @@ class HostelResolver {
     try {
       const hostel = await Hostel.findOne({ where: id, relations: ["users"] });
       return hostel?.users;
-    } catch (e) {
-      throw new Error(`message : ${e}`);
-    }
-  }
-
-  @FieldResolver(() => [Announcement], { nullable: true })
-  async announcements(@Root() { id }: Hostel) {
-    try {
-      const hostel = await Hostel.findOne({
-        where: { id },
-        relations: ["announcements"],
-      });
-      return hostel?.announcements;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
