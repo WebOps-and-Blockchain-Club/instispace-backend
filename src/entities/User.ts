@@ -11,7 +11,7 @@ import {
 } from "typeorm";
 import Tag from "./Tag";
 import Hostel from "./Hostel";
-import Announcement from "./Announcement";
+import Item from "./Item";
 
 @Entity("User")
 @ObjectType("User", { description: "User Entity" })
@@ -52,15 +52,12 @@ class User extends BaseEntity {
   @Field({ nullable: true, description: "User's Hostel amd its details" })
   hostel: Hostel;
 
-  @OneToMany((_type) => Announcement, (announcements) => announcements.user, {
+  @OneToMany((_type) => Item, (items) => items.user, { nullable: true })
+  @Field((_type) => [Item], {
     nullable: true,
+    description: "User's Lost and Found Items",
   })
-  @Field((_type) => [Announcement], {
-    description:
-      "Announcements Created by User, can only be created if its a Super User",
-  })
-  announcements: Announcement[];
-
+  items?: Item[];
   // @ManyToMany(_type => event, event => event.liked_by)
   // @Field(_type => [event])
   // events_liked : event[]

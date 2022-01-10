@@ -7,7 +7,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import Announcement from "./Announcement";
 import User from "./User";
 
 @Entity("Hostel")
@@ -28,15 +27,6 @@ class Hostel extends BaseEntity {
     description: "Residents of The Hostel",
   })
   users: User[];
-
-  @OneToMany((_type) => Announcement, (announcements) => announcements.hostel, {
-    nullable: true,
-  })
-  @Field((_type) => [Announcement], {
-    description:
-      "Hostel's Announcement, they will be displayed on the notice board",
-  })
-  announcements: Announcement[];
 }
 
 export default Hostel;

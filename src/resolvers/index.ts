@@ -1,6 +1,6 @@
 import UsersResolver from "./Users";
 import TagsResolver from "./Tags";
 import HostelResolver from "./Hostel";
-import AnnouncementResolver from "./Announcement";
+import LostAndFoundResolver from "./LostAndFound";
 
-export default [UsersResolver, TagsResolver, HostelResolver, AnnouncementResolver] as const;
+export default [UsersResolver, TagsResolver, HostelResolver, LostAndFoundResolver] as const;
