@@ -35,7 +35,7 @@ import MyContext from "../utils/context";
 import bcrypt from "bcryptjs";
 import { In } from "typeorm";
 import Hostel from "../entities/Hostel";
-
+import Item from "../entities/Item";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -298,6 +298,16 @@ class UsersResolver {
     try {
       const user = await User.findOne({ where: { id }, relations: ["hostel"] });
       return user?.hostel;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [Item], { nullable: true })
+  async items(@Root() { id }: User) {
+    try {
+      const user = await User.findOne({ where: { id }, relations: ["items"] });
+      return user?.items;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
