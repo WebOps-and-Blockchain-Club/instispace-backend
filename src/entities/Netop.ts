@@ -19,9 +19,11 @@ import Report from "./Common/Report";
 @ObjectType("Netop", { description: "networking and opportunity" })
 class Netop extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
+  @Field()
   id: string;
 
   @CreateDateColumn({ type: "timestamptz" })
+  @Field()
   createdAt: Date;
 
   @Column()
@@ -69,6 +71,7 @@ class Netop extends BaseEntity {
   tags: Tag[];
 
   @ManyToOne(() => User, (user) => user.networkingAndOpportunities)
+  @Field()
   createdBy: User;
 
   @ManyToMany(() => User, (user) => user.likedNetop, { nullable: true })
