@@ -9,9 +9,13 @@ import {
   ManyToOne,
   OneToMany,
 } from "typeorm";
+import Netop from "./Netop";
+import Comment from "./Common/Comment";
 import Tag from "./Tag";
 import Hostel from "./Hostel";
 import Item from "./Item";
+import Announcement from "./Announcement";
+import Report from "./Common/Report";
 
 @Entity("User")
 @ObjectType("User", { description: "User Entity" })
@@ -35,6 +39,27 @@ class User extends BaseEntity {
   @Field(() => UserRole, { description: "User's role" })
   role: UserRole;
 
+  // networking and opportunity
+
+  @OneToMany(() => Netop, (netop) => netop.createdBy)
+  networkingAndOpportunities: Netop[];
+
+  @ManyToMany(() => Netop, (netop) => netop.likedBy)
+  likedNetop: Netop[];
+
+  @OneToMany(() => Netop, (netop) => netop.staredBy)
+  staredNetop: Netop[];
+
+  @OneToMany(() => Comment, (comment) => comment.createdBy)
+  comments: Comment[];
+
+  @OneToMany(() => Report, (report) => report.createdBy)
+  reports: Report[];
+
+  @Column({ nullable: true })
+  @Field({ nullable: true, description: "LDAP User's Phone number" })
+  mobile: string;
+
   @Column({ type: "boolean" })
   @Field((_type) => Boolean, {
     description: "This Field determines if User is a new User or not!",
@@ -46,11 +71,11 @@ class User extends BaseEntity {
     nullable: true,
     description: "User's Interest, collection of Tags",
   })
-  interest: Tag[];
+  interest?: Tag[];
 
   @ManyToOne((_type) => Hostel, (hostel) => hostel.users, { nullable: true })
   @Field({ nullable: true, description: "User's Hostel amd its details" })
-  hostel: Hostel;
+  hostel?: Hostel;
 
   @OneToMany((_type) => Item, (items) => items.user, { nullable: true })
   @Field((_type) => [Item], {
@@ -58,6 +83,14 @@ class User extends BaseEntity {
     description: "User's Lost and Found Items",
   })
   items?: Item[];
+  
+  @Field((_type) => [Announcement], {
+    nullable: true,
+    description:
+      "Announcements Created by User, can only be created if its a Super User",
+  })
+  announcements?: Announcement[];
+
   // @ManyToMany(_type => event, event => event.liked_by)
   // @Field(_type => [event])
   // events_liked : event[]
