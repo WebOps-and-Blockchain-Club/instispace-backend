@@ -33,7 +33,7 @@ import Tag from "../entities/Tag";
 import { LoginOutput } from "../types/objects/users";
 import MyContext from "../utils/context";
 import bcrypt from "bcryptjs";
-import { In } from "typeorm";
+import { In, Like } from "typeorm";
 import Hostel from "../entities/Hostel";
 import Item from "../entities/Item";
 
@@ -241,6 +241,25 @@ class UsersResolver {
     }
   }
 
+  @Query(() => [User], { nullable: true })
+  @Authorized()
+  async searchUser(@Arg("search") search: string) {
+    let users: User[] = [];
+    await Promise.all(
+      ["roll", "name"].map(async (field: string) => {
+        const filter = { [field]: Like(`%${search}%`) };
+        const userF = await User.find({ where: filter });
+        userF.forEach((user) => {
+          users.push(user);
+        });
+      })
+    );
+
+    const userStr = users.map((obj) => JSON.stringify(obj));
+    const uniqueUserStr = new Set(userStr);
+    return Array.from(uniqueUserStr).map((str) => JSON.parse(str));
+  }
+
   @Mutation(() => Boolean, {
     description:
       "Mutation to Update/Add User's name, interest, password, Restrictions : {User}",
@@ -251,25 +270,25 @@ class UsersResolver {
     @Arg("UserInput") userInput: UserInput
   ) {
     try {
-      user.name = userInput.name;
+      //finding the hostel by name
       const hostel = await Hostel.findOne({
         where: { name: userInput.hostel },
         relations: ["users"],
       });
-      if (!hostel) throw new Error("invalid hostel name");
-      if (hostel.users.includes(user) === false) hostel.users.push(user);
-      await hostel.save();
+      if (!hostel) throw new Error("Invalid Hostel");
+
+      //updating user
+      user.name = userInput.name;
       user.hostel = hostel;
+      user.mobile = userInput.mobile;
       if (user.isNewUser === true) user.isNewUser = false;
       let tags: Tag[] = [];
       for (let i = 0; i < userInput.interest.length; i++) {
         const tag = await Tag.findOne({
-          where: { title: userInput.interest[i] },
+          where: { id: userInput.interest[i] },
           relations: ["users"],
         });
         if (!tag) throw new Error("No Such Tag");
-        tag.users.push(user);
-        await tag.save();
         tags.push(tag);
       }
       user.interest = tags;
