@@ -23,6 +23,7 @@ import getNetopOutput from "../types/objects/netop";
 import { UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
+import User from "../entities/User";
 
 @Resolver(Netop)
 class NetopResolver {
@@ -350,11 +351,6 @@ class NetopResolver {
     }
   }
 
-  @Query(() => [Report], { nullable: true })
-  async getReports() {
-    return await Report.find({});
-  }
-
   @Query(() => Boolean, {
     description: "check if network and opportunity is liked by current user",
   })
@@ -398,6 +394,12 @@ class NetopResolver {
   async isStared(@Root() { id }: Netop, @Ctx() { user }: MyContext) {
     const netop = await Netop.findOne(id, { relations: ["staredBy"] });
     return netop?.staredBy?.filter((u) => u.id === user.id).length;
+  }
+
+  @FieldResolver(() => User)
+  async createdBy(@Root() { id }: Netop) {
+    const netop = await Netop.findOne(id, { relations: ["createdBy"] });
+    return netop?.createdBy;
   }
 }
 

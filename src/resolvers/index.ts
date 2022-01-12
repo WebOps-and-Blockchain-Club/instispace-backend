@@ -3,6 +3,8 @@ import TagsResolver from "./Tags";
 import HostelResolver from "./Hostel";
 import AnnouncementResolver from "./Announcement";
 import NetopResolver from "./Netop";
+import CommentResolver from "./Comment";
+import ReportResolver from "./Report";
 
 export default [
   UsersResolver,
@@ -10,4 +12,6 @@ export default [
   HostelResolver,
   AnnouncementResolver,
   NetopResolver,
+  CommentResolver,
+  ReportResolver,
 ] as const;

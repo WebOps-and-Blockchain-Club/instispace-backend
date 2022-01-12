@@ -71,7 +71,6 @@ class Netop extends BaseEntity {
   tags: Tag[];
 
   @ManyToOne(() => User, (user) => user.networkingAndOpportunities)
-  @Field()
   createdBy: User;
 
   @ManyToMany(() => User, (user) => user.likedNetop, { nullable: true })
