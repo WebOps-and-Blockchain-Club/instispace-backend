@@ -66,7 +66,7 @@ createConnection({
   url: process.env.DATABASE_URL,
   entities,
   synchronize: true,
-  // ssl: true,
+  ssl: process.env.IS_SSL === "true" ? true : false,
 })
   .then(() => {
     console.log("Database connected");
