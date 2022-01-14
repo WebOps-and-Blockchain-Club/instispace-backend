@@ -10,10 +10,12 @@ import {
   Root,
 } from "type-graphql";
 import Item from "../entities/Item";
-import { Category } from "../utils";
+import { Category, miliSecPerMonth } from "../utils/index";
 import User from "../entities/User";
 import MyContext from "src/utils/context";
 import { In } from "typeorm";
+import { GraphQLUpload, Upload } from "graphql-upload";
+import addAttachments from "../utils/uploads"
 
 @Resolver((_type) => Item)
 class LostAndFoundResolver {
@@ -21,9 +23,17 @@ class LostAndFoundResolver {
   @Authorized()
   async createItem(
     @Ctx() { user }: MyContext,
-    @Arg("ItemInput") itemInput: ItemInput
+    @Arg("ItemInput") itemInput: ItemInput,
+    @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload
   ) {
     try {
+      //stroring image from "image" to itemInput.image 
+      if (image)
+        itemInput.image = (await addAttachments([image], true)).join(
+          " AND "
+        );
+
+      //creating the item 
       const item = new Item();
       item.name = itemInput.name;
       item.description = itemInput.description;
@@ -42,10 +52,14 @@ class LostAndFoundResolver {
   async getItems(@Arg("ItemsFilter", () => [Category]) categories: [Category]) {
     try {
       let items = await Item.find({
-        where: { category: In(categories) },
+        where: { category: In(categories), isResolved: false },
         order: { createdAt: "DESC" },
       });
-      let filteredItems = items?.filter((n) => n.isResolved === false);
+      const filteredItems = items.filter(
+        (item) =>
+          new Date(Date.now()).getTime() - new Date(item.createdAt).getTime() <
+          miliSecPerMonth
+      );
       return filteredItems;
     } catch (e) {
       throw new Error(`message : ${e}`);
@@ -54,10 +68,10 @@ class LostAndFoundResolver {
 
   @Mutation(() => Boolean)
   @Authorized()
-  async resolveItems(@Ctx() { user }: MyContext, @Arg("ItemId") id: string) {
+  async resolveItem(@Ctx() { user }: MyContext, @Arg("ItemId") id: string) {
     try {
       const item = await Item.findOne({ where: { id }, relations: ["user"] });
-      if(item?.user.id !== user.id) throw new Error("Invalid User");
+      if (item?.user.id !== user.id) throw new Error("Invalid User");
       const { affected } = await Item.update(id, { isResolved: true });
       return affected === 1;
     } catch (e) {
@@ -69,9 +83,17 @@ class LostAndFoundResolver {
   @Authorized()
   async editItems(
     @Arg("ItemId") id: string,
-    @Arg("EditItemInput") editItemInput: EditItemInput
+    @Arg("EditItemInput") editItemInput: EditItemInput,
+    @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload
   ) {
     try {
+      //stroring the image 
+      if (image)
+        editItemInput.image = (await addAttachments([image], true)).join(
+          " AND "
+        );
+
+      //updating the item
       const { affected } = await Item.update(id, {
         ...editItemInput,
       });

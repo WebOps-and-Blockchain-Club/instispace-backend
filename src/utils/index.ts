@@ -37,6 +37,9 @@ export function autoGenPass(length: number) {
   return result;
 }
 
+//miliseconds per month = 2629800000
+export const miliSecPerMonth = 2629800000;
+
 export const usersDevList = [
   {
     roll: "MM19B001",
