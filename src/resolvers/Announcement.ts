@@ -179,7 +179,7 @@ class AnnouncementResolver {
       const announcement = await Announcement.findOne({
         where: { id },
         relations: ["user"],
-      });
+      }); 
       return announcement?.user;
     } catch (e) {
       throw new Error(`message : ${e}`);

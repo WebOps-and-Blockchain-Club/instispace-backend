@@ -13,6 +13,7 @@ import Netop from "./Netop";
 import Comment from "./Common/Comment";
 import Tag from "./Tag";
 import Hostel from "./Hostel";
+import Item from "./Item";
 import Announcement from "./Announcement";
 import Report from "./Common/Report";
 
@@ -76,9 +77,13 @@ class User extends BaseEntity {
   @Field({ nullable: true, description: "User's Hostel amd its details" })
   hostel?: Hostel;
 
-  @OneToMany((_type) => Announcement, (announcements) => announcements.user, {
+  @OneToMany((_type) => Item, (items) => items.user, { nullable: true })
+  @Field((_type) => [Item], {
     nullable: true,
+    description: "User's Lost and Found Items",
   })
+  items?: Item[];
+  
   @Field((_type) => [Announcement], {
     nullable: true,
     description:
