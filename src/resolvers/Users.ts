@@ -35,7 +35,7 @@ import MyContext from "../utils/context";
 import bcrypt from "bcryptjs";
 import { In, Like } from "typeorm";
 import Hostel from "../entities/Hostel";
-import Announcement from "../entities/Announcement";
+import Item from "../entities/Item";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -322,14 +322,11 @@ class UsersResolver {
     }
   }
 
-  @FieldResolver(() => [Announcement], { nullable: true })
-  async announcements(@Root() { id }: User) {
+  @FieldResolver(() => [Item], { nullable: true })
+  async items(@Root() { id }: User) {
     try {
-      const user = await User.findOne({
-        where: { id },
-        relations: ["announcements"],
-      });
-      return user?.announcements;
+      const user = await User.findOne({ where: { id }, relations: ["items"] });
+      return user?.items;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
