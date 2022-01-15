@@ -15,29 +15,30 @@ import User from "../entities/User";
 import MyContext from "src/utils/context";
 import { In } from "typeorm";
 import { GraphQLUpload, Upload } from "graphql-upload";
-import addAttachments from "../utils/uploads"
+import addAttachments from "../utils/uploads";
 
 @Resolver((_type) => Item)
 class LostAndFoundResolver {
-  @Mutation((_type) => Boolean)
+  @Mutation((_type) => Boolean, {
+    description:
+      "Mutation to create the Item, anyone who is authorised and have either Lost an Item or have Found it can access",
+  })
   @Authorized()
   async createItem(
     @Ctx() { user }: MyContext,
     @Arg("ItemInput") itemInput: ItemInput,
-    @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload
+    @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
   ) {
     try {
-      //stroring image from "image" to itemInput.image 
-      if (image)
-        itemInput.image = (await addAttachments([image], true)).join(
-          " AND "
-        );
+      //stroring image from "image" to itemInput.image
+      if (images)
+        itemInput.images = (await addAttachments(images, true)).join(" AND ");
 
-      //creating the item 
+      //creating the item
       const item = new Item();
       item.name = itemInput.name;
       item.description = itemInput.description;
-      item.image = itemInput.image;
+      item.images = itemInput.images;
       item.category = itemInput.category;
       item.user = user;
       await item.save();
@@ -47,7 +48,10 @@ class LostAndFoundResolver {
     }
   }
 
-  @Query(() => [Item])
+  @Query(() => [Item], {
+    description:
+      "Query to fetch all the unresolved items, filter by time of creation, Restrictions : {anyone who is authorised}",
+  })
   @Authorized()
   async getItems(@Arg("ItemsFilter", () => [Category]) categories: [Category]) {
     try {
@@ -66,7 +70,10 @@ class LostAndFoundResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description:
+      "Mutation to resolve the item, User who finds his lost entity will update, Restriction : {anyone who is authorised}",
+  })
   @Authorized()
   async resolveItem(@Ctx() { user }: MyContext, @Arg("ItemId") id: string) {
     try {
@@ -79,17 +86,20 @@ class LostAndFoundResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description:
+      "Mutation : Mutation to edit the item, accessible to user who created that item",
+  })
   @Authorized()
   async editItems(
     @Arg("ItemId") id: string,
     @Arg("EditItemInput") editItemInput: EditItemInput,
-    @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload
+    @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
   ) {
     try {
-      //stroring the image 
-      if (image)
-        editItemInput.image = (await addAttachments([image], true)).join(
+      //stroring the image
+      if (images)
+        editItemInput.images = (await addAttachments([images], true)).join(
           " AND "
         );
 

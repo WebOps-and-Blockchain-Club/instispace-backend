@@ -10,7 +10,7 @@ class ItemInput {
   description: string;
 
   @Field({ description: "Item's visual description", nullable: true })
-  image?: string;
+  images?: string;
 
   @Field({ description: "Item's Category can be either Lost or Found" })
   category: Category;
@@ -25,6 +25,6 @@ class EditItemInput {
   description?: string;
 
   @Field({ description: "Item's visual description", nullable: true })
-  image?: string;
+  images?: string;
 }
 export { ItemInput, EditItemInput };
