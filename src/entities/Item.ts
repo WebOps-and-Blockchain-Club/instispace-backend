@@ -27,7 +27,7 @@ class Item extends BaseEntity {
   @Field({ description: "Name of the Lost/Found Item" })
   name: string;
 
-  @Column({ unique: true })
+  @Column()
   @Field({ description: "Item's description" })
   description: string;
 
