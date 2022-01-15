@@ -32,8 +32,8 @@ class Item extends BaseEntity {
   description: string;
 
   @Column({ nullable: true })
-  @Field({ description: "Item's Image", nullable: true })
-  image?: string;
+  @Field({ description: "Item's Images", nullable: true })
+  images?: string;
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date;
