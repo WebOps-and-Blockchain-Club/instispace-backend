@@ -20,6 +20,7 @@
     "jsonwebtoken": "^8.5.1",
     "ldapjs-client": "^0.1.1",
     "pg": "^8.7.1",
+    "subscriptions-transport-ws": "^0.11.0",
     "ts-node": "^10.4.0",
     "type-graphql": "^1.1.1",
     "typeorm": "^0.2.41",
