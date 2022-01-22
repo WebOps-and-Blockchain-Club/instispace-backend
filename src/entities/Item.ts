@@ -31,7 +31,7 @@ class Item extends BaseEntity {
   @Field({ description: "Item's Location" })
   location: string;
 
-  @Column({type : "timestamptz" })
+  @Column({ type: "timestamptz" })
   @Field({ description: "Time at which item is lost or found" })
   time: Date;
 
