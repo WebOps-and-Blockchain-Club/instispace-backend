@@ -30,15 +30,18 @@ class LostAndFoundResolver {
     @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
   ) {
     try {
-      //stroring image from "image" to itemInput.image
-      if (images)
-        itemInput.images = (await addAttachments(images, true)).join(" AND ");
-
       //creating the item
       const item = new Item();
       item.name = itemInput.name;
-      item.description = itemInput.description;
-      item.images = itemInput.images;
+      item.time = new Date(itemInput.time);
+      item.location = itemInput.location;
+
+      //stroring image from "image" to itemInput.image and added it to item.image
+      if (images) {
+        itemInput.images = (await addAttachments(images, true)).join(" AND ");
+        item.images = itemInput.images;
+      }
+
       item.category = itemInput.category;
       item.user = user;
       await item.save();
