@@ -12,6 +12,12 @@ class ItemInput {
   @Field({ description: "Item's visual description", nullable: true })
   images?: string;
 
+  @Field({ description: "Item's Location" })
+  location: string;
+
+  @Field({ description: "Time at which the item is lost or found"})
+  time: string;
+
   @Field({ description: "Item's Category can be either Lost or Found" })
   category: Category;
 }
