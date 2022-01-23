@@ -28,8 +28,12 @@ class Item extends BaseEntity {
   name: string;
 
   @Column()
-  @Field({ description: "Item's description" })
-  description: string;
+  @Field({ description: "Item's Location" })
+  location: string;
+
+  @Column({ type: "timestamptz" })
+  @Field({ description: "Time at which item is lost or found" })
+  time: Date;
 
   @Column({ nullable: true })
   @Field({ description: "Item's Images", nullable: true })
