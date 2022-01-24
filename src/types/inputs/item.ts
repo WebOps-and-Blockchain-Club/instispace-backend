@@ -6,16 +6,13 @@ class ItemInput {
   @Field({ description: "Item's Title" })
   name: string;
 
-  @Field({ description: "Item's Descriptions" })
-  description: string;
-
   @Field({ description: "Item's visual description", nullable: true })
   images?: string;
 
   @Field({ description: "Item's Location" })
   location: string;
 
-  @Field({ description: "Time at which the item is lost or found"})
+  @Field({ description: "Time at which the item is lost or found" })
   time: string;
 
   @Field({ description: "Item's Category can be either Lost or Found" })
@@ -27,8 +24,14 @@ class EditItemInput {
   @Field({ description: "Item's Title", nullable: true })
   name?: string;
 
-  @Field({ description: "Item's Descriptions", nullable: true })
-  description?: string;
+  @Field({ description: "Item's Location", nullable: true })
+  location?: string;
+
+  @Field({
+    description: "Time at which the item is lost or found",
+    nullable: true,
+  })
+  time?: string;
 
   @Field({ description: "Item's visual description", nullable: true })
   images?: string;
