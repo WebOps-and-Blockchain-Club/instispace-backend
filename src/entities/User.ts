@@ -83,7 +83,10 @@ class User extends BaseEntity {
     description: "User's Lost and Found Items",
   })
   items?: Item[];
-  
+
+  @OneToMany((_type) => Announcement, (announcements) => announcements.user, {
+    nullable: true,
+  })
   @Field((_type) => [Announcement], {
     nullable: true,
     description:
@@ -91,6 +94,7 @@ class User extends BaseEntity {
   })
   announcements?: Announcement[];
 
+  
   // @ManyToMany(_type => event, event => event.liked_by)
   // @Field(_type => [event])
   // events_liked : event[]
