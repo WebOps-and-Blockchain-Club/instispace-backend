@@ -85,7 +85,8 @@ class AnnouncementResolver {
 
       const d = new Date();
       let announcements = hostel?.announcements?.filter(
-        (n) => new Date(n.endTime).getTime() > d.getTime()
+        (n) =>
+          new Date(n.endTime).getTime() > d.getTime() && n.isHidden === false
       );
       return announcements;
     } catch (e) {
@@ -152,7 +153,7 @@ class AnnouncementResolver {
           user.role === UserRole.ADMIN)
       ) {
         const { affected } = await Announcement.update(id, { isHidden: true });
-        return affected === 0;
+        return affected === 1;
       }
       throw new Error("Unauthorized");
     } catch (e) {
@@ -179,7 +180,7 @@ class AnnouncementResolver {
       const announcement = await Announcement.findOne({
         where: { id },
         relations: ["user"],
-      }); 
+      });
       return announcement?.user;
     } catch (e) {
       throw new Error(`message : ${e}`);
