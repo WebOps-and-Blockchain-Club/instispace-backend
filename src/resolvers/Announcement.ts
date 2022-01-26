@@ -65,7 +65,7 @@ class AnnouncementResolver {
   @Authorized([UserRole.ADMIN, UserRole.HAS])
   async getAllAnnouncements() {
     try {
-      return await Announcement.find();
+      return await Announcement.find({ where: { isHidden: false } });
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
