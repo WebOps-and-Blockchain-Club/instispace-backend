@@ -7,6 +7,7 @@ import {
   Root,
   Subscription,
 } from "type-graphql";
+import Netop from "../entities/Netop";
 
 class sampleRes {
   private autoIncrement = 0;
@@ -26,6 +27,11 @@ class sampleRes {
     @Root() { id, message }: NotificationPayload
   ): Notification {
     return { id, message, date: new Date() };
+  }
+
+  @Subscription({ topics: "tech" })
+  createNetopSubsTech(@Root() netop: Netop): Netop {
+    return netop;
   }
 }
 
