@@ -4,9 +4,12 @@ import {
   Ctx,
   FieldResolver,
   Mutation,
+  PubSub,
+  PubSubEngine,
   Query,
   Resolver,
   Root,
+  Subscription,
 } from "type-graphql";
 
 import MyContext from "../utils/context";
@@ -33,12 +36,13 @@ class NetopResolver {
   })
   @Authorized()
   async createNetop(
+    @PubSub() pubSub: PubSubEngine,
     @Arg("NewEventData") createNetopsInput: createNetopsInput,
     @Ctx() { user }: MyContext,
     @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload,
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
-  ) {
+  ): Promise<boolean> {
     try {
       var tags: Tag[] = [];
       await Promise.all(
@@ -69,6 +73,12 @@ class NetopResolver {
       });
 
       await netop.save();
+
+      const payload = netop;
+      tags.forEach(async (t) => {
+        await pubSub.publish(t.title, payload);
+      });
+
       return !!netop;
     } catch (e) {
       console.log(e.message);
@@ -400,6 +410,13 @@ class NetopResolver {
   async createdBy(@Root() { id }: Netop) {
     const netop = await Netop.findOne(id, { relations: ["createdBy"] });
     return netop?.createdBy;
+  }
+
+  @Subscription({ topics: ({ args }) => args.tag }) // here you have to give tag names
+  createNetopS(@Root() netop: Netop, @Arg("tag") tag: string): Netop {
+    //TODO:  we can add and check context here but not needed I think
+    console.log(tag);
+    return netop;
   }
 }
 
