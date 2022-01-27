@@ -6,7 +6,6 @@ import AnnouncementResolver from "./Announcement";
 import NetopResolver from "./Netop";
 import CommentResolver from "./Comment";
 import ReportResolver from "./Report";
-import sampleRes from "./Subs";
 
 export default [
   UsersResolver,
@@ -17,5 +16,4 @@ export default [
   CommentResolver,
   ReportResolver,
   LostAndFoundResolver,
-  sampleRes,
 ] as const;
