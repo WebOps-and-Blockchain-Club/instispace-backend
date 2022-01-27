@@ -7,6 +7,7 @@ import Item from "./Item";
 import Announcement from "./Announcement";
 import Tag from "./Tag";
 import Report from "./Common/Report";
+import Query from "./Query";
 
 export default [
   User,
@@ -17,5 +18,6 @@ export default [
   Netop,
   Comment,
   Report,
-  Item
+  Item,
+  Query,
 ];

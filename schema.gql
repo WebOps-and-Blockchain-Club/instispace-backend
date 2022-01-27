@@ -251,7 +251,6 @@ type Mutation {
 
   """Mutation to login, Restrictions : {none}"""
   login(LoginInputs: LoginInput!): LoginOutput!
-  pubSubMutation(message: String): Boolean!
   removeNetop(NetopId: String!): Boolean!
 
   """report network and opportunity, Restrictions:{any authorized user}"""
@@ -319,12 +318,6 @@ input NewPass {
   newPassword: String!
 }
 
-type Notification {
-  date: DateTime!
-  id: ID!
-  message: String
-}
-
 type Query {
   """
   Query to fetch announcements of each hostel, Restrictions : { Admin, Hostel Affair Secretory} 
@@ -385,8 +378,6 @@ type Report {
 type Subscription {
   createAnnoucementSubs(hostel: String!): Announcement!
   createNetopS(tag: String!): Netop!
-  createNetopSubsTech: Netop!
-  normalSubscription: Notification!
 }
 
 """Tag Entity, Users will follow these tags"""
