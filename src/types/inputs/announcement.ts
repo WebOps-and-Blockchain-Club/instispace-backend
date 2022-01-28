@@ -11,7 +11,6 @@ class CreateAnnouncementInput {
   @Field({ description: "Announcement's Endtime" })
   endTime: string;
 
-  @Field({ nullable: true, description: "Announcement's Images" })
   images?: string;
 
   @Field(() => [String], { description: "Hostels' Ids" })
@@ -29,7 +28,6 @@ class EditAnnouncementInput {
   @Field({ nullable: true, description: "Announcement's Endtime" })
   endTime?: string;
 
-  @Field({ nullable: true, description: "Announcement's Images" })
   images?: string;
 
   @Field(() => [String], { nullable: true, description: "Hostels' Ids" })
