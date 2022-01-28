@@ -31,7 +31,7 @@ class AnnouncementResolver {
     @Ctx() { user }: MyContext,
     @Arg("AnnouncementInput")
     announcementInput: CreateAnnouncementInput,
-    @Arg("Images", () => [GraphQLUpload], { nullable: true }) image?: Upload[]
+    @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
   ) {
     try {
       let hostels: Hostel[] = [];
@@ -47,8 +47,12 @@ class AnnouncementResolver {
       announcement.description = announcementInput.description;
       announcement.user = user;
       announcement.endTime = new Date(announcementInput.endTime);
-      if (image)
-        announcement.image = (await addAttachments(image, true)).join(" AND ");
+      if (images) {
+        announcementInput.images = (await addAttachments(images, true)).join(
+          " AND "
+        );
+        announcement.images = announcementInput.images;
+      }
       announcement.hostels = hostels;
 
       await announcement.save();
@@ -102,9 +106,9 @@ class AnnouncementResolver {
   async editAnnouncement(
     @Ctx() { user }: MyContext,
     @Arg("AnnouncementId") id: string,
-    @Arg("UpdateAnnouncementInput", { nullable: true })
-    announcementInput?: EditAnnouncementInput,
-    @Arg("Images", () => [GraphQLUpload], { nullable: true }) image?: Upload[]
+    @Arg("UpdateAnnouncementInput")
+    announcementInput: EditAnnouncementInput,
+    @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
   ) {
     try {
       const announcement = await Announcement.findOne({
@@ -117,8 +121,8 @@ class AnnouncementResolver {
           user.role === UserRole.HAS ||
           user.role === UserRole.ADMIN)
       ) {
-        if (image)
-          announcement.image = (await addAttachments(image, true)).join(
+        if (images)
+          announcementInput.images = (await addAttachments(images, true)).join(
             " AND "
           );
         const { affected } = await Announcement.update(id, {
