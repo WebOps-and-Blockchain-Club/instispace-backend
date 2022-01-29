@@ -8,7 +8,7 @@ import {
   JoinTable,
 } from "typeorm";
 import Netop from "./Netop";
-import Query from "./Query";
+import Query from "./MyQuery";
 import User from "./User";
 
 @Entity("Tag")
@@ -44,7 +44,7 @@ class Tag extends BaseEntity {
     nullable: true,
     cascade: true,
   })
-  queries: Query[];
+  Querys: Query[];
 }
 
 export default Tag;

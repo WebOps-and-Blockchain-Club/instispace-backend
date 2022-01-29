@@ -15,9 +15,9 @@ import Comment from "./Common/Comment";
 import Tag from "./Tag";
 import Report from "./Common/Report";
 
-@Entity("Query")
-@ObjectType("Query", { description: "queries" })
-class Query extends BaseEntity {
+@Entity("MyQuery")
+@ObjectType("MyQuery", { description: "querys" })
+class MyQuery extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   @Field()
   id: string;
@@ -55,16 +55,16 @@ class Query extends BaseEntity {
   @OneToMany(() => Report, (report) => report.query, { nullable: true })
   reports: Report[];
 
-  @ManyToMany((_type) => Tag, (tag) => tag.queries, { nullable: true })
+  @ManyToMany((_type) => Tag, (tag) => tag.Querys, { nullable: true })
   @JoinTable()
   tags: Tag[];
 
-  @ManyToOne(() => User, (user) => user.queries)
+  @ManyToOne(() => User, (user) => user.querys)
   createdBy: User;
 
-  @ManyToMany(() => User, (user) => user.likedQuery, { nullable: true })
+  @ManyToMany(() => User, (user) => user.likedMyQuery, { nullable: true })
   @JoinTable()
   likedBy: User[];
 }
 
-export default Query;
+export default MyQuery;
