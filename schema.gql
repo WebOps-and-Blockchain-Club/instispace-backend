@@ -40,6 +40,7 @@ type Comment {
   createdBy: User!
   id: String!
   netop: Netop!
+  query: MyQuery!
 }
 
 """Input For Create Account Mutation"""
@@ -412,6 +413,7 @@ type Report {
   description: String!
   id: String!
   netop: Netop!
+  query: MyQuery!
 }
 
 type Subscription {
