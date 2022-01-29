@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import Netop from "../Netop";
-import Query from "../Query";
+import Query from "../MyQuery";
 import User from "../User";
 
 @Entity("Comment")

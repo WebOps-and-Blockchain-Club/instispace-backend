@@ -29,10 +29,7 @@ class editNetopsInput {
   @Field()
   endTime: string;
 
-  @Field()
   photo?: string;
-
-  @Field()
   attachments?: string;
 }
 

@@ -205,8 +205,8 @@ type Mutation {
   """
   createAnnouncement(AnnouncementInput: CreateAnnouncementInput!, Images: [Upload!]): Boolean!
 
-  """comment on network and opportunity, Restrictions:{any authorized user}"""
-  createComment(NetopId: String!, content: String!): Boolean!
+  """comment on Query, Restrictions:{any authorized user}"""
+  createComment(MyQueryId: String!, content: String!): Boolean!
 
   """
   Mutation to create Hostels, Restrictions : {Admin, Hostel Secretory and Hostel Affair Secretory}
@@ -217,6 +217,9 @@ type Mutation {
   Mutation to create the Item, anyone who is authorised and have either Lost an Item or have Found it can access
   """
   createItem(Images: [Upload!], ItemInput: ItemInput!): Boolean!
+
+  """create Query, Restrictions:{any authorized user}"""
+  createMyQuery(Attachments: [Upload!], Image: Upload, createQuerysInput: createQuerysInput!): Boolean!
 
   """create network and opportunity, Restrictions:{any authorized user}"""
   createNetop(Attachments: [Upload!], Image: Upload, NewEventData: createNetopsInput!): Boolean!
@@ -233,6 +236,9 @@ type Mutation {
   """
   deleteAnnouncement(AnnouncementId: String!): Boolean!
 
+  """edit Query, Restrictions:{user who created}"""
+  deleteMyQuery(MyQueryId: String!): Boolean!
+
   """edit network and opportunity, Restrictions:{user who created}"""
   deleteNetop(NetopId: String!): Boolean!
 
@@ -246,12 +252,21 @@ type Mutation {
   """
   editItems(EditItemInput: EditItemInput!, Images: [Upload!], ItemId: String!): Boolean!
 
+  """edit Query, Restrictions:{user who created}"""
+  editMyQuery(Attachments: [Upload!], EditMyQuerysData: editQuerysInput!, Image: Upload, MyQueryId: String!): Boolean!
+
   """edit network and opportunity, Restrictions:{user who created}"""
   editNetop(Attachments: [Upload!], EditNetopsData: editNetopsInput!, Image: Upload, NetopId: String!, Tags: [String!]): Boolean!
 
   """Mutation to login, Restrictions : {none}"""
   login(LoginInputs: LoginInput!): LoginOutput!
+  removeMyQuery(MyQueryId: String!): Boolean!
   removeNetop(NetopId: String!): Boolean!
+
+  """
+  star or unstar (if it's previously star) Query, Restrictions:{any authorized user}
+  """
+  reportMyQuery(MyQueryId: String!, description: String!): Boolean!
 
   """report network and opportunity, Restrictions:{any authorized user}"""
   reportNetop(NetopId: String!, description: String!): Boolean!
@@ -262,9 +277,9 @@ type Mutation {
   resolveItem(ItemId: String!): Boolean!
 
   """
-  like or unlike (if it's previously liked) network and opportunity, Restrictions:{any authorized user}
+  like or unlike (if it's previously liked) Query, Restrictions:{any authorized user}
   """
-  toggleLike(NetopId: String!): Boolean!
+  toggleLike(MyQueryId: String!): Boolean!
 
   """
   star or unstar (if it's previously star) network and opportunity, Restrictions:{any authorized user}
@@ -285,6 +300,24 @@ type Mutation {
   Mutation to Update/Add User's name, interest, password, Restrictions : {User}
   """
   updateUser(UserInput: UserInput!): Boolean!
+}
+
+"""querys"""
+type MyQuery {
+  attachments: String
+
+  """get list of comments"""
+  comments: [Comment!]
+  content: String!
+  createdAt: DateTime!
+  createdBy: User!
+  id: String!
+  isHidden: Boolean!
+
+  """number of likes"""
+  likeCount: Float!
+  photo: String
+  title: String!
 }
 
 """networking and opportunity"""
@@ -342,6 +375,12 @@ type Query {
   """
   getMe: User!
 
+  """get an myQuery by id Query"""
+  getMyQuery(MyQueryId: String!): MyQuery!
+
+  """get a list of myQuerys by filer and order conditions"""
+  getMyQuerys(OrderByLikes: Boolean, skip: Float!, take: Float!): getQueryOutput!
+
   """get an netop by id network and opportunity"""
   getNetop(NetopId: String!): Netop!
 
@@ -363,8 +402,8 @@ type Query {
   """Query to fetch ldap Users, Restrictions : {anyone who is authorized}"""
   getUsers: [User!]!
 
-  """check if network and opportunity is liked by current user"""
-  isLiked(NetopId: String!): Boolean!
+  """check if Query is liked by current user"""
+  isLiked(MyQueryId: String!): Boolean!
   searchUser(search: String!): [User!]
 }
 
@@ -473,11 +512,20 @@ input createNetopsInput {
   title: String!
 }
 
+"""user"""
+input createQuerysInput {
+  content: String!
+  title: String!
+}
+
 input editNetopsInput {
-  attachments: String!
   content: String
   endTime: String!
-  photo: String!
+  title: String
+}
+
+input editQuerysInput {
+  content: String
   title: String
 }
 
@@ -488,5 +536,10 @@ input fileringConditions {
 
 type getNetopOutput {
   netopList: [Netop!]
+  total: Float!
+}
+
+type getQueryOutput {
+  queryList: [MyQuery!]
   total: Float!
 }

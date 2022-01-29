@@ -7,7 +7,7 @@ import Item from "./Item";
 import Announcement from "./Announcement";
 import Tag from "./Tag";
 import Report from "./Common/Report";
-import Query from "./Query";
+import MyQuery from "./MyQuery";
 
 export default [
   User,
@@ -19,5 +19,5 @@ export default [
   Comment,
   Report,
   Item,
-  Query,
+  MyQuery,
 ];
