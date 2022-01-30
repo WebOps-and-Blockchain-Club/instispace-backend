@@ -16,6 +16,7 @@ import Hostel from "./Hostel";
 import Item from "./Item";
 import Announcement from "./Announcement";
 import Report from "./Common/Report";
+import Complaint from "./Complaint";
 
 @Entity("User")
 @ObjectType("User", { description: "User Entity" })
@@ -94,7 +95,20 @@ class User extends BaseEntity {
   })
   announcements?: Announcement[];
 
-  
+  @OneToMany((_type) => Complaint, (complaints) => complaints.user, {
+    nullable: true,
+  })
+  @Field((_type) => Complaint, { nullable: true })
+  complaints?: Complaint[];
+
+  @ManyToMany(
+    (_type) => Complaint,
+    (complaintsUpvoted) => complaintsUpvoted.user,
+    { nullable: true }
+  )
+  @Field((_type) => Complaint, { nullable: true })
+  complaintsUpvoted?: Complaint[];
+
   // @ManyToMany(_type => event, event => event.liked_by)
   // @Field(_type => [event])
   // events_liked : event[]
