@@ -6,7 +6,6 @@ class ItemInput {
   @Field({ description: "Item's Title" })
   name: string;
 
-  @Field({ description: "Item's visual description", nullable: true })
   images?: string;
 
   @Field({ description: "Item's Location" })
@@ -33,7 +32,6 @@ class EditItemInput {
   })
   time?: string;
 
-  @Field({ description: "Item's visual description", nullable: true })
   images?: string;
 }
 export { ItemInput, EditItemInput };
