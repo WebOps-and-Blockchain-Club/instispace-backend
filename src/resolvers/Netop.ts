@@ -85,7 +85,7 @@ class NetopResolver {
     @Arg("EditNetopsData") editNetopsInput: editNetopsInput,
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext,
-    @Arg("Tags", () => [String], { nullable: true }) Tags?: string[],
+    @Arg("Tags", () => [String], { nullable: true }) tags?: string[],
     @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload,
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
@@ -96,18 +96,6 @@ class NetopResolver {
       });
 
       if (netop && user.id === netop?.createdBy.id) {
-        if (Tags) {
-          var tags: Tag[] = [];
-          await Promise.all(
-            Tags.map(async (id) => {
-              const tag = await Tag.findOne(id, { relations: ["Netops"] });
-              if (tag) {
-                tags = tags.concat([tag]);
-              }
-            })
-          );
-        }
-
         if (image)
           editNetopsInput.photo = (await addAttachments([image], true)).join(
             " AND "
@@ -117,10 +105,29 @@ class NetopResolver {
             await addAttachments([...attachments], false)
           ).join(" AND ");
 
-        const { affected } = await Netop.update(netopId, {
-          ...editNetopsInput,
-        });
-        return affected === 1;
+        if (tags) {
+          var tags2: Tag[] = [];
+          await Promise.all(
+            tags.map(async (id) => {
+              const tag = await Tag.findOne(id, { relations: ["Netops"] });
+              if (tag) {
+                tags2 = tags2.concat([tag]);
+                netop.tags.push(tag);
+                netop.save();
+              }
+            })
+          );
+          console.log(tags2, tags, netop.tags);
+          const { affected } = await Netop.update(netopId, {
+            ...editNetopsInput,
+          });
+          return affected === 1;
+        } else {
+          const { affected } = await Netop.update(netopId, {
+            ...editNetopsInput,
+          });
+          return affected === 1;
+        }
       } else {
         throw new Error("Unauthorized");
       }
