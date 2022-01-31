@@ -355,6 +355,8 @@ class UsersResolver {
       user!.hostel!.id
     );
     return { netops, announcements };
+  }
+
   @FieldResolver(() => [Item], { nullable: true })
   async complaints(@Root() { id }: User) {
     try {
