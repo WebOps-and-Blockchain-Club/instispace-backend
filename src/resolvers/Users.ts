@@ -30,12 +30,15 @@ import jwt from "jsonwebtoken";
 import UsersDev from "../entities/UsersDev";
 import User from "../entities/User";
 import Tag from "../entities/Tag";
-import { LoginOutput } from "../types/objects/users";
+import { homeOutput, LoginOutput } from "../types/objects/users";
 import MyContext from "../utils/context";
 import bcrypt from "bcryptjs";
 import { In, Like } from "typeorm";
 import Hostel from "../entities/Hostel";
 import Item from "../entities/Item";
+import NetopResolver from "./Netop";
+import { fileringConditions } from "src/types/inputs/netop";
+import Announcement from "./Announcement";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -330,6 +333,28 @@ class UsersResolver {
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
+  }
+
+  @FieldResolver(() => homeOutput, { nullable: true })
+  async getHome(@Root() { id }: User) {
+    const user = await User.findOne({
+      where: { id },
+      relations: ["interest", "hostel"],
+    });
+    const tagIds = user?.interest?.map((tag) => tag.id);
+    const myCon: MyContext = {
+      user: user!,
+    };
+    const netopObject = new NetopResolver();
+    const announcementObject = new Announcement();
+    const filters: fileringConditions = { tags: tagIds!, isStared: false };
+    const netops = await (
+      await netopObject.getNetops(myCon, 100, 0, filters)
+    ).netopList;
+    const announcements = await announcementObject.getAnnouncements(
+      user!.hostel!.id
+    );
+    return { netops, announcements };
   }
 
   @FieldResolver(() => [Item], { nullable: true })
