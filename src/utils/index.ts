@@ -7,12 +7,19 @@ export enum UserRole {
   MODERATOR = "MODERATOR",
   USER = "USER",
   HOSTEL_SEC = "HOSTEL_SEC",
+  SECRETORY = "SECRETORY",
   HAS = "HAS",
 }
 
 export enum Category {
   LOST = "LOST",
   FOUND = "FOUND",
+}
+
+export enum ComplaintCategory {
+  MESS_COMPLAINTS = "MESS_COMPLAINTS",
+  GENERAL_COMPLAINTS = "GENERAL_COMPLAINTS",
+  HOSTEL_COMPLAINTS = "HOSTEL_COMPLAINTS",
 }
 
 export const emailExpresion =

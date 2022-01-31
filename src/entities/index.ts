@@ -5,6 +5,7 @@ import UsersDev from "./UsersDev";
 import Hostel from "./Hostel";
 import Item from "./Item";
 import Announcement from "./Announcement";
+import Complaint from "./Complaint";
 import Tag from "./Tag";
 import Report from "./Common/Report";
 
@@ -17,5 +18,6 @@ export default [
   Netop,
   Comment,
   Report,
-  Item
+  Item,
+  Complaint,
 ];

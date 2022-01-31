@@ -355,6 +355,30 @@ class UsersResolver {
       user!.hostel!.id
     );
     return { netops, announcements };
+  @FieldResolver(() => [Item], { nullable: true })
+  async complaints(@Root() { id }: User) {
+    try {
+      const user = await User.findOne({
+        where: { id },
+        relations: ["complaints"],
+      });
+      return user?.complaints;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [Item], { nullable: true })
+  async complaintsUpvoted(@Root() { id }: User) {
+    try {
+      const user = await User.findOne({
+        where: { id },
+        relations: ["complaintsUpvoted"],
+      });
+      return user?.complaintsUpvoted;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
   }
 }
 
