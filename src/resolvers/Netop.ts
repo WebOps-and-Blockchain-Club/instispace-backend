@@ -106,21 +106,18 @@ class NetopResolver {
           ).join(" AND ");
 
         if (tags) {
-          var tags2: Tag[] = [];
+          netop.tags = [];
           await Promise.all(
             tags.map(async (id) => {
               const tag = await Tag.findOne(id, { relations: ["Netops"] });
               if (tag) {
-                tags2 = tags2.concat([tag]);
                 netop.tags.push(tag);
-                netop.save();
               }
             })
           );
+          await netop.save();
         }
         if (Object.keys(editNetopsInput).length) {
-          console.log(editNetopsInput, Object.keys(editNetopsInput).length);
-
           const { affected } = await Netop.update(netopId, {
             ...editNetopsInput,
           });
