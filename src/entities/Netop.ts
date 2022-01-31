@@ -56,6 +56,14 @@ class Netop extends BaseEntity {
   @Field(() => Boolean, { description: "is this netop is stared" })
   isStared: boolean;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  linkName: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  linkToAction: string;
+
   @OneToMany(() => Comment, (comment) => comment.netop, { nullable: true })
   comments: Comment[];
 
