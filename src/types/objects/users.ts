@@ -1,5 +1,7 @@
 import { Category, UserRole } from "../../utils";
 import { Field, ObjectType, registerEnumType } from "type-graphql";
+import Netop from "../../../src/entities/Netop";
+import Announcement from "../../../src/entities/Announcement";
 registerEnumType(UserRole, { name: "UserRole" });
 registerEnumType(Category, { name: "Category" });
 
@@ -17,4 +19,15 @@ class LoginOutput {
   token: string;
 }
 
-export { LoginOutput };
+@ObjectType()
+class homeOutput {
+  @Field(() => [Netop])
+  netops: Netop[];
+
+  @Field(() => [Announcement])
+  announcements: Announcement[];
+
+  //TODO: events
+}
+
+export { LoginOutput, homeOutput };
