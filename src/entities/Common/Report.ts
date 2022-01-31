@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import Netop from "../Netop";
+import Query from "../MyQuery";
 import User from "../User";
 
 @Entity("Report")
@@ -16,8 +17,11 @@ class Report extends BaseEntity {
   @Field()
   id: string;
 
-  @ManyToOne(() => Netop, (Netop) => Netop.reports)
+  @ManyToOne(() => Netop, (Netop) => Netop.reports, { nullable: true })
   netop: Netop;
+
+  @ManyToOne(() => Query, (Query) => Query.reports, { nullable: true })
+  query: Query;
 
   @ManyToOne(() => User, (User) => User.reports)
   createdBy: User;

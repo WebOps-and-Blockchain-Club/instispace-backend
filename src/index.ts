@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { ApolloServer } from "apollo-server-express";
-import { buildSchema } from "type-graphql";
+import { buildSchema,emitSchemaDefinitionFile } from 'type-graphql'
 import resolvers from "./resolvers";
 import dotenv from "dotenv";
 import { createConnection } from "typeorm";
@@ -10,6 +10,10 @@ import jwt from "jsonwebtoken";
 import authChecker from "./utils/authcheker";
 import express from "express";
 import cors from "cors";
+//subscrib
+import { createServer } from "http";
+import { execute, subscribe } from "graphql";
+import { SubscriptionServer } from "subscriptions-transport-ws";
 
 import { graphqlUploadExpress } from "graphql-upload";
 import { FILE_SIZE_LIMIT_MB } from "./utils/config";
@@ -17,7 +21,18 @@ import { FILE_SIZE_LIMIT_MB } from "./utils/config";
 dotenv.config();
 
 const main = async () => {
+  
+  const app = express();
+  const httpServer = createServer(app);
+
   const schema = await buildSchema({ resolvers, authChecker });
+
+  await emitSchemaDefinitionFile("./schema.gql", schema);
+
+  const subscriptionServer = SubscriptionServer.create(
+    { schema, execute, subscribe },
+    { server: httpServer, path: "/graphql" }
+  );
 
   const server = new ApolloServer({
     schema,
@@ -33,11 +48,20 @@ const main = async () => {
       }
       return { user: user };
     },
+    plugins: [
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              subscriptionServer.close();
+            },
+          };
+        },
+      },
+    ],
   });
 
   await server.start();
-
-  const app = express();
 
   app.use(
     graphqlUploadExpress({
@@ -56,7 +80,7 @@ const main = async () => {
 
   app.use(express.static("public"));
 
-  app.listen(process.env.PORT || 8000, () =>
+  httpServer.listen(process.env.PORT || 8000, () =>
     console.log("Server running: http://localhost:8000")
   );
 };

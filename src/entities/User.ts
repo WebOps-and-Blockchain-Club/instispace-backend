@@ -16,6 +16,7 @@ import Hostel from "./Hostel";
 import Item from "./Item";
 import Announcement from "./Announcement";
 import Report from "./Common/Report";
+import Query from "./MyQuery";
 import Complaint from "./Complaint";
 
 @Entity("User")
@@ -45,8 +46,14 @@ class User extends BaseEntity {
   @OneToMany(() => Netop, (netop) => netop.createdBy)
   networkingAndOpportunities: Netop[];
 
+  @OneToMany(() => Query, (query) => query.createdBy)
+  querys: Query[];
+
   @ManyToMany(() => Netop, (netop) => netop.likedBy)
   likedNetop: Netop[];
+
+  @ManyToMany(() => Query, (query) => query.likedBy)
+  likedMyQuery: Query[];
 
   @OneToMany(() => Netop, (netop) => netop.staredBy)
   staredNetop: Netop[];
@@ -85,9 +92,6 @@ class User extends BaseEntity {
   })
   items?: Item[];
 
-  @OneToMany((_type) => Announcement, (announcements) => announcements.user, {
-    nullable: true,
-  })
   @Field((_type) => [Announcement], {
     nullable: true,
     description:

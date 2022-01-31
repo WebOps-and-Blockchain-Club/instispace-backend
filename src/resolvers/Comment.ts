@@ -2,6 +2,7 @@ import User from "../entities/User";
 import { Authorized, FieldResolver, Resolver, Root } from "type-graphql";
 import Comment from "../entities/Common/Comment";
 import Netop from "../entities/Netop";
+import MyQuery from "../entities/MyQuery";
 
 @Resolver(Comment)
 class CommentResolver {
@@ -17,6 +18,13 @@ class CommentResolver {
   async netop(@Root() { id }: Comment) {
     const comment = await Comment.findOne(id, { relations: ["netop"] });
     return comment?.netop;
+  }
+
+  @FieldResolver(() => MyQuery)
+  @Authorized()
+  async query(@Root() { id }: Comment) {
+    const comment = await Comment.findOne(id, { relations: ["query"] });
+    return comment?.query;
   }
 }
 
