@@ -82,9 +82,9 @@ class NetopResolver {
   })
   @Authorized()
   async editNetop(
-    @Arg("EditNetopsData") editNetopsInput: editNetopsInput,
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext,
+    @Arg("EditNetopsData") editNetopsInput: editNetopsInput,
     @Arg("Tags", () => [String], { nullable: true }) tags?: string[],
     @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload,
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
@@ -117,16 +117,16 @@ class NetopResolver {
               }
             })
           );
-          console.log(tags2, tags, netop.tags);
+        }
+        if (Object.keys(editNetopsInput).length) {
+          console.log(editNetopsInput, Object.keys(editNetopsInput).length);
+
           const { affected } = await Netop.update(netopId, {
             ...editNetopsInput,
           });
           return affected === 1;
         } else {
-          const { affected } = await Netop.update(netopId, {
-            ...editNetopsInput,
-          });
-          return affected === 1;
+          return true;
         }
       } else {
         throw new Error("Unauthorized");
