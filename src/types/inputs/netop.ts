@@ -8,6 +8,12 @@ class createNetopsInput {
   @Field()
   content: string;
 
+  @Field({ nullable: true })
+  linkName: string;
+
+  @Field({ nullable: true })
+  linkToAction: string;
+
   @Field(() => [String])
   tags: string[];
 
@@ -28,6 +34,12 @@ class editNetopsInput {
 
   @Field({ nullable: true })
   endTime: string;
+
+  @Field({ nullable: true })
+  linkName: string;
+
+  @Field({ nullable: true })
+  linkToAction: string;
 
   photo?: string;
   attachments?: string;
