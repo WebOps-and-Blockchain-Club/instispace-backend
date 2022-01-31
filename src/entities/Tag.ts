@@ -8,6 +8,7 @@ import {
   JoinTable,
 } from "typeorm";
 import Netop from "./Netop";
+import Query from "./MyQuery";
 import User from "./User";
 
 @Entity("Tag")
@@ -33,8 +34,17 @@ class Tag extends BaseEntity {
   })
   users: [User];
 
-  @ManyToMany(() => Netop, (Netop) => Netop.tags, { cascade: true })
+  @ManyToMany(() => Netop, (Netop) => Netop.tags, {
+    cascade: true,
+    nullable: true,
+  })
   Netops: Netop[];
+
+  @ManyToMany(() => Query, (Query) => Query.tags, {
+    nullable: true,
+    cascade: true,
+  })
+  Querys: Query[];
 }
 
 export default Tag;

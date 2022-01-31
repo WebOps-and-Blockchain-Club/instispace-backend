@@ -2,6 +2,7 @@ import User from "../entities/User";
 import { Authorized, FieldResolver, Query, Resolver, Root } from "type-graphql";
 import Report from "../entities/Common/Report";
 import Netop from "../entities/Netop";
+import MyQuery from "../entities/MyQuery";
 
 @Resolver(Report)
 class ReportResolver {
@@ -22,6 +23,13 @@ class ReportResolver {
   async netop(@Root() { id }: Report) {
     const report = await Report.findOne(id, { relations: ["netop"] });
     return report?.netop;
+  }
+
+  @FieldResolver(() => MyQuery)
+  @Authorized()
+  async query(@Root() { id }: Report) {
+    const report = await Report.findOne(id, { relations: ["query"] });
+    return report?.query;
   }
 }
 

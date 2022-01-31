@@ -8,6 +8,7 @@ import Announcement from "./Announcement";
 import Complaint from "./Complaint";
 import Tag from "./Tag";
 import Report from "./Common/Report";
+import MyQuery from "./MyQuery";
 
 export default [
   User,
@@ -19,5 +20,6 @@ export default [
   Comment,
   Report,
   Item,
+  MyQuery,
   Complaint,
 ];
