@@ -275,19 +275,6 @@ class MyQueryResolver {
     }
   }
 
-  @Query(() => Boolean, {
-    description: "check if Query is liked by current user",
-  })
-  async isLiked(
-    @Arg("MyQueryId") myQueryId: string,
-    @Ctx() { user }: MyContext
-  ) {
-    const myQuery = await MyQuery.findOne(myQueryId, {
-      relations: ["likedBy"],
-    });
-    return myQuery?.likedBy.filter((u) => u.id === user.id).length;
-  }
-
   @FieldResolver(() => [Comment], {
     nullable: true,
     description: "get list of comments",
@@ -304,6 +291,16 @@ class MyQueryResolver {
     const myQuery = await MyQuery.findOne(id, { relations: ["likedBy"] });
     const like_count = myQuery?.likedBy.length;
     return like_count;
+  }
+
+  @FieldResolver(() => Boolean, {
+    description: "check if Query is liked by current user",
+  })
+  async isLiked(@Root() { id }: MyQuery, @Ctx() { user }: MyContext) {
+    const myQuery = await MyQuery.findOne(id, {
+      relations: ["likedBy"],
+    });
+    return myQuery?.likedBy.filter((u) => u.id === user.id).length;
   }
 
   @FieldResolver(() => User)
