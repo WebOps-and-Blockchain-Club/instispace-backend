@@ -42,8 +42,15 @@ class LostAndFoundResolver {
         item.images = itemInput.images;
       }
 
+      //storing the contact information
+      if (!itemInput.contact) {
+        itemInput.contact = user.mobile;
+      }
+
+      item.contact = itemInput.contact;
       item.category = itemInput.category;
       item.user = user;
+
       await item.save();
       return !!item;
     } catch (e) {
@@ -56,7 +63,11 @@ class LostAndFoundResolver {
       "Query to fetch all the unresolved items, filter by time of creation, Restrictions : {anyone who is authorised}",
   })
   @Authorized()
-  async getItems(@Arg("ItemsFilter", () => [Category]) categories: [Category]) {
+  async getItems(
+    @Arg("take") take: number,
+    @Arg("skip") skip: number,
+    @Arg("ItemsFilter", () => [Category]) categories: [Category]
+  ) {
     try {
       let items = await Item.find({
         where: { category: In(categories), isResolved: false },
@@ -67,7 +78,7 @@ class LostAndFoundResolver {
           new Date(Date.now()).getTime() - new Date(item.createdAt).getTime() <
           miliSecPerMonth
       );
-      return filteredItems;
+      return filteredItems.splice(skip, take);
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -96,6 +107,7 @@ class LostAndFoundResolver {
   @Authorized()
   async editItems(
     @Arg("ItemId") id: string,
+    @Ctx() { user }: MyContext,
     @Arg("EditItemInput") editItemInput: EditItemInput,
     @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
   ) {
@@ -105,6 +117,13 @@ class LostAndFoundResolver {
         editItemInput.images = (await addAttachments([images], true)).join(
           " AND "
         );
+
+      //storing the contact information
+      if (!editItemInput.contact) {
+        editItemInput.contact = user.mobile;
+      }
+
+      editItemInput.contact = editItemInput.contact;
 
       //updating the item
       const { affected } = await Item.update(id, {

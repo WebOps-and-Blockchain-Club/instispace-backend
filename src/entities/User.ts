@@ -92,6 +92,9 @@ class User extends BaseEntity {
   })
   items?: Item[];
 
+  @OneToMany((_type) => Announcement, (announcements) => announcements.user, {
+    nullable: true,
+  })
   @Field((_type) => [Announcement], {
     nullable: true,
     description:

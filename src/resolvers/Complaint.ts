@@ -132,6 +132,8 @@ class ComplaintResolver {
   })
   @Authorized()
   async getComplaints(
+    @Arg("take") take: number,
+    @Arg("skip") skip: number,
     @Arg("OrderByUpvotes", () => Boolean, { nullable: true })
     orderByUpvotes?: Boolean,
     @Arg("OrderByIsResolved", () => Boolean, { nullable: true })
@@ -166,7 +168,7 @@ class ComplaintResolver {
         a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
       );
 
-      return complaints;
+      return complaints.splice(skip, take);
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
@@ -213,8 +215,9 @@ class ComplaintResolver {
   }
 
   @FieldResolver(() => Number, { description: "getting number of upvotes" })
-  async upvotes(@Root() { id }: Complaint) {
+  async upvotes(@Root() { id, upvotedBy}: Complaint) {
     try {
+      if(upvotedBy) return upvotedBy.length;
       const complaint = await Complaint.findOne(id, {
         relations: ["upvotedBy"],
       });
@@ -227,8 +230,9 @@ class ComplaintResolver {
   }
 
   @FieldResolver(() => User)
-  async user(@Root() { id }: Complaint) {
+  async user(@Root() { id, user }: Complaint) {
     try {
+      if (user) return user;
       const complaint = await Complaint.findOne({
         where: { id: id },
         relations: ["user"],
@@ -240,8 +244,9 @@ class ComplaintResolver {
   }
 
   @FieldResolver(() => [User])
-  async upvotedBy(@Root() { id }: Complaint) {
+  async upvotedBy(@Root() { id, upvotedBy }: Complaint) {
     try {
+      if (upvotedBy) return upvotedBy;
       const complaint = await Complaint.findOne({
         where: { id: id },
         relations: ["upvotedBy"],

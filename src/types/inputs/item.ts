@@ -1,5 +1,6 @@
 import { Category } from "../../utils/index";
 import { Field, InputType } from "type-graphql";
+import { IsMobilePhone } from "class-validator";
 
 @InputType({ description: "Item  Input" })
 class ItemInput {
@@ -7,6 +8,10 @@ class ItemInput {
   name: string;
 
   images?: string;
+
+  @IsMobilePhone("en-IN")
+  @Field({ nullable: true, description: "LDAP User's Phone number" })
+  contact: string;
 
   @Field({ description: "Item's Location" })
   location: string;
@@ -31,6 +36,10 @@ class EditItemInput {
     nullable: true,
   })
   time?: string;
+
+  @IsMobilePhone("en-IN")
+  @Field({ nullable: true, description: "LDAP User's Phone number" })
+  contact: string;
 
   images?: string;
 }

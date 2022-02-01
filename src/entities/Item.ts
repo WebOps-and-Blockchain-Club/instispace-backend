@@ -41,6 +41,10 @@ class Item extends BaseEntity {
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date;
+  
+  @Column({ nullable: true })
+  @Field({ nullable: true, description: "Contact Number of User" })
+  contact: string;
 
   @ManyToOne((_type) => User, (user) => user.items, { cascade: true })
   @Field((_type) => User, { description: "Item's User" })

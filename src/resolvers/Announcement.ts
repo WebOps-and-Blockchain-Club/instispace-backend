@@ -16,7 +16,7 @@ import {
   Query,
   Resolver,
   Root,
-  Subscription
+  Subscription,
 } from "type-graphql";
 import MyContext from "src/utils/context";
 import { UserRole } from "../utils";
@@ -77,9 +77,15 @@ class AnnouncementResolver {
       "Query to fetch announcements of each hostel, Restrictions : { Admin, Hostel Affair Secretory} ",
   })
   @Authorized([UserRole.ADMIN, UserRole.HAS])
-  async getAllAnnouncements() {
+  async getAllAnnouncements(
+    @Arg("take") take: number,
+    @Arg("skip") skip: number
+  ) {
     try {
-      return await Announcement.find({ where: { isHidden: false } });
+      const announcements = await Announcement.find({
+        where: { isHidden: false },
+      });
+      return announcements.splice(skip, take);
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -90,7 +96,11 @@ class AnnouncementResolver {
       "Query to fetch announcements of a particular hostel, Restrictions : { anyone who is authorised } ",
   })
   @Authorized()
-  async getAnnouncements(@Arg("HostelId") hostelId: string) {
+  async getAnnouncements(
+    @Arg("take") take: number,
+    @Arg("skip") skip: number,
+    @Arg("HostelId") hostelId: string
+  ) {
     try {
       let hostel = await Hostel.findOne({
         where: { id: hostelId },
@@ -102,7 +112,7 @@ class AnnouncementResolver {
         (n) =>
           new Date(n.endTime).getTime() > d.getTime() && n.isHidden === false
       );
-      return announcements;
+      return announcements?.splice(skip, take);
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -176,8 +186,9 @@ class AnnouncementResolver {
   }
 
   @FieldResolver(() => Hostel)
-  async hostels(@Root() { id }: Announcement) {
+  async hostels(@Root() { id, hostels }: Announcement) {
     try {
+      if (hostels) return hostels;
       const announcement = await Announcement.findOne({
         where: { id },
         relations: ["hostels"],
@@ -189,8 +200,9 @@ class AnnouncementResolver {
   }
 
   @FieldResolver(() => User)
-  async user(@Root() { id }: Announcement) {
+  async user(@Root() { id, user }: Announcement) {
     try {
+      if (user) return user;
       const announcement = await Announcement.findOne({
         where: { id },
         relations: ["user"],
@@ -202,7 +214,10 @@ class AnnouncementResolver {
   }
 
   @Subscription({ topics: ({ args }) => args.hostel }) // here you have to give hostel names
-  createAnnoucementSubs(@Root() announcement: Announcement, @Arg("hostel") hostel: string): Announcement {
+  createAnnoucementSubs(
+    @Root() announcement: Announcement,
+    @Arg("hostel") hostel: string
+  ): Announcement {
     //TODO:  we can add and check context here but not needed I think
     console.log(hostel);
     return announcement;
