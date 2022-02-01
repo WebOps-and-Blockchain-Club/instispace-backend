@@ -422,6 +422,9 @@ type MyQuery {
   id: String!
   isHidden: Boolean!
 
+  """check if Query is liked by current user"""
+  isLiked: Boolean!
+
   """number of likes"""
   likeCount: Float!
   photo: String
@@ -440,6 +443,9 @@ type Netop {
   endTime: DateTime!
   id: String!
   isHidden: Boolean!
+
+  """check if network and opportunity is liked by current user"""
+  isLiked: Boolean!
 
   """is this netop is stared"""
   isStared: Boolean!
@@ -519,6 +525,7 @@ type Query {
 
   """check if Query is liked by current user"""
   isLiked(MyQueryId: String!): Boolean!
+  getUsers: [User!]!
   searchUser(search: String!): [User!]
 }
 
