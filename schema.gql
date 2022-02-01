@@ -180,6 +180,9 @@ input EditComplaintInput {
 
 """Input for editing items"""
 input EditItemInput {
+  """LDAP User's Phone number"""
+  contact: String
+
   """Item's Location"""
   location: String
 
@@ -215,6 +218,9 @@ type Item {
   """Item's status, descibes whether the item is Lost or Found"""
   category: Category!
 
+  """Contact Number of User"""
+  contact: String
+
   """Unique uuid generated for each Item"""
   id: String!
 
@@ -241,6 +247,9 @@ type Item {
 input ItemInput {
   """Item's Category can be either Lost or Found"""
   category: String!
+
+  """LDAP User's Phone number"""
+  contact: String
 
   """Item's Location"""
   location: String!
@@ -456,17 +465,17 @@ type Query {
   """
   Query to fetch announcements of each hostel, Restrictions : { Admin, Hostel Affair Secretory} 
   """
-  getAllAnnouncements: [Announcement!]!
+  getAllAnnouncements(skip: Float!, take: Float!): [Announcement!]!
 
   """
   Query to fetch announcements of a particular hostel, Restrictions : { anyone who is authorised } 
   """
-  getAnnouncements(HostelId: String!): [Announcement!]!
+  getAnnouncements(HostelId: String!, skip: Float!, take: Float!): [Announcement!]!
 
   """
   get a list of Complaints sorted by date, ordered by upvotes if true, and order by isResolved(upresolved at the top)
   """
-  getComplaints(OrderByIsResolved: Boolean, OrderByUpvotes: Boolean): [Complaint!]!
+  getComplaints(OrderByIsResolved: Boolean, OrderByUpvotes: Boolean, skip: Float!, take: Float!): [Complaint!]!
 
   """query to fetch hostels, Restrictions : {anyone who is authorized}"""
   getHostels: [Hostel!]!
@@ -474,7 +483,7 @@ type Query {
   """
   Query to fetch all the unresolved items, filter by time of creation, Restrictions : {anyone who is authorised}
   """
-  getItems(ItemsFilter: [Category!]!): [Item!]!
+  getItems(ItemsFilter: [Category!]!, skip: Float!, take: Float!): [Item!]!
 
   """
   Query to fetch personal profile, Restrictions : {anyone who is authoried}
@@ -497,7 +506,7 @@ type Query {
   """
   Query to fetch Super-Users, Restrictions : {Admins, Leads, Moderators, Hostel Affair Secretory and Hostel Secretory}
   """
-  getSuperUsers(RolesFilter: [UserRole!]!): [User!]!
+  getSuperUsers(RolesFilter: [UserRole!]!, skip: Float!, take: Float!): [User!]!
 
   """Query to Fetch all the tags, Restrictions : {anyone who is authorized}"""
   getTags: [Tag!]!
@@ -506,7 +515,7 @@ type Query {
   getUser(GetUserInput: GetUserInput!): User!
 
   """Query to fetch ldap Users, Restrictions : {anyone who is authorized}"""
-  getUsers: [User!]!
+  getUsers(skip: Float!, take: Float!): [User!]!
 
   """check if Query is liked by current user"""
   isLiked(MyQueryId: String!): Boolean!
@@ -559,6 +568,7 @@ type User {
   announcements: [Announcement!]
   complaints: Complaint
   complaintsUpvoted: Complaint
+  getHome: homeOutput
 
   """User's Hostel amd its details"""
   hostel: Hostel
@@ -656,4 +666,9 @@ type getNetopOutput {
 type getQueryOutput {
   queryList: [MyQuery!]
   total: Float!
+}
+
+type homeOutput {
+  announcements: [Announcement!]!
+  netops: [Netop!]!
 }

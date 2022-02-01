@@ -158,9 +158,14 @@ class UsersResolver {
     UserRole.HAS,
     UserRole.HOSTEL_SEC,
   ])
-  async getSuperUsers(@Arg("RolesFilter", () => [UserRole]) roles: [UserRole]) {
+  async getSuperUsers(
+    @Arg("take") take: number,
+    @Arg("skip") skip: number,
+    @Arg("RolesFilter", () => [UserRole]) roles: [UserRole]
+  ) {
     try {
-      return await User.find({ where: { role: In(roles) } });
+      const superUsers = await User.find({ where: { role: In(roles) } });
+      return superUsers.splice(skip, take);
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -171,11 +176,12 @@ class UsersResolver {
       "Query to fetch ldap Users, Restrictions : {anyone who is authorized}",
   })
   @Authorized()
-  async getUsers() {
+  async getUsers(@Arg("take") take: number, @Arg("skip") skip: number) {
     try {
-      return await User.find({
+      const users = await User.find({
         where: { role: In([UserRole.USER, UserRole.MODERATOR]) },
       });
+      return users.splice(skip, take);
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -303,8 +309,9 @@ class UsersResolver {
   }
 
   @FieldResolver(() => [Tag], { nullable: true })
-  async interest(@Root() { id }: User) {
+  async interest(@Root() { id, interest }: User) {
     try {
+      if (interest) return interest;
       const user = await User.findOne({
         where: { id },
         relations: ["interest"],
@@ -316,8 +323,9 @@ class UsersResolver {
   }
 
   @FieldResolver(() => Hostel, { nullable: true })
-  async hostel(@Root() { id }: User) {
+  async hostel(@Root() { id, hostel }: User) {
     try {
+      if (hostel) return hostel;
       const user = await User.findOne({ where: { id }, relations: ["hostel"] });
       return user?.hostel;
     } catch (e) {
@@ -325,9 +333,23 @@ class UsersResolver {
     }
   }
 
-  @FieldResolver(() => [Item], { nullable: true })
-  async items(@Root() { id }: User) {
+  @FieldResolver(() => [Announcement], { nullable: true })
+  async announcements(@Root() { id }: User) {
     try {
+      const user = await User.findOne({
+        where: { id },
+        relations: ["announcements"],
+      });
+      return user?.announcements;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [Item], { nullable: true })
+  async items(@Root() { id, items }: User) {
+    try {
+      if (items) return items;
       const user = await User.findOne({ where: { id }, relations: ["items"] });
       return user?.items;
     } catch (e) {
@@ -352,14 +374,17 @@ class UsersResolver {
       await netopObject.getNetops(myCon, 100, 0, filters)
     ).netopList;
     const announcements = await announcementObject.getAnnouncements(
+      100,
+      0,
       user!.hostel!.id
     );
     return { netops, announcements };
   }
 
   @FieldResolver(() => [Item], { nullable: true })
-  async complaints(@Root() { id }: User) {
+  async complaints(@Root() { id, complaints }: User) {
     try {
+      if (complaints) return complaints;
       const user = await User.findOne({
         where: { id },
         relations: ["complaints"],
@@ -371,8 +396,9 @@ class UsersResolver {
   }
 
   @FieldResolver(() => [Item], { nullable: true })
-  async complaintsUpvoted(@Root() { id }: User) {
+  async complaintsUpvoted(@Root() { id, complaintsUpvoted }: User) {
     try {
+      if (complaintsUpvoted) return complaintsUpvoted;
       const user = await User.findOne({
         where: { id },
         relations: ["complaintsUpvoted"],
