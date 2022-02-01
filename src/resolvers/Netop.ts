@@ -365,14 +365,6 @@ class NetopResolver {
     }
   }
 
-  @Query(() => Boolean, {
-    description: "check if network and opportunity is liked by current user",
-  })
-  async isLiked(@Arg("NetopId") netopId: string, @Ctx() { user }: MyContext) {
-    const netop = await Netop.findOne(netopId, { relations: ["likedBy"] });
-    return netop?.likedBy.filter((u) => u.id === user.id).length;
-  }
-
   @FieldResolver(() => [Comment], {
     nullable: true,
     description: "get list of comments",
@@ -408,6 +400,14 @@ class NetopResolver {
   async isStared(@Root() { id }: Netop, @Ctx() { user }: MyContext) {
     const netop = await Netop.findOne(id, { relations: ["staredBy"] });
     return netop?.staredBy?.filter((u) => u.id === user.id).length;
+  }
+
+  @FieldResolver(() => Boolean, {
+    description: "check if network and opportunity is liked by current user",
+  })
+  async isLiked(@Root() { id }: Netop, @Ctx() { user }: MyContext) {
+    const netop = await Netop.findOne(id, { relations: ["likedBy"] });
+    return netop?.likedBy.filter((u) => u.id === user.id).length;
   }
 
   @FieldResolver(() => User)

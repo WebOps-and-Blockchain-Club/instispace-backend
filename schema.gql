@@ -413,6 +413,9 @@ type MyQuery {
   id: String!
   isHidden: Boolean!
 
+  """check if Query is liked by current user"""
+  isLiked: Boolean!
+
   """number of likes"""
   likeCount: Float!
   photo: String
@@ -431,6 +434,9 @@ type Netop {
   endTime: DateTime!
   id: String!
   isHidden: Boolean!
+
+  """check if network and opportunity is liked by current user"""
+  isLiked: Boolean!
 
   """is this netop is stared"""
   isStared: Boolean!
@@ -507,9 +513,6 @@ type Query {
 
   """Query to fetch ldap Users, Restrictions : {anyone who is authorized}"""
   getUsers: [User!]!
-
-  """check if Query is liked by current user"""
-  isLiked(MyQueryId: String!): Boolean!
   searchUser(search: String!): [User!]
 }
 
@@ -559,6 +562,7 @@ type User {
   announcements: [Announcement!]
   complaints: Complaint
   complaintsUpvoted: Complaint
+  getHome: homeOutput
 
   """User's Hostel amd its details"""
   hostel: Hostel
@@ -656,4 +660,9 @@ type getNetopOutput {
 type getQueryOutput {
   queryList: [MyQuery!]
   total: Float!
+}
+
+type homeOutput {
+  announcements: [Announcement!]!
+  netops: [Netop!]!
 }
