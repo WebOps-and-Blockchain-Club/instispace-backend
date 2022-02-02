@@ -252,7 +252,11 @@ class UsersResolver {
 
   @Query(() => [User], { nullable: true })
   @Authorized()
-  async searchUser(@Arg("search") search: string) {
+  async searchUser(
+    @Arg("search") search: string,
+    @Arg("take") take: number,
+    @Arg("skip") skip: number
+  ) {
     let users: User[] = [];
     await Promise.all(
       ["roll", "name"].map(async (field: string) => {
@@ -266,7 +270,8 @@ class UsersResolver {
 
     const userStr = users.map((obj) => JSON.stringify(obj));
     const uniqueUserStr = new Set(userStr);
-    return Array.from(uniqueUserStr).map((str) => JSON.parse(str));
+    const finalList = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
+    return finalList.splice(skip, take);
   }
 
   @Mutation(() => Boolean, {
