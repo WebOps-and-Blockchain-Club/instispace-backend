@@ -279,7 +279,8 @@ class MyQueryResolver {
     nullable: true,
     description: "get list of comments",
   })
-  async comments(@Root() { id }: MyQuery) {
+  async comments(@Root() { id, comments }: MyQuery) {
+    if (comments) return comments;
     const myQuery = await MyQuery.findOne(id, {
       relations: ["comments"],
     });
@@ -287,7 +288,8 @@ class MyQueryResolver {
   }
 
   @FieldResolver(() => Number, { description: "get number of likes" })
-  async likeCount(@Root() { id }: MyQuery) {
+  async likeCount(@Root() { id, likedBy }: MyQuery) {
+    if (likedBy) return likedBy.length;
     const myQuery = await MyQuery.findOne(id, { relations: ["likedBy"] });
     const like_count = myQuery?.likedBy.length;
     return like_count;
@@ -296,7 +298,8 @@ class MyQueryResolver {
   @FieldResolver(() => Boolean, {
     description: "check if Query is liked by current user",
   })
-  async isLiked(@Root() { id }: MyQuery, @Ctx() { user }: MyContext) {
+  async isLiked(@Root() { id, likedBy }: MyQuery, @Ctx() { user }: MyContext) {
+    if (likedBy) return likedBy.filter((u) => u.id === user.id).length;
     const myQuery = await MyQuery.findOne(id, {
       relations: ["likedBy"],
     });
@@ -304,7 +307,8 @@ class MyQueryResolver {
   }
 
   @FieldResolver(() => User)
-  async createdBy(@Root() { id }: MyQuery) {
+  async createdBy(@Root() { id, createdBy }: MyQuery) {
+    if (createdBy) return createdBy;
     const myQuery = await MyQuery.findOne(id, { relations: ["createdBy"] });
     return myQuery?.createdBy;
   }

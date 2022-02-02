@@ -522,10 +522,6 @@ type Query {
 
   """Query to fetch ldap Users, Restrictions : {anyone who is authorized}"""
   getUsers(skip: Float!, take: Float!): [User!]!
-
-  """check if Query is liked by current user"""
-  isLiked(MyQueryId: String!): Boolean!
-  getUsers: [User!]!
   searchUser(search: String!): [User!]
 }
 

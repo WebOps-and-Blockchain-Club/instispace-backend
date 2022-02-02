@@ -369,7 +369,8 @@ class NetopResolver {
     nullable: true,
     description: "get list of comments",
   })
-  async comments(@Root() { id }: Netop) {
+  async comments(@Root() { id, comments }: Netop) {
+    if (comments) return comments;
     const netop = await Netop.findOne(id, {
       relations: ["comments"],
     });
@@ -377,7 +378,8 @@ class NetopResolver {
   }
 
   @FieldResolver(() => Number, { description: "get number of likes" })
-  async likeCount(@Root() { id }: Netop) {
+  async likeCount(@Root() { id, likedBy }: Netop) {
+    if (likedBy) return likedBy.length;
     const netop = await Netop.findOne(id, { relations: ["likedBy"] });
     const like_count = netop?.likedBy.length;
     return like_count;
@@ -387,7 +389,8 @@ class NetopResolver {
     nullable: true,
     description: "get all the tags associated",
   })
-  async tags(@Root() { id }: Netop) {
+  async tags(@Root() { id, tags }: Netop) {
+    if (tags) return tags;
     const netop = await Netop.findOne(id, {
       relations: ["tags"],
     });
@@ -397,7 +400,8 @@ class NetopResolver {
   @FieldResolver(() => Boolean, {
     description: "check if network and opportunity is stared by current user",
   })
-  async isStared(@Root() { id }: Netop, @Ctx() { user }: MyContext) {
+  async isStared(@Root() { id, staredBy }: Netop, @Ctx() { user }: MyContext) {
+    if (staredBy) return staredBy?.filter((u) => u.id === user.id).length;
     const netop = await Netop.findOne(id, { relations: ["staredBy"] });
     return netop?.staredBy?.filter((u) => u.id === user.id).length;
   }
@@ -405,13 +409,15 @@ class NetopResolver {
   @FieldResolver(() => Boolean, {
     description: "check if network and opportunity is liked by current user",
   })
-  async isLiked(@Root() { id }: Netop, @Ctx() { user }: MyContext) {
+  async isLiked(@Root() { id, likedBy }: Netop, @Ctx() { user }: MyContext) {
+    if (likedBy) return likedBy.filter((u) => u.id === user.id).length;
     const netop = await Netop.findOne(id, { relations: ["likedBy"] });
     return netop?.likedBy.filter((u) => u.id === user.id).length;
   }
 
   @FieldResolver(() => User)
-  async createdBy(@Root() { id }: Netop) {
+  async createdBy(@Root() { id, createdBy }: Netop) {
+    if (createdBy) return createdBy;
     const netop = await Netop.findOne(id, { relations: ["createdBy"] });
     return netop?.createdBy;
   }
