@@ -2,6 +2,7 @@ import { Category, ComplaintCategory, UserRole } from "../../utils";
 import { Field, ObjectType, registerEnumType } from "type-graphql";
 import Netop from "../../entities/Netop";
 import Announcement from "../../entities/Announcement";
+import User from "../../entities/User";
 registerEnumType(UserRole, { name: "UserRole" });
 registerEnumType(Category, { name: "Category" });
 registerEnumType(ComplaintCategory, { name: "ComplaintCategory" });
@@ -20,7 +21,7 @@ class LoginOutput {
   token: string;
 }
 
-@ObjectType()
+@ObjectType("homeOutput", { description: " Output type for getHome query" })
 class homeOutput {
   @Field(() => [Netop])
   netops: Netop[];
@@ -31,4 +32,46 @@ class homeOutput {
   //TODO: events
 }
 
-export { LoginOutput, homeOutput };
+@ObjectType("searchUserOutput", {
+  description: "Output type for serachUsers query",
+})
+class searchUsersOutput {
+  @Field(() => [User], { nullable: true })
+  usersList: User[];
+
+  @Field(() => Number)
+  total: number;
+
+  //TODO: events
+}
+
+@ObjectType("getSuperUsersOutput", {
+  description: "Output type for getSuperUsers query",
+})
+class getSuperUsersOutput {
+  @Field(() => [User], { nullable: true })
+  usersList: User[];
+
+  @Field(() => Number)
+  total: Number;
+  //TODO: events
+}
+
+@ObjectType("getUsersOutput", {
+  description: "Output type for getSuperUsers query",
+})
+class getUsersOutput {
+  @Field(() => [User], { nullable: true })
+  usersList: User[];
+
+  @Field(() => Number)
+  total: number;
+}
+
+export {
+  LoginOutput,
+  homeOutput,
+  getUsersOutput,
+  getSuperUsersOutput,
+  searchUsersOutput,
+};

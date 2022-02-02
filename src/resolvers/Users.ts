@@ -30,7 +30,13 @@ import jwt from "jsonwebtoken";
 import UsersDev from "../entities/UsersDev";
 import User from "../entities/User";
 import Tag from "../entities/Tag";
-import { homeOutput, LoginOutput } from "../types/objects/users";
+import {
+  getSuperUsersOutput,
+  getUsersOutput,
+  homeOutput,
+  LoginOutput,
+  searchUsersOutput,
+} from "../types/objects/users";
 import MyContext from "../utils/context";
 import bcrypt from "bcryptjs";
 import { In, Like } from "typeorm";
@@ -147,7 +153,7 @@ class UsersResolver {
     }
   }
 
-  @Query(() => [User], {
+  @Query(() => getSuperUsersOutput, {
     description:
       "Query to fetch Super-Users, Restrictions : {Admins, Leads, Moderators, Hostel Affair Secretory and Hostel Secretory}",
   })
@@ -167,13 +173,13 @@ class UsersResolver {
       const superUsers = await User.find({ where: { role: In(roles) } });
       const total = superUsers.length;
       const superUsersList = superUsers.splice(skip, take);
-      return { superUsersList, total };
+      return { usersList: superUsersList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
   }
 
-  @Query(() => [User], {
+  @Query(() => getUsersOutput, {
     description:
       "Query to fetch ldap Users, Restrictions : {anyone who is authorized}",
   })
@@ -185,7 +191,7 @@ class UsersResolver {
       });
       const total = users.length;
       const usersList = users.splice(skip, take);
-      return { usersList, total };
+      return { usersList: usersList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -216,7 +222,7 @@ class UsersResolver {
     }
   }
 
-  @Query(() => [User], { nullable: true })
+  @Query(() => searchUsersOutput, { nullable: true })
   @Authorized()
   async searchUser(
     @Arg("search") search: string,
@@ -239,7 +245,7 @@ class UsersResolver {
     const finalList = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
     const total = finalList.length;
     const usersList = finalList.splice(skip, take);
-    return { usersList, total };
+    return { usersList: usersList, total };
   }
 
   @Mutation(() => Boolean, {
