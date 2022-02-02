@@ -16,6 +16,7 @@ import MyContext from "src/utils/context";
 import { In } from "typeorm";
 import { GraphQLUpload, Upload } from "graphql-upload";
 import addAttachments from "../utils/uploads";
+import getItemsOutput from "../types/objects/items";
 
 @Resolver((_type) => Item)
 class LostAndFoundResolver {
@@ -58,7 +59,7 @@ class LostAndFoundResolver {
     }
   }
 
-  @Query(() => [Item], {
+  @Query(() => getItemsOutput, {
     description:
       "Query to fetch all the unresolved items, filter by time of creation, Restrictions : {anyone who is authorised}",
   })
@@ -80,7 +81,7 @@ class LostAndFoundResolver {
       );
       const total = filteredItems.length;
       const itemsList = filteredItems.splice(skip, take);
-      return { itemsList, total };
+      return { itemsList: itemsList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

@@ -19,6 +19,7 @@ import { GraphQLUpload, Upload } from "graphql-upload";
 import addAttachments from "../utils/uploads";
 import { ComplaintCategory, UserRole } from "../utils";
 import User from "../entities/User";
+import getComplaintsOutput from "../types/objects/complaints";
 
 @Resolver((_type) => Complaint)
 class ComplaintResolver {
@@ -57,7 +58,7 @@ class ComplaintResolver {
     }
   }
 
-  @Query(() => [Complaint], {
+  @Query(() => getComplaintsOutput, {
     description:
       "get a list of Complaints sorted by date, ordered by upvotes if true, and order by isResolved(upresolved at the top)",
   })
@@ -102,7 +103,7 @@ class ComplaintResolver {
       const total = complaints.length;
       const complaintsLists = complaints.splice(skip, take);
 
-      return { complaintsLists, total };
+      return { complaintsList: complaintsLists, total };
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
