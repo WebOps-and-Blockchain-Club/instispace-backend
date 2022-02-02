@@ -57,6 +57,58 @@ class ComplaintResolver {
     }
   }
 
+  @Query(() => [Complaint], {
+    description:
+      "get a list of Complaints sorted by date, ordered by upvotes if true, and order by isResolved(upresolved at the top)",
+  })
+  @Authorized()
+  async getComplaints(
+    @Arg("take") take: number,
+    @Arg("skip") skip: number,
+    @Arg("OrderByUpvotes", () => Boolean, { nullable: true })
+    orderByUpvotes?: Boolean,
+    @Arg("OrderByIsResolved", () => Boolean, { nullable: true })
+    orderByIsResolved?: Boolean
+  ) {
+    try {
+      var complaints = await Complaint.find({
+        relations: ["upvotedBy"],
+      });
+
+      if (orderByUpvotes) {
+        complaints.sort((a, b) =>
+          a.upvotedBy.length > b.upvotedBy.length
+            ? -1
+            : a.upvotedBy.length < b.upvotedBy.length
+            ? 1
+            : 0
+        );
+      }
+
+      if (orderByIsResolved) {
+        complaints.sort((a, b) =>
+          a.isResolved === true && b.isResolved === (false || true)
+            ? -1
+            : a.isResolved === false && b.isResolved === true
+            ? 1
+            : 0
+        );
+      }
+
+      complaints.sort((a, b) =>
+        a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+      );
+
+      const total = complaints.length;
+      const complaintsLists = complaints.splice(skip, take);
+
+      return { complaintsLists, total };
+    } catch (e) {
+      console.log(e.message);
+      throw new Error(e.message);
+    }
+  }
+
   @Mutation(() => Boolean, {
     description:
       "Mutation to edit Complaint, Restrictions : {anyone who is Authorised}",
@@ -126,55 +178,6 @@ class ComplaintResolver {
     }
   }
 
-  @Query(() => [Complaint], {
-    description:
-      "get a list of Complaints sorted by date, ordered by upvotes if true, and order by isResolved(upresolved at the top)",
-  })
-  @Authorized()
-  async getComplaints(
-    @Arg("take") take: number,
-    @Arg("skip") skip: number,
-    @Arg("OrderByUpvotes", () => Boolean, { nullable: true })
-    orderByUpvotes?: Boolean,
-    @Arg("OrderByIsResolved", () => Boolean, { nullable: true })
-    orderByIsResolved?: Boolean
-  ) {
-    try {
-      var complaints = await Complaint.find({
-        relations: ["upvotedBy"],
-      });
-
-      if (orderByUpvotes) {
-        complaints.sort((a, b) =>
-          a.upvotedBy.length > b.upvotedBy.length
-            ? -1
-            : a.upvotedBy.length < b.upvotedBy.length
-            ? 1
-            : 0
-        );
-      }
-
-      if (orderByIsResolved) {
-        complaints.sort((a, b) =>
-          a.isResolved === true && b.isResolved === (false || true)
-            ? -1
-            : a.isResolved === false && b.isResolved === true
-            ? 1
-            : 0
-        );
-      }
-
-      complaints.sort((a, b) =>
-        a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
-      );
-
-      return complaints.splice(skip, take);
-    } catch (e) {
-      console.log(e.message);
-      throw new Error(e.message);
-    }
-  }
-
   @Mutation(() => Boolean, {
     description:
       "Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}",
@@ -215,9 +218,9 @@ class ComplaintResolver {
   }
 
   @FieldResolver(() => Number, { description: "getting number of upvotes" })
-  async upvotes(@Root() { id, upvotedBy}: Complaint) {
+  async upvotes(@Root() { id, upvotedBy }: Complaint) {
     try {
-      if(upvotedBy) return upvotedBy.length;
+      if (upvotedBy) return upvotedBy.length;
       const complaint = await Complaint.findOne(id, {
         relations: ["upvotedBy"],
       });
