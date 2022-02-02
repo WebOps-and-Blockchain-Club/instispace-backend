@@ -85,7 +85,9 @@ class AnnouncementResolver {
       const announcements = await Announcement.find({
         where: { isHidden: false },
       });
-      return announcements.splice(skip, take);
+      const total = announcements.length;
+      const announcementsList = announcements.splice(skip, take);
+      return { announcementsList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -112,7 +114,9 @@ class AnnouncementResolver {
         (n) =>
           new Date(n.endTime).getTime() > d.getTime() && n.isHidden === false
       );
-      return announcements?.splice(skip, take);
+      const total = announcements?.length;
+      const announcementsList = announcements?.splice(skip, take);
+      return { announcementsList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

@@ -78,7 +78,9 @@ class LostAndFoundResolver {
           new Date(Date.now()).getTime() - new Date(item.createdAt).getTime() <
           miliSecPerMonth
       );
-      return filteredItems.splice(skip, take);
+      const total = filteredItems.length;
+      const itemsList = filteredItems.splice(skip, take);
+      return { itemsList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
