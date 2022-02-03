@@ -1,7 +1,7 @@
 import Netop from "../../entities/Netop";
 import { Field, ObjectType } from "type-graphql";
 
-@ObjectType("getNetopOutput")
+@ObjectType("getNetopOutput", { description: "Output type for getNetop query" })
 class getNetopOutput {
   @Field(() => [Netop], { nullable: true })
   netopList: Netop[];

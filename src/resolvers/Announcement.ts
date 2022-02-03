@@ -22,6 +22,10 @@ import MyContext from "src/utils/context";
 import { UserRole } from "../utils";
 import addAttachments from "../utils/uploads";
 import { GraphQLUpload, Upload } from "graphql-upload";
+import {
+  getAllAnnouncementsOutput,
+  getAnnouncementsOutput,
+} from "../types/objects/announcements";
 
 @Resolver((_type) => Announcement)
 class AnnouncementResolver {
@@ -72,7 +76,7 @@ class AnnouncementResolver {
     }
   }
 
-  @Query(() => [Announcement], {
+  @Query(() => getAllAnnouncementsOutput, {
     description:
       "Query to fetch announcements of each hostel, Restrictions : { Admin, Hostel Affair Secretory} ",
   })
@@ -85,13 +89,15 @@ class AnnouncementResolver {
       const announcements = await Announcement.find({
         where: { isHidden: false },
       });
-      return announcements.splice(skip, take);
+      const total = announcements.length;
+      const announcementsList = announcements.splice(skip, take);
+      return { announcementsList: announcementsList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
   }
 
-  @Query(() => [Announcement], {
+  @Query(() => getAnnouncementsOutput, {
     description:
       "Query to fetch announcements of a particular hostel, Restrictions : { anyone who is authorised } ",
   })
@@ -112,7 +118,9 @@ class AnnouncementResolver {
         (n) =>
           new Date(n.endTime).getTime() > d.getTime() && n.isHidden === false
       );
-      return announcements?.splice(skip, take);
+      const total = announcements?.length;
+      const announcementsList = announcements?.splice(skip, take);
+      return { announcementsList: announcementsList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
