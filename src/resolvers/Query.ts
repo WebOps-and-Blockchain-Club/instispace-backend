@@ -116,7 +116,7 @@ class MyQueryResolver {
       "like or unlike (if it's previously liked) Query, Restrictions:{any authorized user}",
   })
   @Authorized()
-  async toggleLike(
+  async toggleLikeQuery(
     @Arg("MyQueryId") myQueryId: string,
     @Ctx() { user }: MyContext
   ) {
@@ -142,10 +142,6 @@ class MyQueryResolver {
     }
   }
 
-  @Mutation(() => Boolean, {
-    description:
-      "star or unstar (if it's previously star) Query, Restrictions:{any authorized user}",
-  })
   @Mutation(() => Boolean, {
     description: "report Query, Restrictions:{any authorized user}",
   })
@@ -180,7 +176,7 @@ class MyQueryResolver {
     description: "comment on Query, Restrictions:{any authorized user}",
   })
   @Authorized()
-  async createComment(
+  async createCommentQuery(
     @Arg("MyQueryId") myQueryId: string,
     @Ctx() { user }: MyContext,
     @Arg("content") content: string
