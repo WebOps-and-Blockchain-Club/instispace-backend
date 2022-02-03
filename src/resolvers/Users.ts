@@ -30,7 +30,13 @@ import jwt from "jsonwebtoken";
 import UsersDev from "../entities/UsersDev";
 import User from "../entities/User";
 import Tag from "../entities/Tag";
-import { homeOutput, LoginOutput } from "../types/objects/users";
+import {
+  getSuperUsersOutput,
+  getUsersOutput,
+  homeOutput,
+  LoginOutput,
+  searchUsersOutput,
+} from "../types/objects/users";
 import MyContext from "../utils/context";
 import bcrypt from "bcryptjs";
 import { In, Like } from "typeorm";
@@ -147,7 +153,7 @@ class UsersResolver {
     }
   }
 
-  @Query(() => [User], {
+  @Query(() => getSuperUsersOutput, {
     description:
       "Query to fetch Super-Users, Restrictions : {Admins, Leads, Moderators, Hostel Affair Secretory and Hostel Secretory}",
   })
@@ -165,13 +171,15 @@ class UsersResolver {
   ) {
     try {
       const superUsers = await User.find({ where: { role: In(roles) } });
-      return superUsers.splice(skip, take);
+      const total = superUsers.length;
+      const superUsersList = superUsers.splice(skip, take);
+      return { usersList: superUsersList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
   }
 
-  @Query(() => [User], {
+  @Query(() => getUsersOutput, {
     description:
       "Query to fetch ldap Users, Restrictions : {anyone who is authorized}",
   })
@@ -181,7 +189,9 @@ class UsersResolver {
       const users = await User.find({
         where: { role: In([UserRole.USER, UserRole.MODERATOR]) },
       });
-      return users.splice(skip, take);
+      const total = users.length;
+      const usersList = users.splice(skip, take);
+      return { usersList: usersList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -210,6 +220,32 @@ class UsersResolver {
     } catch (e) {
       throw new Error(`messsage : ${e}`);
     }
+  }
+
+  @Query(() => searchUsersOutput, { nullable: true })
+  @Authorized()
+  async searchUser(
+    @Arg("search") search: string,
+    @Arg("take") take: number,
+    @Arg("skip") skip: number
+  ) {
+    let users: User[] = [];
+    await Promise.all(
+      ["roll", "name"].map(async (field: string) => {
+        const filter = { [field]: Like(`%${search}%`) };
+        const userF = await User.find({ where: filter });
+        userF.forEach((user) => {
+          users.push(user);
+        });
+      })
+    );
+
+    const userStr = users.map((obj) => JSON.stringify(obj));
+    const uniqueUserStr = new Set(userStr);
+    const finalList = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
+    const total = finalList.length;
+    const usersList = finalList.splice(skip, take);
+    return { usersList: usersList, total };
   }
 
   @Mutation(() => Boolean, {
@@ -248,25 +284,6 @@ class UsersResolver {
     } catch (e) {
       throw new Error(`message: ${e}`);
     }
-  }
-
-  @Query(() => [User], { nullable: true })
-  @Authorized()
-  async searchUser(@Arg("search") search: string) {
-    let users: User[] = [];
-    await Promise.all(
-      ["roll", "name"].map(async (field: string) => {
-        const filter = { [field]: Like(`%${search}%`) };
-        const userF = await User.find({ where: filter });
-        userF.forEach((user) => {
-          users.push(user);
-        });
-      })
-    );
-
-    const userStr = users.map((obj) => JSON.stringify(obj));
-    const uniqueUserStr = new Set(userStr);
-    return Array.from(uniqueUserStr).map((str) => JSON.parse(str));
   }
 
   @Mutation(() => Boolean, {

@@ -471,17 +471,17 @@ type Query {
   """
   Query to fetch announcements of each hostel, Restrictions : { Admin, Hostel Affair Secretory} 
   """
-  getAllAnnouncements(skip: Float!, take: Float!): [Announcement!]!
+  getAllAnnouncements(skip: Float!, take: Float!): getAllAnnouncementsOutput!
 
   """
   Query to fetch announcements of a particular hostel, Restrictions : { anyone who is authorised } 
   """
-  getAnnouncements(HostelId: String!, skip: Float!, take: Float!): [Announcement!]!
+  getAnnouncements(HostelId: String!, skip: Float!, take: Float!): getAnnouncementsOutput!
 
   """
   get a list of Complaints sorted by date, ordered by upvotes if true, and order by isResolved(upresolved at the top)
   """
-  getComplaints(OrderByIsResolved: Boolean, OrderByUpvotes: Boolean, skip: Float!, take: Float!): [Complaint!]!
+  getComplaints(OrderByIsResolved: Boolean, OrderByUpvotes: Boolean, skip: Float!, take: Float!): getComplaintsOutput!
 
   """query to fetch hostels, Restrictions : {anyone who is authorized}"""
   getHostels: [Hostel!]!
@@ -489,7 +489,7 @@ type Query {
   """
   Query to fetch all the unresolved items, filter by time of creation, Restrictions : {anyone who is authorised}
   """
-  getItems(ItemsFilter: [Category!]!, skip: Float!, take: Float!): [Item!]!
+  getItems(ItemsFilter: [Category!]!, skip: Float!, take: Float!): getItemsOutput!
 
   """
   Query to fetch personal profile, Restrictions : {anyone who is authoried}
@@ -512,7 +512,7 @@ type Query {
   """
   Query to fetch Super-Users, Restrictions : {Admins, Leads, Moderators, Hostel Affair Secretory and Hostel Secretory}
   """
-  getSuperUsers(RolesFilter: [UserRole!]!, skip: Float!, take: Float!): [User!]!
+  getSuperUsers(RolesFilter: [UserRole!]!, skip: Float!, take: Float!): getSuperUsersOutput!
 
   """Query to Fetch all the tags, Restrictions : {anyone who is authorized}"""
   getTags: [Tag!]!
@@ -521,8 +521,8 @@ type Query {
   getUser(GetUserInput: GetUserInput!): User!
 
   """Query to fetch ldap Users, Restrictions : {anyone who is authorized}"""
-  getUsers(skip: Float!, take: Float!): [User!]!
-  searchUser(search: String!): [User!]
+  getUsers(skip: Float!, take: Float!): getUsersOutput!
+  searchUser(search: String!, skip: Float!, take: Float!): searchUserOutput
 }
 
 type Report {
@@ -661,17 +661,62 @@ input fileringConditions {
   tags: [String!]
 }
 
+""" Output type for getAllAnnouncements query"""
+type getAllAnnouncementsOutput {
+  announcementsList: [Announcement!]
+  total: Float!
+}
+
+"""Output Type for getAnnouncements query"""
+type getAnnouncementsOutput {
+  announcementsList: [Announcement!]
+  total: Float!
+}
+
+"""Output type for getComplaints query"""
+type getComplaintsOutput {
+  complaintsList: [Complaint!]
+  total: Float!
+}
+
+"""Output type for getItems query"""
+type getItemsOutput {
+  itemsList: [Item!]
+  total: Float!
+}
+
+"""Output type for getNetop query"""
 type getNetopOutput {
   netopList: [Netop!]
   total: Float!
 }
 
+"""Output type for getQuery query"""
 type getQueryOutput {
   queryList: [MyQuery!]
   total: Float!
 }
 
+"""Output type for getSuperUsers query"""
+type getSuperUsersOutput {
+  total: Float!
+  usersList: [User!]
+}
+
+"""Output type for getSuperUsers query"""
+type getUsersOutput {
+  total: Float!
+  usersList: [User!]
+}
+
+""" Output type for getHome query"""
 type homeOutput {
   announcements: [Announcement!]!
   netops: [Netop!]!
+}
+
+"""Output type for serachUsers query"""
+type searchUserOutput {
+  total: Float!
+  usersList: [User!]
 }
