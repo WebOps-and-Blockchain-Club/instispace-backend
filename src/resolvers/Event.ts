@@ -175,7 +175,7 @@ class EventResolver {
     description: "Like or Unlike the event, Restrictions:{ AUTHORIZED USER }",
   })
   @Authorized()
-  async toggleLike(
+  async toggleLikeEvent(
     @Arg("EventId") eventId: string,
     @Ctx() { user }: MyContext
   ) {
@@ -201,7 +201,7 @@ class EventResolver {
     description: "Star or Unstar the event, Restrictions:{ AUTHORIZED USER }",
   })
   @Authorized()
-  async toggleStar(
+  async toggleStarEvent(
     @Arg("EventId") eventId: string,
     @Ctx() { user }: MyContext
   ) {
