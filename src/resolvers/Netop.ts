@@ -163,7 +163,7 @@ class NetopResolver {
       "like or unlike (if it's previously liked) network and opportunity, Restrictions:{any authorized user}",
   })
   @Authorized()
-  async toggleLike(
+  async toggleLikeNetop(
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext
   ) {
@@ -246,7 +246,7 @@ class NetopResolver {
       "comment on network and opportunity, Restrictions:{any authorized user}",
   })
   @Authorized()
-  async createComment(
+  async createCommentNetop(
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext,
     @Arg("content") content: string
