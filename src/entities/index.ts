@@ -9,6 +9,7 @@ import Complaint from "./Complaint";
 import Tag from "./Tag";
 import Report from "./Common/Report";
 import MyQuery from "./MyQuery";
+import Event from "./Event";
 
 export default [
   User,
@@ -22,4 +23,5 @@ export default [
   Item,
   MyQuery,
   Complaint,
+  Event,
 ];

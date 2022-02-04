@@ -10,6 +10,7 @@ import {
   OneToMany,
 } from "typeorm";
 import Netop from "./Netop";
+import Event from "./Event";
 import Comment from "./Common/Comment";
 import Tag from "./Tag";
 import Hostel from "./Hostel";
@@ -46,17 +47,26 @@ class User extends BaseEntity {
   @OneToMany(() => Netop, (netop) => netop.createdBy)
   networkingAndOpportunities: Netop[];
 
+  @OneToMany(() => Event, (event) => event.createdBy)
+  event: Event[];
+
   @OneToMany(() => Query, (query) => query.createdBy)
   querys: Query[];
 
   @ManyToMany(() => Netop, (netop) => netop.likedBy)
   likedNetop: Netop[];
 
+  @ManyToMany(() => Event, (event) => event.likedBy)
+  likedEvent: Event[];
+
   @ManyToMany(() => Query, (query) => query.likedBy)
   likedMyQuery: Query[];
 
   @OneToMany(() => Netop, (netop) => netop.staredBy)
   staredNetop: Netop[];
+
+  @OneToMany(() => Event, (event) => event.staredBy)
+  staredEvent: Event[];
 
   @OneToMany(() => Comment, (comment) => comment.createdBy)
   comments: Comment[];
@@ -115,14 +125,6 @@ class User extends BaseEntity {
   )
   @Field((_type) => Complaint, { nullable: true })
   complaintsUpvoted?: Complaint[];
-
-  // @ManyToMany(_type => event, event => event.liked_by)
-  // @Field(_type => [event])
-  // events_liked : event[]
-
-  // @oneToMany(_type => event, event => event.created_by)
-  // @Field(_type =>[event], {nullable: true})
-  // events : event[];
 }
 
 export default User;

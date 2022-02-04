@@ -193,6 +193,32 @@ input EditItemInput {
   time: String
 }
 
+type Event {
+  attachments: String
+  content: String!
+  createdAt: DateTime!
+  createdBy: User!
+  id: String!
+  isHidden: Boolean!
+
+  """Returns true if the User has likes this Event, else false"""
+  isLiked: Boolean!
+
+  """Event starred boolean"""
+  isStared: Boolean!
+
+  """Total Number of likes for event"""
+  likeCount: Float!
+  linkName: String
+  linkToAction: String
+  photo: String
+
+  """Get the list of Tags added for an Event"""
+  tags: [Tag!]
+  time: DateTime!
+  title: String!
+}
+
 """Input for Query get User"""
 input GetUserInput {
   """User's Id"""
@@ -297,11 +323,17 @@ type Mutation {
   """
   createAnnouncement(AnnouncementInput: CreateAnnouncementInput!, Images: [Upload!]): Boolean!
 
+  """comment on network and opportunity, Restrictions:{any authorized user}"""
+  createCommentNetop(NetopId: String!, content: String!): Boolean!
+
   """comment on Query, Restrictions:{any authorized user}"""
-  createComment(MyQueryId: String!, content: String!): Boolean!
+  createCommentQuery(MyQueryId: String!, content: String!): Boolean!
 
   """Mutation to add Complaint, Restrictions : {anyone who is Authorised}"""
   createComplaint(CreateComplaintInput: ComplaintInput!, Images: [Upload!]): Boolean!
+
+  """Mutation to create an event"""
+  createEvent(Attachments: [Upload!], Image: Upload, NewEventData: createEventInput!): Boolean!
 
   """
   Mutation to create Hostels, Restrictions : {Admin, Hostel Secretory and Hostel Affair Secretory}
@@ -336,6 +368,11 @@ type Mutation {
   """
   deleteComplaint(ComplaintId: String!, DeleteComplaintInput: DeleteComplaintInput!, ProofImages: [Upload!]): Boolean!
 
+  """
+  Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETORY, HAS}
+  """
+  deleteEvent(EventId: String!): Boolean!
+
   """edit Query, Restrictions:{user who created}"""
   deleteMyQuery(MyQueryId: String!): Boolean!
 
@@ -349,6 +386,9 @@ type Mutation {
 
   """Mutation to edit Complaint, Restrictions : {anyone who is Authorised}"""
   editComplaint(ComplaintId: String!, EditComplaintInput: EditComplaintInput!, Images: [Upload!]): Boolean!
+
+  """Edit the event by id"""
+  editEvent(Attachments: [Upload!], EditEventData: editEventInput!, EventId: String!, Image: Upload): Boolean!
 
   """
   Mutation : Mutation to edit the item, accessible to user who created that item
@@ -366,9 +406,7 @@ type Mutation {
   removeMyQuery(MyQueryId: String!): Boolean!
   removeNetop(NetopId: String!): Boolean!
 
-  """
-  star or unstar (if it's previously star) Query, Restrictions:{any authorized user}
-  """
+  """report Query, Restrictions:{any authorized user}"""
   reportMyQuery(MyQueryId: String!, description: String!): Boolean!
 
   """report network and opportunity, Restrictions:{any authorized user}"""
@@ -379,15 +417,21 @@ type Mutation {
   """
   resolveItem(ItemId: String!): Boolean!
 
+  """Like or Unlike the event, Restrictions:{ AUTHORIZED USER }"""
+  toggleLike(EventId: String!): Boolean!
+
+  """
+  like or unlike (if it's previously liked) network and opportunity, Restrictions:{any authorized user}
+  """
+  toggleLikeNetop(NetopId: String!): Boolean!
+
   """
   like or unlike (if it's previously liked) Query, Restrictions:{any authorized user}
   """
-  toggleLike(MyQueryId: String!): Boolean!
+  toggleLikeQuery(MyQueryId: String!): Boolean!
 
-  """
-  star or unstar (if it's previously star) network and opportunity, Restrictions:{any authorized user}
-  """
-  toggleStar(NetopId: String!): Boolean!
+  """Star or Unstar the event, Restrictions:{ AUTHORIZED USER }"""
+  toggleStar(EventId: String!): Boolean!
 
   """
   upvote a complaint or remove upvote if previously upvoted, Restrictions : {any authorized user}
@@ -483,6 +527,14 @@ type Query {
   """
   getComplaints(OrderByIsResolved: Boolean, OrderByUpvotes: Boolean, skip: Float!, take: Float!): getComplaintsOutput!
 
+  """Get the event details by id, Restrictions:{ AUTHORIZED USER }"""
+  getEvent(EventId: String!): Event!
+
+  """
+  Get the list of event details with filters, Restrictions:{ AUTHORIZED USER }
+  """
+  getEvents(FileringCondition: fileringConditions, OrderByLikes: Boolean, skip: Float!, take: Float!): getEventOutput!
+
   """query to fetch hostels, Restrictions : {anyone who is authorized}"""
   getHostels: [Hostel!]!
 
@@ -535,6 +587,7 @@ type Report {
 
 type Subscription {
   createAnnoucementSubs(hostel: String!): Announcement!
+  createEventS(tag: String!): Event!
   createNetopS(tag: String!): Netop!
 }
 
@@ -627,6 +680,15 @@ enum UserRole {
   USER
 }
 
+input createEventInput {
+  content: String!
+  linkName: String
+  linkToAction: String
+  tagIds: [String!]!
+  time: String!
+  title: String!
+}
+
 """user"""
 input createNetopsInput {
   content: String!
@@ -641,6 +703,15 @@ input createNetopsInput {
 input createQuerysInput {
   content: String!
   title: String!
+}
+
+input editEventInput {
+  content: String
+  linkName: String
+  linkToAction: String
+  tagIds: [String!]!
+  time: String
+  title: String
 }
 
 input editNetopsInput {
@@ -676,6 +747,11 @@ type getAnnouncementsOutput {
 """Output type for getComplaints query"""
 type getComplaintsOutput {
   complaintsList: [Complaint!]
+  total: Float!
+}
+
+type getEventOutput {
+  list: [Event!]
   total: Float!
 }
 

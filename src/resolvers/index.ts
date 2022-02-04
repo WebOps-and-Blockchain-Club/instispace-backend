@@ -8,6 +8,7 @@ import CommentResolver from "./Comment";
 import ReportResolver from "./Report";
 import QueryResolver from "./Query";
 import ComplaintResolver from "./Complaint";
+import EventResolver from "./Event";
 
 export default [
   UsersResolver,
@@ -20,4 +21,5 @@ export default [
   LostAndFoundResolver,
   QueryResolver,
   ComplaintResolver,
+  EventResolver,
 ] as const;
