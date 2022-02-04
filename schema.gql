@@ -418,7 +418,7 @@ type Mutation {
   resolveItem(ItemId: String!): Boolean!
 
   """Like or Unlike the event, Restrictions:{ AUTHORIZED USER }"""
-  toggleLike(EventId: String!): Boolean!
+  toggleLikeEvent(EventId: String!): Boolean!
 
   """
   like or unlike (if it's previously liked) network and opportunity, Restrictions:{any authorized user}
@@ -430,8 +430,13 @@ type Mutation {
   """
   toggleLikeQuery(MyQueryId: String!): Boolean!
 
+  """
+  star or unstar (if it's previously star) network and opportunity, Restrictions:{any authorized user}
+  """
+  toggleStar(NetopId: String!): Boolean!
+
   """Star or Unstar the event, Restrictions:{ AUTHORIZED USER }"""
-  toggleStar(EventId: String!): Boolean!
+  toggleStarEvent(EventId: String!): Boolean!
 
   """
   upvote a complaint or remove upvote if previously upvoted, Restrictions : {any authorized user}
