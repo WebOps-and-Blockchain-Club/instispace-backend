@@ -10,6 +10,7 @@ import {
 import Netop from "./Netop";
 import Query from "./MyQuery";
 import User from "./User";
+import Event from "./Event";
 
 @Entity("Tag")
 @ObjectType("Tag", { description: "Tag Entity, Users will follow these tags" })
@@ -39,6 +40,11 @@ class Tag extends BaseEntity {
     nullable: true,
   })
   Netops: Netop[];
+
+  @ManyToMany(() => Event, (event) => event.tags, {
+    nullable: true,
+  })
+  event: Event[];
 
   @ManyToMany(() => Query, (Query) => Query.tags, {
     nullable: true,
