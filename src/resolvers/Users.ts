@@ -43,8 +43,9 @@ import { In, Like } from "typeorm";
 import Hostel from "../entities/Hostel";
 import Item from "../entities/Item";
 import NetopResolver from "./Netop";
-import { fileringConditions } from "src/types/inputs/netop";
+import { fileringConditions } from "../types/inputs/netop";
 import Announcement from "./Announcement";
+import Event from "./Event";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -386,16 +387,17 @@ class UsersResolver {
     };
     const netopObject = new NetopResolver();
     const announcementObject = new Announcement();
+    const eventObject = new Event();
     const filters: fileringConditions = { tags: tagIds!, isStared: false };
-    const netops = await (
-      await netopObject.getNetops(myCon, 100, 0, filters)
-    ).netopList;
+    const netops = (await netopObject.getNetops(myCon, 100, 0, filters))
+      .netopList;
+    const events = (await eventObject.getEvents(myCon, 100, 0, filters)).list;
     const announcements = await announcementObject.getAnnouncements(
       100,
       0,
       user!.hostel!.id
     );
-    return { netops, announcements };
+    return { netops, announcements, events };
   }
 
   @FieldResolver(() => [Item], { nullable: true })
