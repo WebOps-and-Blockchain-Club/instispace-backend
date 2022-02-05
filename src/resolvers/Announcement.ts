@@ -88,6 +88,7 @@ class AnnouncementResolver {
     try {
       const announcements = await Announcement.find({
         where: { isHidden: false },
+        order: { createdAt: "DESC" },
       });
       const total = announcements.length;
       const announcementsList = announcements.splice(skip, take);
@@ -119,6 +120,9 @@ class AnnouncementResolver {
           new Date(n.endTime).getTime() > d.getTime() && n.isHidden === false
       );
       const total = announcements?.length;
+      announcements?.sort((a, b) =>
+        a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+      );
       const announcementsList = announcements?.splice(skip, take);
       return { announcementsList: announcementsList, total };
     } catch (e) {
@@ -149,14 +153,30 @@ class AnnouncementResolver {
           user.role === UserRole.HAS ||
           user.role === UserRole.ADMIN)
       ) {
-        if (images)
+        if (images) {
           announcementInput.images = (await addAttachments(images, true)).join(
             " AND "
           );
-        const { affected } = await Announcement.update(id, {
-          ...announcementInput,
-        });
-        return affected === 1;
+          announcement.images = announcementInput.images;
+        }
+        if (announcementInput.title)
+          announcement.title = announcementInput.title;
+        if (announcementInput.description)
+          announcement.description = announcementInput.description;
+        if (announcementInput.endTime)
+          announcement.endTime = new Date(announcementInput.endTime);
+        if (announcementInput.hostelIds) {
+          let hostels: Hostel[] = [];
+          await Promise.all(
+            announcementInput.hostelIds.map(async (id) => {
+              const hostel = await Hostel.findOne(id);
+              if (hostel) hostels.push(hostel);
+            })
+          );
+          announcement.hostels = hostels;
+        }
+        const announcementUpdated = await announcement.save();
+        return !!announcementUpdated;
       }
       throw new Error("Unauthorized");
     } catch (e) {
