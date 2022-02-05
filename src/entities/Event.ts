@@ -39,6 +39,10 @@ class Event extends BaseEntity {
   @Field()
   isHidden: boolean;
 
+  @Column()
+  @Field()
+  location: string;
+
   @Column({ type: "timestamptz" })
   @Field(() => Date)
   time: Date;
