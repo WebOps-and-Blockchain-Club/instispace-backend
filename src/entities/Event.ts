@@ -35,10 +35,6 @@ class Event extends BaseEntity {
   @Field({ nullable: true })
   photo: string;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  attachments: string;
-
   @Column()
   @Field()
   isHidden: boolean;

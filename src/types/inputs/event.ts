@@ -48,7 +48,6 @@ class editEventInput {
 
   tags?: Tag[]
   photo?: string;
-  attachments?: string;
 }
 
 export { createEventInput, editEventInput };

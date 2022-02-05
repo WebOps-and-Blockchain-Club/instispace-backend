@@ -40,9 +40,7 @@ class EventResolver {
     @PubSub() pubSub: PubSubEngine,
     @Arg("NewEventData") createEventInput: createEventInput,
     @Ctx() { user }: MyContext,
-    @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload,
-    @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
-    attachments?: Upload[]
+    @Arg("Image", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
   ): Promise<boolean> {
     try {
       var tags: Tag[] = [];
@@ -56,14 +54,10 @@ class EventResolver {
         throw new Error("Invalid tagIds");
       createEventInput.tags = tags;
 
-      if (image)
-        createEventInput.photo = (await addAttachments([image], true)).join(
+      if (images)
+        createEventInput.photo = (await addAttachments([...images], true)).join(
           " AND "
         );
-      if (attachments)
-        createEventInput.attachments = (
-          await addAttachments([...attachments], false)
-        ).join(" AND ");
 
       const event = await Event.create({
         ...createEventInput,
@@ -93,9 +87,7 @@ class EventResolver {
     @Arg("EventId") eventId: string,
     @Ctx() { user }: MyContext,
     @Arg("EditEventData") editEventInput: editEventInput,
-    @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload,
-    @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
-    attachments?: Upload[]
+    @Arg("Image", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
   ) {
     try {
       const event = await Event.findOne(eventId, {
@@ -109,13 +101,8 @@ class EventResolver {
             user.role
           ))
       ) {
-        if (image)
-          event.photo = (await addAttachments([image], true)).join(" AND ");
-
-        if (attachments)
-          event.attachments = (
-            await addAttachments([...attachments], false)
-          ).join(" AND ");
+        if (images)
+          event.photo = (await addAttachments([...images], true)).join(" AND ");
 
         if (editEventInput.tagIds) {
           let tags: Tag[] = [];
