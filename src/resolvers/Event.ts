@@ -117,6 +117,7 @@ class EventResolver {
 
         if (editEventInput.title) event.title = editEventInput.title;
         if (editEventInput.content) event.content = editEventInput.content;
+        if (editEventInput.location) event.location = editEventInput.location;
         if (editEventInput.time) event.time = new Date(editEventInput.time);
         if (editEventInput.linkName) event.linkName = editEventInput.linkName;
         if (editEventInput.linkToAction)

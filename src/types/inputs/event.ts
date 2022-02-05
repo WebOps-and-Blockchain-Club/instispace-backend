@@ -21,6 +21,9 @@ class createEventInput {
   @Field()
   time: string;
 
+  @Field()
+  location: string;
+
   tags?: Tag[]
   photo?: string;
   attachments?: string;
@@ -45,6 +48,9 @@ class editEventInput {
 
   @Field({ nullable: true })
   linkToAction: string;
+
+  @Field({ nullable: true })
+  location: string;
 
   tags?: Tag[]
   photo?: string;
