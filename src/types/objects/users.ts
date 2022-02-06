@@ -3,6 +3,7 @@ import { Field, ObjectType, registerEnumType } from "type-graphql";
 import Netop from "../../entities/Netop";
 import Announcement from "../../entities/Announcement";
 import User from "../../entities/User";
+import Event from "../../entities/Event";
 registerEnumType(UserRole, { name: "UserRole" });
 registerEnumType(Category, { name: "Category" });
 registerEnumType(ComplaintCategory, { name: "ComplaintCategory" });
@@ -29,7 +30,8 @@ class homeOutput {
   @Field(() => [Announcement])
   announcements: Announcement[];
 
-  //TODO: events
+  @Field(() => [Event])
+  events: Event[];
 }
 
 @ObjectType("searchUserOutput", {

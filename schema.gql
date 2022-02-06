@@ -792,6 +792,7 @@ type getUsersOutput {
 """ Output type for getHome query"""
 type homeOutput {
   announcements: [Announcement!]!
+  events: [Event!]!
   netops: [Netop!]!
 }
 
