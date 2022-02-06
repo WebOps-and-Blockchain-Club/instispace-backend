@@ -63,16 +63,14 @@ class NetopResolver {
           await addAttachments([...attachments], false)
         ).join(" AND ");
 
-      const netop = Netop.create({
+      const netop = await Netop.create({
         ...createNetopsInput,
         createdBy: user,
         isHidden: false,
         endTime: new Date(createNetopsInput.endTime),
         likeCount: 0,
         tags,
-      });
-
-      await netop.save();
+      }).save();
 
       const payload = netop;
       tags.forEach(async (t) => {
@@ -95,7 +93,6 @@ class NetopResolver {
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext,
     @Arg("EditNetopsData") editNetopsInput: editNetopsInput,
-    @Arg("Tags", () => [String], { nullable: true }) tags?: string[],
     @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload,
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
@@ -105,7 +102,18 @@ class NetopResolver {
         relations: ["tags", "createdBy"],
       });
 
-      if (netop && user.id === netop?.createdBy.id) {
+      if (
+        netop &&
+        (user.id === netop?.createdBy.id ||
+          [
+            UserRole.ADMIN,
+            UserRole.LEADS,
+            UserRole.HAS,
+            UserRole.SECRETORY,
+            UserRole.HOSTEL_SEC,
+            UserRole.MODERATOR,
+          ].includes(user.role))
+      ) {
         if (image)
           editNetopsInput.photo = (await addAttachments([image], true)).join(
             " AND "
@@ -115,26 +123,26 @@ class NetopResolver {
             await addAttachments([...attachments], false)
           ).join(" AND ");
 
-        if (tags) {
-          netop.tags = [];
+        if (editNetopsInput.tagIds) {
+          let tags: Tag[] = [];
           await Promise.all(
-            tags.map(async (id) => {
+            editNetopsInput.tagIds.map(async (id) => {
               const tag = await Tag.findOne(id, { relations: ["Netops"] });
-              if (tag) {
-                netop.tags.push(tag);
-              }
+              if (tag) tags.push(tag);
             })
           );
-          await netop.save();
+          netop.tags = tags;
         }
-        if (Object.keys(editNetopsInput).length) {
-          const { affected } = await Netop.update(netopId, {
-            ...editNetopsInput,
-          });
-          return affected === 1;
-        } else {
-          return true;
-        }
+        if (editNetopsInput.title) netop.title = editNetopsInput.title;
+        if (editNetopsInput.content) netop.content = editNetopsInput.content;
+        if (editNetopsInput.endTime)
+          netop.endTime = new Date(editNetopsInput.endTime);
+        if (editNetopsInput.linkName) netop.linkName = editNetopsInput.linkName;
+        if (editNetopsInput.linkToAction)
+          netop.linkToAction = editNetopsInput.linkToAction;
+
+        const netopUpdated = await netop.save();
+        return !!netopUpdated;
       } else {
         throw new Error("Unauthorized");
       }
@@ -148,10 +156,18 @@ class NetopResolver {
       "edit network and opportunity, Restrictions:{user who created}",
   })
   @Authorized()
-  async deleteNetop(@Arg("NetopId") netopId: string) {
+  async deleteNetop(
+    @Arg("NetopId") netopId: string,
+    @Ctx() { user }: MyContext
+  ) {
     try {
-      const { affected } = await Netop.update(netopId, { isHidden: true });
-      return affected === 1;
+      const netop = await Netop.findOneOrFail(netopId, {
+        relations: ["createdBy"],
+      });
+      if (netop.createdBy.id === user.id) {
+        const { affected } = await Netop.update(netopId, { isHidden: true });
+        return affected === 1;
+      } else throw Error("Unauthorized");
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
@@ -169,15 +185,15 @@ class NetopResolver {
   ) {
     try {
       const netop = await Netop.findOne(netopId, { relations: ["likedBy"] });
+      let netopUpdated;
       if (netop) {
         if (netop.likedBy.filter((u) => u.id === user.id).length) {
           netop.likedBy = netop.likedBy.filter((e) => e.id !== user.id);
-          await netop.save();
         } else {
           netop.likedBy.push(user);
-          await netop.save();
         }
-        return !!netop;
+        netopUpdated = await netop.save();
+        return !!netopUpdated;
       } else {
         throw new Error("Invalid netop id");
       }
@@ -198,15 +214,15 @@ class NetopResolver {
   ) {
     try {
       const netop = await Netop.findOne(netopId, { relations: ["staredBy"] });
+      let netopUpdated;
       if (netop) {
         if (netop.staredBy.filter((u) => u.id === user.id).length) {
           netop.staredBy = netop.staredBy.filter((e) => e.id !== user.id);
-          await netop.save();
         } else {
           netop.staredBy.push(user);
-          await netop.save();
         }
-        return !!netop;
+        netopUpdated = await netop.save();
+        return !!netopUpdated;
       } else {
         throw new Error("Invalid netop id");
       }
@@ -229,8 +245,11 @@ class NetopResolver {
     try {
       const netop = await Netop.findOne(netopId, { relations: ["reports"] });
       if (netop) {
-        const report = Report.create({ netop, description, createdBy: user });
-        await report.save();
+        const report = await Report.create({
+          netop,
+          description,
+          createdBy: user,
+        }).save();
         return !!report;
       } else {
         return false;
@@ -254,8 +273,11 @@ class NetopResolver {
     try {
       const netop = await Netop.findOne(netopId, { relations: ["comments"] });
       if (netop) {
-        const comment = Comment.create({ content, netop, createdBy: user });
-        await comment.save();
+        const comment = await Comment.create({
+          content,
+          netop,
+          createdBy: user,
+        }).save();
         return !!comment;
       }
       throw new Error("Post not found");
@@ -270,7 +292,9 @@ class NetopResolver {
     UserRole.ADMIN,
     UserRole.LEADS,
     UserRole.HAS,
+    UserRole.SECRETORY,
     UserRole.HOSTEL_SEC,
+    UserRole.MODERATOR,
   ])
   async removeNetop(@Arg("NetopId") netopId: string) {
     let { affected } = await Netop.update(netopId, { isHidden: true });
@@ -314,26 +338,23 @@ class NetopResolver {
       });
 
       const d = new Date();
-      if (fileringConditions) {
-        if (fileringConditions.isStared) {
-          netopList = netopList.filter((n) => {
-            return fileringConditions.tags
-              ? n.staredBy.filter((u) => u.id === user.id).length &&
-                  new Date(n.endTime).getTime() > d.getTime() &&
-                  n.tags.filter((tag) =>
-                    fileringConditions.tags.includes(tag.id)
-                  ).length
-              : n.staredBy.filter((u) => u.id === user.id).length &&
-                  new Date(n.endTime).getTime() > d.getTime();
-          });
-        } else if (fileringConditions.tags) {
-          netopList = netopList.filter(
-            (n) =>
-              new Date(n.endTime).getTime() > d.getTime() &&
-              n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
-                .length
-          );
-        }
+      if (fileringConditions && fileringConditions.isStared) {
+        netopList = netopList.filter((n) => {
+          return fileringConditions.tags
+            ? n.staredBy.filter((u) => u.id === user.id).length &&
+                new Date(n.endTime).getTime() > d.getTime() &&
+                n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
+                  .length
+            : n.staredBy.filter((u) => u.id === user.id).length &&
+                new Date(n.endTime).getTime() > d.getTime();
+        });
+      } else if (fileringConditions && fileringConditions.tags) {
+        netopList = netopList.filter(
+          (n) =>
+            new Date(n.endTime).getTime() > d.getTime() &&
+            n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
+              .length
+        );
       } else {
         netopList = netopList.filter(
           (n) => new Date(n.endTime).getTime() > d.getTime()

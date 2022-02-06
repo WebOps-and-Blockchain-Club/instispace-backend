@@ -43,14 +43,13 @@ class MyQueryResolver {
           await addAttachments([...attachments], false)
         ).join(" AND ");
 
-      const myQuery = MyQuery.create({
+      const myQuery = await MyQuery.create({
         ...createMyQuerysInput,
         createdBy: user,
         isHidden: false,
         likeCount: 0,
-      });
+      }).save();
 
-      await myQuery.save();
       return !!myQuery;
     } catch (e) {
       console.log(e.message);
@@ -75,7 +74,13 @@ class MyQueryResolver {
         relations: ["tags", "createdBy"],
       });
 
-      if (myQuery && user.id === myQuery?.createdBy.id) {
+      if (
+        myQuery &&
+        (user.id === myQuery?.createdBy.id ||
+          [UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC].includes(
+            user.role
+          ))
+      ) {
         if (image)
           editMyQuerysInput.photo = (await addAttachments([image], true)).join(
             " AND "
@@ -101,10 +106,19 @@ class MyQueryResolver {
     description: "edit Query, Restrictions:{user who created}",
   })
   @Authorized()
-  async deleteMyQuery(@Arg("MyQueryId") myQueryId: string) {
+  async deleteMyQuery(
+    @Arg("MyQueryId") myQueryId: string,
+    @Ctx() { user }: MyContext
+  ) {
     try {
-      const { affected } = await MyQuery.update(myQueryId, { isHidden: true });
-      return affected === 1;
+      const myQuery = await MyQuery.findOne(myQueryId);
+      if (myQuery && user.id === myQuery?.createdBy.id) {
+        const { affected } = await MyQuery.update(myQueryId, {
+          isHidden: true,
+        });
+        return affected === 1;
+      }
+      return false;
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
@@ -124,15 +138,15 @@ class MyQueryResolver {
       const myQuery = await MyQuery.findOne(myQueryId, {
         relations: ["likedBy"],
       });
+      let myQueryUpdated;
       if (myQuery) {
         if (myQuery.likedBy.filter((u) => u.id === user.id).length) {
           myQuery.likedBy = myQuery.likedBy.filter((e) => e.id !== user.id);
-          await myQuery.save();
         } else {
           myQuery.likedBy.push(user);
-          await myQuery.save();
         }
-        return !!myQuery;
+        myQueryUpdated = await myQuery.save();
+        return !!myQueryUpdated;
       } else {
         throw new Error("Invalid myQuery id");
       }
@@ -156,12 +170,11 @@ class MyQueryResolver {
         relations: ["reports"],
       });
       if (myQuery) {
-        const report = Report.create({
+        const report = await Report.create({
           query: myQuery,
           description,
           createdBy: user,
-        });
-        await report.save();
+        }).save();
         return !!report;
       } else {
         return false;
@@ -186,12 +199,11 @@ class MyQueryResolver {
         relations: ["comments"],
       });
       if (myQuery) {
-        const comment = Comment.create({
+        const comment = await Comment.create({
           content,
           query: myQuery,
           createdBy: user,
-        });
-        await comment.save();
+        }).save();
         return !!comment;
       }
       throw new Error("Post not found");
@@ -204,7 +216,7 @@ class MyQueryResolver {
   @Mutation(() => Boolean)
   @Authorized([
     UserRole.ADMIN,
-    UserRole.LEADS,
+    UserRole.SECRETORY,
     UserRole.HAS,
     UserRole.HOSTEL_SEC,
   ])

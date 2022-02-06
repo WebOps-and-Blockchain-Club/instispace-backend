@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { ApolloServer } from "apollo-server-express";
-import { buildSchema,emitSchemaDefinitionFile } from 'type-graphql'
-import resolvers from "./resolvers";
+import { buildSchema, emitSchemaDefinitionFile } from "type-graphql";
+import resolvers from "./resolvers/Index";
 import dotenv from "dotenv";
 import { createConnection } from "typeorm";
 import entities from "./entities";
@@ -21,7 +21,6 @@ import { FILE_SIZE_LIMIT_MB } from "./utils/config";
 dotenv.config();
 
 const main = async () => {
-  
   const app = express();
   const httpServer = createServer(app);
 

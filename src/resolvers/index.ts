@@ -6,7 +6,7 @@ import AnnouncementResolver from "./Announcement";
 import NetopResolver from "./Netop";
 import CommentResolver from "./Comment";
 import ReportResolver from "./Report";
-import QueryResolver from "./Query";
+import QueryResolver from "./MyQuery";
 import ComplaintResolver from "./Complaint";
 import EventResolver from "./Event";
 
