@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema, emitSchemaDefinitionFile } from "type-graphql";
-import resolvers from "./resolvers/Index";
+import resolvers from "./resolvers/index";
 import dotenv from "dotenv";
 import { createConnection } from "typeorm";
 import entities from "./entities";
