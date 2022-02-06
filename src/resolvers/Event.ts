@@ -251,26 +251,23 @@ class EventResolver {
 
       const d = new Date();
       d.setHours(d.getHours() - 2); //Filter the events after the 2 hours time of completion
-      if (fileringConditions) {
-        if (fileringConditions.isStared) {
-          eventList = eventList.filter((n) => {
-            return fileringConditions.tags
-              ? n.staredBy.filter((u) => u.id === user.id).length &&
-                  new Date(n.time).getTime() > d.getTime() &&
-                  n.tags.filter((tag) =>
-                    fileringConditions.tags.includes(tag.id)
-                  ).length
-              : n.staredBy.filter((u) => u.id === user.id).length &&
-                  new Date(n.time).getTime() > d.getTime();
-          });
-        } else if (fileringConditions.tags) {
-          eventList = eventList.filter(
-            (n) =>
-              new Date(n.time).getTime() > d.getTime() &&
-              n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
-                .length
-          );
-        }
+      if (fileringConditions && fileringConditions.isStared) {
+        eventList = eventList.filter((n) => {
+          return fileringConditions.tags
+            ? n.staredBy.filter((u) => u.id === user.id).length &&
+                new Date(n.time).getTime() > d.getTime() &&
+                n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
+                  .length
+            : n.staredBy.filter((u) => u.id === user.id).length &&
+                new Date(n.time).getTime() > d.getTime();
+        });
+      } else if (fileringConditions && fileringConditions.tags) {
+        eventList = eventList.filter(
+          (n) =>
+            new Date(n.time).getTime() > d.getTime() &&
+            n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
+              .length
+        );
       } else {
         eventList = eventList.filter(
           (n) => new Date(n.time).getTime() > d.getTime()

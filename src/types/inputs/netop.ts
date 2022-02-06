@@ -32,6 +32,9 @@ class editNetopsInput {
   @Field({ nullable: true })
   content: string;
 
+  @Field(() => [String])
+  tagIds: string[];
+
   @Field({ nullable: true })
   endTime: string;
 

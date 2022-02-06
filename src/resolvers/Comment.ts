@@ -15,14 +15,16 @@ class CommentResolver {
 
   @FieldResolver(() => Netop)
   @Authorized()
-  async netop(@Root() { id }: Comment) {
+  async netop(@Root() { id, netop }: Comment) {
+    if (netop) return netop;
     const comment = await Comment.findOne(id, { relations: ["netop"] });
     return comment?.netop;
   }
 
   @FieldResolver(() => MyQuery)
   @Authorized()
-  async query(@Root() { id }: Comment) {
+  async query(@Root() { id, query }: Comment) {
+    if (query) return query;
     const comment = await Comment.findOne(id, { relations: ["query"] });
     return comment?.query;
   }
