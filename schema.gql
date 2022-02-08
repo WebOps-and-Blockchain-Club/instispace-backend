@@ -210,6 +210,7 @@ type Event {
   likeCount: Float!
   linkName: String
   linkToAction: String
+  location: String!
   photo: String
 
   """Get the list of Tags added for an Event"""
@@ -398,7 +399,7 @@ type Mutation {
   editMyQuery(Attachments: [Upload!], EditMyQuerysData: editQuerysInput!, Image: Upload, MyQueryId: String!): Boolean!
 
   """edit network and opportunity, Restrictions:{user who created}"""
-  editNetop(Attachments: [Upload!], EditNetopsData: editNetopsInput!, Image: Upload, NetopId: String!, Tags: [String!]): Boolean!
+  editNetop(Attachments: [Upload!], EditNetopsData: editNetopsInput!, Image: Upload, NetopId: String!): Boolean!
 
   """Mutation to login, Restrictions : {none}"""
   login(LoginInputs: LoginInput!): LoginOutput!
@@ -688,6 +689,7 @@ input createEventInput {
   content: String!
   linkName: String
   linkToAction: String
+  location: String!
   tagIds: [String!]!
   time: String!
   title: String!
@@ -713,6 +715,7 @@ input editEventInput {
   content: String
   linkName: String
   linkToAction: String
+  location: String
   tagIds: [String!]!
   time: String
   title: String
@@ -723,6 +726,7 @@ input editNetopsInput {
   endTime: String
   linkName: String
   linkToAction: String
+  tagIds: [String!]!
   title: String
 }
 

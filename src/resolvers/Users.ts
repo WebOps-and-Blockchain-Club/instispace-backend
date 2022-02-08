@@ -392,11 +392,9 @@ class UsersResolver {
     const netops = (await netopObject.getNetops(myCon, 100, 0, filters))
       .netopList;
     const events = (await eventObject.getEvents(myCon, 100, 0, filters)).list;
-    const announcements = await announcementObject.getAnnouncements(
-      100,
-      0,
-      user!.hostel!.id
-    );
+    const announcements = (
+      await announcementObject.getAnnouncements(100, 0, user!.hostel!.id)
+    ).announcementsList;
     return { netops, announcements, events };
   }
 
