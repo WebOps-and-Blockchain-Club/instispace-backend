@@ -315,7 +315,9 @@ input ModeratorInput {
 }
 
 type Mutation {
-  """Mutation to create a Super-User account, Restrictions : {Admin}"""
+  """
+  Mutation to create a Super-User account can't create Hostel_Sec, Restrictions : {Admin}
+  """
   createAccount(CreateAccountInput: CreateAccountInput!): Boolean!
 
   """
