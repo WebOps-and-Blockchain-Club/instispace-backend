@@ -128,7 +128,7 @@ class UsersResolver {
     description:
       "Mutation to create a Super-User account can't create Hostel_Sec, Restrictions : {Admin}",
   })
-  @Authorized([UserRole.ADMIN])
+  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETORY])
   async createAccount(
     @Arg("CreateAccountInput") createAccountInput: CreateAccountInput
   ) {
@@ -141,8 +141,13 @@ class UsersResolver {
 
       //Creating the User
       const user = new User();
-      if (createAccountInput.role === UserRole.HOSTEL_SEC)
-        throw new Error("Invalid Role");
+
+      if (
+        createAccountInput.role === UserRole.HOSTEL_SEC ||
+        ([UserRole.HAS, UserRole.SECRETORY].includes(createAccountInput.role) &&
+          user.role !== UserRole.ADMIN)
+      )
+        throw new Error("Invalid role");
       user.role = createAccountInput.role;
       user.roll = createAccountInput.roll;
       user.isNewUser = true;
