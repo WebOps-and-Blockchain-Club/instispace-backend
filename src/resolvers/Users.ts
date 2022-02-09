@@ -126,7 +126,7 @@ class UsersResolver {
 
   @Mutation(() => Boolean, {
     description:
-      "Mutation to create a Super-User account, Restrictions : {Admin}",
+      "Mutation to create a Super-User account can't create Hostel_Sec, Restrictions : {Admin}",
   })
   @Authorized([UserRole.ADMIN])
   async createAccount(
@@ -141,6 +141,8 @@ class UsersResolver {
 
       //Creating the User
       const user = new User();
+      if (createAccountInput.role === UserRole.HOSTEL_SEC)
+        throw new Error("Invalid Role");
       user.role = createAccountInput.role;
       user.roll = createAccountInput.roll;
       user.isNewUser = true;
