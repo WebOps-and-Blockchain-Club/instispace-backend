@@ -315,7 +315,9 @@ input ModeratorInput {
 }
 
 type Mutation {
-  """Mutation to create a Super-User account, Restrictions : {Admin}"""
+  """
+  Mutation to create a Super-User account can't create Hostel_Sec, Restrictions : {Admin}
+  """
   createAccount(CreateAccountInput: CreateAccountInput!): Boolean!
 
   """
@@ -357,16 +359,6 @@ type Mutation {
 
   """Mutation to Create Tags, Restrictions : {Admin}"""
   createTag(TagInput: TagInput!): Boolean!
-
-  """
-  hide Announcement Mutation, Restrictions : {Admin, Hostel Affair Secretory and Hostel secretory }
-  """
-  deleteAnnouncement(AnnouncementId: String!): Boolean!
-
-  """
-  Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}
-  """
-  deleteComplaint(ComplaintId: String!, DeleteComplaintInput: DeleteComplaintInput!, ProofImages: [Upload!]): Boolean!
 
   """
   Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETORY, HAS}
@@ -411,6 +403,16 @@ type Mutation {
 
   """report network and opportunity, Restrictions:{any authorized user}"""
   reportNetop(NetopId: String!, description: String!): Boolean!
+
+  """
+  hide Announcement Mutation, Restrictions : {Admin, Hostel Affair Secretory and Hostel secretory }
+  """
+  resolveAnnouncement(AnnouncementId: String!): Boolean!
+
+  """
+  Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}
+  """
+  resolveComplaint(ComplaintId: String!, DeleteComplaintInput: DeleteComplaintInput!, ProofImages: [Upload!]): Boolean!
 
   """
   Mutation to resolve the item, User who finds his lost entity will update, Restriction : {anyone who is authorised}
