@@ -19,6 +19,7 @@ import { UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
+import { Like } from "typeorm";
 
 @Resolver(MyQuery)
 class MyQueryResolver {
@@ -281,6 +282,30 @@ class MyQueryResolver {
       console.log(e.message);
       throw new Error(e.message);
     }
+  }
+
+  @Query(() => getMyQueryOutput)
+  @Authorized()
+  async searchQueries(
+    @Arg("search") search: string,
+    @Arg("take") take: number,
+    @Arg("skip") skip: number
+  ) {
+    let querys: MyQuery[] = [];
+
+    await Promise.all(
+      ["title"].map(async (field: string) => {
+        const filter = { [field]: Like(`%${search}%`) };
+        const queryF = await MyQuery.find({ where: filter });
+        queryF.forEach((query) => {
+          querys.push(query);
+        });
+      })
+    );
+
+    const total = querys.length;
+    const querysList = querys.splice(skip, take);
+    return { queryList: querysList, total };
   }
 
   @FieldResolver(() => [Comment], {

@@ -579,6 +579,7 @@ type Query {
 
   """Query to fetch ldap Users, Restrictions : {anyone who is authorized}"""
   getUsers(skip: Float!, take: Float!): getUsersOutput!
+  searchQueries(search: String!, skip: Float!, take: Float!): getQueryOutput!
   searchUser(search: String!, skip: Float!, take: Float!): searchUserOutput
 }
 
