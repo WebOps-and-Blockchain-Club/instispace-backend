@@ -33,7 +33,12 @@ class AnnouncementResolver {
     description:
       "Mutation to create Announcements, Restrictions : {Admin, Hostel Secretary, and Hostel Affair Secretary}",
   })
-  @Authorized([UserRole.HAS, UserRole.HOSTEL_SEC, UserRole.ADMIN])
+  @Authorized([
+    UserRole.HAS,
+    UserRole.HOSTEL_SEC,
+    UserRole.ADMIN,
+    UserRole.SECRETORY,
+  ])
   async createAnnouncement(
     @PubSub() pubSub: PubSubEngine,
     @Ctx() { user }: MyContext,
@@ -63,14 +68,14 @@ class AnnouncementResolver {
       }
       announcement.hostels = hostels;
 
-      await announcement.save();
+      const announcementCreated = await announcement.save();
 
       const payload = announcement;
       hostels.forEach((h) => {
         pubSub.publish(h.name, payload);
       });
 
-      return !!announcement;
+      return !!announcementCreated;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -80,7 +85,7 @@ class AnnouncementResolver {
     description:
       "Query to fetch announcements of each hostel, Restrictions : { Admin, Hostel Affair Secretory} ",
   })
-  @Authorized([UserRole.ADMIN, UserRole.HAS])
+  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETORY])
   async getAllAnnouncements(
     @Arg("take") take: number,
     @Arg("skip") skip: number
@@ -134,7 +139,12 @@ class AnnouncementResolver {
     description:
       "Mutataion to update Announcement, Restrictions : {Admin, Hostel Affair Secretory, Hostel Secretory}",
   })
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.HAS,
+    UserRole.HOSTEL_SEC,
+    UserRole.SECRETORY,
+  ])
   async editAnnouncement(
     @Ctx() { user }: MyContext,
     @Arg("AnnouncementId") id: string,
@@ -150,8 +160,9 @@ class AnnouncementResolver {
       if (
         announcement &&
         (announcement.user.id === user.id ||
-          user.role === UserRole.HAS ||
-          user.role === UserRole.ADMIN)
+          [UserRole.ADMIN, UserRole.SECRETORY, UserRole.HAS].includes(
+            user.role
+          ))
       ) {
         if (images) {
           announcementInput.images = (await addAttachments(images, true)).join(
@@ -188,8 +199,13 @@ class AnnouncementResolver {
     description:
       "hide Announcement Mutation, Restrictions : {Admin, Hostel Affair Secretory and Hostel secretory }",
   })
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
-  async deleteAnnouncement(
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.HAS,
+    UserRole.HOSTEL_SEC,
+    UserRole.SECRETORY,
+  ])
+  async resolveAnnouncement(
     @Ctx() { user }: MyContext,
     @Arg("AnnouncementId") id: string
   ) {
@@ -201,8 +217,9 @@ class AnnouncementResolver {
       if (
         announcement &&
         (announcement.user.id === user.id ||
-          user.role === UserRole.HAS ||
-          user.role === UserRole.ADMIN)
+          [UserRole.ADMIN, UserRole.SECRETORY, UserRole.HAS].includes(
+            user.role
+          ))
       ) {
         const { affected } = await Announcement.update(id, { isHidden: true });
         return affected === 1;
