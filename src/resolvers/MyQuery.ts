@@ -289,14 +289,20 @@ class MyQueryResolver {
   async searchQueries(
     @Arg("search") search: string,
     @Arg("take") take: number,
-    @Arg("skip") skip: number
+    @Arg("skip") skip: number,
+    @Arg("OrderByLikes", () => Boolean, { nullable: true })
+    orderByLikes?: Boolean
   ) {
     let querys: MyQuery[] = [];
 
     await Promise.all(
       ["title"].map(async (field: string) => {
         const filter = { [field]: Like(`%${search}%`) };
-        const queryF = await MyQuery.find({ where: filter });
+        const queryF = await MyQuery.find({
+          where: filter,
+          relations: ["likedBy"],
+          order: { createdAt: "DESC" },
+        });
         queryF.forEach((query) => {
           querys.push(query);
         });
@@ -304,6 +310,21 @@ class MyQueryResolver {
     );
 
     const total = querys.length;
+
+    if (orderByLikes) {
+      querys.sort((a, b) =>
+        a.likedBy.length > b.likedBy.length
+          ? -1
+          : a.likedBy.length < b.likedBy.length
+          ? 1
+          : 0
+      );
+    } else {
+      querys.sort((a, b) =>
+        a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+      );
+    }
+
     const querysList = querys.splice(skip, take);
     return { queryList: querysList, total };
   }
