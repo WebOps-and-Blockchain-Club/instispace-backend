@@ -146,7 +146,10 @@ class HostelResolver {
   async contacts(@Root() { id, contacts }: Hostel) {
     try {
       if (contacts) return contacts;
-      const hostel = await Hostel.findOne({ where: { id } });
+      const hostel = await Hostel.findOne({
+        where: { id },
+        relations: ["contacts"],
+      });
       return hostel?.contacts;
     } catch (e) {
       throw new Error(`message : ${e}`);
@@ -157,7 +160,10 @@ class HostelResolver {
   async amenities(@Root() { id, amenities }: Hostel) {
     try {
       if (amenities) return amenities;
-      const hostel = await Hostel.findOne({ where: { id: id } });
+      const hostel = await Hostel.findOne({
+        where: { id: id },
+        relations: ["amenities"],
+      });
       return hostel?.amenities;
     } catch (e) {
       throw new Error(`message : ${e}`);
