@@ -3,6 +3,14 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type Amenity {
+  description: String!
+  hostel: Hostel
+  id: String!
+  images: String
+  name: String!
+}
+
 """Annoucements Entity, It will be diplayed for all hostels"""
 type Announcement {
   createdAt: DateTime!
@@ -103,6 +111,14 @@ input ComplaintInput {
   title: String!
 }
 
+type Contact {
+  contact: String!
+  hostel: Hostel
+  id: String!
+  name: String!
+  type: String!
+}
+
 """Input For Create Account Mutation"""
 input CreateAccountInput {
   """Super-User's role"""
@@ -110,6 +126,11 @@ input CreateAccountInput {
 
   """Super-User's email"""
   roll: String!
+}
+
+input CreateAmenityInput {
+  description: String!
+  name: String!
 }
 
 """Announcement Input"""
@@ -125,6 +146,12 @@ input CreateAnnouncementInput {
 
   """Announcement's Title"""
   title: String!
+}
+
+input CreateContactInput {
+  contact: String!
+  name: String!
+  type: String!
 }
 
 """Input for Hostel"""
@@ -227,8 +254,11 @@ input GetUserInput {
 
 """Hostel entity"""
 type Hostel {
+  amenities: [Amenity!]
+
   """Hostel's Announcement, they will be displayed on the notice board"""
   announcements: [Announcement!]!
+  contacts: [Contact!]
 
   """Unique uuid generated for each Hostel"""
   id: String!
@@ -319,6 +349,7 @@ type Mutation {
   Mutation to create a Super-User account can't create Hostel_Sec, Restrictions : {Admin}
   """
   createAccount(CreateAccountInput: CreateAccountInput!): Boolean!
+  createAmenity(CreateAmenityInput: CreateAmenityInput!, HostelId: String!): Boolean!
 
   """
   Mutation to create Announcements, Restrictions : {Admin, Hostel Secretary, and Hostel Affair Secretary}
@@ -341,6 +372,7 @@ type Mutation {
   Mutation to create Hostels, Restrictions : {Admin, Hostel Secretory and Hostel Affair Secretory}
   """
   createHostel(CreateHostelInput: CreateHostelInput!): Boolean!
+  createHostelContact(CreateContactInput: CreateContactInput!, HostelId: String!): Boolean!
 
   """
   Mutation to create the Item, anyone who is authorised and have either Lost an Item or have Found it can access

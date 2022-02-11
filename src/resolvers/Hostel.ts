@@ -12,6 +12,10 @@ import User from "../entities/User";
 import { accountPassword, autoGenPass, salt, UserRole } from "../utils/index";
 import bcrypt from "bcryptjs";
 import { CreateSecInput, CreateHostelInput } from "../types/inputs/hostel";
+import HostelContact from "../entities/Contact";
+import Amenity from "../entities/Amenity";
+import { CreateAmenityInput } from "../types/inputs/amenity";
+import { CreateContactInput } from "../types/inputs/contact";
 
 @Resolver((_type) => Hostel)
 class HostelResolver {
@@ -68,6 +72,53 @@ class HostelResolver {
     }
   }
 
+  @Mutation(() => Boolean)
+  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
+  async createHostelContact(
+    @Arg("CreateContactInput") contactInput: CreateContactInput,
+    @Arg("HostelId") id: string
+  ) {
+    try {
+      // finding the hostel
+      const hostel = await Hostel.findOne({ where: { id } });
+      if (!hostel) throw new Error("Invalid Hostel");
+
+      //creating the contact
+      const contact = new HostelContact();
+      contact.type = contactInput.type;
+      contact.name = contactInput.name;
+      contact.contact = contactInput.contact;
+      contact.hostel = hostel;
+      await contact.save();
+      return !!contact;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @Mutation(() => Boolean)
+  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
+  async createAmenity(
+    @Arg("CreateAmenityInput") amenityInput: CreateAmenityInput,
+    @Arg("HostelId") id: string
+  ) {
+    try {
+      // finding the hostel
+      const hostel = await Hostel.findOne({ where: { id } });
+      if (!hostel) throw new Error("Invalid Hostel");
+
+      //creating the amenity
+      const amenity = new Amenity();
+      amenity.name = amenityInput.name;
+      amenity.description = amenityInput.description;
+      amenity.hostel = hostel;
+      await amenity.save();
+      return !!amenity;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
   @Query(() => [Hostel], {
     description:
       "query to fetch hostels, Restrictions : {anyone who is authorized}",
@@ -86,6 +137,28 @@ class HostelResolver {
     try {
       const hostel = await Hostel.findOne({ where: id, relations: ["users"] });
       return hostel?.users;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [HostelContact], { nullable: true })
+  async contacts(@Root() { id, contacts }: Hostel) {
+    try {
+      if (contacts) return contacts;
+      const hostel = await Hostel.findOne({ where: { id } });
+      return hostel?.contacts;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [Amenity], { nullable: true })
+  async amenities(@Root() { id, amenities }: Hostel) {
+    try {
+      if (amenities) return amenities;
+      const hostel = await Hostel.findOne({ where: { id: id } });
+      return hostel?.amenities;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

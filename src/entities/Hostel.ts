@@ -7,7 +7,9 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import Amenity from "./Amenity";
 import Announcement from "./Announcement";
+import HostelContact from "./Contact";
 import User from "./User";
 
 @Entity("Hostel")
@@ -41,6 +43,18 @@ class Hostel extends BaseEntity {
       "Hostel's Announcement, they will be displayed on the notice board",
   })
   announcements?: Announcement[];
+
+  @OneToMany((_type) => HostelContact, (contacts) => contacts.hostel, {
+    nullable: true,
+  })
+  @Field((_type) => [HostelContact], { nullable: true })
+  contacts: HostelContact[];
+
+  @OneToMany((_type) => Amenity, (amenities) => amenities.hostel, {
+    nullable: true,
+  })
+  @Field((_type) => [Amenity], { nullable: true })
+  amenities: Amenity[];
 }
 
 export default Hostel;
