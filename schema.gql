@@ -179,6 +179,11 @@ input DeleteComplaintInput {
   resolutionDesc: String
 }
 
+input EditAmenityInput {
+  description: String
+  name: String
+}
+
 """Announcement Input"""
 input EditAnnouncementInput {
   """Announcement's Descriptions"""
@@ -203,6 +208,12 @@ input EditComplaintInput {
 
   """Complaint Title"""
   title: String
+}
+
+input EditContactInput {
+  contact: String
+  name: String
+  type: String
 }
 
 """Input for editing items"""
@@ -476,6 +487,8 @@ type Mutation {
   upvote a complaint or remove upvote if previously upvoted, Restrictions : {any authorized user}
   """
   toggleupvotes(complaintId: String!): Boolean!
+  updateAmenity(AmenityId: String!, UpdateAmenityInput: EditAmenityInput): Boolean!
+  updateHostelContact(ContactId: String!, HostelId: String, UpdateContactInput: EditContactInput): Boolean!
 
   """
   Mutation to change Super-Users passwords, Restrictions : {Leads, Hostel Affair Secretory and Hostel Secretory}
