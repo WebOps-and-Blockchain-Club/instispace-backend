@@ -402,6 +402,7 @@ type Mutation {
 
   """Mutation to Create Tags, Restrictions : {Admin}"""
   createTag(TagInput: TagInput!): Boolean!
+  deleteAmenity(AmenityId: String!): Boolean!
 
   """
   Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETORY, HAS}

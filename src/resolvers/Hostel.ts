@@ -202,6 +202,22 @@ class HostelResolver {
     }
   }
 
+  @Mutation(() => Boolean)
+  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
+  async deleteAmenity(@Arg("AmenityId") id: string) {
+    try {
+      const amenity = await Amenity.findOne({
+        where: { id },
+        relations: ["hostel"],
+      });
+      if (!amenity) throw new Error("Invalid Amenity");
+      const amenityDeleted = await amenity?.remove();
+      return !!amenityDeleted;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
   @FieldResolver(() => [User], { nullable: true })
   async users(@Root() { id }: Hostel) {
     try {
