@@ -2,6 +2,7 @@ import Hostel from "../entities/Hostel";
 import {
   Arg,
   Authorized,
+  Ctx,
   FieldResolver,
   Mutation,
   Query,
@@ -14,8 +15,10 @@ import bcrypt from "bcryptjs";
 import { CreateSecInput, CreateHostelInput } from "../types/inputs/hostel";
 import HostelContact from "../entities/Contact";
 import Amenity from "../entities/Amenity";
-import { CreateAmenityInput } from "../types/inputs/amenity";
-import { CreateContactInput } from "../types/inputs/contact";
+import { CreateAmenityInput, EditAmenityInput } from "../types/inputs/amenity";
+import { CreateContactInput, EditContactInput } from "../types/inputs/contact";
+import Contact from "../entities/Contact";
+import MyContext from "../utils/context";
 
 @Resolver((_type) => Hostel)
 class HostelResolver {
@@ -127,6 +130,73 @@ class HostelResolver {
   async getHostels() {
     try {
       return await Hostel.find();
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @Mutation(() => Boolean)
+  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
+  async updateHostelContact(
+    @Arg("ContactId") contactId: string,
+    @Arg("HostelId", { nullable: true }) hostelId: string,
+    @Ctx() { user }: MyContext,
+    @Arg("UpdateContactInput", { nullable: true })
+    contactInput: EditContactInput
+  ) {
+    try {
+      const contact = await Contact.findOne({
+        where: { id: contactId },
+        relations: ["hostel"],
+      });
+      if (!contact) throw new Error("Invalid Contact");
+
+      if (
+        user.hostel === contact.hostel ||
+        [UserRole.HAS, UserRole.ADMIN].includes(user.role)
+      ) {
+        if (contactInput.type) contact.type = contactInput.type;
+        if (contactInput.name) contact.name = contactInput.name;
+        if (contactInput.contact) contact.contact = contactInput.contact;
+        if (hostelId) {
+          const hostel = await Hostel.findOne({ where: { id: hostelId } });
+          if (!hostel) throw new Error("Invalid Hostel");
+          contact.hostel = hostel;
+        }
+        const contactUpdated = await contact.save();
+        return !!contactUpdated;
+      }
+      throw new Error("Unauthorized");
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @Mutation(() => Boolean)
+  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
+  async updateAmenity(
+    @Arg("AmenityId") amenityId: string,
+    @Ctx() { user }: MyContext,
+    @Arg("UpdateAmenityInput", { nullable: true })
+    amenityInput: EditAmenityInput
+  ) {
+    try {
+      const amenity = await Amenity.findOne({
+        where: { id: amenityId },
+      });
+      if (!amenity) throw new Error("Invalid Amenity");
+
+      if (
+        user.hostel === amenity.hostel ||
+        [UserRole.HAS, UserRole.ADMIN].includes(user.role)
+      ) {
+        if (amenityInput.name) amenity.name = amenityInput.name;
+        if (amenityInput.description)
+          amenity.description = amenityInput.description;
+        const amenityUpdated = await amenity.save();
+        return !!amenityUpdated;
+      }
+      throw new Error("Unauthorized");
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
