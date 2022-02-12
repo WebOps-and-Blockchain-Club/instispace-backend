@@ -11,6 +11,8 @@ import TagInput from "../types/inputs/tags";
 import Tag from "../entities/Tag";
 import User from "../entities/User";
 import { UserRole } from "../utils";
+import Netop from "../entities/Netop";
+import Event from "../entities/Event";
 
 @Resolver((_type) => Tag)
 class TagsResolver {
@@ -51,6 +53,20 @@ class TagsResolver {
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
+  }
+
+  @FieldResolver(() => [Netop])
+  async netops(@Root() { id, netops }: Tag) {
+    if (netops) return netops;
+    const tag = await Tag.findOne(id, { relations: ["netops"] });
+    return tag?.netops;
+  }
+
+  @FieldResolver(() => [Event])
+  async events(@Root() { id, event }: Tag) {
+    if (event) return event;
+    const tag = await Tag.findOne(id, { relations: ["event"] });
+    return tag?.event;
   }
 }
 export default TagsResolver;

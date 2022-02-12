@@ -74,7 +74,7 @@ class Netop extends BaseEntity {
   @JoinTable()
   staredBy: User[];
 
-  @ManyToMany((_type) => Tag, (tag) => tag.Netops, { nullable: true })
+  @ManyToMany((_type) => Tag, (tag) => tag.netops, { nullable: true })
   @JoinTable()
   tags: Tag[];
 
