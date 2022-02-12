@@ -32,16 +32,13 @@ import User from "../entities/User";
 class NetopResolver {
   @Query(() => Boolean)
   async isInterested(@Ctx() { user }: MyContext, @Arg("tag") tag: string) {
-    console.log(tag);
     if (user.interest) {
-      console.log("if", tag);
       user.interest.filter((interest) => {
         console.log(interest.id, tag);
         return interest.id == tag;
       });
       return !!user;
     } else {
-      console.log("else", tag);
       const u = await User.findOne(user.id, { relations: ["interest"] });
       var t = u?.interest?.filter((interest) => {
         console.log(interest.id, tag);
