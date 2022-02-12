@@ -3,6 +3,14 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type Amenity {
+  description: String!
+  hostel: Hostel
+  id: String!
+  images: String
+  name: String!
+}
+
 """Annoucements Entity, It will be diplayed for all hostels"""
 type Announcement {
   createdAt: DateTime!
@@ -103,6 +111,14 @@ input ComplaintInput {
   title: String!
 }
 
+type Contact {
+  contact: String!
+  hostel: Hostel
+  id: String!
+  name: String!
+  type: String!
+}
+
 """Input For Create Account Mutation"""
 input CreateAccountInput {
   """Super-User's role"""
@@ -110,6 +126,11 @@ input CreateAccountInput {
 
   """Super-User's email"""
   roll: String!
+}
+
+input CreateAmenityInput {
+  description: String!
+  name: String!
 }
 
 """Announcement Input"""
@@ -125,6 +146,12 @@ input CreateAnnouncementInput {
 
   """Announcement's Title"""
   title: String!
+}
+
+input CreateContactInput {
+  contact: String!
+  name: String!
+  type: String!
 }
 
 """Input for Hostel"""
@@ -152,6 +179,11 @@ input DeleteComplaintInput {
   resolutionDesc: String
 }
 
+input EditAmenityInput {
+  description: String
+  name: String
+}
+
 """Announcement Input"""
 input EditAnnouncementInput {
   """Announcement's Descriptions"""
@@ -176,6 +208,12 @@ input EditComplaintInput {
 
   """Complaint Title"""
   title: String
+}
+
+input EditContactInput {
+  contact: String
+  name: String
+  type: String
 }
 
 """Input for editing items"""
@@ -227,8 +265,11 @@ input GetUserInput {
 
 """Hostel entity"""
 type Hostel {
+  amenities: [Amenity!]
+
   """Hostel's Announcement, they will be displayed on the notice board"""
   announcements: [Announcement!]!
+  contacts: [Contact!]
 
   """Unique uuid generated for each Hostel"""
   id: String!
@@ -319,6 +360,7 @@ type Mutation {
   Mutation to create a Super-User account can't create Hostel_Sec, Restrictions : {Admin}
   """
   createAccount(CreateAccountInput: CreateAccountInput!): Boolean!
+  createAmenity(CreateAmenityInput: CreateAmenityInput!, HostelId: String!): Boolean!
 
   """
   Mutation to create Announcements, Restrictions : {Admin, Hostel Secretary, and Hostel Affair Secretary}
@@ -341,6 +383,7 @@ type Mutation {
   Mutation to create Hostels, Restrictions : {Admin, Hostel Secretory and Hostel Affair Secretory}
   """
   createHostel(CreateHostelInput: CreateHostelInput!): Boolean!
+  createHostelContact(CreateContactInput: CreateContactInput!, HostelId: String!): Boolean!
 
   """
   Mutation to create the Item, anyone who is authorised and have either Lost an Item or have Found it can access
@@ -359,11 +402,7 @@ type Mutation {
 
   """Mutation to Create Tags, Restrictions : {Admin}"""
   createTag(TagInput: TagInput!): Boolean!
-
-  """
-  Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}
-  """
-  deleteComplaint(ComplaintId: String!, DeleteComplaintInput: DeleteComplaintInput!, ProofImages: [Upload!]): Boolean!
+  deleteAmenity(AmenityId: String!): Boolean!
 
   """
   Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETORY, HAS}
@@ -415,6 +454,11 @@ type Mutation {
   resolveAnnouncement(AnnouncementId: String!): Boolean!
 
   """
+  Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}
+  """
+  resolveComplaint(ComplaintId: String!, DeleteComplaintInput: DeleteComplaintInput!, ProofImages: [Upload!]): Boolean!
+
+  """
   Mutation to resolve the item, User who finds his lost entity will update, Restriction : {anyone who is authorised}
   """
   resolveItem(ItemId: String!): Boolean!
@@ -444,6 +488,8 @@ type Mutation {
   upvote a complaint or remove upvote if previously upvoted, Restrictions : {any authorized user}
   """
   toggleupvotes(complaintId: String!): Boolean!
+  updateAmenity(AmenityId: String!, UpdateAmenityInput: EditAmenityInput): Boolean!
+  updateHostelContact(ContactId: String!, HostelId: String, UpdateContactInput: EditContactInput): Boolean!
 
   """
   Mutation to change Super-Users passwords, Restrictions : {Leads, Hostel Affair Secretory and Hostel Secretory}

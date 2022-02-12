@@ -10,6 +10,8 @@ import Tag from "./Tag";
 import Report from "./Common/Report";
 import MyQuery from "./MyQuery";
 import Event from "./Event";
+import HostelContact from "./Contact";
+import Amenity from "./Amenity";
 
 export default [
   User,
@@ -24,4 +26,6 @@ export default [
   MyQuery,
   Complaint,
   Event,
+  HostelContact,
+  Amenity
 ];
