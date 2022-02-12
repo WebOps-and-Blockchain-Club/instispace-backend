@@ -12,7 +12,6 @@ import {
 } from "typeorm";
 import User from "./User";
 import Comment from "./Common/Comment";
-import Tag from "./Tag";
 import Report from "./Common/Report";
 
 @Entity("MyQuery")
@@ -54,10 +53,6 @@ class MyQuery extends BaseEntity {
 
   @OneToMany(() => Report, (report) => report.query, { nullable: true })
   reports: Report[];
-
-  @ManyToMany((_type) => Tag, (tag) => tag.Querys, { nullable: true })
-  @JoinTable()
-  tags: Tag[];
 
   @ManyToOne(() => User, (user) => user.querys)
   createdBy: User;

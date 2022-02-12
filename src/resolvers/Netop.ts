@@ -30,6 +30,27 @@ import User from "../entities/User";
 
 @Resolver(Netop)
 class NetopResolver {
+  @Query(() => Boolean)
+  async isInterested(@Ctx() { user }: MyContext, @Arg("tag") tag: string) {
+    console.log(tag);
+    if (user.interest) {
+      console.log("if", tag);
+      user.interest.filter((interest) => {
+        console.log(interest.id, tag);
+        return interest.id == tag;
+      });
+      return !!user;
+    } else {
+      console.log("else", tag);
+      const u = await User.findOne(user.id, { relations: ["interest"] });
+      var t = u?.interest?.filter((interest) => {
+        console.log(interest.id, tag);
+        return interest.id == tag;
+      });
+      return !!t;
+    }
+  }
+
   @Mutation(() => Boolean, {
     description:
       "create network and opportunity, Restrictions:{any authorized user}",
@@ -73,9 +94,17 @@ class NetopResolver {
       }).save();
 
       const payload = netop;
-      tags.forEach(async (t) => {
-        await pubSub.publish(t.title, payload);
-      });
+      let isUserInterested: boolean | undefined = false;
+      await Promise.all(
+        tags.map(async (t) => {
+          isUserInterested = await this.isInterested({ user }, t.id);
+        })
+      );
+      console.log(isUserInterested);
+
+      if (isUserInterested) {
+        await pubSub.publish("NETOP", payload);
+      }
 
       return !!netop;
     } catch (e) {
@@ -348,7 +377,11 @@ class NetopResolver {
             : n.staredBy.filter((u) => u.id === user.id).length &&
                 new Date(n.endTime).getTime() > d.getTime();
         });
-      } else if (fileringConditions && fileringConditions.tags) {
+      } else if (
+        fileringConditions &&
+        fileringConditions.tags &&
+        fileringConditions.tags.length
+      ) {
         netopList = netopList.filter(
           (n) =>
             new Date(n.endTime).getTime() > d.getTime() &&
@@ -447,6 +480,12 @@ class NetopResolver {
   createNetopS(@Root() netop: Netop, @Arg("tag") tag: string): Netop {
     //TODO:  we can add and check context here but not needed I think
     console.log(tag);
+    return netop;
+  }
+
+  @Subscription({ topics: "NETOP" })
+  createNetop2(@Root() netop: Netop): Netop {
+    console.log(netop.title);
     return netop;
   }
 }

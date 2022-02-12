@@ -581,6 +581,7 @@ type Query {
 
   """Query to fetch ldap Users, Restrictions : {anyone who is authorized}"""
   getUsers(skip: Float!, take: Float!): getUsersOutput!
+  isInterested(tag: String!): Boolean!
   searchQueries(OrderByLikes: Boolean, search: String!, skip: Float!, take: Float!): getQueryOutput!
   searchUser(search: String!, skip: Float!, take: Float!): searchUserOutput
 }
@@ -596,6 +597,7 @@ type Report {
 type Subscription {
   createAnnoucementSubs(hostel: String!): Announcement!
   createEventS(tag: String!): Event!
+  createNetop2: Netop!
   createNetopS(tag: String!): Netop!
 }
 
@@ -603,9 +605,11 @@ type Subscription {
 type Tag {
   """Tag's Category"""
   category: String!
+  events: [Event!]!
 
   """Unique uuid generated for each Tag"""
   id: String!
+  netops: [Netop!]!
 
   """Tag's Title"""
   title: String!
