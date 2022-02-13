@@ -221,7 +221,10 @@ class EventResolver {
       const event = await Event.findOne(eventId, {
         where: { isHidden: false },
       });
-      return event;
+
+      const d = new Date();
+      if (event && new Date(event.time).getTime() > d.getTime()) return event;
+      else return null;
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);

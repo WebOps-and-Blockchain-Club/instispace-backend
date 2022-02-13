@@ -336,7 +336,11 @@ class NetopResolver {
       const netop = await Netop.findOne(netopId, {
         where: { isHidden: false },
       });
-      return netop;
+
+      const d = new Date();
+      if (netop && new Date(netop.endTime).getTime() > d.getTime())
+        return netop;
+      else return null;
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
