@@ -12,23 +12,26 @@ import Hostel from "./Hostel";
 @ObjectType("Amenity")
 class Amenity extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
-  @Field()
+  @Field({ description: "Auto generated uuid for an Amenity" })
   id: string;
 
   @Column()
-  @Field()
+  @Field({ description: "Amenity's name" })
   name: string;
 
   @Column()
-  @Field()
+  @Field({ description: "Amenity image" })
   description: string;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Field({ nullable: true, description: "Amenity's visual description" })
   images: string;
 
   @ManyToOne((_type) => Hostel, (hostel) => hostel.amenities, { cascade: true })
-  @Field((_type) => Hostel, { nullable: true })
+  @Field((_type) => Hostel, {
+    nullable: true,
+    description: "Hostel to which amenity is related",
+  })
   hostel: Hostel;
 }
 

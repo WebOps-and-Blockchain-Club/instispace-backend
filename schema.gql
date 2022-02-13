@@ -4,10 +4,19 @@
 # -----------------------------------------------
 
 type Amenity {
+  """Amenity image"""
   description: String!
+
+  """Hostel to which amenity is related"""
   hostel: Hostel
+
+  """Auto generated uuid for an Amenity"""
   id: String!
+
+  """Amenity's visual description"""
   images: String
+
+  """Amenity's name"""
   name: String!
 }
 
@@ -112,10 +121,19 @@ input ComplaintInput {
 }
 
 type Contact {
+  """contact"""
   contact: String!
+
+  """relation which stores the contact-hostel"""
   hostel: Hostel
+
+  """Auto generated uuid"""
   id: String!
+
+  """name of the person with whom the contact is related to"""
   name: String!
+
+  """type of contact Warden-contact/secretory-contact etc."""
   type: String!
 }
 
@@ -129,7 +147,10 @@ input CreateAccountInput {
 }
 
 input CreateAmenityInput {
+  """Amenity description"""
   description: String!
+
+  """Amenity's name"""
   name: String!
 }
 
@@ -149,8 +170,13 @@ input CreateAnnouncementInput {
 }
 
 input CreateContactInput {
+  """Contact"""
   contact: String!
+
+  """name of the Person"""
   name: String!
+
+  """Contact's type"""
   type: String!
 }
 
@@ -180,7 +206,10 @@ input DeleteComplaintInput {
 }
 
 input EditAmenityInput {
+  """description"""
   description: String
+
+  """name"""
   name: String
 }
 
@@ -211,8 +240,13 @@ input EditComplaintInput {
 }
 
 input EditContactInput {
+  """Contact"""
   contact: String
+
+  """name of the person"""
   name: String
+
+  """type of the Contact"""
   type: String
 }
 
@@ -265,10 +299,13 @@ input GetUserInput {
 
 """Hostel entity"""
 type Hostel {
+  """amenities for hostel"""
   amenities: [Amenity!]
 
   """Hostel's Announcement, they will be displayed on the notice board"""
   announcements: [Announcement!]!
+
+  """Contacs related to a Hostel"""
   contacts: [Contact!]
 
   """Unique uuid generated for each Hostel"""
@@ -360,6 +397,10 @@ type Mutation {
   Mutation to create a Super-User account can't create Hostel_Sec, Restrictions : {Admin}
   """
   createAccount(CreateAccountInput: CreateAccountInput!): Boolean!
+
+  """
+  Mutation to create Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
+  """
   createAmenity(CreateAmenityInput: CreateAmenityInput!, HostelId: String!): Boolean!
 
   """
@@ -383,6 +424,10 @@ type Mutation {
   Mutation to create Hostels, Restrictions : {Admin, Hostel Secretory and Hostel Affair Secretory}
   """
   createHostel(CreateHostelInput: CreateHostelInput!): Boolean!
+
+  """
+  Mutation to create Hostel-Contact, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
+  """
   createHostelContact(CreateContactInput: CreateContactInput!, HostelId: String!): Boolean!
 
   """
@@ -402,6 +447,10 @@ type Mutation {
 
   """Mutation to Create Tags, Restrictions : {Admin}"""
   createTag(TagInput: TagInput!): Boolean!
+
+  """
+  Mutation to delete Hostel-Amenity, Restrictions : {Admin, Hostel-Secretory(related to hostel), HAS}
+  """
   deleteAmenity(AmenityId: String!): Boolean!
 
   """
@@ -488,7 +537,15 @@ type Mutation {
   upvote a complaint or remove upvote if previously upvoted, Restrictions : {any authorized user}
   """
   toggleupvotes(complaintId: String!): Boolean!
+
+  """
+  Mutation to update Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
+  """
   updateAmenity(AmenityId: String!, UpdateAmenityInput: EditAmenityInput): Boolean!
+
+  """
+  Mutation to update Hostel-Contact, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
+  """
   updateHostelContact(ContactId: String!, HostelId: String, UpdateContactInput: EditContactInput): Boolean!
 
   """
