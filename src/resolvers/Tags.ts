@@ -45,6 +45,19 @@ class TagsResolver {
     }
   }
 
+  @Query(() => Tag, {
+    description:
+      "Query to Fetch the tag, Restrictions : {anyone who is authorized}",
+  })
+  @Authorized()
+  async getTag(@Arg("Tag") tagId: string) {
+    try {
+      return await Tag.findOne(tagId);
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
   @FieldResolver(() => [User])
   async users(@Root() { id }: Tag) {
     try {
