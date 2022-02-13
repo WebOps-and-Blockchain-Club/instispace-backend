@@ -12,23 +12,30 @@ import Hostel from "./Hostel";
 @ObjectType("Contact")
 class HostelContact extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
-  @Field()
+  @Field({ description: "Auto generated uuid" })
   id: string;
 
   @Column()
-  @Field()
+  @Field({
+    description: "name of the person with whom the contact is related to",
+  })
   name: string;
 
   @Column()
-  @Field()
+  @Field({
+    description: "type of contact Warden-contact/secretory-contact etc.",
+  })
   type: string;
 
   @Column()
-  @Field()
+  @Field({ description: "contact" })
   contact: string;
 
   @ManyToOne((_type) => Hostel, (hostel) => hostel.contacts, { cascade: true })
-  @Field((_type) => Hostel, { nullable: true })
+  @Field((_type) => Hostel, {
+    nullable: true,
+    description: "relation which stores the contact-hostel",
+  })
   hostel: Hostel;
 }
 

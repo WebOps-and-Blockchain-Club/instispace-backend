@@ -47,13 +47,19 @@ class Hostel extends BaseEntity {
   @OneToMany((_type) => HostelContact, (contacts) => contacts.hostel, {
     nullable: true,
   })
-  @Field((_type) => [HostelContact], { nullable: true })
+  @Field((_type) => [HostelContact], {
+    nullable: true,
+    description: "Contacs related to a Hostel",
+  })
   contacts: HostelContact[];
 
   @OneToMany((_type) => Amenity, (amenities) => amenities.hostel, {
     nullable: true,
   })
-  @Field((_type) => [Amenity], { nullable: true })
+  @Field((_type) => [Amenity], {
+    nullable: true,
+    description: "amenities for hostel",
+  })
   amenities: Amenity[];
 }
 
