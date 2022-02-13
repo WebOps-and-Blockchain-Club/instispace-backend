@@ -70,16 +70,48 @@ class TagsResolver {
 
   @FieldResolver(() => [Netop])
   async netops(@Root() { id, netops }: Tag) {
-    if (netops) return netops;
+    if (netops) {
+      const d = new Date();
+      if (netops) {
+        const ns = netops.filter(
+          (n) => !n.isHidden && new Date(n.endTime).getTime() > d.getTime()
+        );
+        return ns;
+      }
+      return null;
+    }
     const tag = await Tag.findOne(id, { relations: ["netops"] });
-    return tag?.netops;
+    const d = new Date();
+    if (tag?.netops) {
+      const ns = tag.netops.filter(
+        (n) => !n.isHidden && new Date(n.endTime).getTime() > d.getTime()
+      );
+      return ns;
+    }
+    return null;
   }
 
   @FieldResolver(() => [Event])
   async events(@Root() { id, event }: Tag) {
-    if (event) return event;
+    if (event) {
+      const d = new Date();
+      if (event) {
+        const ns = event.filter(
+          (n) => !n.isHidden && new Date(n.time).getTime() > d.getTime()
+        );
+        return ns;
+      }
+      return null;
+    }
     const tag = await Tag.findOne(id, { relations: ["event"] });
-    return tag?.event;
+    const d = new Date();
+    if (tag?.event) {
+      const ns = tag.event.filter(
+        (n) => !n.isHidden && new Date(n.time).getTime() > d.getTime()
+      );
+      return ns;
+    }
+    return null;
   }
 }
 export default TagsResolver;
