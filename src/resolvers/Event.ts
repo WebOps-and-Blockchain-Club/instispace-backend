@@ -261,7 +261,11 @@ class EventResolver {
             : n.staredBy.filter((u) => u.id === user.id).length &&
                 new Date(n.time).getTime() > d.getTime();
         });
-      } else if (fileringConditions && fileringConditions.tags) {
+      } else if (
+        fileringConditions &&
+        fileringConditions.tags &&
+        fileringConditions.tags.length
+      ) {
         eventList = eventList.filter(
           (n) =>
             new Date(n.time).getTime() > d.getTime() &&

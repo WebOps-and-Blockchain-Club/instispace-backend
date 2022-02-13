@@ -619,6 +619,9 @@ type Query {
   """
   getSuperUsers(RolesFilter: [UserRole!]!, skip: Float!, take: Float!): getSuperUsersOutput!
 
+  """Query to Fetch the tag, Restrictions : {anyone who is authorized}"""
+  getTag(Tag: String!): Tag!
+
   """Query to Fetch all the tags, Restrictions : {anyone who is authorized}"""
   getTags: [Tag!]!
 
