@@ -65,7 +65,7 @@ class NetopResolver {
       var tags: Tag[] = [];
       await Promise.all(
         createNetopsInput.tags.map(async (id) => {
-          const tag = await Tag.findOne(id, { relations: ["Netops"] });
+          const tag = await Tag.findOne(id, { relations: ["netops"] });
           if (tag) {
             tags = tags.concat([tag]);
           }
@@ -153,7 +153,7 @@ class NetopResolver {
           let tags: Tag[] = [];
           await Promise.all(
             editNetopsInput.tagIds.map(async (id) => {
-              const tag = await Tag.findOne(id, { relations: ["Netops"] });
+              const tag = await Tag.findOne(id, { relations: ["netops"] });
               if (tag) tags.push(tag);
             })
           );
