@@ -353,8 +353,7 @@ class NetopResolver {
   @Authorized()
   async getNetops(
     @Ctx() { user }: MyContext,
-    @Arg("take") take: number,
-    @Arg("skip") skip: number,
+    @Arg("LastNetopId", { nullable: true }) lastNetopId?: string,
     @Arg("FileringCondition", { nullable: true })
     fileringConditions?: fileringConditions,
     @Arg("OrderByLikes", () => Boolean, { nullable: true })
@@ -411,7 +410,14 @@ class NetopResolver {
         );
       }
 
-      const finalList = netopList.splice(skip, take);
+      var finalList;
+
+      if (lastNetopId) {
+        const index = netopList.map((n) => n.id).indexOf(lastNetopId);
+        finalList = netopList.splice(index + 1);
+      } else {
+        finalList = netopList;
+      }
 
       return { netopList: finalList, total };
     } catch (e) {
@@ -475,13 +481,6 @@ class NetopResolver {
     if (createdBy) return createdBy;
     const netop = await Netop.findOne(id, { relations: ["createdBy"] });
     return netop?.createdBy;
-  }
-
-  @Subscription({ topics: ({ args }) => args.tag }) // here you have to give tag names
-  createNetopS(@Root() netop: Netop, @Arg("tag") tag: string): Netop {
-    //TODO:  we can add and check context here but not needed I think
-    console.log(tag);
-    return netop;
   }
 
   @Subscription({ topics: "NETOP" })
