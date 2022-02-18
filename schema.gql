@@ -668,7 +668,7 @@ type Query {
   getNetop(NetopId: String!): Netop!
 
   """get a list of netops by filer and order conditions"""
-  getNetops(FileringCondition: fileringConditions, LastNetopId: String, OrderByLikes: Boolean): getNetopOutput!
+  getNetops(FileringCondition: fileringConditions, LastNetopId: String!, OrderByLikes: Boolean, take: Float!): getNetopOutput!
   getReports: [Report!]
 
   """
