@@ -668,7 +668,7 @@ type Query {
   getNetop(NetopId: String!): Netop!
 
   """get a list of netops by filer and order conditions"""
-  getNetops(FileringCondition: fileringConditions, OrderByLikes: Boolean, skip: Float!, take: Float!): getNetopOutput!
+  getNetops(FileringCondition: fileringConditions, LastNetopId: String, OrderByLikes: Boolean): getNetopOutput!
   getReports: [Report!]
 
   """
@@ -704,7 +704,6 @@ type Subscription {
   createAnnoucementSubs(hostel: String!): Announcement!
   createEventS(tag: String!): Event!
   createNetop2: Netop!
-  createNetopS(tag: String!): Netop!
 }
 
 """Tag Entity, Users will follow these tags"""
