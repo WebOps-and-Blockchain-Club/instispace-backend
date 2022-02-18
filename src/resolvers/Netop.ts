@@ -353,7 +353,8 @@ class NetopResolver {
   @Authorized()
   async getNetops(
     @Ctx() { user }: MyContext,
-    @Arg("LastNetopId", { nullable: true }) lastNetopId?: string,
+    @Arg("LastNetopId") lastNetopId: string,
+    @Arg("take") take: number,
     @Arg("FileringCondition", { nullable: true })
     fileringConditions?: fileringConditions,
     @Arg("OrderByLikes", () => Boolean, { nullable: true })
@@ -414,7 +415,7 @@ class NetopResolver {
 
       if (lastNetopId) {
         const index = netopList.map((n) => n.id).indexOf(lastNetopId);
-        finalList = netopList.splice(index + 1);
+        finalList = netopList.splice(index + 1, take);
       } else {
         finalList = netopList;
       }

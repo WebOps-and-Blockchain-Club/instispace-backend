@@ -396,7 +396,7 @@ class UsersResolver {
     const announcementObject = new Announcement();
     const eventObject = new Event();
     const filters: fileringConditions = { tags: tagIds!, isStared: false };
-    const netops = (await netopObject.getNetops(myCon,'', filters))
+    const netops = (await netopObject.getNetops(myCon, "", 10, filters))
       .netopList;
     const events = (await eventObject.getEvents(myCon, 100, 0, filters)).list;
     const announcements = (
@@ -432,8 +432,6 @@ class UsersResolver {
       throw new Error(`message : ${e}`);
     }
   }
-
-  
 }
 
 export default UsersResolver;
