@@ -296,7 +296,7 @@ class MyQueryResolver {
   async searchQueries(
     @Arg("search") search: string,
     @Arg("take") take: number,
-    @Arg("skip") skip: number,
+    @Arg("lastEventId") lastEventId: string,
     @Arg("OrderByLikes", () => Boolean, { nullable: true })
     orderByLikes?: Boolean
   ) {
@@ -332,8 +332,15 @@ class MyQueryResolver {
       );
     }
 
-    const querysList = querys.splice(skip, take);
-    return { queryList: querysList, total };
+    var finalList;
+
+    if (lastEventId) {
+      const index = querys.map((n) => n.id).indexOf(lastEventId);
+      finalList = querys.splice(index + 1, take);
+    } else {
+      finalList = querys.splice(0, take);
+    }
+    return { queryList: finalList, total };
   }
 
   @FieldResolver(() => [Comment], {
