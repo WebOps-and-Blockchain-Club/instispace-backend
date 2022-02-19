@@ -248,7 +248,7 @@ class MyQueryResolver {
   @Authorized()
   async getMyQuerys(
     @Arg("take") take: number,
-    @Arg("skip") skip: number,
+    @Arg("lastEventId") lastEventId: string,
     @Arg("OrderByLikes", () => Boolean, { nullable: true })
     orderByLikes?: Boolean
   ) {
@@ -275,7 +275,14 @@ class MyQueryResolver {
         );
       }
 
-      const finalList = myQueryList.splice(skip, take);
+      var finalList;
+
+      if (lastEventId) {
+        const index = myQueryList.map((n) => n.id).indexOf(lastEventId);
+        finalList = myQueryList.splice(index + 1, take);
+      } else {
+        finalList = myQueryList.splice(0, take);
+      }
 
       return { queryList: finalList, total };
     } catch (e) {

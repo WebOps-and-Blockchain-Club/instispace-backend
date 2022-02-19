@@ -238,8 +238,8 @@ class EventResolver {
   @Authorized()
   async getEvents(
     @Ctx() { user }: MyContext,
+    @Arg("lastEventId") lastEventId: string,
     @Arg("take") take: number,
-    @Arg("skip") skip: number,
     @Arg("FileringCondition", { nullable: true })
     fileringConditions?: fileringConditions,
     @Arg("OrderByLikes", () => Boolean, { nullable: true })
@@ -297,9 +297,15 @@ class EventResolver {
         );
       }
 
-      const list = eventList.splice(skip, take);
+      var finalList;
 
-      return { list, total };
+      if (lastEventId) {
+        const index = eventList.map((n) => n.id).indexOf(lastEventId);
+        finalList = eventList.splice(index + 1, take);
+      } else {
+        finalList = eventList.splice(0, take);
+      }
+      return { list: finalList, total };
     } catch (e) {
       throw new Error(e.message);
     }
