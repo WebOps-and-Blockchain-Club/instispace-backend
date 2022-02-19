@@ -417,7 +417,7 @@ class NetopResolver {
         const index = netopList.map((n) => n.id).indexOf(lastNetopId);
         finalList = netopList.splice(index + 1, take);
       } else {
-        finalList = netopList;
+        finalList = netopList.splice(0, take);
       }
 
       return { netopList: finalList, total };
