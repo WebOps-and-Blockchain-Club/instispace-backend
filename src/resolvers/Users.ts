@@ -173,14 +173,20 @@ class UsersResolver {
     UserRole.HOSTEL_SEC,
   ])
   async getSuperUsers(
+    @Arg("LastUserId") lastUserId: string,
     @Arg("take") take: number,
-    @Arg("skip") skip: number,
     @Arg("RolesFilter", () => [UserRole]) roles: [UserRole]
   ) {
     try {
       const superUsers = await User.find({ where: { role: In(roles) } });
       const total = superUsers.length;
-      const superUsersList = superUsers.splice(skip, take);
+      var superUsersList;
+      if (lastUserId) {
+        const index = superUsers.map((n) => n.id).indexOf(lastUserId);
+        superUsersList = superUsers.splice(index + 1, take);
+      } else {
+        superUsersList = superUsers;
+      }
       return { usersList: superUsersList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
@@ -192,13 +198,22 @@ class UsersResolver {
       "Query to fetch ldap Users, Restrictions : {anyone who is authorized}",
   })
   @Authorized()
-  async getUsers(@Arg("take") take: number, @Arg("skip") skip: number) {
+  async getUsers(
+    @Arg("LastUserId") lastUserId: string,
+    @Arg("take") take: number
+  ) {
     try {
       const users = await User.find({
         where: { role: In([UserRole.USER, UserRole.MODERATOR]) },
       });
       const total = users.length;
-      const usersList = users.splice(skip, take);
+      var usersList;
+      if (lastUserId) {
+        const index = users.map((n) => n.id).indexOf(lastUserId);
+        usersList = users.splice(index + 1, take);
+      } else {
+        usersList = users;
+      }
       return { usersList: usersList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
@@ -233,9 +248,9 @@ class UsersResolver {
   @Query(() => searchUsersOutput, { nullable: true })
   @Authorized()
   async searchUser(
+    @Arg("LastUserId") lastUserId: string,
     @Arg("search") search: string,
-    @Arg("take") take: number,
-    @Arg("skip") skip: number
+    @Arg("take") take: number
   ) {
     let users: User[] = [];
     await Promise.all(
@@ -252,7 +267,13 @@ class UsersResolver {
     const uniqueUserStr = new Set(userStr);
     const finalList = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
     const total = finalList.length;
-    const usersList = finalList.splice(skip, take);
+    var usersList;
+    if (lastUserId) {
+      const index = finalList.map((n) => n.id).indexOf(lastUserId);
+      usersList = finalList.splice(index + 1, take);
+    } else {
+      usersList = users;
+    }
     return { usersList: usersList, total };
   }
 
@@ -400,7 +421,7 @@ class UsersResolver {
       .netopList;
     const events = (await eventObject.getEvents(myCon, "", 25, filters)).list;
     const announcements = (
-      await announcementObject.getAnnouncements(100, 0, user!.hostel!.id)
+      await announcementObject.getAnnouncements("", 25, user!.hostel!.id)
     ).announcementsList;
     return { netops, announcements, events };
   }

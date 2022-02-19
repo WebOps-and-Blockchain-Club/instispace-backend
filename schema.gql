@@ -454,11 +454,6 @@ type Mutation {
   deleteAmenity(AmenityId: String!): Boolean!
 
   """
-  Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}
-  """
-  deleteComplaint(ComplaintId: String!, DeleteComplaintInput: DeleteComplaintInput!, ProofImages: [Upload!]): Boolean!
-
-  """
   Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETORY, HAS}
   """
   deleteEvent(EventId: String!): Boolean!
@@ -506,6 +501,11 @@ type Mutation {
   hide Announcement Mutation, Restrictions : {Admin, Hostel Affair Secretory and Hostel secretory }
   """
   resolveAnnouncement(AnnouncementId: String!): Boolean!
+
+  """
+  Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}
+  """
+  resolveComplaint(ComplaintId: String!, DeleteComplaintInput: DeleteComplaintInput!, ProofImages: [Upload!]): Boolean!
 
   """
   Mutation to resolve the item, User who finds his lost entity will update, Restriction : {anyone who is authorised}
@@ -625,12 +625,12 @@ type Query {
   """
   Query to fetch announcements of each hostel, Restrictions : { Admin, Hostel Affair Secretory} 
   """
-  getAllAnnouncements(skip: Float!, take: Float!): getAllAnnouncementsOutput!
+  getAllAnnouncements(LastAnnouncementId: String!, take: Float!): getAllAnnouncementsOutput!
 
   """
   Query to fetch announcements of a particular hostel, Restrictions : { anyone who is authorised } 
   """
-  getAnnouncements(HostelId: String!, skip: Float!, take: Float!): getAnnouncementsOutput!
+  getAnnouncements(HostelId: String!, LastAnnouncementId: String!, take: Float!): getAnnouncementsOutput!
 
   """
   get a list of Complaints sorted by date, ordered by upvotes if true, and order by isResolved(upresolved at the top)
@@ -651,7 +651,7 @@ type Query {
   """
   Query to fetch all the unresolved items, filter by time of creation, Restrictions : {anyone who is authorised}
   """
-  getItems(ItemsFilter: [Category!]!, skip: Float!, take: Float!): getItemsOutput!
+  getItems(ItemsFilter: [Category!]!, LastItemId: String!, take: Float!): getItemsOutput!
 
   """
   Query to fetch personal profile, Restrictions : {anyone who is authoried}
@@ -674,7 +674,7 @@ type Query {
   """
   Query to fetch Super-Users, Restrictions : {Admins, Leads, Moderators, Hostel Affair Secretory and Hostel Secretory}
   """
-  getSuperUsers(RolesFilter: [UserRole!]!, skip: Float!, take: Float!): getSuperUsersOutput!
+  getSuperUsers(LastUserId: String!, RolesFilter: [UserRole!]!, take: Float!): getSuperUsersOutput!
 
   """Query to Fetch the tag, Restrictions : {anyone who is authorized}"""
   getTag(Tag: String!): Tag!
@@ -686,10 +686,10 @@ type Query {
   getUser(GetUserInput: GetUserInput!): User!
 
   """Query to fetch ldap Users, Restrictions : {anyone who is authorized}"""
-  getUsers(skip: Float!, take: Float!): getUsersOutput!
+  getUsers(LastUserId: String!, take: Float!): getUsersOutput!
   isInterested(tag: String!): Boolean!
   searchQueries(OrderByLikes: Boolean, search: String!, skip: Float!, take: Float!): getQueryOutput!
-  searchUser(search: String!, skip: Float!, take: Float!): searchUserOutput
+  searchUser(LastUserId: String!, search: String!, take: Float!): searchUserOutput
 }
 
 type Report {
