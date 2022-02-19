@@ -87,8 +87,8 @@ class AnnouncementResolver {
   })
   @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETORY])
   async getAllAnnouncements(
-    @Arg("take") take: number,
-    @Arg("skip") skip: number
+    @Arg("LastAnnouncementId") lastAnnouncementId: string,
+    @Arg("take") take: number
   ) {
     try {
       const announcements = await Announcement.find({
@@ -96,7 +96,15 @@ class AnnouncementResolver {
         order: { createdAt: "DESC" },
       });
       const total = announcements.length;
-      const announcementsList = announcements.splice(skip, take);
+      var announcementsList;
+      if (lastAnnouncementId) {
+        const index = announcements
+          .map((n) => n.id)
+          .indexOf(lastAnnouncementId);
+        announcementsList = announcements.splice(index + 1, take);
+      } else {
+        announcementsList = announcements;
+      }
       return { announcementsList: announcementsList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
@@ -109,8 +117,8 @@ class AnnouncementResolver {
   })
   @Authorized()
   async getAnnouncements(
+    @Arg("LastAnnouncementId") lastAnnouncementId: string,
     @Arg("take") take: number,
-    @Arg("skip") skip: number,
     @Arg("HostelId") hostelId: string
   ) {
     try {
@@ -124,11 +132,24 @@ class AnnouncementResolver {
         (n) =>
           new Date(n.endTime).getTime() > d.getTime() && n.isHidden === false
       );
+
       const total = announcements?.length;
+
       announcements?.sort((a, b) =>
         a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
       );
-      const announcementsList = announcements?.splice(skip, take);
+
+      var announcementsList;
+
+      if (lastAnnouncementId) {
+        const index = announcements!
+          .map((n) => n.id)
+          .indexOf(lastAnnouncementId);
+        announcementsList = announcements?.splice(index + 1, take);
+      } else {
+        announcementsList = announcements;
+      }
+
       return { announcementsList: announcementsList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
