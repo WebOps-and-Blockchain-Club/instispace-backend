@@ -643,7 +643,7 @@ type Query {
   """
   Get the list of event details with filters, Restrictions:{ AUTHORIZED USER }
   """
-  getEvents(FileringCondition: fileringConditions, OrderByLikes: Boolean, skip: Float!, take: Float!): getEventOutput!
+  getEvents(FileringCondition: fileringConditions, OrderByLikes: Boolean, lastEventId: String!, take: Float!): getEventOutput!
 
   """query to fetch hostels, Restrictions : {anyone who is authorized}"""
   getHostels: [Hostel!]!
@@ -662,7 +662,7 @@ type Query {
   getMyQuery(MyQueryId: String!): MyQuery!
 
   """get a list of myQuerys by filer and order conditions"""
-  getMyQuerys(OrderByLikes: Boolean, skip: Float!, take: Float!): getQueryOutput!
+  getMyQuerys(OrderByLikes: Boolean, lastEventId: String!, take: Float!): getQueryOutput!
 
   """get an netop by id network and opportunity"""
   getNetop(NetopId: String!): Netop!

@@ -396,9 +396,9 @@ class UsersResolver {
     const announcementObject = new Announcement();
     const eventObject = new Event();
     const filters: fileringConditions = { tags: tagIds!, isStared: false };
-    const netops = (await netopObject.getNetops(myCon, "", 10, filters))
+    const netops = (await netopObject.getNetops(myCon, "", 25, filters))
       .netopList;
-    const events = (await eventObject.getEvents(myCon, 100, 0, filters)).list;
+    const events = (await eventObject.getEvents(myCon, "", 25, filters)).list;
     const announcements = (
       await announcementObject.getAnnouncements(100, 0, user!.hostel!.id)
     ).announcementsList;
