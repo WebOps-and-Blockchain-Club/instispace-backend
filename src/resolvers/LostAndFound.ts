@@ -65,8 +65,8 @@ class LostAndFoundResolver {
   })
   @Authorized()
   async getItems(
+    @Arg("LastItemId") lastItemId: string,
     @Arg("take") take: number,
-    @Arg("skip") skip: number,
     @Arg("ItemsFilter", () => [Category]) categories: [Category]
   ) {
     try {
@@ -80,7 +80,13 @@ class LostAndFoundResolver {
           miliSecPerMonth
       );
       const total = filteredItems.length;
-      const itemsList = filteredItems.splice(skip, take);
+      var itemsList;
+      if (lastItemId) {
+        const index = filteredItems.map((n) => n.id).indexOf(lastItemId);
+        itemsList = filteredItems.splice(index + 1, take);
+      } else {
+        itemsList = filteredItems;
+      }
       return { itemsList: itemsList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
