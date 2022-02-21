@@ -173,14 +173,31 @@ class UsersResolver {
     UserRole.HOSTEL_SEC,
   ])
   async getSuperUsers(
+    @Arg("RolesFilter", () => [UserRole]) roles: [UserRole],
     @Arg("LastUserId") lastUserId: string,
     @Arg("take") take: number,
-    @Arg("RolesFilter", () => [UserRole]) roles: [UserRole]
+    @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      const superUsers = await User.find({ where: { role: In(roles) } });
+      let superUsers = await User.find({ where: { role: In(roles) } });
       const total = superUsers.length;
-      var superUsersList;
+      var superUsersList: User[] = [];
+      if (search) {
+        await Promise.all(
+          ["name", "roll"].map(async (field: string) => {
+            const filter = { [field]: Like(`%${search}%`) };
+            const userF = await User.find({
+              where: filter,
+            });
+            userF.forEach((user) => {
+              superUsersList.push(user);
+            });
+          })
+        );
+        const userStr = superUsersList.map((obj) => JSON.stringify(obj));
+        const uniqueItemStr = new Set(userStr);
+        superUsers = Array.from(uniqueItemStr).map((str) => JSON.parse(str));
+      }
       if (lastUserId) {
         const index = superUsers.map((n) => n.id).indexOf(lastUserId);
         superUsersList = superUsers.splice(index + 1, take);
@@ -200,14 +217,30 @@ class UsersResolver {
   @Authorized()
   async getUsers(
     @Arg("LastUserId") lastUserId: string,
-    @Arg("take") take: number
+    @Arg("take") take: number,
+    @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      const users = await User.find({
+      let users = await User.find({
         where: { role: In([UserRole.USER, UserRole.MODERATOR]) },
       });
       const total = users.length;
-      var usersList;
+      var usersList: User[] = [];
+      if (search) {
+        await Promise.all(
+          ["roll", "name"].map(async (field: string) => {
+            const filter = { [field]: Like(`%${search}%`) };
+            const userF = await User.find({ where: filter });
+            userF.forEach((user) => {
+              usersList.push(user);
+            });
+          })
+        );
+
+        const userStr = users.map((obj) => JSON.stringify(obj));
+        const uniqueUserStr = new Set(userStr);
+        users = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
+      }
       if (lastUserId) {
         const index = users.map((n) => n.id).indexOf(lastUserId);
         usersList = users.splice(index + 1, take);
@@ -249,8 +282,8 @@ class UsersResolver {
   @Authorized()
   async searchUser(
     @Arg("LastUserId") lastUserId: string,
-    @Arg("search") search: string,
-    @Arg("take") take: number
+    @Arg("take") take: number,
+    @Arg("search", { nullable: true }) search?: string
   ) {
     let users: User[] = [];
     await Promise.all(

@@ -26,6 +26,7 @@ import {
   getAllAnnouncementsOutput,
   getAnnouncementsOutput,
 } from "../types/objects/announcements";
+import { Like } from "typeorm";
 
 @Resolver((_type) => Announcement)
 class AnnouncementResolver {
@@ -88,15 +89,33 @@ class AnnouncementResolver {
   @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETORY])
   async getAllAnnouncements(
     @Arg("LastAnnouncementId") lastAnnouncementId: string,
-    @Arg("take") take: number
+    @Arg("take") take: number,
+    @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      const announcements = await Announcement.find({
+      let announcements = await Announcement.find({
         where: { isHidden: false },
         order: { createdAt: "DESC" },
       });
       const total = announcements.length;
-      var announcementsList;
+      var announcementsList: Announcement[] = [];
+      if (search) {
+        await Promise.all(
+          ["title"].map(async (field: string) => {
+            const filter = { [field]: Like(`%${search}%`) };
+            const announcementF = await Announcement.find({
+              where: filter,
+              order: { createdAt: "DESC" },
+            });
+            announcementF.forEach((ann) => {
+              announcementsList.push(ann);
+            });
+          })
+        );
+        const annStr = announcementsList.map((obj) => JSON.stringify(obj));
+        const uniqueAnnStr = new Set(annStr);
+        announcements = Array.from(uniqueAnnStr).map((str) => JSON.parse(str));
+      }
       if (lastAnnouncementId) {
         const index = announcements
           .map((n) => n.id)
@@ -119,7 +138,8 @@ class AnnouncementResolver {
   async getAnnouncements(
     @Arg("LastAnnouncementId") lastAnnouncementId: string,
     @Arg("take") take: number,
-    @Arg("HostelId") hostelId: string
+    @Arg("HostelId") hostelId: string,
+    @Arg("search", { nullable: true }) search?: string
   ) {
     try {
       let hostel = await Hostel.findOne({
@@ -128,28 +148,42 @@ class AnnouncementResolver {
       });
 
       const d = new Date();
-      let announcements = hostel?.announcements?.filter(
+      let announcements = hostel?.announcements!.filter(
         (n) =>
           new Date(n.endTime).getTime() > d.getTime() && n.isHidden === false
       );
-
-      const total = announcements?.length;
-
+      if (!announcements) throw new Error("No Announcements Found");
+      const total = announcements.length;
       announcements?.sort((a, b) =>
         a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
       );
 
-      var announcementsList;
-
+      var announcementsList: Announcement[] = [];
+      if (search) {
+        await Promise.all(
+          ["title"].map(async (field: string) => {
+            const filter = { [field]: Like(`%${search}%`) };
+            const announcementF = await Announcement.find({
+              where: filter,
+              order: { createdAt: "DESC" },
+            });
+            announcementF.forEach((ann) => {
+              announcementsList.push(ann);
+            });
+          })
+        );
+        const annStr = announcementsList.map((obj) => JSON.stringify(obj));
+        const uniqueAnnStr = new Set(annStr);
+        announcements = Array.from(uniqueAnnStr).map((str) => JSON.parse(str));
+      }
       if (lastAnnouncementId) {
-        const index = announcements!
+        const index = announcements
           .map((n) => n.id)
           .indexOf(lastAnnouncementId);
-        announcementsList = announcements?.splice(index + 1, take);
+        announcementsList = announcements.splice(index + 1, take);
       } else {
         announcementsList = announcements;
       }
-
       return { announcementsList: announcementsList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);

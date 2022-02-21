@@ -162,10 +162,9 @@ class HostelResolver {
   @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
   async updateHostelContact(
     @Arg("ContactId") contactId: string,
-    @Arg("HostelId", { nullable: true }) hostelId: string,
     @Ctx() { user }: MyContext,
-    @Arg("UpdateContactInput", { nullable: true })
-    contactInput: EditContactInput
+    @Arg("UpdateContactInput") contactInput: EditContactInput,
+    @Arg("HostelId", { nullable: true }) hostelId?: string
   ) {
     try {
       const contact = await Contact.findOne({
@@ -203,8 +202,7 @@ class HostelResolver {
   async updateAmenity(
     @Arg("AmenityId") amenityId: string,
     @Ctx() { user }: MyContext,
-    @Arg("UpdateAmenityInput", { nullable: true })
-    amenityInput: EditAmenityInput
+    @Arg("UpdateAmenityInput") amenityInput: EditAmenityInput
   ) {
     try {
       const amenity = await Amenity.findOne({
