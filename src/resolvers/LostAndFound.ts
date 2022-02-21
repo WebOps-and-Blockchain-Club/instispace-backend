@@ -103,7 +103,7 @@ class LostAndFoundResolver {
         const index = filteredItems.map((n) => n.id).indexOf(lastItemId);
         itemsList = filteredItems.splice(index + 1, take);
       } else {
-        itemsList = filteredItems;
+        itemsList = filteredItems.splice(0, take);
       }
       return { itemsList: itemsList, total };
     } catch (e) {
