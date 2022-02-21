@@ -202,7 +202,7 @@ class UsersResolver {
         const index = superUsers.map((n) => n.id).indexOf(lastUserId);
         superUsersList = superUsers.splice(index + 1, take);
       } else {
-        superUsersList = superUsers;
+        superUsersList = superUsers.splice(0, take);
       }
       return { usersList: superUsersList, total };
     } catch (e) {
@@ -305,7 +305,7 @@ class UsersResolver {
       const index = finalList.map((n) => n.id).indexOf(lastUserId);
       usersList = finalList.splice(index + 1, take);
     } else {
-      usersList = users;
+      usersList = users.splice(0, take);
     }
     return { usersList: usersList, total };
   }

@@ -122,7 +122,7 @@ class AnnouncementResolver {
           .indexOf(lastAnnouncementId);
         announcementsList = announcements.splice(index + 1, take);
       } else {
-        announcementsList = announcements;
+        announcementsList = announcements.splice(0, take);
       }
       return { announcementsList: announcementsList, total };
     } catch (e) {
@@ -182,7 +182,7 @@ class AnnouncementResolver {
           .indexOf(lastAnnouncementId);
         announcementsList = announcements.splice(index + 1, take);
       } else {
-        announcementsList = announcements;
+        announcementsList = announcements.splice(0, take);
       }
       return { announcementsList: announcementsList, total };
     } catch (e) {
