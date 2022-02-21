@@ -13,7 +13,7 @@ import Item from "../entities/Item";
 import { Category, miliSecPerMonth } from "../utils/index";
 import User from "../entities/User";
 import MyContext from "src/utils/context";
-import { In } from "typeorm";
+import { In, Like } from "typeorm";
 import { GraphQLUpload, Upload } from "graphql-upload";
 import addAttachments from "../utils/uploads";
 import getItemsOutput from "../types/objects/items";
@@ -65,22 +65,40 @@ class LostAndFoundResolver {
   })
   @Authorized()
   async getItems(
+    @Arg("ItemsFilter", () => [Category]) categories: [Category],
     @Arg("LastItemId") lastItemId: string,
     @Arg("take") take: number,
-    @Arg("ItemsFilter", () => [Category]) categories: [Category]
+    @Arg("search", { nullable: true }) search?: string
   ) {
     try {
       let items = await Item.find({
         where: { category: In(categories), isResolved: false },
         order: { createdAt: "DESC" },
       });
-      const filteredItems = items.filter(
+      let filteredItems = items.filter(
         (item) =>
           new Date(Date.now()).getTime() - new Date(item.createdAt).getTime() <
           miliSecPerMonth
       );
       const total = filteredItems.length;
-      var itemsList;
+      var itemsList: Item[] = [];
+      if (search) {
+        await Promise.all(
+          ["name", "location"].map(async (field: string) => {
+            const filter = { [field]: Like(`%${search}%`) };
+            const itemF = await Item.find({
+              where: filter,
+              order: { createdAt: "DESC" },
+            });
+            itemF.forEach((item) => {
+              itemsList.push(item);
+            });
+          })
+        );
+        const itemStr = itemsList.map((obj) => JSON.stringify(obj));
+        const uniqueItemStr = new Set(itemStr);
+        filteredItems = Array.from(uniqueItemStr).map((str) => JSON.parse(str));
+      }
       if (lastItemId) {
         const index = filteredItems.map((n) => n.id).indexOf(lastItemId);
         itemsList = filteredItems.splice(index + 1, take);

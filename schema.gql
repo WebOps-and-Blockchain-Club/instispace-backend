@@ -541,12 +541,12 @@ type Mutation {
   """
   Mutation to update Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
   """
-  updateAmenity(AmenityId: String!, UpdateAmenityInput: EditAmenityInput): Boolean!
+  updateAmenity(AmenityId: String!, UpdateAmenityInput: EditAmenityInput!): Boolean!
 
   """
   Mutation to update Hostel-Contact, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
   """
-  updateHostelContact(ContactId: String!, HostelId: String, UpdateContactInput: EditContactInput): Boolean!
+  updateHostelContact(ContactId: String!, HostelId: String, UpdateContactInput: EditContactInput!): Boolean!
 
   """
   Mutation to change Super-Users passwords, Restrictions : {Leads, Hostel Affair Secretory and Hostel Secretory}
@@ -625,12 +625,12 @@ type Query {
   """
   Query to fetch announcements of each hostel, Restrictions : { Admin, Hostel Affair Secretory} 
   """
-  getAllAnnouncements(LastAnnouncementId: String!, take: Float!): getAllAnnouncementsOutput!
+  getAllAnnouncements(LastAnnouncementId: String!, search: String, take: Float!): getAllAnnouncementsOutput!
 
   """
   Query to fetch announcements of a particular hostel, Restrictions : { anyone who is authorised } 
   """
-  getAnnouncements(HostelId: String!, LastAnnouncementId: String!, take: Float!): getAnnouncementsOutput!
+  getAnnouncements(HostelId: String!, LastAnnouncementId: String!, search: String, take: Float!): getAnnouncementsOutput!
 
   """
   get a list of Complaints sorted by date, ordered by upvotes if true, and order by isResolved(upresolved at the top)
@@ -651,7 +651,7 @@ type Query {
   """
   Query to fetch all the unresolved items, filter by time of creation, Restrictions : {anyone who is authorised}
   """
-  getItems(ItemsFilter: [Category!]!, LastItemId: String!, take: Float!): getItemsOutput!
+  getItems(ItemsFilter: [Category!]!, LastItemId: String!, search: String, take: Float!): getItemsOutput!
 
   """
   Query to fetch personal profile, Restrictions : {anyone who is authoried}
@@ -674,7 +674,7 @@ type Query {
   """
   Query to fetch Super-Users, Restrictions : {Admins, Leads, Moderators, Hostel Affair Secretory and Hostel Secretory}
   """
-  getSuperUsers(LastUserId: String!, RolesFilter: [UserRole!]!, take: Float!): getSuperUsersOutput!
+  getSuperUsers(LastUserId: String!, RolesFilter: [UserRole!]!, search: String, take: Float!): getSuperUsersOutput!
 
   """Query to Fetch the tag, Restrictions : {anyone who is authorized}"""
   getTag(Tag: String!): Tag!
@@ -686,10 +686,10 @@ type Query {
   getUser(GetUserInput: GetUserInput!): User!
 
   """Query to fetch ldap Users, Restrictions : {anyone who is authorized}"""
-  getUsers(LastUserId: String!, take: Float!): getUsersOutput!
+  getUsers(LastUserId: String!, search: String, take: Float!): getUsersOutput!
   isInterested(tag: String!): Boolean!
-  searchQueries(OrderByLikes: Boolean, search: String!, skip: Float!, take: Float!): getQueryOutput!
-  searchUser(LastUserId: String!, search: String!, take: Float!): searchUserOutput
+  searchQueries(OrderByLikes: Boolean, lastEventId: String!, search: String!, take: Float!): getQueryOutput!
+  searchUser(LastUserId: String!, search: String, take: Float!): searchUserOutput
 }
 
 type Report {
