@@ -27,6 +27,7 @@ import { UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
+import { Like } from "typeorm";
 
 @Resolver(Netop)
 class NetopResolver {
@@ -358,14 +359,33 @@ class NetopResolver {
     @Arg("FileringCondition", { nullable: true })
     fileringConditions?: fileringConditions,
     @Arg("OrderByLikes", () => Boolean, { nullable: true })
-    orderByLikes?: Boolean
+    orderByLikes?: Boolean,
+    @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      var netopList = await Netop.find({
-        where: { isHidden: false },
-        relations: ["tags", "likedBy", "staredBy"],
-        order: { createdAt: "DESC" },
-      });
+      var netopList: Netop[] = [];
+
+      if (search) {
+        await Promise.all(
+          ["title"].map(async (field: string) => {
+            const filter = { [field]: Like(`%${search}%`) };
+            const netopF = await Netop.find({
+              where: filter,
+              relations: ["tags", "likedBy", "staredBy"],
+              order: { createdAt: "DESC" },
+            });
+            netopF.forEach((netop) => {
+              netopList.push(netop);
+            });
+          })
+        );
+      } else {
+        netopList = await Netop.find({
+          where: { isHidden: false },
+          relations: ["tags", "likedBy", "staredBy"],
+          order: { createdAt: "DESC" },
+        });
+      }
 
       const d = new Date();
       if (fileringConditions && fileringConditions.isStared) {
@@ -395,7 +415,7 @@ class NetopResolver {
         );
       }
 
-      const total = netopList.length;
+      let total = netopList.length;
 
       if (orderByLikes) {
         netopList.sort((a, b) =>

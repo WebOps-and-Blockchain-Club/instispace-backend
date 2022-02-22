@@ -250,14 +250,32 @@ class MyQueryResolver {
     @Arg("take") take: number,
     @Arg("lastEventId") lastEventId: string,
     @Arg("OrderByLikes", () => Boolean, { nullable: true })
-    orderByLikes?: Boolean
+    orderByLikes?: Boolean,
+    @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      var myQueryList = await MyQuery.find({
-        where: { isHidden: false },
-        relations: ["likedBy"],
-        order: { createdAt: "DESC" },
-      });
+      var myQueryList: MyQuery[] = [];
+      if (search) {
+        await Promise.all(
+          ["title"].map(async (field: string) => {
+            const filter = { [field]: Like(`%${search}%`) };
+            const queryF = await MyQuery.find({
+              where: filter,
+              relations: ["likedBy"],
+              order: { createdAt: "DESC" },
+            });
+            queryF.forEach((query) => {
+              myQueryList.push(query);
+            });
+          })
+        );
+      } else {
+        myQueryList = await MyQuery.find({
+          where: { isHidden: false },
+          relations: ["likedBy"],
+          order: { createdAt: "DESC" },
+        });
+      }
 
       const total = myQueryList.length;
 
