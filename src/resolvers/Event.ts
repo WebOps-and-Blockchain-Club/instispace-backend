@@ -22,6 +22,7 @@ import User from "../entities/User";
 import Event from "../entities/Event";
 import { createEventInput, editEventInput } from "../types/inputs/event";
 import getEventOutput from "../types/objects/event";
+import { Like } from "typeorm";
 
 @Resolver(Event)
 class EventResolver {
@@ -243,14 +244,33 @@ class EventResolver {
     @Arg("FileringCondition", { nullable: true })
     fileringConditions?: fileringConditions,
     @Arg("OrderByLikes", () => Boolean, { nullable: true })
-    orderByLikes?: Boolean
+    orderByLikes?: Boolean,
+    @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      var eventList = await Event.find({
-        where: { isHidden: false },
-        relations: ["tags", "likedBy", "staredBy"],
-        order: { createdAt: "DESC" },
-      });
+      var eventList: Event[] = [];
+
+      if (search) {
+        await Promise.all(
+          ["title"].map(async (field: string) => {
+            const filter = { [field]: Like(`%${search}%`) };
+            const eventF = await Event.find({
+              where: filter,
+              relations: ["tags", "likedBy", "staredBy"],
+              order: { createdAt: "DESC" },
+            });
+            eventF.forEach((event) => {
+              eventList.push(event);
+            });
+          })
+        );
+      } else {
+        eventList = await Event.find({
+          where: { isHidden: false },
+          relations: ["tags", "likedBy", "staredBy"],
+          order: { createdAt: "DESC" },
+        });
+      }
 
       const d = new Date();
       d.setHours(d.getHours() - 2); //Filter the events after the 2 hours time of completion
