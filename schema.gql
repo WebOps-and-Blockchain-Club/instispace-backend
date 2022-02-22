@@ -643,7 +643,7 @@ type Query {
   """
   Get the list of event details with filters, Restrictions:{ AUTHORIZED USER }
   """
-  getEvents(FileringCondition: fileringConditions, OrderByLikes: Boolean, lastEventId: String!, take: Float!): getEventOutput!
+  getEvents(FileringCondition: fileringConditions, OrderByLikes: Boolean, lastEventId: String!, search: String, take: Float!): getEventOutput!
 
   """query to fetch hostels, Restrictions : {anyone who is authorized}"""
   getHostels: [Hostel!]!
