@@ -95,8 +95,17 @@ class UsersResolver {
         }
         //If user exists
         else {
+          console.log("I am here");
+          user.fcmToken = fcmToken;
+          await user.save();
+          console.log(user.fcmToken);
           const token = jwt.sign(user.id, process.env.JWT_SECRET!);
-          return { isNewUser: user.isNewUser, role: user.role, token };
+          return {
+            isNewUser: user.isNewUser,
+            role: user.role,
+            token,
+            fcmToken: user.fcmToken,
+          };
         }
       }
       //For admins and leads
@@ -108,6 +117,7 @@ class UsersResolver {
             admin.roll = adminEmail;
             admin.role = UserRole.ADMIN;
             admin.isNewUser = false;
+            admin.fcmToken = fcmToken;
             admin.password = await bcrypt.hash(adminPassword, salt);
             await admin.save();
           }
@@ -452,15 +462,17 @@ class UsersResolver {
       user: user!,
     };
 
+    console.log("Inside home", user?.fcmToken);
+
     var message = {
       to: user?.fcmToken,
       notification: {
         title: `Hi ${user?.name}`,
-        body: "welcome to the app",
+        body: "welcome to the app made by janith",
       },
     };
 
-    fcm.send(message, (err: any, response: any) => {
+    await fcm.send(message, (err: any, response: any) => {
       if (err) {
         console.log("Something has gone wrong!" + err);
         console.log("Respponse:! " + response);
