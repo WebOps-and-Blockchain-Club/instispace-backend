@@ -78,11 +78,15 @@ class User extends BaseEntity {
   @Field({ nullable: true, description: "LDAP User's Phone number" })
   mobile: string;
 
-  @Column({ type: "boolean" })
+  @Column({ type: Boolean })
   @Field((_type) => Boolean, {
     description: "This Field determines if User is a new User or not!",
   })
   isNewUser: Boolean;
+
+  @Column({ type: String, nullable: true })
+  @Field((_type) => String)
+  fcmToken: String;
 
   @ManyToMany((_type) => Tag, (interest) => interest.users, { nullable: true })
   @Field((_type) => [Tag], {
