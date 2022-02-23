@@ -492,7 +492,7 @@ type Mutation {
   editNetop(Attachments: [Upload!], EditNetopsData: editNetopsInput!, Image: Upload, NetopId: String!): Boolean!
 
   """Mutation to login, Restrictions : {none}"""
-  login(LoginInputs: LoginInput!): LoginOutput!
+  login(LoginInputs: LoginInput!, fcmToken: String!): LoginOutput!
   removeMyQuery(MyQueryId: String!): Boolean!
   removeNetop(NetopId: String!): Boolean!
 
@@ -741,6 +741,7 @@ type User {
   announcements: [Announcement!]
   complaints: Complaint
   complaintsUpvoted: Complaint
+  fcmToken: String!
   getHome: homeOutput
 
   """User's Hostel amd its details"""

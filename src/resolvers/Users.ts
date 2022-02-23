@@ -46,13 +46,17 @@ import NetopResolver from "./Netop";
 import { fileringConditions } from "../types/inputs/netop";
 import Announcement from "./Announcement";
 import Event from "./Event";
+import fcm from "../utils/fcmTokens";
 
 @Resolver((_type) => User)
 class UsersResolver {
   @Mutation(() => LoginOutput, {
     description: "Mutation to login, Restrictions : {none}",
   })
-  async login(@Arg("LoginInputs") { roll, pass }: LoginInput) {
+  async login(
+    @Arg("LoginInputs") { roll, pass }: LoginInput,
+    @Arg("fcmToken") fcmToken: string
+  ) {
     /************ Checking the user credentials ************/
     //For users
     try {
@@ -84,6 +88,7 @@ class UsersResolver {
           newUser.roll = roll;
           newUser.role = UserRole.USER;
           newUser.isNewUser = true;
+          newUser.fcmToken = fcmToken;
           await newUser.save();
           const token = jwt.sign(newUser.id, process.env.JWT_SECRET!);
           return { isNewUser: newUser.isNewUser, role: UserRole.USER, token };
@@ -446,6 +451,25 @@ class UsersResolver {
     const myCon: MyContext = {
       user: user!,
     };
+
+    var message = {
+      to: user?.fcmToken,
+      notification: {
+        title: `Hi ${user?.name}`,
+        body: "welcome to the app",
+      },
+    };
+
+    fcm.send(message, (err: any, response: any) => {
+      if (err) {
+        console.log("Something has gone wrong!" + err);
+        console.log("Respponse:! " + response);
+      } else {
+        // showToast("Successfully sent with response");
+        console.log("Successfully sent with response: ", response);
+      }
+    });
+
     const netopObject = new NetopResolver();
     const announcementObject = new Announcement();
     const eventObject = new Event();
