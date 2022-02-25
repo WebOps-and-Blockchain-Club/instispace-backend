@@ -1,6 +1,6 @@
 const FCM = require("fcm-node");
 const serverKey =
-  "AAAAy4xqH0o:APA91bE8erYvlvDquQ-UaBkY0gCVpxxX2Z9gsYQkJLTpMe2wc2bx-LQohu2PYGRxiMkjHNzTC7cr9hEB8_e-aWYllFhwnT6vjCR7D-zNFXuOAC0yfFFB8t9HuYxFOiEGfGIzS0HTiLzK";
+  "AAAAy4xqH0o:APA91bHBv0gMwFxMlzkrfO7tiP134mO4PqfxbordRfNIbs8A2W2zmkm0BNU95bqcpYLJjtQNJ7d-_kQ1WI6gzevlM8GVLxHLpKsOZDvH_xFW_IozQE93f3bGWQ35QYDghi9vH8pOPLdy";
 var fcm = new FCM(serverKey);
 
 export default fcm;

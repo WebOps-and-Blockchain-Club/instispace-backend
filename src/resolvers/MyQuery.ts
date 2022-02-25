@@ -20,6 +20,7 @@ import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
 import { Like } from "typeorm";
+import fcm from "../utils/fcmTokens";
 
 @Resolver(MyQuery)
 class MyQueryResolver {
@@ -197,7 +198,7 @@ class MyQueryResolver {
   ) {
     try {
       const myQuery = await MyQuery.findOne(myQueryId, {
-        relations: ["comments"],
+        relations: ["comments", "createdBy"],
       });
       if (myQuery) {
         const comment = await Comment.create({
@@ -205,6 +206,27 @@ class MyQueryResolver {
           query: myQuery,
           createdBy: user,
         }).save();
+
+        const creator = myQuery.createdBy;
+
+        var message = {
+          to: creator.fcmToken,
+          notification: {
+            title: `Hi ${user?.name}`,
+            body: "your query got responsed",
+          },
+        };
+
+        await fcm.send(message, (err: any, response: any) => {
+          if (err) {
+            console.log("Something has gone wrong!" + err);
+            console.log("Respponse:! " + response);
+          } else {
+            // showToast("Successfully sent with response");
+            console.log("Successfully sent with response: ", response);
+          }
+        });
+
         return !!comment;
       }
       throw new Error("Post not found");

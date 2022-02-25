@@ -4,8 +4,6 @@ import {
   Ctx,
   FieldResolver,
   Mutation,
-  PubSub,
-  PubSubEngine,
   Query,
   Resolver,
   Root,
@@ -28,6 +26,7 @@ import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
 import { Like } from "typeorm";
+import fcm from "../utils/fcmTokens";
 
 @Resolver(Netop)
 class NetopResolver {
@@ -55,7 +54,7 @@ class NetopResolver {
   })
   @Authorized()
   async createNetop(
-    @PubSub() pubSub: PubSubEngine,
+    // @PubSub() pubSub: PubSubEngine,
     @Arg("NewEventData") createNetopsInput: createNetopsInput,
     @Ctx() { user }: MyContext,
     @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload,
@@ -63,12 +62,14 @@ class NetopResolver {
     attachments?: Upload[]
   ): Promise<boolean> {
     try {
+      let iUsers: User[] = [];
       var tags: Tag[] = [];
       await Promise.all(
         createNetopsInput.tags.map(async (id) => {
-          const tag = await Tag.findOne(id, { relations: ["netops"] });
+          const tag = await Tag.findOne(id, { relations: ["netops", "users"] });
           if (tag) {
             tags = tags.concat([tag]);
+            iUsers = iUsers.concat(tag.users);
           }
         })
       );
@@ -91,18 +92,58 @@ class NetopResolver {
         tags,
       }).save();
 
-      const payload = netop;
-      let isUserInterested: boolean | undefined = false;
+      // const payload = netop;
+      // let isUserInterested: boolean | undefined = false;
+      // await Promise.all(
+      //   tags.map(async (t) => {
+      //     isUserInterested = await this.isInterested({ user }, t.id);
+      //   })
+      // );
+      // console.log(isUserInterested);
+
+      // if (isUserInterested) {
+      //   await pubSub.publish("NETOP", payload);
+      // }
+
+      // var message = {
+      //   to: "fE4SNMUBTPWD_2hPpmpEV3:APA91bFqGNzM2uWdElL2Qfg6ilirQ8s2uYhGUw4Ae-MWkMEAxP9bBzVyQvF60Gj9BrSQGy6RsZajeToloRqC35j1z6pCuUvJruQ6bqvrTm5bC_3l_lIstrKUR4pjkmWDJSEZJeCxkx25",
+      //   notification: {
+      //     title: `Hi ${user?.name}`,
+      //     body: "you may interested",
+      //   },
+      // };
+
+      // await fcm.send(message, (err: any, response: any) => {
+      //   if (err) {
+      //     console.log("Something has gone wrong!" + err);
+      //     console.log("Respponse:! " + response);
+      //   } else {
+      //     // showToast("Successfully sent with response");
+      //     console.log("Successfully sent with response: ", response);
+      //   }
+      // });
+
       await Promise.all(
-        tags.map(async (t) => {
-          isUserInterested = await this.isInterested({ user }, t.id);
+        iUsers.map(async (u) => {
+          var message = {
+            to: u.fcmToken,
+            notification: {
+              title: `Hi ${user?.name}`,
+              body: "you may interested",
+            },
+          };
+
+          await fcm.send(message, (err: any, response: any) => {
+            if (err) {
+              console.log("Something has gone wrong!" + err);
+              console.log("Respponse:! " + response);
+            } else {
+              // showToast("Successfully sent with response");
+              console.log("Successfully sent with response: ", response);
+            }
+          });
         })
       );
-      console.log(isUserInterested);
-
-      if (isUserInterested) {
-        await pubSub.publish("NETOP", payload);
-      }
 
       return !!netop;
     } catch (e) {

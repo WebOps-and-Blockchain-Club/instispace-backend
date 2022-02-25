@@ -468,7 +468,7 @@ class UsersResolver {
       to: user?.fcmToken,
       notification: {
         title: `Hi ${user?.name}`,
-        body: "welcome to the app made by janith",
+        body: "welcome to the app",
       },
     };
 
