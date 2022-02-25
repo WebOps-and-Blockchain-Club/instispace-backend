@@ -23,6 +23,7 @@ import Event from "../entities/Event";
 import { createEventInput, editEventInput } from "../types/inputs/event";
 import getEventOutput from "../types/objects/event";
 import { Like } from "typeorm";
+import fcm from "../utils/fcmTokens";
 
 @Resolver(Event)
 class EventResolver {
@@ -45,10 +46,14 @@ class EventResolver {
   ): Promise<boolean> {
     try {
       var tags: Tag[] = [];
+      let iUsers: User[] = [];
       await Promise.all(
         createEventInput.tagIds.map(async (id) => {
           const tag = await Tag.findOne(id, { relations: ["event"] });
-          if (tag) tags = tags.concat([tag]);
+          if (tag) {
+            tags = tags.concat([tag]);
+            iUsers = iUsers.concat(tag.users);
+          }
         })
       );
       if (tags.length !== createEventInput.tagIds.length)
@@ -72,6 +77,28 @@ class EventResolver {
       tags.forEach(async (t) => {
         await pubSub.publish(t.title, payload);
       });
+
+      await Promise.all(
+        iUsers.map(async (u) => {
+          var message = {
+            to: u.fcmToken,
+            notification: {
+              title: `Hi ${user?.name}`,
+              body: "you may interested",
+            },
+          };
+
+          await fcm.send(message, (err: any, response: any) => {
+            if (err) {
+              console.log("Something has gone wrong!" + err);
+              console.log("Respponse:! " + response);
+            } else {
+              // showToast("Successfully sent with response");
+              console.log("Successfully sent with response: ", response);
+            }
+          });
+        })
+      );
 
       return !!event;
     } catch (e) {
