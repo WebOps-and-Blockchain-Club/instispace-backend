@@ -363,7 +363,7 @@ class NetopResolver {
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      var netopList: Netop[] = [];
+      let netopList: Netop[] = [];
 
       if (search) {
         await Promise.all(

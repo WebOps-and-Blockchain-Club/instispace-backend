@@ -51,8 +51,8 @@ class ComplaintResolver {
 
       complaint.category = complaintInput.category;
 
-      complaint.save();
-      return !!complaint;
+      const complaintCreated = await complaint.save();
+      return !!complaintCreated;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -72,9 +72,15 @@ class ComplaintResolver {
     orderByIsResolved?: Boolean
   ) {
     try {
+      //add one more column to keep track of resolved complaint time
       var complaints = await Complaint.find({
         relations: ["upvotedBy"],
       });
+      //filter cond. resolved, unresolved or both
+
+      complaints.sort((a, b) =>
+        a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+      );
 
       if (orderByUpvotes) {
         complaints.sort((a, b) =>
@@ -95,10 +101,6 @@ class ComplaintResolver {
             : 0
         );
       }
-
-      complaints.sort((a, b) =>
-        a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
-      );
 
       const total = complaints.length;
       const complaintsLists = complaints.splice(skip, take);
@@ -159,17 +161,18 @@ class ComplaintResolver {
       const complaint = await Complaint.findOne(complaintId, {
         relations: ["upvotedBy"],
       });
+      let complaintsUpvoted;
       if (complaint) {
         if (complaint.upvotedBy.filter((u) => u.id === user.id).length) {
           complaint.upvotedBy = complaint.upvotedBy.filter(
             (e) => e.id !== user.id
           );
-          await complaint.save();
         } else {
           complaint.upvotedBy.push(user);
-          await complaint.save();
         }
-        return !!complaint;
+        complaintsUpvoted = await complaint.save();
+
+        return !!complaintsUpvoted;
       } else {
         throw new Error("Invalid complaint id");
       }
@@ -184,7 +187,7 @@ class ComplaintResolver {
       "Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}",
   })
   @Authorized([UserRole.HAS, UserRole.HOSTEL_SEC, UserRole.SECRETORY])
-  async deleteComplaint(
+  async resolveComplaint(
     @Arg("DeleteComplaintInput") complaintInput: DeleteComplaintInput,
     @Arg("ComplaintId") complaintId: string,
     @Ctx() { user }: MyContext,

@@ -38,12 +38,16 @@ const main = async () => {
     context: async ({ req }: { req: any }) => {
       let user;
       if (req.headers.authorization) {
-        const token = req.headers.authorization;
-        const decoded: any = jwt.verify(
-          token.split("Bearer ")[1],
-          process.env.JWT_SECRET!
-        );
-        user = await User.findOne({ id: decoded });
+        try {
+          const token = req.headers.authorization;
+          const decoded: any = jwt.verify(
+            token.split("Bearer ")[1],
+            process.env.JWT_SECRET!
+          );
+          user = await User.findOne({ id: decoded });
+        } catch (e) {
+          console.log(`message ${e}`);
+        }
       }
       return { user: user };
     },

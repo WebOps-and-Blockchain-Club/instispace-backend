@@ -52,8 +52,8 @@ class LostAndFoundResolver {
       item.category = itemInput.category;
       item.user = user;
 
-      await item.save();
-      return !!item;
+      const itemCreated = await item.save();
+      return !!itemCreated;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -71,17 +71,7 @@ class LostAndFoundResolver {
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      let items = await Item.find({
-        where: { category: In(categories), isResolved: false },
-        order: { createdAt: "DESC" },
-      });
-      let filteredItems = items.filter(
-        (item) =>
-          new Date(Date.now()).getTime() - new Date(item.createdAt).getTime() <
-          miliSecPerMonth
-      );
-      const total = filteredItems.length;
-      var itemsList: Item[] = [];
+      let itemsList: Item[] = [];
       if (search) {
         await Promise.all(
           ["name", "location"].map(async (field: string) => {
@@ -97,13 +87,24 @@ class LostAndFoundResolver {
         );
         const itemStr = itemsList.map((obj) => JSON.stringify(obj));
         const uniqueItemStr = new Set(itemStr);
-        filteredItems = Array.from(uniqueItemStr).map((str) => JSON.parse(str));
-      }
-      if (lastItemId) {
-        const index = filteredItems.map((n) => n.id).indexOf(lastItemId);
-        itemsList = filteredItems.splice(index + 1, take);
+        itemsList = Array.from(uniqueItemStr).map((str) => JSON.parse(str));
       } else {
-        itemsList = filteredItems.splice(0, take);
+        itemsList = await Item.find({
+          where: { category: In(categories), isResolved: false },
+          order: { createdAt: "DESC" },
+        });
+      }
+      itemsList = itemsList.filter(
+        (item) =>
+          new Date(Date.now()).getTime() - new Date(item.createdAt).getTime() <
+          miliSecPerMonth
+      );
+      const total = itemsList.length;
+      if (lastItemId) {
+        const index = itemsList.map((n) => n.id).indexOf(lastItemId);
+        itemsList = itemsList.splice(index + 1, take);
+      } else {
+        itemsList = itemsList.splice(0, take);
       }
       return { itemsList: itemsList, total };
     } catch (e) {
