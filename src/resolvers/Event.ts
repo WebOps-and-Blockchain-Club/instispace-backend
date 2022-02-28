@@ -224,6 +224,7 @@ class EventResolver {
       });
 
       const d = new Date();
+      d.setHours(d.getHours() - 2);
       if (event && new Date(event.time).getTime() > d.getTime()) return event;
       else return null;
     } catch (e) {
