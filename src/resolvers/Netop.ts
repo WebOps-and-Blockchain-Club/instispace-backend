@@ -418,7 +418,7 @@ class NetopResolver {
       const d = new Date();
       if (fileringConditions && fileringConditions.isStared) {
         netopList = netopList.filter((n) => {
-          return fileringConditions.tags
+          return fileringConditions.tags && fileringConditions.tags.length
             ? n.staredBy.filter((u) => u.id === user.id).length &&
                 new Date(n.endTime).getTime() > d.getTime() &&
                 n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))

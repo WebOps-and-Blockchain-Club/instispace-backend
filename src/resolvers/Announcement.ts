@@ -11,8 +11,6 @@ import {
   Ctx,
   FieldResolver,
   Mutation,
-  PubSub,
-  PubSubEngine,
   Query,
   Resolver,
   Root,
@@ -27,6 +25,7 @@ import {
   getAnnouncementsOutput,
 } from "../types/objects/announcements";
 import { Like } from "typeorm";
+import fcm from "../utils/fcmTokens";
 
 @Resolver((_type) => Announcement)
 class AnnouncementResolver {
@@ -41,7 +40,6 @@ class AnnouncementResolver {
     UserRole.SECRETORY,
   ])
   async createAnnouncement(
-    @PubSub() pubSub: PubSubEngine,
     @Ctx() { user }: MyContext,
     @Arg("AnnouncementInput")
     announcementInput: CreateAnnouncementInput,
@@ -49,10 +47,14 @@ class AnnouncementResolver {
   ) {
     try {
       let hostels: Hostel[] = [];
+      let iUsers: User[] = [];
       await Promise.all(
         announcementInput.hostelIds.map(async (id) => {
-          const hostel = await Hostel.findOne(id);
-          if (hostel) hostels.push(hostel);
+          const hostel = await Hostel.findOne(id, { relations: ["users"] });
+          if (hostel) {
+            hostels.push(hostel);
+            iUsers = iUsers.concat(hostel.users);
+          }
         })
       );
 
@@ -71,10 +73,27 @@ class AnnouncementResolver {
 
       const announcementCreated = await announcement.save();
 
-      const payload = announcement;
-      hostels.forEach((h) => {
-        pubSub.publish(h.name, payload);
-      });
+      await Promise.all(
+        iUsers.map(async (u) => {
+          const message = {
+            to: u.fcmToken,
+            notification: {
+              title: `announcement`,
+              body: "your hostel's new announcement",
+            },
+          };
+
+          await fcm.send(message, (err: any, response: any) => {
+            if (err) {
+              console.log("Something has gone wrong!" + err);
+              console.log("Respponse:! " + response);
+            } else {
+              // showToast("Successfully sent with response");
+              console.log("Successfully sent with response: ", response);
+            }
+          });
+        })
+      );
 
       return !!announcementCreated;
     } catch (e) {
