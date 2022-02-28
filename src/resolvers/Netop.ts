@@ -7,7 +7,6 @@ import {
   Query,
   Resolver,
   Root,
-  Subscription,
 } from "type-graphql";
 
 import MyContext from "../utils/context";
@@ -30,24 +29,6 @@ import fcm from "../utils/fcmTokens";
 
 @Resolver(Netop)
 class NetopResolver {
-  @Query(() => Boolean)
-  async isInterested(@Ctx() { user }: MyContext, @Arg("tag") tag: string) {
-    if (user.interest) {
-      user.interest.filter((interest) => {
-        console.log(interest.id, tag);
-        return interest.id == tag;
-      });
-      return !!user;
-    } else {
-      const u = await User.findOne(user.id, { relations: ["interest"] });
-      var t = u?.interest?.filter((interest) => {
-        console.log(interest.id, tag);
-        return interest.id == tag;
-      });
-      return !!t;
-    }
-  }
-
   @Mutation(() => Boolean, {
     description:
       "create network and opportunity, Restrictions:{any authorized user}",
@@ -92,40 +73,9 @@ class NetopResolver {
         tags,
       }).save();
 
-      // const payload = netop;
-      // let isUserInterested: boolean | undefined = false;
-      // await Promise.all(
-      //   tags.map(async (t) => {
-      //     isUserInterested = await this.isInterested({ user }, t.id);
-      //   })
-      // );
-      // console.log(isUserInterested);
-
-      // if (isUserInterested) {
-      //   await pubSub.publish("NETOP", payload);
-      // }
-
-      // var message = {
-      //   to: "fE4SNMUBTPWD_2hPpmpEV3:APA91bFqGNzM2uWdElL2Qfg6ilirQ8s2uYhGUw4Ae-MWkMEAxP9bBzVyQvF60Gj9BrSQGy6RsZajeToloRqC35j1z6pCuUvJruQ6bqvrTm5bC_3l_lIstrKUR4pjkmWDJSEZJeCxkx25",
-      //   notification: {
-      //     title: `Hi ${user?.name}`,
-      //     body: "you may interested",
-      //   },
-      // };
-
-      // await fcm.send(message, (err: any, response: any) => {
-      //   if (err) {
-      //     console.log("Something has gone wrong!" + err);
-      //     console.log("Respponse:! " + response);
-      //   } else {
-      //     // showToast("Successfully sent with response");
-      //     console.log("Successfully sent with response: ", response);
-      //   }
-      // });
-
       await Promise.all(
         iUsers.map(async (u) => {
-          var message = {
+          const message = {
             to: u.fcmToken,
             notification: {
               title: `Hi ${user?.name}`,
@@ -318,6 +268,29 @@ class NetopResolver {
           description,
           createdBy: user,
         }).save();
+
+        netop.isHidden = true;
+        await netop.save();
+
+        const creator = report.createdBy;
+
+        const message = {
+          to: creator.fcmToken,
+          notification: {
+            title: `Hi ${creator.name}`,
+            body: "Your netop got reported!!! contact admin for more info",
+          },
+        };
+
+        await fcm.send(message, (err: any, response: any) => {
+          if (err) {
+            console.log("Something has gone wrong!" + err);
+            console.log("Respponse:! " + response);
+          } else {
+            // showToast("Successfully sent with response");
+            console.log("Successfully sent with response: ", response);
+          }
+        });
         return !!report;
       } else {
         return false;
@@ -367,6 +340,20 @@ class NetopResolver {
   async removeNetop(@Arg("NetopId") netopId: string) {
     let { affected } = await Netop.update(netopId, { isHidden: true });
     return affected === 1;
+  }
+
+  @Mutation(() => Boolean)
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.LEADS,
+    UserRole.HAS,
+    UserRole.SECRETORY,
+    UserRole.HOSTEL_SEC,
+    UserRole.MODERATOR,
+  ])
+  async resolveReportNetop(@Arg("NetopId") netopId: string) {
+    const update = await Netop.update(netopId, { isHidden: false });
+    return update && true;
   }
 
   @Query(() => Netop, {
@@ -543,12 +530,6 @@ class NetopResolver {
     if (createdBy) return createdBy;
     const netop = await Netop.findOne(id, { relations: ["createdBy"] });
     return netop?.createdBy;
-  }
-
-  @Subscription({ topics: "NETOP" })
-  createNetop2(@Root() netop: Netop): Netop {
-    console.log(netop.title);
-    return netop;
   }
 }
 
