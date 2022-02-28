@@ -13,7 +13,7 @@ import Item from "../entities/Item";
 import { Category, miliSecPerMonth } from "../utils/index";
 import User from "../entities/User";
 import MyContext from "src/utils/context";
-import { In, Like } from "typeorm";
+import { ILike, In } from "typeorm";
 import { GraphQLUpload, Upload } from "graphql-upload";
 import addAttachments from "../utils/uploads";
 import getItemsOutput from "../types/objects/items";
@@ -75,7 +75,7 @@ class LostAndFoundResolver {
       if (search) {
         await Promise.all(
           ["name", "location"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const itemF = await Item.find({
               where: filter,
               order: { createdAt: "DESC" },

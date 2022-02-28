@@ -512,7 +512,7 @@ type Mutation {
   """
   resolveItem(ItemId: String!): Boolean!
 
-  """Like or Unlike the event, Restrictions:{ AUTHORIZED USER }"""
+  """ILike or Unlike the event, Restrictions:{ AUTHORIZED USER }"""
   toggleLikeEvent(EventId: String!): Boolean!
 
   """

@@ -26,7 +26,7 @@ import {
   getAllAnnouncementsOutput,
   getAnnouncementsOutput,
 } from "../types/objects/announcements";
-import { Like } from "typeorm";
+import { ILike } from "typeorm";
 
 @Resolver((_type) => Announcement)
 class AnnouncementResolver {
@@ -97,7 +97,7 @@ class AnnouncementResolver {
       if (search) {
         await Promise.all(
           ["title"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const announcementF = await Announcement.find({
               where: filter,
               order: { createdAt: "DESC" },
@@ -148,7 +148,7 @@ class AnnouncementResolver {
       if (search) {
         await Promise.all(
           ["title"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const announcementF = await Announcement.find({
               where: filter,
               order: { createdAt: "DESC" },
