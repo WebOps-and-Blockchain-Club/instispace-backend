@@ -511,6 +511,8 @@ type Mutation {
   Mutation to resolve the item, User who finds his lost entity will update, Restriction : {anyone who is authorised}
   """
   resolveItem(ItemId: String!): Boolean!
+  resolveReportMyQuery(MyQueryId: String!): Boolean!
+  resolveReportNetop(NetopId: String!): Boolean!
 
   """Like or Unlike the event, Restrictions:{ AUTHORIZED USER }"""
   toggleLikeEvent(EventId: String!): Boolean!
@@ -687,7 +689,6 @@ type Query {
 
   """Query to fetch ldap Users, Restrictions : {anyone who is authorized}"""
   getUsers(LastUserId: String!, search: String, take: Float!): getUsersOutput!
-  isInterested(tag: String!): Boolean!
   searchQueries(OrderByLikes: Boolean, lastEventId: String!, search: String!, take: Float!): getQueryOutput!
   searchUser(LastUserId: String!, search: String, take: Float!): searchUserOutput
 }
@@ -703,7 +704,6 @@ type Report {
 type Subscription {
   createAnnoucementSubs(hostel: String!): Announcement!
   createEventS(tag: String!): Event!
-  createNetop2: Netop!
 }
 
 """Tag Entity, Users will follow these tags"""
