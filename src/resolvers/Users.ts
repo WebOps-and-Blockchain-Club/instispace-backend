@@ -287,29 +287,28 @@ class UsersResolver {
   async searchUser(
     @Arg("LastUserId") lastUserId: string,
     @Arg("take") take: number,
-    @Arg("search", { nullable: true }) search?: string
+    @Arg("search") search?: string
   ) {
-    let users: User[] = [];
+    let usersList: User[] = [];
     await Promise.all(
       ["roll", "name"].map(async (field: string) => {
         const filter = { [field]: ILike(`%${search}%`) };
         const userF = await User.find({ where: filter });
         userF.forEach((user) => {
-          users.push(user);
+          usersList.push(user);
         });
       })
     );
 
-    const userStr = users.map((obj) => JSON.stringify(obj));
+    const userStr = usersList.map((obj) => JSON.stringify(obj));
     const uniqueUserStr = new Set(userStr);
-    const finalList = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
-    const total = finalList.length;
-    var usersList;
+    usersList = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
+    const total = usersList.length;
     if (lastUserId) {
-      const index = finalList.map((n) => n.id).indexOf(lastUserId);
-      usersList = finalList.splice(index + 1, take);
+      const index = usersList.map((n) => n.id).indexOf(lastUserId);
+      usersList = usersList.splice(index + 1, take);
     } else {
-      usersList = users.splice(0, take);
+      usersList = usersList.splice(0, take);
     }
     return { usersList: usersList, total };
   }
