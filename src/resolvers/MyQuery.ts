@@ -177,6 +177,29 @@ class MyQueryResolver {
           description,
           createdBy: user,
         }).save();
+
+        myQuery.isHidden = true;
+        await myQuery.save();
+
+        const creator = report.createdBy;
+
+        const message = {
+          to: creator.fcmToken,
+          notification: {
+            title: `Hi ${creator.name}`,
+            body: "Your Query got reported!!! contact admin for more info",
+          },
+        };
+
+        await fcm.send(message, (err: any, response: any) => {
+          if (err) {
+            console.log("Something has gone wrong!" + err);
+            console.log("Respponse:! " + response);
+          } else {
+            // showToast("Successfully sent with response");
+            console.log("Successfully sent with response: ", response);
+          }
+        });
         return !!report;
       } else {
         return false;
@@ -246,6 +269,20 @@ class MyQueryResolver {
   async removeMyQuery(@Arg("MyQueryId") myQueryId: string) {
     let { affected } = await MyQuery.update(myQueryId, { isHidden: true });
     return affected === 1;
+  }
+
+  @Mutation(() => Boolean)
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.LEADS,
+    UserRole.HAS,
+    UserRole.SECRETORY,
+    UserRole.HOSTEL_SEC,
+    UserRole.MODERATOR,
+  ])
+  async resolveReportMyQuery(@Arg("MyQueryId") myQueryId: string) {
+    const update = await MyQuery.update(myQueryId, { isHidden: false });
+    return update && true;
   }
 
   @Query(() => MyQuery, {
