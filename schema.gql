@@ -454,11 +454,6 @@ type Mutation {
   deleteAmenity(AmenityId: String!): Boolean!
 
   """
-  Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}
-  """
-  deleteComplaint(ComplaintId: String!, DeleteComplaintInput: DeleteComplaintInput!, ProofImages: [Upload!]): Boolean!
-
-  """
   Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETORY, HAS}
   """
   deleteEvent(EventId: String!): Boolean!
@@ -506,6 +501,11 @@ type Mutation {
   hide Announcement Mutation, Restrictions : {Admin, Hostel Affair Secretory and Hostel secretory }
   """
   resolveAnnouncement(AnnouncementId: String!): Boolean!
+
+  """
+  Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}
+  """
+  resolveComplaint(ComplaintId: String!, DeleteComplaintInput: DeleteComplaintInput!, ProofImages: [Upload!]): Boolean!
 
   """
   Mutation to resolve the item, User who finds his lost entity will update, Restriction : {anyone who is authorised}
