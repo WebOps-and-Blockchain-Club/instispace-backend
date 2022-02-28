@@ -39,7 +39,7 @@ import {
 } from "../types/objects/users";
 import MyContext from "../utils/context";
 import bcrypt from "bcryptjs";
-import { In, Like } from "typeorm";
+import { In, ILike } from "typeorm";
 import Hostel from "../entities/Hostel";
 import Item from "../entities/Item";
 import NetopResolver from "./Netop";
@@ -183,7 +183,7 @@ class UsersResolver {
       if (search) {
         await Promise.all(
           ["name", "roll"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const userF = await User.find({
               where: filter,
             });
@@ -228,7 +228,7 @@ class UsersResolver {
       if (search) {
         await Promise.all(
           ["roll", "name"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const userF = await User.find({ where: filter });
             userF.forEach((user) => {
               usersList.push(user);
@@ -292,7 +292,7 @@ class UsersResolver {
     let users: User[] = [];
     await Promise.all(
       ["roll", "name"].map(async (field: string) => {
-        const filter = { [field]: Like(`%${search}%`) };
+        const filter = { [field]: ILike(`%${search}%`) };
         const userF = await User.find({ where: filter });
         userF.forEach((user) => {
           users.push(user);
