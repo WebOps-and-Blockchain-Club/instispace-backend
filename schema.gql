@@ -689,7 +689,7 @@ type Query {
   getUsers(LastUserId: String!, search: String, take: Float!): getUsersOutput!
   isInterested(tag: String!): Boolean!
   searchQueries(OrderByLikes: Boolean, lastEventId: String!, search: String!, take: Float!): getQueryOutput!
-  searchUser(LastUserId: String!, search: String!, take: Float!): searchUserOutput
+  searchUser(LastUserId: String!, search: String, take: Float!): searchUserOutput
 }
 
 type Report {
