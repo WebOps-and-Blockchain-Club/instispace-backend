@@ -287,7 +287,7 @@ class UsersResolver {
   async searchUser(
     @Arg("LastUserId") lastUserId: string,
     @Arg("take") take: number,
-    @Arg("search") search?: string
+    @Arg("search", { nullable: true }) search?: string
   ) {
     let usersList: User[] = [];
     await Promise.all(
