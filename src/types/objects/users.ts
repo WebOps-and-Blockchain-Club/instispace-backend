@@ -1,4 +1,9 @@
-import { Category, ComplaintCategory, UserRole } from "../../utils";
+import {
+  Category,
+  ComplaintCategory,
+  UserRole,
+  Notification,
+} from "../../utils";
 import { Field, ObjectType, registerEnumType } from "type-graphql";
 import Netop from "../../entities/Netop";
 import Announcement from "../../entities/Announcement";
@@ -7,6 +12,7 @@ import Event from "../../entities/Event";
 registerEnumType(UserRole, { name: "UserRole" });
 registerEnumType(Category, { name: "Category" });
 registerEnumType(ComplaintCategory, { name: "ComplaintCategory" });
+registerEnumType(Notification, { name: "Notification" });
 
 @ObjectType({ description: "Output for Login Mutation" })
 class LoginOutput {

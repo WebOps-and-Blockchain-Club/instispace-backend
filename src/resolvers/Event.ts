@@ -4,8 +4,6 @@ import {
   Ctx,
   FieldResolver,
   Mutation,
-  PubSub,
-  PubSubEngine,
   Query,
   Resolver,
   Root,
@@ -24,6 +22,7 @@ import { createEventInput, editEventInput } from "../types/inputs/event";
 import getEventOutput from "../types/objects/event";
 import { Like } from "typeorm";
 import fcm from "../utils/fcmTokens";
+import { Notification } from "../utils/index";
 
 @Resolver(Event)
 class EventResolver {
@@ -39,7 +38,6 @@ class EventResolver {
     UserRole.HOSTEL_SEC
   )
   async createEvent(
-    @PubSub() pubSub: PubSubEngine,
     @Arg("NewEventData") createEventInput: createEventInput,
     @Ctx() { user }: MyContext,
     @Arg("Image", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
@@ -49,16 +47,22 @@ class EventResolver {
       let iUsers: User[] = [];
       await Promise.all(
         createEventInput.tagIds.map(async (id) => {
-          const tag = await Tag.findOne(id, { relations: ["event"] });
+          const tag = await Tag.findOne(id, { relations: ["event", "users"] });
           if (tag) {
             tags = tags.concat([tag]);
-            iUsers = iUsers.concat(tag.users);
+            if (tag.users) iUsers = iUsers.concat(tag.users);
           }
         })
       );
+
       if (tags.length !== createEventInput.tagIds.length)
         throw new Error("Invalid tagIds");
       createEventInput.tags = tags;
+
+      const users = await User.find({
+        where: { notifyNetop: Notification.FORALL },
+      });
+      if (users) iUsers = iUsers.concat(users);
 
       if (images)
         createEventInput.photo = (await addAttachments([...images], true)).join(
@@ -73,17 +77,12 @@ class EventResolver {
         tags,
       }).save();
 
-      const payload = event;
-      tags.forEach(async (t) => {
-        await pubSub.publish(t.title, payload);
-      });
-
       await Promise.all(
         iUsers.map(async (u) => {
-          var message = {
+          const message = {
             to: u.fcmToken,
             notification: {
-              title: `Hi ${user?.name}`,
+              title: `Hi ${u.name}`,
               body: "you may interested",
             },
           };
