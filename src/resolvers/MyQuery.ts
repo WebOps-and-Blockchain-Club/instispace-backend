@@ -230,25 +230,29 @@ class MyQueryResolver {
           createdBy: user,
         }).save();
 
-        const creator = myQuery.createdBy;
-
-        var message = {
-          to: creator.fcmToken,
-          notification: {
-            title: `Hi ${user?.name}`,
-            body: "your query got responsed",
-          },
-        };
-
-        await fcm.send(message, (err: any, response: any) => {
-          if (err) {
-            console.log("Something has gone wrong!" + err);
-            console.log("Respponse:! " + response);
-          } else {
-            // showToast("Successfully sent with response");
-            console.log("Successfully sent with response: ", response);
-          }
+        const creator = await User.findOneOrFail(myQuery.createdBy.id, {
+          relations: ["notifyMyQuery"],
         });
+
+        if (creator.notifyMyQuery) {
+          const message = {
+            to: creator.fcmToken,
+            notification: {
+              title: `Hi ${user?.name}`,
+              body: "your query got responsed",
+            },
+          };
+
+          await fcm.send(message, (err: any, response: any) => {
+            if (err) {
+              console.log("Something has gone wrong!" + err);
+              console.log("Respponse:! " + response);
+            } else {
+              // showToast("Successfully sent with response");
+              console.log("Successfully sent with response: ", response);
+            }
+          });
+        }
 
         return !!comment;
       }

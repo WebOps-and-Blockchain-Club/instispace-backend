@@ -393,6 +393,8 @@ input ModeratorInput {
 }
 
 type Mutation {
+  changeNotificationSettings(notifyEvent: Notification, notifyNetop: Notification, toggleNotifyFound: Boolean, toggleNotifyMyQuery: Boolean): Boolean!
+
   """
   Mutation to create a Super-User account can't create Hostel_Sec, Restrictions : {Admin}
   """
@@ -623,6 +625,12 @@ input NewPass {
   newPassword: String!
 }
 
+enum Notification {
+  FOLLOWED_TAGS
+  FORALL
+  NONE
+}
+
 type Query {
   """
   Query to fetch announcements of each hostel, Restrictions : { Admin, Hostel Affair Secretory} 
@@ -764,6 +772,10 @@ type User {
 
   """User's name"""
   name: String
+  notifyEvent: Notification!
+  notifyFound: Boolean!
+  notifyMyQuery: Boolean!
+  notifyNetop: Notification!
 
   """User's role"""
   role: UserRole!

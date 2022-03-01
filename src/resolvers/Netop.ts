@@ -26,6 +26,7 @@ import addAttachments from "../utils/uploads";
 import User from "../entities/User";
 import { Like } from "typeorm";
 import fcm from "../utils/fcmTokens";
+import { Notification } from "../utils/index";
 
 @Resolver(Netop)
 class NetopResolver {
@@ -55,6 +56,14 @@ class NetopResolver {
         })
       );
 
+      if (tags.length !== createNetopsInput.tags.length)
+        throw new Error("Invalid tagIds");
+
+      const users = await User.find({
+        where: { notifyNetop: Notification.FORALL },
+      });
+      iUsers = iUsers.concat(users);
+
       if (image)
         createNetopsInput.photo = (await addAttachments([image], true)).join(
           " AND "
@@ -78,11 +87,10 @@ class NetopResolver {
           const message = {
             to: u.fcmToken,
             notification: {
-              title: `Hi ${user?.name}`,
+              title: `Hi ${u?.name}`,
               body: "you may interested",
             },
           };
-
           await fcm.send(message, (err: any, response: any) => {
             if (err) {
               console.log("Something has gone wrong!" + err);
@@ -92,6 +100,7 @@ class NetopResolver {
               console.log("Successfully sent with response: ", response);
             }
           });
+          console.log(`sent message to ${u.fcmToken}`);
         })
       );
 

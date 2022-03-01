@@ -16,6 +16,12 @@ export enum Category {
   FOUND = "FOUND",
 }
 
+export enum Notification {
+  FORALL = "FORALL",
+  FOLLOWED_TAGS = "FOLLOWED_TAGS",
+  NONE = "NONE",
+}
+
 export enum ComplaintCategory {
   MESS_COMPLAINTS = "MESS_COMPLAINTS",
   GENERAL_COMPLAINTS = "GENERAL_COMPLAINTS",

@@ -47,6 +47,7 @@ import { fileringConditions } from "../types/inputs/netop";
 import Announcement from "./Announcement";
 import Event from "./Event";
 import fcm from "../utils/fcmTokens";
+import { Notification } from "../utils/index";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -89,6 +90,10 @@ class UsersResolver {
           newUser.role = UserRole.USER;
           newUser.isNewUser = true;
           newUser.fcmToken = fcmToken;
+          newUser.notifyEvent = Notification.FOLLOWED_TAGS;
+          newUser.notifyNetop = Notification.FOLLOWED_TAGS;
+          newUser.notifyFound = false;
+          newUser.notifyMyQuery = true;
           await newUser.save();
           const token = jwt.sign(newUser.id, process.env.JWT_SECRET!);
           return { isNewUser: newUser.isNewUser, role: UserRole.USER, token };
@@ -97,6 +102,10 @@ class UsersResolver {
         else {
           console.log("I am here");
           user.fcmToken = fcmToken;
+          user.notifyEvent = Notification.FOLLOWED_TAGS;
+          user.notifyNetop = Notification.FOLLOWED_TAGS;
+          user.notifyFound = false;
+          user.notifyMyQuery = true;
           await user.save();
           console.log(user.fcmToken);
           const token = jwt.sign(user.id, process.env.JWT_SECRET!);
@@ -119,6 +128,10 @@ class UsersResolver {
             admin.isNewUser = false;
             admin.fcmToken = fcmToken;
             admin.password = await bcrypt.hash(adminPassword, salt);
+            admin.notifyEvent = Notification.FOLLOWED_TAGS;
+            admin.notifyNetop = Notification.FOLLOWED_TAGS;
+            admin.notifyFound = false;
+            admin.notifyMyQuery = true;
             await admin.save();
           }
         }
@@ -167,6 +180,10 @@ class UsersResolver {
       user.roll = createAccountInput.roll;
       user.isNewUser = true;
       user.password = bcrypt.hashSync(password, salt);
+      user.notifyEvent = Notification.FOLLOWED_TAGS;
+      user.notifyNetop = Notification.FOLLOWED_TAGS;
+      user.notifyFound = false;
+      user.notifyMyQuery = true;
       await user.save();
       console.log(password);
       //this password is going to be emailed to lead
@@ -402,6 +419,48 @@ class UsersResolver {
     }
   }
 
+  @Mutation(() => Boolean)
+  @Authorized()
+  async changeNotificationSettings(
+    @Ctx() { user }: MyContext,
+    @Arg("toggleNotifyFound", () => Boolean, { nullable: true })
+    toggleNotifyFound?: Boolean,
+    @Arg("toggleNotifyMyQuery", () => Boolean, { nullable: true })
+    toggleNotifyMyQuery?: Boolean,
+    @Arg("notifyNetop", () => Notification, { nullable: true })
+    notifyNetop?: Notification,
+    @Arg("notifyEvent", () => Notification, { nullable: true })
+    notifyEvent?: Notification
+  ) {
+    const u = await User.findOneOrFail(user.id);
+    if (toggleNotifyMyQuery) {
+      u.notifyMyQuery = !u.notifyMyQuery;
+    }
+    if (toggleNotifyFound) {
+      u.notifyFound = !u.notifyFound;
+    }
+    if (notifyEvent) {
+      if (notifyEvent == Notification.FORALL) {
+        u.notifyEvent = Notification.FORALL;
+      } else if (notifyEvent == Notification.FOLLOWED_TAGS) {
+        u.notifyEvent = Notification.FOLLOWED_TAGS;
+      } else if (notifyEvent == Notification.NONE) {
+        u.notifyEvent = Notification.NONE;
+      }
+    }
+    if (notifyNetop) {
+      if (notifyNetop == Notification.FORALL) {
+        u.notifyEvent = Notification.FORALL;
+      } else if (notifyNetop == Notification.FOLLOWED_TAGS) {
+        u.notifyEvent = Notification.FOLLOWED_TAGS;
+      } else if (notifyNetop == Notification.NONE) {
+        u.notifyEvent = Notification.NONE;
+      }
+    }
+    await u.save();
+    return !!u;
+  }
+
   @FieldResolver(() => [Tag], { nullable: true })
   async interest(@Root() { id, interest }: User) {
     try {
@@ -464,7 +523,7 @@ class UsersResolver {
 
     console.log("Inside home", user?.fcmToken);
 
-    var message = {
+    const message = {
       to: user?.fcmToken,
       notification: {
         title: `Hi ${user?.name}`,

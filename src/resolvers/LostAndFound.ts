@@ -17,6 +17,7 @@ import { In, Like } from "typeorm";
 import { GraphQLUpload, Upload } from "graphql-upload";
 import addAttachments from "../utils/uploads";
 import getItemsOutput from "../types/objects/items";
+import fcm from "../utils/fcmTokens";
 
 @Resolver((_type) => Item)
 class LostAndFoundResolver {
@@ -53,6 +54,30 @@ class LostAndFoundResolver {
       item.user = user;
 
       await item.save();
+
+      if (item.category == Category.FOUND) {
+        const iUsers = await User.find({ where: { notifyFound: true } });
+
+        iUsers.map(async (u) => {
+          const message = {
+            to: u.fcmToken,
+            notification: {
+              title: `Hi ${u?.name}`,
+              body: "We found something",
+            },
+          };
+
+          await fcm.send(message, (err: any, response: any) => {
+            if (err) {
+              console.log("Something has gone wrong!" + err);
+              console.log("Respponse:! " + response);
+            } else {
+              // showToast("Successfully sent with response");
+              console.log("Successfully sent with response: ", response);
+            }
+          });
+        });
+      }
       return !!item;
     } catch (e) {
       throw new Error(`message : ${e}`);

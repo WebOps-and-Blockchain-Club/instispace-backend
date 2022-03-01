@@ -19,6 +19,7 @@ import Announcement from "./Announcement";
 import Report from "./Common/Report";
 import Query from "./MyQuery";
 import Complaint from "./Complaint";
+import { Notification } from "../utils/index";
 
 @Entity("User")
 @ObjectType("User", { description: "User Entity" })
@@ -42,8 +43,24 @@ class User extends BaseEntity {
   @Field(() => UserRole, { description: "User's role" })
   role: UserRole;
 
-  // networking and opportunity
+  //Notifications
+  @Column("enum", { enum: Notification })
+  @Field(() => Notification)
+  notifyNetop: Notification;
 
+  @Column("enum", { enum: Notification })
+  @Field(() => Notification)
+  notifyEvent: Notification;
+
+  @Column(() => Boolean)
+  @Field(() => Boolean)
+  notifyMyQuery: boolean;
+
+  @Column(() => Boolean)
+  @Field(() => Boolean)
+  notifyFound: boolean;
+
+  // networking and opportunity
   @OneToMany(() => Netop, (netop) => netop.createdBy)
   networkingAndOpportunities: Netop[];
 
