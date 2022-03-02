@@ -230,15 +230,13 @@ class MyQueryResolver {
           createdBy: user,
         }).save();
 
-        const creator = await User.findOneOrFail(myQuery.createdBy.id, {
-          relations: ["notifyMyQuery"],
-        });
+        const creator = await User.findOneOrFail(myQuery.createdBy.id);
 
         if (creator.notifyMyQuery) {
           const message = {
             to: creator.fcmToken,
             notification: {
-              title: `Hi ${user?.name}`,
+              title: `Hi ${creator.name}`,
               body: "your query got responsed",
             },
           };

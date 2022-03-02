@@ -52,11 +52,11 @@ class User extends BaseEntity {
   @Field(() => Notification)
   notifyEvent: Notification;
 
-  @Column(() => Boolean)
+  @Column("boolean")
   @Field(() => Boolean)
   notifyMyQuery: boolean;
 
-  @Column(() => Boolean)
+  @Column("boolean")
   @Field(() => Boolean)
   notifyFound: boolean;
 
