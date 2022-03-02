@@ -45,12 +45,13 @@ class EventResolver {
     try {
       var tags: Tag[] = [];
       let iUsers: User[] = [];
+
       await Promise.all(
         createEventInput.tagIds.map(async (id) => {
           const tag = await Tag.findOne(id, { relations: ["event", "users"] });
           if (tag) {
             tags = tags.concat([tag]);
-            if (tag.users) iUsers = iUsers.concat(tag.users);
+            iUsers = iUsers.concat(tag.users);
           }
         })
       );
@@ -58,11 +59,6 @@ class EventResolver {
       if (tags.length !== createEventInput.tagIds.length)
         throw new Error("Invalid tagIds");
       createEventInput.tags = tags;
-
-      const users = await User.find({
-        where: { notifyNetop: Notification.FORALL },
-      });
-      if (users) iUsers = iUsers.concat(users);
 
       if (images)
         createEventInput.photo = (await addAttachments([...images], true)).join(
@@ -77,13 +73,36 @@ class EventResolver {
         tags,
       }).save();
 
+      const users1 = await User.find({
+        where: { notifyEvent: Notification.FORALL },
+      });
+      if (users1) iUsers = iUsers.concat(users1);
+
+      let iUsersIds = iUsers.map((u) => u.fcmToken);
+
+      const iUsersSet = new Set<string>(iUsersIds);
+      iUsersIds = Array.from(iUsersSet);
+
+      iUsers = [];
+
+      await Promise.all(
+        iUsersIds.map(async (ft) => {
+          const u = await User.findOneOrFail({
+            where: { fcmToken: ft },
+          });
+          console.log("Bahar", u.roll, u.notifyEvent, u.notifyNetop);
+          if (u.notifyEvent !== Notification.NONE) iUsers.push(u);
+        })
+      );
+
       await Promise.all(
         iUsers.map(async (u) => {
+          console.log(u.roll, u.notifyEvent, u.notifyNetop);
           const message = {
             to: u.fcmToken,
             notification: {
               title: `Hi ${u.name}`,
-              body: "you may interested",
+              body: "you may interested in this event",
             },
           };
 

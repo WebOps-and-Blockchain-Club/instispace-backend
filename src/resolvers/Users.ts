@@ -423,22 +423,18 @@ class UsersResolver {
   @Authorized()
   async changeNotificationSettings(
     @Ctx() { user }: MyContext,
-    @Arg("toggleNotifyFound", () => Boolean, { nullable: true })
-    toggleNotifyFound?: Boolean,
-    @Arg("toggleNotifyMyQuery", () => Boolean, { nullable: true })
-    toggleNotifyMyQuery?: Boolean,
+    @Arg("toggleNotifyFound", () => Boolean)
+    toggleNotifyFound: boolean,
+    @Arg("toggleNotifyMyQuery", () => Boolean)
+    toggleNotifyMyQuery: boolean,
     @Arg("notifyNetop", () => Notification, { nullable: true })
     notifyNetop?: Notification,
     @Arg("notifyEvent", () => Notification, { nullable: true })
     notifyEvent?: Notification
   ) {
     const u = await User.findOneOrFail(user.id);
-    if (toggleNotifyMyQuery) {
-      u.notifyMyQuery = !u.notifyMyQuery;
-    }
-    if (toggleNotifyFound) {
-      u.notifyFound = !u.notifyFound;
-    }
+    u.notifyMyQuery = toggleNotifyMyQuery;
+    u.notifyFound = toggleNotifyFound;
     if (notifyEvent) {
       if (notifyEvent == Notification.FORALL) {
         u.notifyEvent = Notification.FORALL;
@@ -450,14 +446,31 @@ class UsersResolver {
     }
     if (notifyNetop) {
       if (notifyNetop == Notification.FORALL) {
-        u.notifyEvent = Notification.FORALL;
+        u.notifyNetop = Notification.FORALL;
       } else if (notifyNetop == Notification.FOLLOWED_TAGS) {
-        u.notifyEvent = Notification.FOLLOWED_TAGS;
+        u.notifyNetop = Notification.FOLLOWED_TAGS;
       } else if (notifyNetop == Notification.NONE) {
-        u.notifyEvent = Notification.NONE;
+        u.notifyNetop = Notification.NONE;
       }
     }
     await u.save();
+    console.log(
+      "done",
+      "netop",
+      notifyNetop,
+      "event",
+      notifyEvent,
+      toggleNotifyFound,
+      toggleNotifyMyQuery
+    );
+    console.log(
+      "for user",
+      u.notifyNetop,
+      u.notifyEvent,
+      u.notifyFound,
+      u.notifyMyQuery
+    );
+
     return !!u;
   }
 

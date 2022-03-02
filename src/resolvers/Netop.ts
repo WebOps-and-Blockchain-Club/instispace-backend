@@ -44,8 +44,9 @@ class NetopResolver {
     attachments?: Upload[]
   ): Promise<boolean> {
     try {
-      let iUsers: User[] = [];
       var tags: Tag[] = [];
+      let iUsers: User[] = [];
+
       await Promise.all(
         createNetopsInput.tags.map(async (id) => {
           const tag = await Tag.findOne(id, { relations: ["netops", "users"] });
@@ -58,11 +59,6 @@ class NetopResolver {
 
       if (tags.length !== createNetopsInput.tags.length)
         throw new Error("Invalid tagIds");
-
-      const users = await User.find({
-        where: { notifyNetop: Notification.FORALL },
-      });
-      iUsers = iUsers.concat(users);
 
       if (image)
         createNetopsInput.photo = (await addAttachments([image], true)).join(
@@ -82,13 +78,35 @@ class NetopResolver {
         tags,
       }).save();
 
+      const users = await User.find({
+        where: { notifyNetop: Notification.FORALL },
+      });
+      if (users) iUsers = iUsers.concat(users);
+
+      let iUsersIds = iUsers.map((u) => u.fcmToken);
+
+      const iUsersSet = new Set<string>(iUsersIds);
+      iUsersIds = Array.from(iUsersSet);
+
+      iUsers = [];
+
+      await Promise.all(
+        iUsersIds.map(async (ft) => {
+          const u = await User.findOneOrFail({
+            where: { fcmToken: ft },
+          });
+          console.log("Bahar", u.roll, u.notifyEvent, u.notifyNetop);
+          if (u.notifyNetop !== Notification.NONE) iUsers.push(u);
+        })
+      );
+
       await Promise.all(
         iUsers.map(async (u) => {
           const message = {
             to: u.fcmToken,
             notification: {
               title: `Hi ${u?.name}`,
-              body: "you may interested",
+              body: "you may interested for netop",
             },
           };
           await fcm.send(message, (err: any, response: any) => {
