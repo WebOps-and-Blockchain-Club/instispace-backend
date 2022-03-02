@@ -222,8 +222,8 @@ class EventResolver {
       const event = await Event.findOne(eventId, {
         where: { isHidden: false },
       });
-
       const d = new Date();
+      d.setHours(d.getHours() - 2);
       if (event && new Date(event.time).getTime() > d.getTime()) return event;
       else return null;
     } catch (e) {
