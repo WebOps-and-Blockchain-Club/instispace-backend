@@ -393,7 +393,7 @@ input ModeratorInput {
 }
 
 type Mutation {
-  changeNotificationSettings(notifyEvent: Notification, notifyNetop: Notification, toggleNotifyFound: Boolean, toggleNotifyMyQuery: Boolean): Boolean!
+  changeNotificationSettings(notifyEvent: Notification, notifyNetop: Notification, toggleNotifyFound: Boolean!, toggleNotifyMyQuery: Boolean!): Boolean!
 
   """
   Mutation to create a Super-User account can't create Hostel_Sec, Restrictions : {Admin}

@@ -103,7 +103,7 @@ class User extends BaseEntity {
 
   @Column({ type: String, nullable: true })
   @Field((_type) => String)
-  fcmToken: String;
+  fcmToken: string;
 
   @ManyToMany((_type) => Tag, (interest) => interest.users, { nullable: true })
   @Field((_type) => [Tag], {
