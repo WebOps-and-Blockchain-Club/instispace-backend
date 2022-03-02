@@ -106,6 +106,7 @@ class UsersResolver {
           user.notifyNetop = Notification.FOLLOWED_TAGS;
           user.notifyFound = false;
           user.notifyMyQuery = true;
+          user.notifyNetopComment = true;
           await user.save();
           console.log(user.fcmToken);
           const token = jwt.sign(user.id, process.env.JWT_SECRET!);
@@ -132,6 +133,7 @@ class UsersResolver {
             admin.notifyNetop = Notification.FOLLOWED_TAGS;
             admin.notifyFound = false;
             admin.notifyMyQuery = true;
+            admin.notifyNetopComment = true;
             await admin.save();
           }
         }
@@ -184,6 +186,7 @@ class UsersResolver {
       user.notifyNetop = Notification.FOLLOWED_TAGS;
       user.notifyFound = false;
       user.notifyMyQuery = true;
+      user.notifyNetopComment = true;
       await user.save();
       console.log(password);
       //this password is going to be emailed to lead
@@ -454,23 +457,6 @@ class UsersResolver {
       }
     }
     await u.save();
-    console.log(
-      "done",
-      "netop",
-      notifyNetop,
-      "event",
-      notifyEvent,
-      toggleNotifyFound,
-      toggleNotifyMyQuery
-    );
-    console.log(
-      "for user",
-      u.notifyNetop,
-      u.notifyEvent,
-      u.notifyFound,
-      u.notifyMyQuery
-    );
-
     return !!u;
   }
 

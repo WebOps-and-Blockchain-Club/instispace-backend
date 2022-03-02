@@ -60,6 +60,10 @@ class User extends BaseEntity {
   @Field(() => Boolean)
   notifyFound: boolean;
 
+  @Column("boolean")
+  @Field(() => Boolean)
+  notifyNetopComment: boolean;
+
   // networking and opportunity
   @OneToMany(() => Netop, (netop) => netop.createdBy)
   networkingAndOpportunities: Netop[];

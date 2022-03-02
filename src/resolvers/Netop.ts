@@ -346,6 +346,29 @@ class NetopResolver {
           netop,
           createdBy: user,
         }).save();
+
+        const creator = await User.findOneOrFail(netop.createdBy.id);
+
+        if (creator.notifyNetopComment) {
+          const message = {
+            to: creator.fcmToken,
+            notification: {
+              title: `Hi ${creator.name}`,
+              body: "your netop got commented",
+            },
+          };
+
+          await fcm.send(message, (err: any, response: any) => {
+            if (err) {
+              console.log("Something has gone wrong!" + err);
+              console.log("Respponse:! " + response);
+            } else {
+              // showToast("Successfully sent with response");
+              console.log("Successfully sent with response: ", response);
+            }
+          });
+        }
+
         return !!comment;
       }
       throw new Error("Post not found");
