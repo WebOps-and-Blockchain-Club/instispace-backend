@@ -46,6 +46,7 @@ import NetopResolver from "./Netop";
 import { fileringConditions } from "../types/inputs/netop";
 import Announcement from "./Announcement";
 import Event from "./Event";
+import Feedback from "./Feedback";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -126,11 +127,13 @@ class UsersResolver {
 
   @Mutation(() => Boolean, {
     description:
-      "Mutation to create a Super-User account can't create Hostel_Sec, Restrictions : {Admin}",
+      "Mutation to create a Super-User account, Restrictions : {Admin}",
   })
   @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETORY])
   async createAccount(
-    @Arg("CreateAccountInput") createAccountInput: CreateAccountInput
+    @Ctx() { user }: MyContext,
+    @Arg("CreateAccountInput") createAccountInput: CreateAccountInput,
+    @Arg("HostelId", { nullable: true }) hostelId: string
   ) {
     try {
       //Autogenerating the password
@@ -138,24 +141,32 @@ class UsersResolver {
         process.env.NODE_ENV === "development"
           ? accountPassword
           : autoGenPass(8);
-
-      //Creating the User
-      const user = new User();
-
       if (
-        createAccountInput.role === UserRole.HOSTEL_SEC ||
-        ([UserRole.HAS, UserRole.SECRETORY].includes(createAccountInput.role) &&
-          user.role !== UserRole.ADMIN)
-      )
-        throw new Error("Invalid role");
-      user.role = createAccountInput.role;
-      user.roll = createAccountInput.roll;
-      user.isNewUser = true;
-      user.password = bcrypt.hashSync(password, salt);
-      await user.save();
+        [UserRole.HOSTEL_SEC, UserRole.HAS].includes(createAccountInput.role) &&
+        user.role !== UserRole.ADMIN
+      ) {
+        throw new Error("Invalid Role");
+      }
+      //Creating the User
+      const newUser = new User();
+      newUser.role = createAccountInput.role;
+      //finding the hostel if provided
+      if (
+        hostelId &&
+        [UserRole.ADMIN, UserRole.SECRETORY].includes(user.role)
+      ) {
+        const hostel = await Hostel.findOne({ where: { id: hostelId } });
+        if (!hostel) throw new Error("Invalid Hostel");
+        newUser.hostel = hostel;
+      }
+      newUser.roll = createAccountInput.roll;
+      newUser.name = createAccountInput.name;
+      newUser.isNewUser = true;
+      newUser.password = bcrypt.hashSync(password, salt);
+      await newUser.save();
       console.log(password);
       //this password is going to be emailed to lead
-      return !!user;
+      return !!newUser;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -493,6 +504,16 @@ class UsersResolver {
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
+  }
+
+  @FieldResolver(() => [Feedback], { nullable: true })
+  async feedbacks(@Root() { id, feedbacks }: User) {
+    if (feedbacks) return feedbacks;
+    const user = await User.findOne({
+      where: { id: id },
+      relations: ["feedbacks"],
+    });
+    return user?.feedbacks;
   }
 }
 
