@@ -462,26 +462,46 @@ class UsersResolver {
   }
 
   @FieldResolver(() => homeOutput, { nullable: true })
-  async getHome(@Root() { id }: User) {
-    const user = await User.findOne({
-      where: { id },
-      relations: ["interest", "hostel"],
-    });
-    const tagIds = user?.interest?.map((tag) => tag.id);
-    const myCon: MyContext = {
-      user: user!,
-    };
-    const netopObject = new NetopResolver();
-    const announcementObject = new Announcement();
-    const eventObject = new Event();
-    const filters: fileringConditions = { tags: tagIds!, isStared: false };
-    const netops = (await netopObject.getNetops(myCon, "", 25, filters))
-      .netopList;
-    const events = (await eventObject.getEvents(myCon, "", 25, filters)).list;
-    const announcements = (
-      await announcementObject.getAnnouncements("", 25, user!.hostel!.id)
-    ).announcementsList;
-    return { netops, announcements, events };
+  async getHome(@Root() { id, role }: User) {
+    if (
+      role == UserRole.ADMIN ||
+      role == UserRole.DEV_TEAM ||
+      role == UserRole.HAS ||
+      role == UserRole.HOSTEL_SEC ||
+      role == UserRole.LEADS ||
+      role == UserRole.SECRETORY
+    ) {
+      const user = await User.findOneOrFail(id, {
+        relations: ["networkingAndOpportunities", "event", "announcements"],
+      });
+
+      return {
+        netops: user.networkingAndOpportunities,
+        announcements: user.announcements,
+        events: user.event,
+      };
+    } else {
+      const user = await User.findOneOrFail({
+        where: { id },
+        relations: ["interest", "hostel"],
+      });
+
+      const tagIds = user.interest?.map((tag) => tag.id);
+      const myCon: MyContext = {
+        user,
+      };
+      const netopObject = new NetopResolver();
+      const announcementObject = new Announcement();
+      const eventObject = new Event();
+      const filters: fileringConditions = { tags: tagIds!, isStared: false };
+      const netops = (await netopObject.getNetops(myCon, "", 25, filters))
+        .netopList;
+      const events = (await eventObject.getEvents(myCon, "", 25, filters)).list;
+      const announcements = (
+        await announcementObject.getAnnouncements("", 25, user!.hostel!.id)
+      ).announcementsList;
+      return { netops, announcements, events };
+    }
   }
 
   @FieldResolver(() => [Item], { nullable: true })
