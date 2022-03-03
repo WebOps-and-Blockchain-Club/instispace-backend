@@ -51,6 +51,7 @@ class FeedbackResolver {
       } else {
         feedbackList = feedbackList.splice(0, take);
       }
+      return feedbackList;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

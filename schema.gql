@@ -773,11 +773,11 @@ scalar Upload
 type User {
   """Announcements Created by User, can only be created if its a Super User"""
   announcements: [Announcement!]
-  complaints: Complaint
-  complaintsUpvoted: Complaint
+  complaints: [Complaint!]
+  complaintsUpvoted: [Complaint!]
 
   """feedbacks of the user"""
-  feedbacks: Feedback
+  feedbacks: [Feedback!]
   getHome: homeOutput
 
   """User's Hostel amd its details"""
