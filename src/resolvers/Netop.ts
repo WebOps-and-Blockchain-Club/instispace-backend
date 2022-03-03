@@ -129,18 +129,7 @@ class NetopResolver {
         relations: ["tags", "createdBy"],
       });
 
-      if (
-        netop &&
-        (user.id === netop?.createdBy.id ||
-          [
-            UserRole.ADMIN,
-            UserRole.LEADS,
-            UserRole.HAS,
-            UserRole.SECRETORY,
-            UserRole.HOSTEL_SEC,
-            UserRole.MODERATOR,
-          ].includes(user.role))
-      ) {
+      if (netop && user.id === netop?.createdBy.id) {
         if (image)
           editNetopsInput.photo = (await addAttachments([image], true)).join(
             " AND "
