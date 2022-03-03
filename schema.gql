@@ -56,6 +56,7 @@ type Comment {
   content: String!
   createdBy: User!
   id: String!
+  images: String
   netop: Netop!
   query: MyQuery!
 }
@@ -414,7 +415,7 @@ type Mutation {
   createCommentNetop(NetopId: String!, content: String!): Boolean!
 
   """comment on Query, Restrictions:{any authorized user}"""
-  createCommentQuery(MyQueryId: String!, content: String!): Boolean!
+  createCommentQuery(Images: [Upload!], MyQueryId: String!, content: String!): Boolean!
 
   """Mutation to add Complaint, Restrictions : {anyone who is Authorised}"""
   createComplaint(CreateComplaintInput: ComplaintInput!, Images: [Upload!]): Boolean!
@@ -441,7 +442,7 @@ type Mutation {
   createMyQuery(Attachments: [Upload!], Image: Upload, createQuerysInput: createQuerysInput!): Boolean!
 
   """create network and opportunity, Restrictions:{any authorized user}"""
-  createNetop(Attachments: [Upload!], Image: Upload, NewEventData: createNetopsInput!): Boolean!
+  createNetop(Attachments: [Upload!], Image: Upload, NewNetopData: createNetopsInput!): Boolean!
 
   """ Mutation to create Hostel secretory, Restrictions : {Admin, Hostel Affair Secretory} 
   """
@@ -495,6 +496,7 @@ type Mutation {
 
   """Mutation to login, Restrictions : {none}"""
   login(LoginInputs: LoginInput!, fcmToken: String!): LoginOutput!
+  logout(fcmToken: String!): Boolean!
   removeMyQuery(MyQueryId: String!): Boolean!
   removeNetop(NetopId: String!): Boolean!
 

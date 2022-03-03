@@ -60,27 +60,31 @@ class LostAndFoundResolver {
 
         await Promise.all(
           iUsers.map(async (u) => {
-            console.log(u.notifyFound);
-            if (u.notifyFound) {
-              console.log(u.roll);
-              const message = {
-                to: u.fcmToken,
-                notification: {
-                  title: `Hi ${u?.name}`,
-                  body: "We found something",
-                },
-              };
+            u.fcmToken &&
+              u.fcmToken.split(" AND ").map(async () => {
+                if (u.notifyFound) {
+                  const message = {
+                    to: u.fcmToken,
+                    notification: {
+                      title: `Hi ${u?.name}`,
+                      body: "We found something",
+                    },
+                  };
 
-              await fcm.send(message, (err: any, response: any) => {
-                if (err) {
-                  console.log("Something has gone wrong!" + err);
-                  console.log("Respponse:! " + response);
-                } else {
-                  // showToast("Successfully sent with response");
-                  console.log("Successfully sent with response: ", response);
+                  await fcm.send(message, (err: any, response: any) => {
+                    if (err) {
+                      console.log("Something has gone wrong!" + err);
+                      console.log("Respponse:! " + response);
+                    } else {
+                      // showToast("Successfully sent with response");
+                      console.log(
+                        "Successfully sent with response: ",
+                        response
+                      );
+                    }
+                  });
                 }
               });
-            }
           })
         );
       }
