@@ -17,10 +17,10 @@ class Report extends BaseEntity {
   @Field()
   id: string;
 
-  @ManyToOne(() => Netop, (Netop) => Netop.reports, { nullable: true })
+  @ManyToOne(() => Netop, (netop) => netop.reports)
   netop: Netop;
 
-  @ManyToOne(() => Query, (Query) => Query.reports, { nullable: true })
+  @ManyToOne(() => Query, (Query) => Query.reports)
   query: Query;
 
   @ManyToOne(() => User, (User) => User.reports)

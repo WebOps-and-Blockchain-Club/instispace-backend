@@ -94,6 +94,7 @@ class UsersResolver {
           newUser.notifyNetop = Notification.FOLLOWED_TAGS;
           newUser.notifyFound = false;
           newUser.notifyMyQuery = true;
+          newUser.notifyNetopComment = true;
           await newUser.save();
           const token = jwt.sign(newUser.id, process.env.JWT_SECRET!);
           return { isNewUser: newUser.isNewUser, role: UserRole.USER, token };

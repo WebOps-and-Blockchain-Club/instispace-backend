@@ -169,7 +169,7 @@ class MyQueryResolver {
   ) {
     try {
       const myQuery = await MyQuery.findOne(myQueryId, {
-        relations: ["reports"],
+        relations: ["reports", "createdBy"],
       });
       if (myQuery) {
         const report = await Report.create({
@@ -178,10 +178,7 @@ class MyQueryResolver {
           createdBy: user,
         }).save();
 
-        myQuery.isHidden = true;
-        await myQuery.save();
-
-        const creator = report.createdBy;
+        const creator = myQuery.createdBy;
 
         const message = {
           to: creator.fcmToken,
