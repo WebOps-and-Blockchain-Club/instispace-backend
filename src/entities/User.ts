@@ -19,6 +19,7 @@ import Announcement from "./Announcement";
 import Report from "./Common/Report";
 import Query from "./MyQuery";
 import Complaint from "./Complaint";
+import Feedback from "./Feedback";
 
 @Entity("User")
 @ObjectType("User", { description: "User Entity" })
@@ -125,6 +126,15 @@ class User extends BaseEntity {
   )
   @Field((_type) => Complaint, { nullable: true })
   complaintsUpvoted?: Complaint[];
+
+  @OneToMany((__type) => Feedback, (feedbacks) => feedbacks.user, {
+    nullable: true,
+  })
+  @Field((__type) => Feedback, {
+    nullable: true,
+    description: "feedbacks of the user",
+  })
+  feedbacks?: Feedback[];
 }
 
 export default User;

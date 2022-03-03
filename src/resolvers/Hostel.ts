@@ -23,8 +23,7 @@ import MyContext from "../utils/context";
 @Resolver((_type) => Hostel)
 class HostelResolver {
   @Mutation(() => Boolean, {
-    description:
-      " Mutation to create Hostel secretory, Restrictions : {Admin, Hostel Affair Secretory} ",
+    description: "Mutation deprecated",
   })
   @Authorized([UserRole.HAS, UserRole.ADMIN])
   async createSec(
