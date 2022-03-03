@@ -398,6 +398,13 @@ class MyQueryResolver {
     const myQuery = await MyQuery.findOne(id, { relations: ["createdBy"] });
     return myQuery?.createdBy;
   }
+
+  @FieldResolver(() => Number)
+  async commentCount(@Root() { id, comments }: MyQuery) {
+    if(comments) return comments.length;
+    const myQuerys = await MyQuery.findOneOrFail(id, { relations:["comments"]});
+    return myQuerys.comments.length;
+  }
 }
 
 export default MyQueryResolver;

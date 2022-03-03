@@ -598,6 +598,7 @@ type Mutation {
 """querys"""
 type MyQuery {
   attachments: String
+  commentCount: Float!
 
   """get list of comments"""
   comments: [Comment!]
@@ -619,6 +620,9 @@ type MyQuery {
 """networking and opportunity"""
 type Netop {
   attachments: String
+
+  """number of likes"""
+  commentCount: Float!
 
   """get list of comments"""
   comments: [Comment!]
