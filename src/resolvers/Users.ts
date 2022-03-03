@@ -142,7 +142,7 @@ class UsersResolver {
           ? accountPassword
           : autoGenPass(8);
       if (
-        [UserRole.HOSTEL_SEC, UserRole.HAS].includes(createAccountInput.role) &&
+        [UserRole.SECRETORY, UserRole.HAS].includes(createAccountInput.role) &&
         user.role !== UserRole.ADMIN
       ) {
         throw new Error("Invalid Role");
@@ -151,10 +151,7 @@ class UsersResolver {
       const newUser = new User();
       newUser.role = createAccountInput.role;
       //finding the hostel if provided
-      if (
-        hostelId &&
-        [UserRole.ADMIN, UserRole.SECRETORY].includes(user.role)
-      ) {
+      if (hostelId && [UserRole.ADMIN, UserRole.HAS].includes(user.role)) {
         const hostel = await Hostel.findOne({ where: { id: hostelId } });
         if (!hostel) throw new Error("Invalid Hostel");
         newUser.hostel = hostel;
