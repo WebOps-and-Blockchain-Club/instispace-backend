@@ -26,7 +26,7 @@ import {
   getAllAnnouncementsOutput,
   getAnnouncementsOutput,
 } from "../types/objects/announcements";
-import { Like } from "typeorm";
+import { ILike } from "typeorm";
 
 @Resolver((_type) => Announcement)
 class AnnouncementResolver {
@@ -93,16 +93,11 @@ class AnnouncementResolver {
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      let announcements = await Announcement.find({
-        where: { isHidden: false },
-        order: { createdAt: "DESC" },
-      });
-      const total = announcements.length;
-      var announcementsList: Announcement[] = [];
+      let announcementsList: Announcement[] = [];
       if (search) {
         await Promise.all(
           ["title"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const announcementF = await Announcement.find({
               where: filter,
               order: { createdAt: "DESC" },
@@ -112,17 +107,20 @@ class AnnouncementResolver {
             });
           })
         );
-        const annStr = announcementsList.map((obj) => JSON.stringify(obj));
-        const uniqueAnnStr = new Set(annStr);
-        announcements = Array.from(uniqueAnnStr).map((str) => JSON.parse(str));
+      } else {
+        announcementsList = await Announcement.find({
+          where: { isHidden: false },
+          order: { createdAt: "DESC" },
+        });
       }
+      const total = announcementsList.length;
       if (lastAnnouncementId) {
-        const index = announcements
+        const index = announcementsList
           .map((n) => n.id)
           .indexOf(lastAnnouncementId);
-        announcementsList = announcements.splice(index + 1, take);
+        announcementsList = announcementsList.splice(index + 1, take);
       } else {
-        announcementsList = announcements.splice(0, take);
+        announcementsList = announcementsList.splice(0, take);
       }
       return { announcementsList: announcementsList, total };
     } catch (e) {
@@ -146,23 +144,11 @@ class AnnouncementResolver {
         where: { id: hostelId },
         relations: ["announcements"],
       });
-
-      const d = new Date();
-      let announcements = hostel?.announcements!.filter(
-        (n) =>
-          new Date(n.endTime).getTime() > d.getTime() && n.isHidden === false
-      );
-      if (!announcements) throw new Error("No Announcements Found");
-      const total = announcements.length;
-      announcements?.sort((a, b) =>
-        a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
-      );
-
-      var announcementsList: Announcement[] = [];
+      let announcementsList: Announcement[] = [];
       if (search) {
         await Promise.all(
           ["title"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const announcementF = await Announcement.find({
               where: filter,
               order: { createdAt: "DESC" },
@@ -172,17 +158,24 @@ class AnnouncementResolver {
             });
           })
         );
-        const annStr = announcementsList.map((obj) => JSON.stringify(obj));
-        const uniqueAnnStr = new Set(annStr);
-        announcements = Array.from(uniqueAnnStr).map((str) => JSON.parse(str));
+      } else {
+        const d = new Date();
+        announcementsList = hostel!.announcements!.filter(
+          (n) =>
+            new Date(n.endTime).getTime() > d.getTime() && n.isHidden === false
+        );
+        announcementsList.sort((a, b) =>
+          a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+        );
       }
+      const total = announcementsList.length;
       if (lastAnnouncementId) {
-        const index = announcements
+        const index = announcementsList
           .map((n) => n.id)
           .indexOf(lastAnnouncementId);
-        announcementsList = announcements.splice(index + 1, take);
+        announcementsList = announcementsList.splice(index + 1, take);
       } else {
-        announcementsList = announcements.splice(0, take);
+        announcementsList = announcementsList.splice(0, take);
       }
       return { announcementsList: announcementsList, total };
     } catch (e) {

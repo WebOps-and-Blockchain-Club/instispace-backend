@@ -22,7 +22,7 @@ import User from "../entities/User";
 import Event from "../entities/Event";
 import { createEventInput, editEventInput } from "../types/inputs/event";
 import getEventOutput from "../types/objects/event";
-import { Like } from "typeorm";
+import { ILike } from "typeorm";
 
 @Resolver(Event)
 class EventResolver {
@@ -161,7 +161,7 @@ class EventResolver {
   }
 
   @Mutation(() => Boolean, {
-    description: "Like or Unlike the event, Restrictions:{ AUTHORIZED USER }",
+    description: "ILike or Unlike the event, Restrictions:{ AUTHORIZED USER }",
   })
   @Authorized()
   async toggleLikeEvent(
@@ -222,7 +222,6 @@ class EventResolver {
       const event = await Event.findOne(eventId, {
         where: { isHidden: false },
       });
-
       const d = new Date();
       d.setHours(d.getHours() - 2);
       if (event && new Date(event.time).getTime() > d.getTime()) return event;
@@ -254,7 +253,7 @@ class EventResolver {
       if (search) {
         await Promise.all(
           ["title"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const eventF = await Event.find({
               where: filter,
               relations: ["tags", "likedBy", "staredBy"],

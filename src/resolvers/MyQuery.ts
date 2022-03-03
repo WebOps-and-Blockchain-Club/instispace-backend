@@ -19,7 +19,7 @@ import { UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
-import { Like } from "typeorm";
+import { ILike } from "typeorm";
 
 @Resolver(MyQuery)
 class MyQueryResolver {
@@ -258,7 +258,7 @@ class MyQueryResolver {
       if (search) {
         await Promise.all(
           ["title"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const queryF = await MyQuery.find({
               where: filter,
               relations: ["likedBy"],
@@ -322,7 +322,7 @@ class MyQueryResolver {
 
     await Promise.all(
       ["title"].map(async (field: string) => {
-        const filter = { [field]: Like(`%${search}%`) };
+        const filter = { [field]: ILike(`%${search}%`) };
         const queryF = await MyQuery.find({
           where: filter,
           relations: ["likedBy"],
