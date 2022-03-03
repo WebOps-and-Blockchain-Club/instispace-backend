@@ -353,7 +353,13 @@ class UsersResolver {
     description:
       "Mutation to change role of an ldap User to Moderator, Restrictions : {Admins and Leads}",
   })
-  @Authorized([UserRole.ADMIN, UserRole.LEADS])
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.LEADS,
+    UserRole.HAS,
+    UserRole.HOSTEL_SEC,
+    UserRole.SECRETORY,
+  ])
   async updateRole(@Arg("ModeratorInput") { roll }: ModeratorInput) {
     try {
       const user = await User.findOne({ where: { roll } });
