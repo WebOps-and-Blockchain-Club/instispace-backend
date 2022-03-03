@@ -214,39 +214,50 @@ class MyQueryResolver {
   async createCommentQuery(
     @Arg("MyQueryId") myQueryId: string,
     @Ctx() { user }: MyContext,
-    @Arg("content") content: string
+    @Arg("content") content: string,
+    @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
   ) {
     try {
       const myQuery = await MyQuery.findOne(myQueryId, {
         relations: ["comments", "createdBy"],
       });
       if (myQuery) {
+        let photos;
+
+        if (images) {
+          photos = (await addAttachments([...images], true)).join(" AND ");
+        }
+
         const comment = await Comment.create({
           content,
           query: myQuery,
           createdBy: user,
+          images: photos,
         }).save();
 
         const creator = await User.findOneOrFail(myQuery.createdBy.id);
 
         if (creator.notifyMyQuery) {
-          const message = {
-            to: creator.fcmToken,
-            notification: {
-              title: `Hi ${creator.name}`,
-              body: "your query got responsed",
-            },
-          };
+          creator.fcmToken &&
+            creator.fcmToken.split(" AND ").map(async (ft) => {
+              const message = {
+                to: ft,
+                notification: {
+                  title: `Hi ${creator.name}`,
+                  body: "your query got responsed",
+                },
+              };
 
-          await fcm.send(message, (err: any, response: any) => {
-            if (err) {
-              console.log("Something has gone wrong!" + err);
-              console.log("Respponse:! " + response);
-            } else {
-              // showToast("Successfully sent with response");
-              console.log("Successfully sent with response: ", response);
-            }
-          });
+              await fcm.send(message, (err: any, response: any) => {
+                if (err) {
+                  console.log("Something has gone wrong!" + err);
+                  console.log("Respponse:! " + response);
+                } else {
+                  // showToast("Successfully sent with response");
+                  console.log("Successfully sent with response: ", response);
+                }
+              });
+            });
         }
 
         return !!comment;

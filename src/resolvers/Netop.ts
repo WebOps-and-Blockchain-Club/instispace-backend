@@ -37,7 +37,7 @@ class NetopResolver {
   @Authorized()
   async createNetop(
     // @PubSub() pubSub: PubSubEngine,
-    @Arg("NewEventData") createNetopsInput: createNetopsInput,
+    @Arg("NewNetopData") createNetopsInput: createNetopsInput,
     @Ctx() { user }: MyContext,
     @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload,
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
@@ -100,24 +100,30 @@ class NetopResolver {
         })
       );
 
-      iUsers.map((u) => {
-        const message = {
-          to: u.fcmToken,
-          notification: {
-            title: `Hi ${u?.name}`,
-            body: "you may interested for netop",
-          },
-        };
-        fcm.send(message, (err: any, response: any) => {
-          if (err) {
-            console.log("Something has gone wrong!" + err);
-            console.log("Respponse:! " + response);
-          } else {
-            // showToast("Successfully sent with response");
-            console.log("Successfully sent with response: ", response);
-          }
-        });
-      });
+      await Promise.all(
+        iUsers.map(async (u) => {
+          u.fcmToken &&
+            u.fcmToken.split(" AND ").map(async (ft) => {
+              const message = {
+                to: ft,
+                notification: {
+                  title: `Hi ${u?.name}`,
+                  body: "you may interested for netop",
+                },
+              };
+
+              await fcm.send(message, (err: any, response: any) => {
+                if (err) {
+                  console.log("Something has gone wrong!" + err);
+                  console.log("Respponse:! " + response);
+                } else {
+                  // showToast("Successfully sent with response");
+                  console.log("Successfully sent with response: ", response);
+                }
+              });
+            });
+        })
+      );
 
       return !!netop;
     } catch (e) {
@@ -347,23 +353,26 @@ class NetopResolver {
         const creator = netop.createdBy;
 
         if (creator.notifyNetopComment) {
-          const message = {
-            to: creator.fcmToken,
-            notification: {
-              title: `Hi ${creator.name}`,
-              body: "your netop got commented",
-            },
-          };
+          creator.fcmToken &&
+            creator.fcmToken.split(" AND ").map((ft) => {
+              const message = {
+                to: ft,
+                notification: {
+                  title: `Hi ${creator.name}`,
+                  body: "your netop got commented",
+                },
+              };
 
-          fcm.send(message, (err: any, response: any) => {
-            if (err) {
-              console.log("Something has gone wrong!" + err);
-              console.log("Respponse:! " + response);
-            } else {
-              // showToast("Successfully sent with response");
-              console.log("Successfully sent with response: ", response);
-            }
-          });
+              fcm.send(message, (err: any, response: any) => {
+                if (err) {
+                  console.log("Something has gone wrong!" + err);
+                  console.log("Respponse:! " + response);
+                } else {
+                  // showToast("Successfully sent with response");
+                  console.log("Successfully sent with response: ", response);
+                }
+              });
+            });
         }
 
         return !!comment;

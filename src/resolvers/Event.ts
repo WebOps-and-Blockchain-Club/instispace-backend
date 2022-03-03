@@ -97,24 +97,27 @@ class EventResolver {
 
       await Promise.all(
         iUsers.map(async (u) => {
-          console.log(u.roll, u.notifyEvent, u.notifyNetop);
-          const message = {
-            to: u.fcmToken,
-            notification: {
-              title: `Hi ${u.name}`,
-              body: "you may interested in this event",
-            },
-          };
+          console.log(u.name, u.fcmToken);
+          u.fcmToken &&
+            u.fcmToken.split(" AND ").map(async (ft) => {
+              const message = {
+                to: ft,
+                notification: {
+                  title: `Hi ${u.name}`,
+                  body: "you may interested in this event",
+                },
+              };
 
-          await fcm.send(message, (err: any, response: any) => {
-            if (err) {
-              console.log("Something has gone wrong!" + err);
-              console.log("Respponse:! " + response);
-            } else {
-              // showToast("Successfully sent with response");
-              console.log("Successfully sent with response: ", response);
-            }
-          });
+              await fcm.send(message, (err: any, response: any) => {
+                if (err) {
+                  console.log("Something has gone wrong!" + err);
+                  console.log("Respponse:! " + response);
+                } else {
+                  // showToast("Successfully sent with response");
+                  console.log("Successfully sent with response: ", response);
+                }
+              });
+            });
         })
       );
 

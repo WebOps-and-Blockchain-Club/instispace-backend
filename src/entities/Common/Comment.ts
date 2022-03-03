@@ -29,6 +29,10 @@ class Comment extends BaseEntity {
   @Column()
   @Field()
   content: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  images: string;
 }
 
 export default Comment;

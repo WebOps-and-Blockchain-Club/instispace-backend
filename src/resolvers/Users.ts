@@ -46,7 +46,6 @@ import NetopResolver from "./Netop";
 import { fileringConditions } from "../types/inputs/netop";
 import Announcement from "./Announcement";
 import Event from "./Event";
-import fcm from "../utils/fcmTokens";
 import { Notification } from "../utils/index";
 
 @Resolver((_type) => User)
@@ -89,7 +88,7 @@ class UsersResolver {
           newUser.roll = roll;
           newUser.role = UserRole.USER;
           newUser.isNewUser = true;
-          newUser.fcmToken = fcmToken;
+          newUser.fcmToken += " AND " + fcmToken;
           newUser.notifyEvent = Notification.FOLLOWED_TAGS;
           newUser.notifyNetop = Notification.FOLLOWED_TAGS;
           newUser.notifyFound = false;
@@ -102,7 +101,11 @@ class UsersResolver {
         //If user exists
         else {
           console.log("I am here");
-          user.fcmToken = fcmToken;
+          if (user.fcmToken) {
+            user.fcmToken += " AND " + fcmToken;
+          } else {
+            user.fcmToken = fcmToken;
+          }
           user.notifyEvent = Notification.FOLLOWED_TAGS;
           user.notifyNetop = Notification.FOLLOWED_TAGS;
           user.notifyFound = false;
@@ -128,7 +131,7 @@ class UsersResolver {
             admin.roll = adminEmail;
             admin.role = UserRole.ADMIN;
             admin.isNewUser = false;
-            admin.fcmToken = fcmToken;
+            admin.fcmToken += " AND " + fcmToken;
             admin.password = await bcrypt.hash(adminPassword, salt);
             admin.notifyEvent = Notification.FOLLOWED_TAGS;
             admin.notifyNetop = Notification.FOLLOWED_TAGS;
@@ -195,6 +198,30 @@ class UsersResolver {
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
+  }
+
+  @Mutation(() => Boolean)
+  @Authorized()
+  async logout(@Ctx() { user }: MyContext, @Arg("fcmToken") fcmToken: string) {
+    console.log("inside logout for", user.name, fcmToken);
+    const u = await User.findOneOrFail(user.id);
+    let fcmTokenArr = u.fcmToken.split(" AND ");
+    const index = fcmTokenArr.indexOf(fcmToken);
+    let newFcmToken = "";
+
+    if (index > -1) {
+      fcmTokenArr.splice(index, 1);
+      let newFcmTokenArr = fcmTokenArr;
+      console.log(newFcmTokenArr);
+      newFcmToken =
+        newFcmTokenArr.length > 1
+          ? newFcmTokenArr.join(" AND ")
+          : newFcmTokenArr.toString();
+    }
+
+    const affected = await User.update(user.id, { fcmToken: newFcmToken });
+
+    return affected && 1;
   }
 
   @Query(() => getSuperUsersOutput, {
@@ -511,47 +538,46 @@ class UsersResolver {
   }
 
   @FieldResolver(() => homeOutput, { nullable: true })
-  async getHome(@Root() { id }: User) {
-    const user = await User.findOne({
-      where: { id },
-      relations: ["interest", "hostel"],
-    });
-    const tagIds = user?.interest?.map((tag) => tag.id);
-    const myCon: MyContext = {
-      user: user!,
-    };
+  async getHome(@Root() { id, role }: User) {
+    if (
+      role == UserRole.ADMIN ||
+      role == UserRole.DEV_TEAM ||
+      role == UserRole.HAS ||
+      role == UserRole.HOSTEL_SEC ||
+      role == UserRole.LEADS ||
+      role == UserRole.SECRETORY
+    ) {
+      const user = await User.findOneOrFail(id, {
+        relations: ["networkingAndOpportunities", "event", "announcements"],
+      });
 
-    console.log("Inside home", user?.fcmToken);
+      return {
+        netops: user.networkingAndOpportunities,
+        announcements: user.announcements,
+        events: user.event,
+      };
+    } else {
+      const user = await User.findOneOrFail({
+        where: { id },
+        relations: ["interest", "hostel"],
+      });
 
-    const message = {
-      to: user?.fcmToken,
-      notification: {
-        title: `Hi ${user?.name}`,
-        body: "welcome to the app",
-      },
-    };
-
-    await fcm.send(message, (err: any, response: any) => {
-      if (err) {
-        console.log("Something has gone wrong!" + err);
-        console.log("Respponse:! " + response);
-      } else {
-        // showToast("Successfully sent with response");
-        console.log("Successfully sent with response: ", response);
-      }
-    });
-
-    const netopObject = new NetopResolver();
-    const announcementObject = new Announcement();
-    const eventObject = new Event();
-    const filters: fileringConditions = { tags: tagIds!, isStared: false };
-    const netops = (await netopObject.getNetops(myCon, "", 25, filters))
-      .netopList;
-    const events = (await eventObject.getEvents(myCon, "", 25, filters)).list;
-    const announcements = (
-      await announcementObject.getAnnouncements("", 25, user!.hostel!.id)
-    ).announcementsList;
-    return { netops, announcements, events };
+      const tagIds = user.interest?.map((tag) => tag.id);
+      const myCon: MyContext = {
+        user,
+      };
+      const netopObject = new NetopResolver();
+      const announcementObject = new Announcement();
+      const eventObject = new Event();
+      const filters: fileringConditions = { tags: tagIds!, isStared: false };
+      const netops = (await netopObject.getNetops(myCon, "", 25, filters))
+        .netopList;
+      const events = (await eventObject.getEvents(myCon, "", 25, filters)).list;
+      const announcements = (
+        await announcementObject.getAnnouncements("", 25, user!.hostel!.id)
+      ).announcementsList;
+      return { netops, announcements, events };
+    }
   }
 
   @FieldResolver(() => [Item], { nullable: true })
