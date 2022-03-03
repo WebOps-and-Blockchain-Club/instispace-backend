@@ -91,7 +91,8 @@ class EventResolver {
             where: { fcmToken: ft },
           });
           console.log("Bahar", u.roll, u.notifyEvent, u.notifyNetop);
-          if (u.notifyEvent !== Notification.NONE) iUsers.push(u);
+          if (u.notifyEvent !== Notification.NONE && u.id != user.id)
+            iUsers.push(u);
         })
       );
 

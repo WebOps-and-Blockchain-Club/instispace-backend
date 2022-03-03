@@ -88,7 +88,11 @@ class UsersResolver {
           newUser.roll = roll;
           newUser.role = UserRole.USER;
           newUser.isNewUser = true;
-          newUser.fcmToken += " AND " + fcmToken;
+          if (newUser.fcmToken) {
+            newUser.fcmToken += " AND " + fcmToken;
+          } else {
+            newUser.fcmToken = fcmToken;
+          }
           newUser.notifyEvent = Notification.FOLLOWED_TAGS;
           newUser.notifyNetop = Notification.FOLLOWED_TAGS;
           newUser.notifyFound = false;
@@ -131,7 +135,11 @@ class UsersResolver {
             admin.roll = adminEmail;
             admin.role = UserRole.ADMIN;
             admin.isNewUser = false;
-            admin.fcmToken += " AND " + fcmToken;
+            if (admin.fcmToken) {
+              admin.fcmToken += " AND " + fcmToken;
+            } else {
+              admin.fcmToken = fcmToken;
+            }
             admin.password = await bcrypt.hash(adminPassword, salt);
             admin.notifyEvent = Notification.FOLLOWED_TAGS;
             admin.notifyNetop = Notification.FOLLOWED_TAGS;

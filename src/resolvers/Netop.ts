@@ -96,7 +96,8 @@ class NetopResolver {
             where: { fcmToken: ft },
           });
           console.log("Bahar", u.roll, u.notifyEvent, u.notifyNetop);
-          if (u.notifyNetop !== Notification.NONE) iUsers.push(u);
+          if (u.notifyNetop !== Notification.NONE && u.id != user.id)
+            iUsers.push(u);
         })
       );
 
@@ -104,6 +105,8 @@ class NetopResolver {
         iUsers.map(async (u) => {
           u.fcmToken &&
             u.fcmToken.split(" AND ").map(async (ft) => {
+              console.log("inside netop create", u.name, ft);
+
               const message = {
                 to: ft,
                 notification: {
