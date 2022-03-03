@@ -3,6 +3,12 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+input AddFeedbackInput {
+  ans1: String
+  ans2: String
+  ans3: String
+}
+
 type Amenity {
   """Amenity image"""
   description: String!
@@ -139,6 +145,9 @@ type Contact {
 
 """Input For Create Account Mutation"""
 input CreateAccountInput {
+  """Super-User's name"""
+  name: String!
+
   """Super-User's role"""
   role: String!
 
@@ -291,6 +300,23 @@ type Event {
   title: String!
 }
 
+type Feedback {
+  """answer to question-1"""
+  ans1: String
+
+  """answer to question-2"""
+  ans2: String
+
+  """answer to question-3"""
+  ans3: String
+
+  """Auto generated uuid for a feedback"""
+  id: String!
+
+  """User who added this feedback"""
+  user: User!
+}
+
 """Input for Query get User"""
 input GetUserInput {
   """User's Id"""
@@ -393,10 +419,11 @@ input ModeratorInput {
 }
 
 type Mutation {
-  """
-  Mutation to create a Super-User account can't create Hostel_Sec, Restrictions : {Admin}
-  """
-  createAccount(CreateAccountInput: CreateAccountInput!): Boolean!
+  """Mutation to add a feedback, Restrictions: {anyone who is authorized}"""
+  addFeedback(AddFeedback: AddFeedbackInput!): Boolean!
+
+  """Mutation to create a Super-User account, Restrictions : {Admin}"""
+  createAccount(CreateAccountInput: CreateAccountInput!, HostelId: String): Boolean!
 
   """
   Mutation to create Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
@@ -441,8 +468,7 @@ type Mutation {
   """create network and opportunity, Restrictions:{any authorized user}"""
   createNetop(Attachments: [Upload!], Image: Upload, NewEventData: createNetopsInput!): Boolean!
 
-  """ Mutation to create Hostel secretory, Restrictions : {Admin, Hostel Affair Secretory} 
-  """
+  """Mutation deprecated"""
   createSec(CreateSecInput: CreateSecInput!, HostelId: String!): Boolean!
 
   """Mutation to Create Tags, Restrictions : {Admin}"""
@@ -457,6 +483,11 @@ type Mutation {
   Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETORY, HAS}
   """
   deleteEvent(EventId: String!): Boolean!
+
+  """
+  Mutation to delete Hostel Contact, Restrictions: {Admin, Has, hostel_secretary}
+  """
+  deleteHostelContact(HostelId: String!): Boolean!
 
   """edit Query, Restrictions:{user who created}"""
   deleteMyQuery(MyQueryId: String!): Boolean!
@@ -627,6 +658,9 @@ type Query {
   """
   getAllAnnouncements(LastAnnouncementId: String!, search: String, take: Float!): getAllAnnouncementsOutput!
 
+  """Query to fetch all feedbacks, Restrictions: {Admins}"""
+  getAllFeedbacks(LastAnnouncementId: String!, take: Float!): [Feedback!]!
+
   """
   Query to fetch announcements of a particular hostel, Restrictions : { anyone who is authorised } 
   """
@@ -741,6 +775,9 @@ type User {
   announcements: [Announcement!]
   complaints: Complaint
   complaintsUpvoted: Complaint
+
+  """feedbacks of the user"""
+  feedbacks: Feedback
   getHome: homeOutput
 
   """User's Hostel amd its details"""

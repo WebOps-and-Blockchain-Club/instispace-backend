@@ -19,6 +19,9 @@ class CreateAccountInput {
 
   @Field({ description: "Super-User's role" })
   role: UserRole;
+
+  @Field({ description: "Super-User's name" })
+  name: string;
 }
 
 @InputType({ description: "Input for Update-User Mutation" })

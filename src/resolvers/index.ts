@@ -9,6 +9,7 @@ import ReportResolver from "./Report";
 import QueryResolver from "./MyQuery";
 import ComplaintResolver from "./Complaint";
 import EventResolver from "./Event";
+import FeedbackResolver from "./Feedback";
 
 export default [
   UsersResolver,
@@ -22,4 +23,5 @@ export default [
   QueryResolver,
   ComplaintResolver,
   EventResolver,
+  FeedbackResolver,
 ] as const;

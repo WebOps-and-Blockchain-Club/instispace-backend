@@ -12,6 +12,7 @@ import MyQuery from "./MyQuery";
 import Event from "./Event";
 import HostelContact from "./Contact";
 import Amenity from "./Amenity";
+import Feedback from "./Feedback";
 
 export default [
   User,
@@ -27,5 +28,6 @@ export default [
   Complaint,
   Event,
   HostelContact,
-  Amenity
+  Amenity,
+  Feedback,
 ];
