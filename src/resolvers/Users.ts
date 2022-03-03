@@ -46,7 +46,7 @@ import NetopResolver from "./Netop";
 import { fileringConditions } from "../types/inputs/netop";
 import Announcement from "./Announcement";
 import Event from "./Event";
-import Feedback from "./Feedback";
+import Feedback from "../entities/Feedback";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -514,12 +514,17 @@ class UsersResolver {
 
   @FieldResolver(() => [Feedback], { nullable: true })
   async feedbacks(@Root() { id, feedbacks }: User) {
-    if (feedbacks) return feedbacks;
-    const user = await User.findOne({
-      where: { id: id },
-      relations: ["feedbacks"],
-    });
-    return user?.feedbacks;
+    try {
+      if (feedbacks) return feedbacks;
+      const user = await User.findOne({
+        where: { id: id },
+        relations: ["feedbacks"],
+      });
+      console.log(user?.feedbacks);
+      return user?.feedbacks;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
   }
 }
 
