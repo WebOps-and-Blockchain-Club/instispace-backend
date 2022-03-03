@@ -493,6 +493,13 @@ class NetopResolver {
     return netop?.createdBy;
   }
 
+  @FieldResolver(() => Number)
+  async commentCount(@Root() { id, comments }: Netop) {
+    if(comments) return comments.length;
+    const netop = await Netop.findOneOrFail(id, { relations:["comments"]});
+    return netop.comments.length;
+  }
+
   @Subscription({ topics: "NETOP" })
   createNetop2(@Root() netop: Netop): Netop {
     console.log(netop.title);

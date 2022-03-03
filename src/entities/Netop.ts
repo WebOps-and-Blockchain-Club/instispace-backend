@@ -53,6 +53,9 @@ class Netop extends BaseEntity {
   @Field(() => Number, { description: "number of likes" })
   likeCount: number;
 
+  @Field(() => Number, { description: "number of likes" })
+  commentCount: number;
+
   @Field(() => Boolean, { description: "is this netop is stared" })
   isStared: boolean;
 
