@@ -19,7 +19,7 @@ class ReportResolver {
     return report?.createdBy;
   }
 
-  @FieldResolver(() => Netop)
+  @FieldResolver(() => Netop, { nullable: true })
   @Authorized()
   async netop(@Root() { id, netop }: Report) {
     if (netop) return netop;
@@ -27,7 +27,7 @@ class ReportResolver {
     return report?.netop;
   }
 
-  @FieldResolver(() => MyQuery)
+  @FieldResolver(() => MyQuery, { nullable: true })
   @Authorized()
   async query(@Root() { id, query }: Report) {
     if (query) return query;

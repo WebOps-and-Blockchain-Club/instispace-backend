@@ -593,7 +593,7 @@ type MyQuery {
 type Netop {
   attachments: String
 
-  """get list of comments"""
+  """get list of report"""
   comments: [Comment!]
   content: String!
   createdAt: DateTime!
@@ -613,6 +613,9 @@ type Netop {
   linkName: String
   linkToAction: String
   photo: String
+
+  """get list of reports"""
+  reports: [Comment!]
 
   """get all the tags associated"""
   tags: [Tag!]
@@ -705,8 +708,8 @@ type Report {
   createdBy: User!
   description: String!
   id: String!
-  netop: Netop!
-  query: MyQuery!
+  netop: Netop
+  query: MyQuery
 }
 
 type Subscription {
@@ -776,6 +779,7 @@ type User {
   notifyFound: Boolean!
   notifyMyQuery: Boolean!
   notifyNetop: Notification!
+  notifyNetopComment: Boolean!
 
   """User's role"""
   role: UserRole!

@@ -100,27 +100,24 @@ class NetopResolver {
         })
       );
 
-      await Promise.all(
-        iUsers.map(async (u) => {
-          const message = {
-            to: u.fcmToken,
-            notification: {
-              title: `Hi ${u?.name}`,
-              body: "you may interested for netop",
-            },
-          };
-          await fcm.send(message, (err: any, response: any) => {
-            if (err) {
-              console.log("Something has gone wrong!" + err);
-              console.log("Respponse:! " + response);
-            } else {
-              // showToast("Successfully sent with response");
-              console.log("Successfully sent with response: ", response);
-            }
-          });
-          console.log(`sent message to ${u.fcmToken}`);
-        })
-      );
+      iUsers.map((u) => {
+        const message = {
+          to: u.fcmToken,
+          notification: {
+            title: `Hi ${u?.name}`,
+            body: "you may interested for netop",
+          },
+        };
+        fcm.send(message, (err: any, response: any) => {
+          if (err) {
+            console.log("Something has gone wrong!" + err);
+            console.log("Respponse:! " + response);
+          } else {
+            // showToast("Successfully sent with response");
+            console.log("Successfully sent with response: ", response);
+          }
+        });
+      });
 
       return !!netop;
     } catch (e) {
@@ -288,7 +285,9 @@ class NetopResolver {
     @Arg("description") description: string
   ) {
     try {
-      const netop = await Netop.findOne(netopId, { relations: ["reports"] });
+      const netop = await Netop.findOne(netopId, {
+        relations: ["reports", "createdBy"],
+      });
       if (netop) {
         const report = await Report.create({
           netop,
@@ -296,10 +295,7 @@ class NetopResolver {
           createdBy: user,
         }).save();
 
-        netop.isHidden = true;
-        await netop.save();
-
-        const creator = report.createdBy;
+        const creator = netop.createdBy;
 
         const message = {
           to: creator.fcmToken,
@@ -309,7 +305,7 @@ class NetopResolver {
           },
         };
 
-        await fcm.send(message, (err: any, response: any) => {
+        fcm.send(message, (err: any, response: any) => {
           if (err) {
             console.log("Something has gone wrong!" + err);
             console.log("Respponse:! " + response);
@@ -319,9 +315,8 @@ class NetopResolver {
           }
         });
         return !!report;
-      } else {
-        return false;
       }
+      return false;
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
@@ -339,7 +334,9 @@ class NetopResolver {
     @Arg("content") content: string
   ) {
     try {
-      const netop = await Netop.findOne(netopId, { relations: ["comments"] });
+      const netop = await Netop.findOne(netopId, {
+        relations: ["comments", "createdBy"],
+      });
       if (netop) {
         const comment = await Comment.create({
           content,
@@ -347,7 +344,7 @@ class NetopResolver {
           createdBy: user,
         }).save();
 
-        const creator = await User.findOneOrFail(netop.createdBy.id);
+        const creator = netop.createdBy;
 
         if (creator.notifyNetopComment) {
           const message = {
@@ -358,7 +355,7 @@ class NetopResolver {
             },
           };
 
-          await fcm.send(message, (err: any, response: any) => {
+          fcm.send(message, (err: any, response: any) => {
             if (err) {
               console.log("Something has gone wrong!" + err);
               console.log("Respponse:! " + response);
@@ -413,7 +410,7 @@ class NetopResolver {
   async getNetop(@Arg("NetopId") netopId: string) {
     try {
       const netop = await Netop.findOne(netopId, {
-        where: { isHidden: false },
+        where: { isHidden: true },
       });
 
       const d = new Date();
@@ -527,7 +524,19 @@ class NetopResolver {
 
   @FieldResolver(() => [Comment], {
     nullable: true,
-    description: "get list of comments",
+    description: "get list of reports",
+  })
+  async reports(@Root() { id, reports }: Netop) {
+    if (reports) return reports;
+    const netop = await Netop.findOne(id, {
+      relations: ["reports"],
+    });
+    return netop?.reports;
+  }
+
+  @FieldResolver(() => [Comment], {
+    nullable: true,
+    description: "get list of report",
   })
   async comments(@Root() { id, comments }: Netop) {
     if (comments) return comments;
