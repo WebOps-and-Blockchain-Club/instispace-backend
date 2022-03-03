@@ -240,13 +240,40 @@ class HostelResolver {
         where: { id },
         relations: ["hostel"],
       });
+      if (!amenity) throw new Error("Invalid Amenity");
       if (
         user.hostel === amenity?.hostel ||
         [UserRole.HAS, UserRole.ADMIN].includes(user.role)
       ) {
-        if (!amenity) throw new Error("Invalid Amenity");
-        const amenityDeleted = await amenity?.remove();
+        const amenityDeleted = await amenity.remove();
         return !!amenityDeleted;
+      }
+      throw new Error("Unauthorised");
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @Mutation(() => Boolean, {
+    description:
+      "Mutation to delete Hostel Contact, Restrictions: {Admin, Has, hostel_secretary}",
+  })
+  async deleteHostelContact(
+    @Arg("HostelId") id: string,
+    @Ctx() { user }: MyContext
+  ) {
+    try {
+      const hostelContact = await Contact.findOne({
+        where: { id },
+        relations: ["hostel"],
+      });
+      if (!hostelContact) throw new Error("Invalid Contact");
+      if (
+        user.hostel === hostelContact?.hostel ||
+        [UserRole.HAS, UserRole.ADMIN].includes(user.role)
+      ) {
+        const hostelContactDeleted = await hostelContact.remove();
+        return !!hostelContactDeleted;
       }
       throw new Error("Unauthorised");
     } catch (e) {

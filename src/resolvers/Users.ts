@@ -317,7 +317,12 @@ class UsersResolver {
     description:
       "Mutation to change Super-Users passwords, Restrictions : {Leads, Hostel Affair Secretory and Hostel Secretory}",
   })
-  @Authorized([UserRole.LEADS, UserRole.HAS, UserRole.HOSTEL_SEC])
+  @Authorized([
+    UserRole.LEADS,
+    UserRole.HAS,
+    UserRole.HOSTEL_SEC,
+    UserRole.SECRETORY,
+  ])
   async updatePassword(
     @Ctx() { user }: MyContext,
     @Arg("NewPass") newPass: NewPass
