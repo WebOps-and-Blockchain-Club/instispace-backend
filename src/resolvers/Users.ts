@@ -39,7 +39,7 @@ import {
 } from "../types/objects/users";
 import MyContext from "../utils/context";
 import bcrypt from "bcryptjs";
-import { In, Like } from "typeorm";
+import { In, ILike } from "typeorm";
 import Hostel from "../entities/Hostel";
 import Item from "../entities/Item";
 import NetopResolver from "./Netop";
@@ -179,13 +179,11 @@ class UsersResolver {
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      let superUsers = await User.find({ where: { role: In(roles) } });
-      const total = superUsers.length;
-      var superUsersList: User[] = [];
+      let superUsersList: User[] = [];
       if (search) {
         await Promise.all(
           ["name", "roll"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const userF = await User.find({
               where: filter,
             });
@@ -196,13 +194,18 @@ class UsersResolver {
         );
         const userStr = superUsersList.map((obj) => JSON.stringify(obj));
         const uniqueItemStr = new Set(userStr);
-        superUsers = Array.from(uniqueItemStr).map((str) => JSON.parse(str));
-      }
-      if (lastUserId) {
-        const index = superUsers.map((n) => n.id).indexOf(lastUserId);
-        superUsersList = superUsers.splice(index + 1, take);
+        superUsersList = Array.from(uniqueItemStr).map((str) =>
+          JSON.parse(str)
+        );
       } else {
-        superUsersList = superUsers.splice(0, take);
+        superUsersList = await User.find({ where: { role: In(roles) } });
+      }
+      const total = superUsersList.length;
+      if (lastUserId) {
+        const index = superUsersList.map((n) => n.id).indexOf(lastUserId);
+        superUsersList = superUsersList.splice(index + 1, take);
+      } else {
+        superUsersList = superUsersList.splice(0, take);
       }
       return { usersList: superUsersList, total };
     } catch (e) {
@@ -221,15 +224,11 @@ class UsersResolver {
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      let users = await User.find({
-        where: { role: In([UserRole.USER, UserRole.MODERATOR]) },
-      });
-      const total = users.length;
-      var usersList: User[] = [];
+      let usersList: User[] = [];
       if (search) {
         await Promise.all(
           ["roll", "name"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const userF = await User.find({ where: filter });
             userF.forEach((user) => {
               usersList.push(user);
@@ -237,15 +236,20 @@ class UsersResolver {
           })
         );
 
-        const userStr = users.map((obj) => JSON.stringify(obj));
+        const userStr = usersList.map((obj) => JSON.stringify(obj));
         const uniqueUserStr = new Set(userStr);
-        users = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
-      }
-      if (lastUserId) {
-        const index = users.map((n) => n.id).indexOf(lastUserId);
-        usersList = users.splice(index + 1, take);
+        usersList = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
       } else {
-        usersList = users;
+        usersList = await User.find({
+          where: { role: In([UserRole.USER, UserRole.MODERATOR]) },
+        });
+      }
+      const total = usersList.length;
+      if (lastUserId) {
+        const index = usersList.map((n) => n.id).indexOf(lastUserId);
+        usersList = usersList.splice(index + 1, take);
+      } else {
+        usersList = usersList.splice(0, take);
       }
       return { usersList: usersList, total };
     } catch (e) {
@@ -285,27 +289,26 @@ class UsersResolver {
     @Arg("take") take: number,
     @Arg("search", { nullable: true }) search?: string
   ) {
-    let users: User[] = [];
+    let usersList: User[] = [];
     await Promise.all(
       ["roll", "name"].map(async (field: string) => {
-        const filter = { [field]: Like(`%${search}%`) };
+        const filter = { [field]: ILike(`%${search}%`) };
         const userF = await User.find({ where: filter });
         userF.forEach((user) => {
-          users.push(user);
+          usersList.push(user);
         });
       })
     );
 
-    const userStr = users.map((obj) => JSON.stringify(obj));
+    const userStr = usersList.map((obj) => JSON.stringify(obj));
     const uniqueUserStr = new Set(userStr);
-    const finalList = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
-    const total = finalList.length;
-    var usersList;
+    usersList = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
+    const total = usersList.length;
     if (lastUserId) {
-      const index = finalList.map((n) => n.id).indexOf(lastUserId);
-      usersList = finalList.splice(index + 1, take);
+      const index = usersList.map((n) => n.id).indexOf(lastUserId);
+      usersList = usersList.splice(index + 1, take);
     } else {
-      usersList = users.splice(0, take);
+      usersList = usersList.splice(0, take);
     }
     return { usersList: usersList, total };
   }
@@ -314,7 +317,12 @@ class UsersResolver {
     description:
       "Mutation to change Super-Users passwords, Restrictions : {Leads, Hostel Affair Secretory and Hostel Secretory}",
   })
-  @Authorized([UserRole.LEADS, UserRole.HAS, UserRole.HOSTEL_SEC])
+  @Authorized([
+    UserRole.LEADS,
+    UserRole.HAS,
+    UserRole.HOSTEL_SEC,
+    UserRole.SECRETORY,
+  ])
   async updatePassword(
     @Ctx() { user }: MyContext,
     @Arg("NewPass") newPass: NewPass

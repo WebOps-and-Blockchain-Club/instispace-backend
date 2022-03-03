@@ -27,7 +27,7 @@ import { UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
-import { Like } from "typeorm";
+import { ILike } from "typeorm";
 
 @Resolver(Netop)
 class NetopResolver {
@@ -363,12 +363,12 @@ class NetopResolver {
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      var netopList: Netop[] = [];
+      let netopList: Netop[] = [];
 
       if (search) {
         await Promise.all(
           ["title"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const netopF = await Netop.find({
               where: filter,
               relations: ["tags", "likedBy", "staredBy"],
