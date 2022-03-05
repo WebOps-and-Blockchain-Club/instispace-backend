@@ -135,7 +135,7 @@ class AnnouncementResolver {
   async getAnnouncements(
     @Arg("LastAnnouncementId") lastAnnouncementId: string,
     @Arg("take") take: number,
-    @Arg("HostelId") hostelId: string,
+    @Arg("HostelId", { nullable: true }) hostelId?: string,
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
