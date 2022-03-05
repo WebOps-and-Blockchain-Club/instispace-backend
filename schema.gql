@@ -523,7 +523,7 @@ type Mutation {
   """Mutation to login, Restrictions : {none}"""
   login(LoginInputs: LoginInput!): LoginOutput!
   removeMyQuery(MyQueryId: String!): Boolean!
-  removeNetop(NetopId: String!): Boolean!
+  removeNetop(NetopId: String!, ReportId: String!): Boolean!
 
   """report Query, Restrictions:{any authorized user}"""
   reportMyQuery(MyQueryId: String!, description: String!): Boolean!
@@ -671,9 +671,7 @@ input NewPass {
 }
 
 type Query {
-  """
-  Query to fetch announcements of each hostel, Restrictions : { Admin, Hostel Affair Secretory} 
-  """
+  """depricated"""
   getAllAnnouncements(LastAnnouncementId: String!, search: String, take: Float!): getAllAnnouncementsOutput!
 
   """Query to fetch all feedbacks, Restrictions: {Admins}"""
@@ -682,7 +680,7 @@ type Query {
   """
   Query to fetch announcements of a particular hostel, Restrictions : { anyone who is authorised } 
   """
-  getAnnouncements(HostelId: String!, LastAnnouncementId: String!, search: String, take: Float!): getAnnouncementsOutput!
+  getAnnouncements(HostelId: String, LastAnnouncementId: String!, search: String, take: Float!): getAnnouncementsOutput!
 
   """
   get a list of Complaints sorted by date, ordered by upvotes if true, and order by isResolved(upresolved at the top)
