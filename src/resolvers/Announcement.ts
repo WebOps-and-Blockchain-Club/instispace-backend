@@ -83,7 +83,7 @@ class AnnouncementResolver {
   }
 
   @Query(() => getAllAnnouncementsOutput, {
-    description: "depricated",
+    description: "Query depricated",
   })
   @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETORY])
   async getAllAnnouncements(
