@@ -155,14 +155,6 @@ input CreateAccountInput {
   roll: String!
 }
 
-input CreateAmenityInput {
-  """Amenity description"""
-  description: String!
-
-  """Amenity's name"""
-  name: String!
-}
-
 """Announcement Input"""
 input CreateAnnouncementInput {
   """Announcement's Descriptions"""
@@ -176,17 +168,6 @@ input CreateAnnouncementInput {
 
   """Announcement's Title"""
   title: String!
-}
-
-input CreateContactInput {
-  """Contact"""
-  contact: String!
-
-  """name of the Person"""
-  name: String!
-
-  """Contact's type"""
-  type: String!
 }
 
 """Input for Hostel"""
@@ -214,14 +195,6 @@ input DeleteComplaintInput {
   resolutionDesc: String
 }
 
-input EditAmenityInput {
-  """description"""
-  description: String
-
-  """name"""
-  name: String
-}
-
 """Announcement Input"""
 input EditAnnouncementInput {
   """Announcement's Descriptions"""
@@ -246,17 +219,6 @@ input EditComplaintInput {
 
   """Complaint Title"""
   title: String
-}
-
-input EditContactInput {
-  """Contact"""
-  contact: String
-
-  """name of the person"""
-  name: String
-
-  """type of the Contact"""
-  type: String
 }
 
 """Input for editing items"""
@@ -426,11 +388,6 @@ type Mutation {
   createAccount(CreateAccountInput: CreateAccountInput!, HostelId: String): Boolean!
 
   """
-  Mutation to create Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
-  """
-  createAmenity(CreateAmenityInput: CreateAmenityInput!, HostelId: String!): Boolean!
-
-  """
   Mutation to create Announcements, Restrictions : {Admin, Hostel Secretary, and Hostel Affair Secretary}
   """
   createAnnouncement(AnnouncementInput: CreateAnnouncementInput!, Images: [Upload!]): Boolean!
@@ -453,11 +410,6 @@ type Mutation {
   createHostel(CreateHostelInput: CreateHostelInput!): Boolean!
 
   """
-  Mutation to create Hostel-Contact, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
-  """
-  createHostelContact(CreateContactInput: CreateContactInput!, HostelId: String!): Boolean!
-
-  """
   Mutation to create the Item, anyone who is authorised and have either Lost an Item or have Found it can access
   """
   createItem(Images: [Upload!], ItemInput: ItemInput!): Boolean!
@@ -475,19 +427,9 @@ type Mutation {
   createTag(TagInput: TagInput!): Boolean!
 
   """
-  Mutation to delete Hostel-Amenity, Restrictions : {Admin, Hostel-Secretory(related to hostel), HAS}
-  """
-  deleteAmenity(AmenityId: String!): Boolean!
-
-  """
   Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETORY, HAS}
   """
   deleteEvent(EventId: String!): Boolean!
-
-  """
-  Mutation to delete Hostel Contact, Restrictions: {Admin, Has, hostel_secretary}
-  """
-  deleteHostelContact(HostelId: String!): Boolean!
 
   """edit Query, Restrictions:{user who created}"""
   deleteMyQuery(MyQueryId: String!): Boolean!
@@ -568,16 +510,6 @@ type Mutation {
   upvote a complaint or remove upvote if previously upvoted, Restrictions : {any authorized user}
   """
   toggleupvotes(complaintId: String!): Boolean!
-
-  """
-  Mutation to update Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
-  """
-  updateAmenity(AmenityId: String!, UpdateAmenityInput: EditAmenityInput!): Boolean!
-
-  """
-  Mutation to update Hostel-Contact, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
-  """
-  updateHostelContact(ContactId: String!, HostelId: String, UpdateContactInput: EditContactInput!): Boolean!
 
   """
   Mutation to change Super-Users passwords, Restrictions : {Leads, Hostel Affair Secretory and Hostel Secretory}
@@ -663,9 +595,7 @@ input NewPass {
 }
 
 type Query {
-  """
-  Query to fetch announcements of each hostel, Restrictions : { Admin, Hostel Affair Secretory} 
-  """
+  """Query depricated"""
   getAllAnnouncements(LastAnnouncementId: String!, search: String, take: Float!): getAllAnnouncementsOutput!
 
   """Query to fetch all feedbacks, Restrictions: {Admins}"""
@@ -674,7 +604,7 @@ type Query {
   """
   Query to fetch announcements of a particular hostel, Restrictions : { anyone who is authorised } 
   """
-  getAnnouncements(HostelId: String!, LastAnnouncementId: String!, search: String, take: Float!): getAnnouncementsOutput!
+  getAnnouncements(HostelId: String, LastAnnouncementId: String!, search: String, take: Float!): getAnnouncementsOutput!
 
   """
   get a list of Complaints sorted by date, ordered by upvotes if true, and order by isResolved(upresolved at the top)
