@@ -167,19 +167,18 @@ class MyQueryResolver {
     @Arg("description") description: string
   ) {
     try {
-      const myQuery = await MyQuery.findOne(myQueryId, {
+      const myQuery = await MyQuery.findOneOrFail(myQueryId, {
         relations: ["reports"],
       });
-      if (myQuery) {
-        const report = await Report.create({
-          query: myQuery,
-          description,
-          createdBy: user,
-        }).save();
-        return !!report;
-      } else {
-        return false;
-      }
+      const report = await Report.create({
+        query: myQuery,
+        description,
+        createdBy: user,
+      }).save();
+
+      const { affected } = await MyQuery.update(myQueryId, { isHidden: true });
+
+      return !!report && affected;
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
@@ -221,9 +220,29 @@ class MyQueryResolver {
     UserRole.HAS,
     UserRole.HOSTEL_SEC,
   ])
-  async removeMyQuery(@Arg("MyQueryId") myQueryId: string) {
+  async removeMyQuery(
+    @Arg("MyQueryId") myQueryId: string,
+    @Arg("ReportId") reportId: string
+  ) {
     let { affected } = await MyQuery.update(myQueryId, { isHidden: true });
-    return affected === 1;
+    let { affected: a2 } = await Report.update(reportId, { isResolved: true });
+    return affected === 1 && a2 === 1;
+  }
+
+  @Mutation(() => Boolean)
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.SECRETORY,
+    UserRole.HAS,
+    UserRole.HOSTEL_SEC,
+  ])
+  async resolveMyQuery(
+    @Arg("MyQueryId") myQueryId: string,
+    @Arg("ReportId") reportId: string
+  ) {
+    let { affected } = await MyQuery.update(myQueryId, { isHidden: false });
+    let { affected: a2 } = await Report.update(reportId, { isResolved: true });
+    return affected === 1 && a2 === 1;
   }
 
   @Query(() => MyQuery, {
@@ -401,8 +420,10 @@ class MyQueryResolver {
 
   @FieldResolver(() => Number)
   async commentCount(@Root() { id, comments }: MyQuery) {
-    if(comments) return comments.length;
-    const myQuerys = await MyQuery.findOneOrFail(id, { relations:["comments"]});
+    if (comments) return comments.length;
+    const myQuerys = await MyQuery.findOneOrFail(id, {
+      relations: ["comments"],
+    });
     return myQuerys.comments.length;
   }
 }
