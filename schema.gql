@@ -60,6 +60,7 @@ enum Category {
 
 type Comment {
   content: String!
+  createdAt: DateTime!
   createdBy: User!
   id: String!
   netop: Netop!
@@ -279,6 +280,8 @@ type Event {
   createdAt: DateTime!
   createdBy: User!
   id: String!
+
+  """Visiblity state of announcements"""
   isHidden: Boolean!
 
   """Returns true if the User has likes this Event, else false"""
@@ -542,6 +545,7 @@ type Mutation {
   Mutation to resolve the item, User who finds his lost entity will update, Restriction : {anyone who is authorised}
   """
   resolveItem(ItemId: String!): Boolean!
+  resolveNetop(NetopId: String!, ReportId: String!): Boolean!
 
   """ILike or Unlike the event, Restrictions:{ AUTHORIZED USER }"""
   toggleLikeEvent(EventId: String!): Boolean!
@@ -606,6 +610,8 @@ type MyQuery {
   createdAt: DateTime!
   createdBy: User!
   id: String!
+
+  """Visiblity state of query"""
   isHidden: Boolean!
 
   """check if Query is liked by current user"""
@@ -631,6 +637,8 @@ type Netop {
   createdBy: User!
   endTime: DateTime!
   id: String!
+
+  """Visiblity state of netop"""
   isHidden: Boolean!
 
   """is this netop is liked"""
@@ -737,9 +745,13 @@ type Query {
 }
 
 type Report {
+  createdAt: DateTime!
   createdBy: User!
   description: String!
   id: String!
+
+  """Visiblity state of reports"""
+  isResolved: Boolean!
   netop: Netop
   query: MyQuery
 }

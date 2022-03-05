@@ -42,8 +42,10 @@ class Netop extends BaseEntity {
   @Field({ nullable: true })
   attachments: string;
 
-  @Column()
-  @Field()
+  @Column({ type: Boolean, default: false })
+  @Field((_type) => Boolean, {
+    description: "Visiblity state of netop",
+  })
   isHidden: boolean;
 
   @Column({ type: "timestamptz" })

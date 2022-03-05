@@ -2,6 +2,7 @@ import { Field, ObjectType } from "type-graphql";
 import {
   BaseEntity,
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -29,6 +30,16 @@ class Report extends BaseEntity {
   @Column()
   @Field()
   description: string;
+
+  @Column({ type: Boolean, default: false })
+  @Field((_type) => Boolean, {
+    description: "Visiblity state of reports",
+  })
+  isResolved: boolean;
+
+  @CreateDateColumn({ type: "timestamptz" })
+  @Field()
+  createdAt: Date;
 }
 
 export default Report;
