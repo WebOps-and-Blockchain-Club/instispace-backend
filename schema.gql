@@ -522,7 +522,7 @@ type Mutation {
 
   """Mutation to login, Restrictions : {none}"""
   login(LoginInputs: LoginInput!): LoginOutput!
-  removeMyQuery(MyQueryId: String!): Boolean!
+  removeMyQuery(MyQueryId: String!, ReportId: String!): Boolean!
   removeNetop(NetopId: String!, ReportId: String!): Boolean!
 
   """report Query, Restrictions:{any authorized user}"""
@@ -545,6 +545,7 @@ type Mutation {
   Mutation to resolve the item, User who finds his lost entity will update, Restriction : {anyone who is authorised}
   """
   resolveItem(ItemId: String!): Boolean!
+  resolveMyQuery(MyQueryId: String!, ReportId: String!): Boolean!
   resolveNetop(NetopId: String!, ReportId: String!): Boolean!
 
   """ILike or Unlike the event, Restrictions:{ AUTHORIZED USER }"""

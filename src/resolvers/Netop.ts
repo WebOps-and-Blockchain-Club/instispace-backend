@@ -269,7 +269,6 @@ class NetopResolver {
       }).save();
 
       const { affected } = await Netop.update(netop.id, { isHidden: true });
-      console.log(affected);
 
       return !!report && affected;
     } catch (e) {
