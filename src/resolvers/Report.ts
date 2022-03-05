@@ -10,18 +10,10 @@ class ReportResolver {
   @Authorized()
   async getReports() {
     let reports = await Report.find({
+      where: { isResolved: false },
       relations: ["netop", "createdBy", "query"],
+      order: { createdAt: "DESC" },
     });
-    if (reports) {
-      reports = reports.filter((report) => {
-        if (report.netop) {
-          return !report.netop.isHidden;
-        } else if (report.query) {
-          return !report.query.isHidden;
-        }
-        return false;
-      });
-    }
     return reports;
   }
 
