@@ -259,17 +259,18 @@ class NetopResolver {
     @Arg("description") description: string
   ) {
     try {
-      const netop = await Netop.findOne(netopId, { relations: ["reports"] });
-      if (netop) {
-        const report = await Report.create({
-          netop,
-          description,
-          createdBy: user,
-        }).save();
-        return !!report;
-      } else {
-        return false;
-      }
+      let netop = await Netop.findOneOrFail(netopId, {
+        relations: ["reports"],
+      });
+      const report = await Report.create({
+        netop,
+        description,
+        createdBy: user,
+      }).save();
+
+      const { affected } = await Netop.update(netop.id, { isHidden: true });
+
+      return !!report && affected;
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
@@ -312,11 +313,35 @@ class NetopResolver {
     UserRole.HOSTEL_SEC,
     UserRole.MODERATOR,
   ])
-  async removeNetop(@Arg("NetopId") netopId: string) {
+  async removeNetop(
+    @Arg("NetopId") netopId: string,
+    @Arg("ReportId") reportId: string
+  ) {
     let { affected } = await Netop.update(netopId, {
       isHidden: true,
     });
-    return affected === 1;
+    let { affected: a2 } = await Report.update(reportId, { isResolved: true });
+    return affected === 1 && a2 === 1;
+  }
+
+  @Mutation(() => Boolean)
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.LEADS,
+    UserRole.HAS,
+    UserRole.SECRETORY,
+    UserRole.HOSTEL_SEC,
+    UserRole.MODERATOR,
+  ])
+  async resolveNetop(
+    @Arg("NetopId") netopId: string,
+    @Arg("ReportId") reportId: string
+  ) {
+    let { affected } = await Netop.update(netopId, {
+      isHidden: false,
+    });
+    let { affected: a2 } = await Report.update(reportId, { isResolved: true });
+    return affected === 1 && a2 === 1;
   }
 
   @Query(() => Netop, {
@@ -385,11 +410,9 @@ class NetopResolver {
             ? n.staredBy.filter((u) => u.id === user.id).length &&
                 new Date(n.endTime).getTime() > d.getTime() &&
                 n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
-                  .length &&
-                !(n.reports && n.reports.length)
+                  .length
             : n.staredBy.filter((u) => u.id === user.id).length &&
-                new Date(n.endTime).getTime() > d.getTime() &&
-                !(n.reports && n.reports.length);
+                new Date(n.endTime).getTime() > d.getTime();
         });
       } else if (
         fileringConditions &&
@@ -400,14 +423,11 @@ class NetopResolver {
           (n) =>
             new Date(n.endTime).getTime() > d.getTime() &&
             n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
-              .length &&
-            !(n.reports && n.reports.length)
+              .length
         );
       } else {
         netopList = netopList.filter(
-          (n) =>
-            new Date(n.endTime).getTime() > d.getTime() &&
-            !(n.reports && n.reports.length)
+          (n) => new Date(n.endTime).getTime() > d.getTime()
         );
       }
 
