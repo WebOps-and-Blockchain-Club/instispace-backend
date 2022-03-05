@@ -633,8 +633,11 @@ type Netop {
   id: String!
   isHidden: Boolean!
 
-  """check if network and opportunity is liked by current user"""
+  """is this netop is liked"""
   isLiked: Boolean!
+
+  """is this netop is boolean"""
+  isReported: Boolean!
 
   """is this netop is stared"""
   isStared: Boolean!
@@ -644,6 +647,9 @@ type Netop {
   linkName: String
   linkToAction: String
   photo: String
+
+  """get list of reports"""
+  reports: [Report!]
 
   """get all the tags associated"""
   tags: [Tag!]
@@ -734,8 +740,8 @@ type Report {
   createdBy: User!
   description: String!
   id: String!
-  netop: Netop!
-  query: MyQuery!
+  netop: Netop
+  query: MyQuery
 }
 
 type Subscription {

@@ -59,6 +59,12 @@ class Netop extends BaseEntity {
   @Field(() => Boolean, { description: "is this netop is stared" })
   isStared: boolean;
 
+  @Field(() => Boolean, { description: "is this netop is boolean" })
+  isReported: boolean;
+
+  @Field(() => Boolean, { description: "is this netop is liked" })
+  isLiked: boolean;
+
   @Field({ nullable: true })
   @Column({ nullable: true })
   linkName: string;

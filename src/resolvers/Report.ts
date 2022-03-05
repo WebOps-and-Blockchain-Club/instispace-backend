@@ -7,8 +7,22 @@ import MyQuery from "../entities/MyQuery";
 @Resolver(Report)
 class ReportResolver {
   @Query(() => [Report], { nullable: true })
+  @Authorized()
   async getReports() {
-    return await Report.find({});
+    let reports = await Report.find({
+      relations: ["netop", "createdBy", "query"],
+    });
+    if (reports) {
+      reports = reports.filter((report) => {
+        if (report.netop) {
+          return !report.netop.isHidden;
+        } else if (report.query) {
+          return !report.query.isHidden;
+        }
+        return false;
+      });
+    }
+    return reports;
   }
 
   @FieldResolver(() => User)
@@ -19,7 +33,7 @@ class ReportResolver {
     return report?.createdBy;
   }
 
-  @FieldResolver(() => Netop)
+  @FieldResolver(() => Netop, { nullable: true })
   @Authorized()
   async netop(@Root() { id, netop }: Report) {
     if (netop) return netop;
@@ -27,7 +41,7 @@ class ReportResolver {
     return report?.netop;
   }
 
-  @FieldResolver(() => MyQuery)
+  @FieldResolver(() => MyQuery, { nullable: true })
   @Authorized()
   async query(@Root() { id, query }: Report) {
     if (query) return query;
