@@ -314,11 +314,15 @@ class NetopResolver {
     UserRole.HOSTEL_SEC,
     UserRole.MODERATOR,
   ])
-  async removeNetop(@Arg("NetopId") netopId: string) {
+  async removeNetop(
+    @Arg("NetopId") netopId: string,
+    @Arg("ReportId") reportId: string
+  ) {
     let { affected } = await Netop.update(netopId, {
       isHidden: true,
     });
-    return affected === 1;
+    let { affected: a2 } = await Report.update(reportId, { isResolved: true });
+    return affected === 1 && a2 === 1;
   }
 
   @Mutation(() => Boolean)
