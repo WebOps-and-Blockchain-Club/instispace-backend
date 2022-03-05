@@ -497,8 +497,8 @@ type Mutation {
   """Mutation to login, Restrictions : {none}"""
   login(LoginInputs: LoginInput!, fcmToken: String!): LoginOutput!
   logout(fcmToken: String!): Boolean!
-  removeMyQuery(MyQueryId: String!): Boolean!
-  removeNetop(NetopId: String!): Boolean!
+  removeMyQuery(MyQueryId: String!, ReportId: String!): Boolean!
+  removeNetop(NetopId: String!, ReportId: String!): Boolean!
 
   """report Query, Restrictions:{any authorized user}"""
   reportMyQuery(MyQueryId: String!, description: String!): Boolean!
@@ -515,8 +515,8 @@ type Mutation {
   Mutation to resolve the item, User who finds his lost entity will update, Restriction : {anyone who is authorised}
   """
   resolveItem(ItemId: String!): Boolean!
-  resolveReportMyQuery(MyQueryId: String!): Boolean!
-  resolveReportNetop(NetopId: String!): Boolean!
+  resolveReportMyQuery(MyQueryId: String!, ReportId: String!): Boolean!
+  resolveReportNetop(NetopId: String!, ReportId: String!): Boolean!
 
   """Like or Unlike the event, Restrictions:{ AUTHORIZED USER }"""
   toggleLikeEvent(EventId: String!): Boolean!
@@ -588,6 +588,9 @@ type MyQuery {
   """number of likes"""
   likeCount: Float!
   photo: String
+
+  """get list of reports"""
+  reports: [Comment!]
   title: String!
 }
 
@@ -595,7 +598,7 @@ type MyQuery {
 type Netop {
   attachments: String
 
-  """get list of report"""
+  """get list of comments"""
   comments: [Comment!]
   content: String!
   createdAt: DateTime!
@@ -617,7 +620,7 @@ type Netop {
   photo: String
 
   """get list of reports"""
-  reports: [Comment!]
+  reports: [Report!]
 
   """get all the tags associated"""
   tags: [Tag!]
@@ -707,9 +710,11 @@ type Query {
 }
 
 type Report {
+  createdAt: DateTime!
   createdBy: User!
   description: String!
   id: String!
+  isHidden: Boolean!
   netop: Netop
   query: MyQuery
 }

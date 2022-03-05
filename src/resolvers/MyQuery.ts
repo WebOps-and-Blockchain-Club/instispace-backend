@@ -176,9 +176,13 @@ class MyQueryResolver {
           query: myQuery,
           description,
           createdBy: user,
+          isHidden: false,
         }).save();
 
         const creator = myQuery.createdBy;
+
+        myQuery.isHidden = true;
+        await myQuery.save();
 
         const message = {
           to: creator.fcmToken,
@@ -276,9 +280,16 @@ class MyQueryResolver {
     UserRole.HAS,
     UserRole.HOSTEL_SEC,
   ])
-  async removeMyQuery(@Arg("MyQueryId") myQueryId: string) {
-    let { affected } = await MyQuery.update(myQueryId, { isHidden: true });
-    return affected === 1;
+  async removeMyQuery(
+    @Arg("MyQueryId") myQueryId: string,
+    @Arg("ReportId") reportId: string
+  ) {
+    const affected = await Report.update(reportId, { isHidden: true });
+    const update = await MyQuery.update(myQueryId, {
+      isHidden: true,
+      reports: [],
+    });
+    return update && affected && true;
   }
 
   @Mutation(() => Boolean)
@@ -290,9 +301,16 @@ class MyQueryResolver {
     UserRole.HOSTEL_SEC,
     UserRole.MODERATOR,
   ])
-  async resolveReportMyQuery(@Arg("MyQueryId") myQueryId: string) {
-    const update = await MyQuery.update(myQueryId, { isHidden: false });
-    return update && true;
+  async resolveReportMyQuery(
+    @Arg("MyQueryId") myQueryId: string,
+    @Arg("ReportId") reportId: string
+  ) {
+    const affected = await Report.update(reportId, { isHidden: true });
+    const update = await MyQuery.update(myQueryId, {
+      isHidden: false,
+      reports: [],
+    });
+    return update && affected && true;
   }
 
   @Query(() => MyQuery, {
@@ -466,6 +484,18 @@ class MyQueryResolver {
     if (createdBy) return createdBy;
     const myQuery = await MyQuery.findOne(id, { relations: ["createdBy"] });
     return myQuery?.createdBy;
+  }
+
+  @FieldResolver(() => [Comment], {
+    nullable: true,
+    description: "get list of reports",
+  })
+  async reports(@Root() { id, reports }: MyQuery) {
+    if (reports) return reports;
+    const myQuery = await MyQuery.findOne(id, {
+      relations: ["reports"],
+    });
+    return myQuery?.reports;
   }
 }
 

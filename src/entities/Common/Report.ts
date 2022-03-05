@@ -2,6 +2,7 @@ import { Field, ObjectType } from "type-graphql";
 import {
   BaseEntity,
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -17,18 +18,29 @@ class Report extends BaseEntity {
   @Field()
   id: string;
 
-  @ManyToOne(() => Netop, (netop) => netop.reports)
+  @Field(() => Netop, { nullable: true })
+  @ManyToOne(() => Netop, (netop) => netop.reports, { nullable: true })
   netop: Netop;
 
-  @ManyToOne(() => Query, (Query) => Query.reports)
+  @Field(() => Query, { nullable: true })
+  @ManyToOne(() => Query, (Query) => Query.reports, { nullable: true })
   query: Query;
 
+  @Field(() => User)
   @ManyToOne(() => User, (User) => User.reports)
   createdBy: User;
 
   @Column()
   @Field()
   description: string;
+
+  @Column()
+  @Field()
+  isHidden: boolean;
+
+  @CreateDateColumn({ type: "timestamptz" })
+  @Field()
+  createdAt: Date;
 }
 
 export default Report;
