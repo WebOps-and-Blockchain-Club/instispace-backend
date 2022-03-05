@@ -3,12 +3,21 @@ import { Authorized, FieldResolver, Query, Resolver, Root } from "type-graphql";
 import Report from "../entities/Common/Report";
 import Netop from "../entities/Netop";
 import MyQuery from "../entities/MyQuery";
+import { UserRole } from "../utils";
 
 @Resolver(Report)
 class ReportResolver {
   @Query(() => [Report], { nullable: true })
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.LEADS,
+    UserRole.HAS,
+    UserRole.SECRETORY,
+    UserRole.HOSTEL_SEC,
+    UserRole.MODERATOR,
+  ])
   async getReports() {
-    return await Report.find({});
+    return await Report.find({ where: { isHidden: false } });
   }
 
   @FieldResolver(() => User)

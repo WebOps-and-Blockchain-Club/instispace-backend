@@ -294,7 +294,7 @@ class NetopResolver {
     @Arg("description") description: string
   ) {
     try {
-      const netop = await Netop.findOne(netopId, {
+      let netop = await Netop.findOne(netopId, {
         relations: ["reports", "createdBy"],
       });
       if (netop) {
@@ -302,27 +302,31 @@ class NetopResolver {
           netop,
           description,
           createdBy: user,
+          isHidden: false,
         }).save();
 
         const creator = netop.createdBy;
 
-        const message = {
-          to: creator.fcmToken,
-          notification: {
-            title: `Hi ${creator.name}`,
-            body: "Your netop got reported!!! contact admin for more info",
-          },
-        };
+        creator.fcmToken.split(" AND ").map((ft) => {
+          const message = {
+            to: ft,
+            notification: {
+              title: `Hi ${creator.name}`,
+              body: "Your netop got reported!!! contact admin for more info",
+            },
+          };
 
-        fcm.send(message, (err: any, response: any) => {
-          if (err) {
-            console.log("Something has gone wrong!" + err);
-            console.log("Respponse:! " + response);
-          } else {
-            // showToast("Successfully sent with response");
-            console.log("Successfully sent with response: ", response);
-          }
+          fcm.send(message, (err: any, response: any) => {
+            if (err) {
+              console.log("Something has gone wrong!" + err);
+              console.log("Respponse:! " + response);
+            } else {
+              // showToast("Successfully sent with response");
+              console.log("Successfully sent with response: ", response);
+            }
+          });
         });
+
         return !!report;
       }
       return false;
@@ -396,9 +400,16 @@ class NetopResolver {
     UserRole.HOSTEL_SEC,
     UserRole.MODERATOR,
   ])
-  async removeNetop(@Arg("NetopId") netopId: string) {
-    let { affected } = await Netop.update(netopId, { isHidden: true });
-    return affected === 1;
+  async removeNetop(
+    @Arg("NetopId") netopId: string,
+    @Arg("ReportId") reportId: string
+  ) {
+    const affected = await Report.update(reportId, { isHidden: true });
+    const update = await Netop.update(netopId, {
+      isHidden: true,
+      reports: [],
+    });
+    return update && affected && true;
   }
 
   @Mutation(() => Boolean)
@@ -410,9 +421,15 @@ class NetopResolver {
     UserRole.HOSTEL_SEC,
     UserRole.MODERATOR,
   ])
-  async resolveReportNetop(@Arg("NetopId") netopId: string) {
-    const update = await Netop.update(netopId, { isHidden: false });
-    return update && true;
+  async resolveReportNetop(
+    @Arg("NetopId") netopId: string,
+    @Arg("ReportId") reportId: string
+  ) {
+    const affected = await Report.update(reportId, { isHidden: true });
+    const update = await Netop.update(netopId, {
+      isHidden: false,
+    });
+    return update && affected && true;
   }
 
   @Query(() => Netop, {
@@ -534,7 +551,7 @@ class NetopResolver {
     }
   }
 
-  @FieldResolver(() => [Comment], {
+  @FieldResolver(() => [Report], {
     nullable: true,
     description: "get list of reports",
   })
@@ -548,7 +565,7 @@ class NetopResolver {
 
   @FieldResolver(() => [Comment], {
     nullable: true,
-    description: "get list of report",
+    description: "get list of comments",
   })
   async comments(@Root() { id, comments }: Netop) {
     if (comments) return comments;
