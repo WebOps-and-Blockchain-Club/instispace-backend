@@ -83,8 +83,7 @@ class AnnouncementResolver {
   }
 
   @Query(() => getAllAnnouncementsOutput, {
-    description:
-      "Query to fetch announcements of each hostel, Restrictions : { Admin, Hostel Affair Secretory} ",
+    description: "depricated",
   })
   @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETORY])
   async getAllAnnouncements(
@@ -136,14 +135,10 @@ class AnnouncementResolver {
   async getAnnouncements(
     @Arg("LastAnnouncementId") lastAnnouncementId: string,
     @Arg("take") take: number,
-    @Arg("HostelId") hostelId: string,
+    @Arg("HostelId", { nullable: true }) hostelId?: string,
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      let hostel = await Hostel.findOne({
-        where: { id: hostelId },
-        relations: ["announcements"],
-      });
       let announcementsList: Announcement[] = [];
       if (search) {
         await Promise.all(
@@ -159,14 +154,26 @@ class AnnouncementResolver {
           })
         );
       } else {
-        const d = new Date();
-        announcementsList = hostel!.announcements!.filter(
-          (n) =>
-            new Date(n.endTime).getTime() > d.getTime() && n.isHidden === false
-        );
-        announcementsList.sort((a, b) =>
-          a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
-        );
+        if (hostelId) {
+          let hostel = await Hostel.findOne({
+            where: { id: hostelId },
+            relations: ["announcements"],
+          });
+          if (!hostel) throw new Error("Invalid Hostel Id");
+          const d = new Date();
+          announcementsList = hostel.announcements!.filter(
+            (n) =>
+              new Date(n.endTime).getTime() > d.getTime() &&
+              n.isHidden === false
+          );
+          announcementsList.sort((a, b) =>
+            a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+          );
+        } else {
+          announcementsList = await Announcement.find({
+            order: { createdAt: "DESC" },
+          });
+        }
       }
       const total = announcementsList.length;
       if (lastAnnouncementId) {
