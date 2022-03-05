@@ -313,7 +313,9 @@ class NetopResolver {
     UserRole.MODERATOR,
   ])
   async removeNetop(@Arg("NetopId") netopId: string) {
-    let { affected } = await Netop.update(netopId, { isHidden: true });
+    let { affected } = await Netop.update(netopId, {
+      isHidden: true,
+    });
     return affected === 1;
   }
 
@@ -360,7 +362,7 @@ class NetopResolver {
             const filter = { [field]: ILike(`%${search}%`) };
             const netopF = await Netop.find({
               where: filter,
-              relations: ["tags", "likedBy", "staredBy"],
+              relations: ["tags", "likedBy", "staredBy", "reports"],
               order: { createdAt: "DESC" },
             });
             netopF.forEach((netop) => {
@@ -371,7 +373,7 @@ class NetopResolver {
       } else {
         netopList = await Netop.find({
           where: { isHidden: false },
-          relations: ["tags", "likedBy", "staredBy"],
+          relations: ["tags", "likedBy", "staredBy", "reports"],
           order: { createdAt: "DESC" },
         });
       }
@@ -383,9 +385,11 @@ class NetopResolver {
             ? n.staredBy.filter((u) => u.id === user.id).length &&
                 new Date(n.endTime).getTime() > d.getTime() &&
                 n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
-                  .length
+                  .length &&
+                !(n.reports && n.reports.length)
             : n.staredBy.filter((u) => u.id === user.id).length &&
-                new Date(n.endTime).getTime() > d.getTime();
+                new Date(n.endTime).getTime() > d.getTime() &&
+                !(n.reports && n.reports.length);
         });
       } else if (
         fileringConditions &&
@@ -396,11 +400,14 @@ class NetopResolver {
           (n) =>
             new Date(n.endTime).getTime() > d.getTime() &&
             n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
-              .length
+              .length &&
+            !(n.reports && n.reports.length)
         );
       } else {
         netopList = netopList.filter(
-          (n) => new Date(n.endTime).getTime() > d.getTime()
+          (n) =>
+            new Date(n.endTime).getTime() > d.getTime() &&
+            !(n.reports && n.reports.length)
         );
       }
 
@@ -448,6 +455,18 @@ class NetopResolver {
     return netop?.comments;
   }
 
+  @FieldResolver(() => [Report], {
+    nullable: true,
+    description: "get list of reports",
+  })
+  async reports(@Root() { id, reports }: Netop) {
+    if (reports) return reports;
+    const netop = await Netop.findOne(id, {
+      relations: ["reports"],
+    });
+    return netop?.reports;
+  }
+
   @FieldResolver(() => Number, { description: "get number of likes" })
   async likeCount(@Root() { id, likedBy }: Netop) {
     if (likedBy) return likedBy.length;
@@ -486,6 +505,12 @@ class NetopResolver {
     return netop?.likedBy.filter((u) => u.id === user.id).length;
   }
 
+  @FieldResolver(() => Boolean)
+  async isReported(@Root() { id }: Netop) {
+    const netop = await Netop.findOneOrFail(id, { relations: ["reports"] });
+    return netop.reports.length && true;
+  }
+
   @FieldResolver(() => User)
   async createdBy(@Root() { id, createdBy }: Netop) {
     if (createdBy) return createdBy;
@@ -495,8 +520,8 @@ class NetopResolver {
 
   @FieldResolver(() => Number)
   async commentCount(@Root() { id, comments }: Netop) {
-    if(comments) return comments.length;
-    const netop = await Netop.findOneOrFail(id, { relations:["comments"]});
+    if (comments) return comments.length;
+    const netop = await Netop.findOneOrFail(id, { relations: ["comments"] });
     return netop.comments.length;
   }
 
