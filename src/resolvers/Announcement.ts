@@ -135,7 +135,7 @@ class AnnouncementResolver {
   async getAnnouncements(
     @Arg("LastAnnouncementId") lastAnnouncementId: string,
     @Arg("take") take: number,
-    @Arg("HostelId", { nullable: true }) hostelId?: string,
+    @Arg("HostelId") hostelId?: string,
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
@@ -159,13 +159,7 @@ class AnnouncementResolver {
             where: { id: hostelId },
             relations: ["announcements"],
           });
-          if (!hostel) throw new Error("Invalid Hostel Id");
-          const d = new Date();
-          announcementsList = hostel.announcements!.filter(
-            (n) =>
-              new Date(n.endTime).getTime() > d.getTime() &&
-              n.isHidden === false
-          );
+          announcementsList = hostel!.announcements!;
           announcementsList.sort((a, b) =>
             a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
           );
@@ -175,6 +169,11 @@ class AnnouncementResolver {
           });
         }
       }
+      const d = new Date();
+      announcementsList.filter(
+        (n) =>
+          new Date(n.endTime).getTime() > d.getTime() && n.isHidden === false
+      );
       const total = announcementsList.length;
       if (lastAnnouncementId) {
         const index = announcementsList
