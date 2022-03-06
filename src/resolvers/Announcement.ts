@@ -24,12 +24,8 @@ import {
   getAllAnnouncementsOutput,
   getAnnouncementsOutput,
 } from "../types/objects/announcements";
-<<<<<<< HEAD
-import { Like } from "typeorm";
 import fcm from "../utils/fcmTokens";
-=======
 import { ILike } from "typeorm";
->>>>>>> main
 
 @Resolver((_type) => Announcement)
 class AnnouncementResolver {

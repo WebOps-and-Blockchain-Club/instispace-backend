@@ -24,14 +24,10 @@ import { smail, UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
-<<<<<<< HEAD
-import { Like } from "typeorm";
 import fcm from "../utils/fcmTokens";
 import { Notification } from "../utils/index";
-=======
 import { ILike, In } from "typeorm";
 import { mail } from "../utils/mail";
->>>>>>> main
 
 @Resolver(Netop)
 class NetopResolver {
@@ -564,18 +560,6 @@ class NetopResolver {
     return netop?.comments;
   }
 
-  @FieldResolver(() => [Report], {
-    nullable: true,
-    description: "get list of reports",
-  })
-  async reports(@Root() { id, reports }: Netop) {
-    if (reports) return reports;
-    const netop = await Netop.findOne(id, {
-      relations: ["reports"],
-    });
-    return netop?.reports;
-  }
-
   @FieldResolver(() => Number, { description: "get number of likes" })
   async likeCount(@Root() { id, likedBy }: Netop) {
     if (likedBy) return likedBy.length;
@@ -626,8 +610,6 @@ class NetopResolver {
     const netop = await Netop.findOne(id, { relations: ["createdBy"] });
     return netop?.createdBy;
   }
-<<<<<<< HEAD
-=======
 
   @FieldResolver(() => Number)
   async commentCount(@Root() { id, comments }: Netop) {
@@ -635,13 +617,6 @@ class NetopResolver {
     const netop = await Netop.findOneOrFail(id, { relations: ["comments"] });
     return netop.comments.length;
   }
-
-  @Subscription({ topics: "NETOP" })
-  createNetop2(@Root() netop: Netop): Netop {
-    console.log(netop.title);
-    return netop;
-  }
->>>>>>> main
 }
 
 export default NetopResolver;

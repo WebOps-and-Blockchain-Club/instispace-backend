@@ -19,12 +19,8 @@ import { UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
-<<<<<<< HEAD
-import { Like } from "typeorm";
 import fcm from "../utils/fcmTokens";
-=======
 import { ILike } from "typeorm";
->>>>>>> main
 
 @Resolver(MyQuery)
 class MyQueryResolver {
@@ -457,7 +453,6 @@ class MyQueryResolver {
     return myQuery?.createdBy;
   }
 
-<<<<<<< HEAD
   @FieldResolver(() => [Comment], {
     nullable: true,
     description: "get list of reports",
@@ -468,7 +463,8 @@ class MyQueryResolver {
       relations: ["reports"],
     });
     return myQuery?.reports;
-=======
+  }
+
   @FieldResolver(() => Number)
   async commentCount(@Root() { id, comments }: MyQuery) {
     if (comments) return comments.length;
@@ -476,7 +472,6 @@ class MyQueryResolver {
       relations: ["comments"],
     });
     return myQuerys.comments.length;
->>>>>>> main
   }
 }
 
