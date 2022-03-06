@@ -3,7 +3,6 @@ import { Authorized, FieldResolver, Query, Resolver, Root } from "type-graphql";
 import Report from "../entities/Common/Report";
 import Netop from "../entities/Netop";
 import MyQuery from "../entities/MyQuery";
-import { UserRole } from "../utils";
 
 @Resolver(Report)
 class ReportResolver {

@@ -58,35 +58,30 @@ class LostAndFoundResolver {
       if (item.category == Category.FOUND) {
         const iUsers = await User.find({});
 
-        await Promise.all(
-          iUsers.map(async (u) => {
-            u.fcmToken &&
-              u.fcmToken.split(" AND ").map(async () => {
-                if (u.notifyFound) {
-                  const message = {
-                    to: u.fcmToken,
-                    notification: {
-                      title: `Hi ${u?.name}`,
-                      body: "We found something",
-                    },
-                  };
+        iUsers.map(async (u) => {
+          u.fcmToken &&
+            u.fcmToken.split(" AND ").map(() => {
+              if (u.notifyFound) {
+                const message = {
+                  to: u.fcmToken,
+                  notification: {
+                    title: `Hi ${u?.name}`,
+                    body: "We found something",
+                  },
+                };
 
-                  await fcm.send(message, (err: any, response: any) => {
-                    if (err) {
-                      console.log("Something has gone wrong!" + err);
-                      console.log("Respponse:! " + response);
-                    } else {
-                      // showToast("Successfully sent with response");
-                      console.log(
-                        "Successfully sent with response: ",
-                        response
-                      );
-                    }
-                  });
-                }
-              });
-          })
-        );
+                fcm.send(message, (err: any, response: any) => {
+                  if (err) {
+                    console.log("Something has gone wrong!" + err);
+                    console.log("Respponse:! " + response);
+                  } else {
+                    // showToast("Successfully sent with response");
+                    console.log("Successfully sent with response: ", response);
+                  }
+                });
+              }
+            });
+        });
       }
       return !!item;
     } catch (e) {
