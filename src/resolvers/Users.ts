@@ -184,24 +184,8 @@ class UsersResolver {
         process.env.NODE_ENV === "development"
           ? accountPassword
           : autoGenPass(8);
+
       if (
-<<<<<<< HEAD
-        createAccountInput.role === UserRole.HOSTEL_SEC ||
-        ([UserRole.HAS, UserRole.SECRETORY].includes(createAccountInput.role) &&
-          user.role !== UserRole.ADMIN)
-      )
-        throw new Error("Invalid role");
-      user.role = createAccountInput.role;
-      user.roll = createAccountInput.roll;
-      user.isNewUser = true;
-      user.password = bcrypt.hashSync(password, salt);
-      user.notifyEvent = Notification.FOLLOWED_TAGS;
-      user.notifyNetop = Notification.FOLLOWED_TAGS;
-      user.notifyFound = false;
-      user.notifyMyQuery = true;
-      user.notifyNetopComment = true;
-      await user.save();
-=======
         [UserRole.SECRETORY, UserRole.HAS].includes(createAccountInput.role) &&
         user.role !== UserRole.ADMIN
       ) {
@@ -218,10 +202,14 @@ class UsersResolver {
       }
       newUser.roll = createAccountInput.roll;
       newUser.name = createAccountInput.name;
+      newUser.notifyEvent = Notification.FOLLOWED_TAGS;
+      newUser.notifyNetop = Notification.FOLLOWED_TAGS;
+      newUser.notifyFound = false;
+      newUser.notifyMyQuery = true;
+      newUser.notifyNetopComment = true;
       newUser.isNewUser = true;
       newUser.password = bcrypt.hashSync(password, salt);
       await newUser.save();
->>>>>>> main
       console.log(password);
       //this password is going to be emailed to the Super-User
       if (process.env.NODE_ENV !== "development")
@@ -589,46 +577,6 @@ class UsersResolver {
 
   @FieldResolver(() => homeOutput, { nullable: true })
   async getHome(@Root() { id, role }: User) {
-<<<<<<< HEAD
-    if (
-      role == UserRole.ADMIN ||
-      role == UserRole.DEV_TEAM ||
-      role == UserRole.HAS ||
-      role == UserRole.HOSTEL_SEC ||
-      role == UserRole.LEADS ||
-      role == UserRole.SECRETORY
-    ) {
-      const user = await User.findOneOrFail(id, {
-        relations: ["networkingAndOpportunities", "event", "announcements"],
-      });
-
-      return {
-        netops: user.networkingAndOpportunities,
-        announcements: user.announcements,
-        events: user.event,
-      };
-    } else {
-      const user = await User.findOneOrFail({
-        where: { id },
-        relations: ["interest", "hostel"],
-      });
-
-      const tagIds = user.interest?.map((tag) => tag.id);
-      const myCon: MyContext = {
-        user,
-      };
-      const netopObject = new NetopResolver();
-      const announcementObject = new Announcement();
-      const eventObject = new Event();
-      const filters: fileringConditions = { tags: tagIds!, isStared: false };
-      const netops = (await netopObject.getNetops(myCon, "", 25, filters))
-        .netopList;
-      const events = (await eventObject.getEvents(myCon, "", 25, filters)).list;
-      const announcements = (
-        await announcementObject.getAnnouncements("", 25, user!.hostel!.id)
-      ).announcementsList;
-      return { netops, announcements, events };
-=======
     try {
       if (
         role == UserRole.ADMIN ||
@@ -672,7 +620,6 @@ class UsersResolver {
       }
     } catch (e) {
       throw new Error(`message: ${e}`);
->>>>>>> main
     }
   }
 
