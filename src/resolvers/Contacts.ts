@@ -56,7 +56,7 @@ class ContactResolver {
       "Query to return contact information, Restrictions: {Admins, HAS}",
   })
   @Authorized([UserRole.ADMIN, UserRole.HAS])
-  async getContact(@Arg("HostelId") hostelId: string) {
+  async getContact(@Arg("HostelId") hostelId?: string) {
     try {
       let contacts: Contact[] = [];
       if (hostelId) {
