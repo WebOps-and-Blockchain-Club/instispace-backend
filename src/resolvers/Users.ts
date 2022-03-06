@@ -107,7 +107,6 @@ class UsersResolver {
         }
         //If user exists
         else {
-          console.log("I am here");
           if (user.fcmToken) {
             user.fcmToken += " AND " + fcmToken;
           } else {
@@ -217,7 +216,7 @@ class UsersResolver {
         await mail({
           email: `${newUser.roll}`,
           subject: "Super-User login credentials",
-          htmlContent: "",
+          htmlContent: `You now have access to new Super-User account, role: ${newUser.role}, password: ${newUser.password}`,
         });
       return !!newUser;
     } catch (e) {

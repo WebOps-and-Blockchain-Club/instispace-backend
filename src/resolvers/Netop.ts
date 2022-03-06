@@ -294,26 +294,29 @@ class NetopResolver {
       }).save();
 
       const { affected } = await Netop.update(netop.id, { isHidden: true });
-      const superUsersList = await User.find({
-        where: {
-          role: In([UserRole.ADMIN, UserRole.LEADS, UserRole.MODERATOR]),
-        },
-      });
-      let mailList: String[] = [];
-      superUsersList.forEach((user) => {
-        if (user.role === UserRole.MODERATOR) {
-          const email = user.roll.concat(smail);
-          mailList.push(email);
-        } else {
-          mailList.push(user.roll);
-        }
-      });
-      console.log(mailList);
-      await mail({
-        email: mailList.join(", "),
-        subject: "Report",
-        htmlContent: "",
-      });
+
+      if (process.env.NODE_ENV !== "development") {
+        const superUsersList = await User.find({
+          where: {
+            role: In([UserRole.ADMIN, UserRole.LEADS, UserRole.MODERATOR]),
+          },
+        });
+        let mailList: String[] = [];
+        superUsersList.forEach((user) => {
+          if (user.role === UserRole.MODERATOR) {
+            const email = user.roll.concat(smail);
+            mailList.push(email);
+          } else {
+            mailList.push(user.roll);
+          }
+        });
+        console.log(mailList);
+        await mail({
+          email: mailList.join(", "),
+          subject: "Report",
+          htmlContent: "Your post has been reported!",
+        });
+      }
 
       const creator = netop.createdBy;
 
