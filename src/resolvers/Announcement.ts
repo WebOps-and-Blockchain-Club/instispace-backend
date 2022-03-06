@@ -145,6 +145,21 @@ class AnnouncementResolver {
     }
   }
 
+  @Query(() => Announcement)
+  async getAnnouncement(@Arg("announcementId") announcementId: string) {
+    const announcement = await Announcement.findOne(announcementId);
+    const d = new Date();
+
+    if (
+      announcement &&
+      !announcement.isHidden &&
+      new Date(announcement.endTime).getTime() > d.getTime()
+    ) {
+      return announcement;
+    }
+    return null;
+  }
+
   @Query(() => getAnnouncementsOutput, {
     description:
       "Query to fetch announcements of a particular hostel, Restrictions : { anyone who is authorised } ",

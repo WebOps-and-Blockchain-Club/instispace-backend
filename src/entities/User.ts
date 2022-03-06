@@ -73,6 +73,13 @@ class User extends BaseEntity {
   @OneToMany(() => Event, (event) => event.createdBy)
   event: Event[];
 
+  @OneToMany((_type) => Announcement, (announcements) => announcements.user)
+  @Field((_type) => [Announcement], {
+    description:
+      "Announcements Created by User, can only be created if its a Super User",
+  })
+  announcements: Announcement[];
+
   @OneToMany(() => Query, (query) => query.createdBy)
   querys: Query[];
 
@@ -128,16 +135,6 @@ class User extends BaseEntity {
     description: "User's Lost and Found Items",
   })
   items?: Item[];
-
-  @OneToMany((_type) => Announcement, (announcements) => announcements.user, {
-    nullable: true,
-  })
-  @Field((_type) => [Announcement], {
-    nullable: true,
-    description:
-      "Announcements Created by User, can only be created if its a Super User",
-  })
-  announcements?: Announcement[];
 
   @OneToMany((_type) => Complaint, (complaints) => complaints.user, {
     nullable: true,

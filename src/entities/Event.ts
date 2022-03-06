@@ -20,7 +20,7 @@ class Event extends BaseEntity {
   id: string;
 
   @CreateDateColumn({ type: "timestamptz" })
-  @Field()
+  @Field(() => Date)
   createdAt: Date;
 
   @Column()

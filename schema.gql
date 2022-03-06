@@ -441,7 +441,7 @@ type Mutation {
   createAnnouncement(AnnouncementInput: CreateAnnouncementInput!, Images: [Upload!]): Boolean!
 
   """comment on network and opportunity, Restrictions:{any authorized user}"""
-  createCommentNetop(NetopId: String!, content: String!): Boolean!
+  createCommentNetop(Images: [Upload!], NetopId: String!, content: String!): Boolean!
 
   """comment on Query, Restrictions:{any authorized user}"""
   createCommentQuery(Images: [Upload!], MyQueryId: String!, content: String!): Boolean!
@@ -468,10 +468,10 @@ type Mutation {
   createItem(Images: [Upload!], ItemInput: ItemInput!): Boolean!
 
   """create Query, Restrictions:{any authorized user}"""
-  createMyQuery(Attachments: [Upload!], Image: Upload, createQuerysInput: createQuerysInput!): Boolean!
+  createMyQuery(Attachments: [Upload!], Images: Upload, createQuerysInput: createQuerysInput!): Boolean!
 
   """create network and opportunity, Restrictions:{any authorized user}"""
-  createNetop(Attachments: [Upload!], Image: Upload, NewNetopData: createNetopsInput!): Boolean!
+  createNetop(Attachments: [Upload!], Image: [Upload!], NewNetopData: createNetopsInput!): Boolean!
 
   """Mutation deprecated"""
   createSec(CreateSecInput: CreateSecInput!, HostelId: String!): Boolean!
@@ -517,10 +517,10 @@ type Mutation {
   editItems(EditItemInput: EditItemInput!, Images: [Upload!], ItemId: String!): Boolean!
 
   """edit Query, Restrictions:{user who created}"""
-  editMyQuery(Attachments: [Upload!], EditMyQuerysData: editQuerysInput!, Image: Upload, MyQueryId: String!): Boolean!
+  editMyQuery(Attachments: [Upload!], EditMyQuerysData: editQuerysInput!, Image: [Upload!], MyQueryId: String!): Boolean!
 
   """edit network and opportunity, Restrictions:{user who created}"""
-  editNetop(Attachments: [Upload!], EditNetopsData: editNetopsInput!, Image: Upload, NetopId: String!): Boolean!
+  editNetop(Attachments: [Upload!], EditNetopsData: editNetopsInput!, Image: [Upload!], NetopId: String!): Boolean!
 
   """Mutation to login, Restrictions : {none}"""
   login(LoginInputs: LoginInput!, fcmToken: String!): LoginOutput!
@@ -692,6 +692,7 @@ type Query {
 
   """Query to get all amenities, Restrictions: {Admins}"""
   getAmenities(HostelId: String!): [Amenity!]!
+  getAnnouncement(announcementId: String!): Announcement!
 
   """
   Query to fetch announcements of a particular hostel, Restrictions : { anyone who is authorised } 
@@ -804,7 +805,7 @@ scalar Upload
 """User Entity"""
 type User {
   """Announcements Created by User, can only be created if its a Super User"""
-  announcements: [Announcement!]
+  announcements: [Announcement!]!
   complaints: [Complaint!]
   complaintsUpvoted: [Complaint!]
   fcmToken: String!
@@ -982,9 +983,9 @@ type getUsersOutput {
 
 """ Output type for getHome query"""
 type homeOutput {
-  announcements: [Announcement!]!
-  events: [Event!]!
-  netops: [Netop!]!
+  announcements: [Announcement!]
+  events: [Event!]
+  netops: [Netop!]
 }
 
 """Output type for serachUsers query"""

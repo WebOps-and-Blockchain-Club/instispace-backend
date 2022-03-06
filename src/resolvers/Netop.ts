@@ -509,12 +509,14 @@ class NetopResolver {
   @Authorized()
   async getNetop(@Arg("NetopId") netopId: string) {
     try {
-      const netop = await Netop.findOne(netopId, {
-        where: { isHidden: true },
-      });
+      const netop = await Netop.findOne(netopId);
 
       const d = new Date();
-      if (netop && new Date(netop.endTime).getTime() > d.getTime())
+      if (
+        netop &&
+        !netop.isHidden &&
+        new Date(netop.endTime).getTime() > d.getTime()
+      )
         return netop;
       else return null;
     } catch (e) {

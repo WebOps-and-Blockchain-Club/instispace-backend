@@ -267,12 +267,15 @@ class EventResolver {
   @Authorized()
   async getEvent(@Arg("EventId") eventId: string) {
     try {
-      const event = await Event.findOne(eventId, {
-        where: { isHidden: false },
-      });
+      const event = await Event.findOne(eventId);
       const d = new Date();
       d.setHours(d.getHours() - 2);
-      if (event && new Date(event.time).getTime() > d.getTime()) return event;
+      if (
+        event &&
+        !event.isHidden &&
+        new Date(event.time).getTime() > d.getTime()
+      )
+        return event;
       else return null;
     } catch (e) {
       console.log(e.message);
