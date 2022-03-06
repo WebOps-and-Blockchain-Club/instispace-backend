@@ -7,7 +7,6 @@ import {
   Query,
   Resolver,
   Root,
-  Subscription,
 } from "type-graphql";
 
 import MyContext from "../utils/context";
@@ -424,13 +423,6 @@ class EventResolver {
     if (createdBy) return createdBy;
     const event = await Event.findOne(id, { relations: ["createdBy"] });
     return event?.createdBy;
-  }
-
-  @Subscription({ topics: ({ args }) => args.tag }) // here you have to give tag names
-  createEventS(@Root() event: Event, @Arg("tag") tag: string): Event {
-    //TODO:  we can add and check context here but not needed I think
-    console.log(tag);
-    return event;
   }
 }
 
