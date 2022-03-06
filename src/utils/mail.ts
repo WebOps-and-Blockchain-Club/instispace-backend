@@ -46,7 +46,7 @@ export const mail = async ({
       const mailOptions = {
         from: "instispace_cfi@smail.iitm.ac.in",
         fromName: "InstiSpace, IIT Madras",
-        to: "mm19b035@smail.iitm.ac.in",
+        to: email,
         subject: subject,
         html: htmlContent,
       };
