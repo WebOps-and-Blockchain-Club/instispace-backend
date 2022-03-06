@@ -14,7 +14,6 @@ import {
   Query,
   Resolver,
   Root,
-  Subscription,
 } from "type-graphql";
 import MyContext from "src/utils/context";
 import { UserRole } from "../utils";
@@ -329,16 +328,6 @@ class AnnouncementResolver {
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
-  }
-
-  @Subscription({ topics: ({ args }) => args.hostel }) // here you have to give hostel names
-  createAnnoucementSubs(
-    @Root() announcement: Announcement,
-    @Arg("hostel") hostel: string
-  ): Announcement {
-    //TODO:  we can add and check context here but not needed I think
-    console.log(hostel);
-    return announcement;
   }
 }
 
