@@ -285,7 +285,7 @@ class NetopResolver {
   ) {
     try {
       let netop = await Netop.findOneOrFail(netopId, {
-        relations: ["reports"],
+        relations: ["reports", "createdBy"],
       });
       const report = await Report.create({
         netop,
@@ -313,6 +313,28 @@ class NetopResolver {
         email: mailList.join(", "),
         subject: "Report",
         htmlContent: "",
+      });
+
+      const creator = netop.createdBy;
+
+      creator.fcmToken.split(" AND ").map((ft) => {
+        const message = {
+          to: ft,
+          notification: {
+            title: `Hi ${creator.name}`,
+            body: "your netop got reported",
+          },
+        };
+
+        fcm.send(message, (err: any, response: any) => {
+          if (err) {
+            console.log("Something has gone wrong!" + err);
+            console.log("Respponse:! " + response);
+          } else {
+            // showToast("Successfully sent with response");
+            console.log("Successfully sent with response: ", response);
+          }
+        });
       });
 
       return !!report && affected;
@@ -394,7 +416,34 @@ class NetopResolver {
       isHidden: true,
     });
     let { affected: a2 } = await Report.update(reportId, { isResolved: true });
-    return affected === 1 && a2 === 1;
+
+    if (affected === 1 && a2 === 1) {
+      let netop = await Netop.findOneOrFail(netopId);
+
+      const creator = netop.createdBy;
+
+      creator.fcmToken.split(" AND ").map((ft) => {
+        const message = {
+          to: ft,
+          notification: {
+            title: `Hi ${creator.name}`,
+            body: "your netop got resolved and now its displayed",
+          },
+        };
+
+        fcm.send(message, (err: any, response: any) => {
+          if (err) {
+            console.log("Something has gone wrong!" + err);
+            console.log("Respponse:! " + response);
+          } else {
+            // showToast("Successfully sent with response");
+            console.log("Successfully sent with response: ", response);
+          }
+        });
+      });
+      return true;
+    }
+    return false;
   }
 
   @Mutation(() => Boolean)
@@ -414,7 +463,34 @@ class NetopResolver {
       isHidden: false,
     });
     let { affected: a2 } = await Report.update(reportId, { isResolved: true });
-    return affected === 1 && a2 === 1;
+
+    if (affected === 1 && a2 === 1) {
+      let netop = await Netop.findOneOrFail(netopId);
+
+      const creator = netop.createdBy;
+
+      creator.fcmToken.split(" AND ").map((ft) => {
+        const message = {
+          to: ft,
+          notification: {
+            title: `Hi ${creator.roll}`,
+            body: "your netop got reported",
+          },
+        };
+
+        fcm.send(message, (err: any, response: any) => {
+          if (err) {
+            console.log("Something has gone wrong!" + err);
+            console.log("Respponse:! " + response);
+          } else {
+            // showToast("Successfully sent with response");
+            console.log("Successfully sent with response: ", response);
+          }
+        });
+      });
+      return true;
+    }
+    return false;
   }
 
   @Query(() => Netop, {
