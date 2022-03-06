@@ -23,11 +23,12 @@ import Netop from "../entities/Netop";
 import Comment from "../entities/Common/Comment";
 import { GraphQLUpload, Upload } from "graphql-upload";
 import getNetopOutput from "../types/objects/netop";
-import { UserRole } from "../utils";
+import { smail, UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
-import { ILike } from "typeorm";
+import { ILike, In } from "typeorm";
+import { mail } from "../utils/mail";
 
 @Resolver(Netop)
 class NetopResolver {
@@ -269,6 +270,26 @@ class NetopResolver {
       }).save();
 
       const { affected } = await Netop.update(netop.id, { isHidden: true });
+      const superUsersList = await User.find({
+        where: {
+          role: In([UserRole.ADMIN, UserRole.LEADS, UserRole.MODERATOR]),
+        },
+      });
+      let mailList: String[] = [];
+      superUsersList.forEach((user) => {
+        if (user.role === UserRole.MODERATOR) {
+          const email = user.roll.concat(smail);
+          mailList.push(email);
+        } else {
+          mailList.push(user.roll);
+        }
+      });
+      console.log(mailList);
+      await mail({
+        email: mailList.join(", "),
+        subject: "Report",
+        htmlContent: "",
+      });
 
       return !!report && affected;
     } catch (e) {

@@ -2,7 +2,6 @@ import Hostel from "../entities/Hostel";
 import {
   Arg,
   Authorized,
-  Ctx,
   FieldResolver,
   Mutation,
   Query,
@@ -15,10 +14,6 @@ import bcrypt from "bcryptjs";
 import { CreateSecInput, CreateHostelInput } from "../types/inputs/hostel";
 import HostelContact from "../entities/Contact";
 import Amenity from "../entities/Amenity";
-import { CreateAmenityInput, EditAmenityInput } from "../types/inputs/amenity";
-import { CreateContactInput, EditContactInput } from "../types/inputs/contact";
-import Contact from "../entities/Contact";
-import MyContext from "../utils/context";
 
 @Resolver((_type) => Hostel)
 class HostelResolver {
@@ -74,73 +69,6 @@ class HostelResolver {
     }
   }
 
-  @Mutation(() => Boolean, {
-    description:
-      "Mutation to create Hostel-Contact, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}",
-  })
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
-  async createHostelContact(
-    @Ctx() { user }: MyContext,
-    @Arg("CreateContactInput") contactInput: CreateContactInput,
-    @Arg("HostelId") id: string
-  ) {
-    try {
-      // finding the hostel
-      const hostel = await Hostel.findOne({ where: { id } });
-      if (!hostel) throw new Error("Invalid Hostel");
-
-      if (
-        user.hostel === hostel ||
-        [UserRole.HAS, UserRole.ADMIN].includes(user.role)
-      ) {
-        //creating the contact
-        const contact = new HostelContact();
-        contact.type = contactInput.type;
-        contact.name = contactInput.name;
-        contact.contact = contactInput.contact;
-        contact.hostel = hostel;
-        await contact.save();
-        return !!contact;
-      }
-      throw new Error("Unauthorized");
-    } catch (e) {
-      throw new Error(`message : ${e}`);
-    }
-  }
-
-  @Mutation(() => Boolean, {
-    description:
-      "Mutation to create Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}",
-  })
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
-  async createAmenity(
-    @Ctx() { user }: MyContext,
-    @Arg("CreateAmenityInput") amenityInput: CreateAmenityInput,
-    @Arg("HostelId") id: string
-  ) {
-    try {
-      // finding the hostel
-      const hostel = await Hostel.findOne({ where: { id } });
-      if (!hostel) throw new Error("Invalid Hostel");
-
-      if (
-        user.hostel === hostel ||
-        [UserRole.HAS, UserRole.ADMIN].includes(user.role)
-      ) {
-        //creating the amenity
-        const amenity = new Amenity();
-        amenity.name = amenityInput.name;
-        amenity.description = amenityInput.description;
-        amenity.hostel = hostel;
-        await amenity.save();
-        return !!amenity;
-      }
-      throw new Error("Unauthorized");
-    } catch (e) {
-      throw new Error(`message : ${e}`);
-    }
-  }
-
   @Query(() => [Hostel], {
     description:
       "query to fetch hostels, Restrictions : {anyone who is authorized}",
@@ -149,132 +77,6 @@ class HostelResolver {
   async getHostels() {
     try {
       return await Hostel.find();
-    } catch (e) {
-      throw new Error(`message : ${e}`);
-    }
-  }
-
-  @Mutation(() => Boolean, {
-    description:
-      "Mutation to update Hostel-Contact, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}",
-  })
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
-  async updateHostelContact(
-    @Arg("ContactId") contactId: string,
-    @Ctx() { user }: MyContext,
-    @Arg("UpdateContactInput") contactInput: EditContactInput,
-    @Arg("HostelId", { nullable: true }) hostelId?: string
-  ) {
-    try {
-      const contact = await Contact.findOne({
-        where: { id: contactId },
-        relations: ["hostel"],
-      });
-      if (!contact) throw new Error("Invalid Contact");
-
-      if (
-        user.hostel === contact.hostel ||
-        [UserRole.HAS, UserRole.ADMIN].includes(user.role)
-      ) {
-        if (contactInput.type) contact.type = contactInput.type;
-        if (contactInput.name) contact.name = contactInput.name;
-        if (contactInput.contact) contact.contact = contactInput.contact;
-        if (hostelId) {
-          const hostel = await Hostel.findOne({ where: { id: hostelId } });
-          if (!hostel) throw new Error("Invalid Hostel");
-          contact.hostel = hostel;
-        }
-        const contactUpdated = await contact.save();
-        return !!contactUpdated;
-      }
-      throw new Error("Unauthorized");
-    } catch (e) {
-      throw new Error(`message : ${e}`);
-    }
-  }
-
-  @Mutation(() => Boolean, {
-    description:
-      "Mutation to update Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}",
-  })
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
-  async updateAmenity(
-    @Arg("AmenityId") amenityId: string,
-    @Ctx() { user }: MyContext,
-    @Arg("UpdateAmenityInput") amenityInput: EditAmenityInput
-  ) {
-    try {
-      const amenity = await Amenity.findOne({
-        where: { id: amenityId },
-      });
-      if (!amenity) throw new Error("Invalid Amenity");
-
-      if (
-        user.hostel === amenity.hostel ||
-        [UserRole.HAS, UserRole.ADMIN].includes(user.role)
-      ) {
-        if (amenityInput.name) amenity.name = amenityInput.name;
-        if (amenityInput.description)
-          amenity.description = amenityInput.description;
-        const amenityUpdated = await amenity.save();
-        return !!amenityUpdated;
-      }
-      throw new Error("Unauthorized");
-    } catch (e) {
-      throw new Error(`message : ${e}`);
-    }
-  }
-
-  @Mutation(() => Boolean, {
-    description:
-      "Mutation to delete Hostel-Amenity, Restrictions : {Admin, Hostel-Secretory(related to hostel), HAS}",
-  })
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
-  async deleteAmenity(
-    @Arg("AmenityId") id: string,
-    @Ctx() { user }: MyContext
-  ) {
-    try {
-      const amenity = await Amenity.findOne({
-        where: { id },
-        relations: ["hostel"],
-      });
-      if (!amenity) throw new Error("Invalid Amenity");
-      if (
-        user.hostel === amenity?.hostel ||
-        [UserRole.HAS, UserRole.ADMIN].includes(user.role)
-      ) {
-        const amenityDeleted = await amenity.remove();
-        return !!amenityDeleted;
-      }
-      throw new Error("Unauthorised");
-    } catch (e) {
-      throw new Error(`message : ${e}`);
-    }
-  }
-
-  @Mutation(() => Boolean, {
-    description:
-      "Mutation to delete Hostel Contact, Restrictions: {Admin, Has, hostel_secretary}",
-  })
-  async deleteHostelContact(
-    @Arg("HostelId") id: string,
-    @Ctx() { user }: MyContext
-  ) {
-    try {
-      const hostelContact = await Contact.findOne({
-        where: { id },
-        relations: ["hostel"],
-      });
-      if (!hostelContact) throw new Error("Invalid Contact");
-      if (
-        user.hostel === hostelContact?.hostel ||
-        [UserRole.HAS, UserRole.ADMIN].includes(user.role)
-      ) {
-        const hostelContactDeleted = await hostelContact.remove();
-        return !!hostelContactDeleted;
-      }
-      throw new Error("Unauthorised");
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

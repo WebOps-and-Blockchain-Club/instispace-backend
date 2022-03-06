@@ -13,6 +13,7 @@ import MyContext from "../utils/context";
 import { UserRole } from "../utils";
 import User from "../entities/User";
 import AddFeedbackInput from "../types/inputs/feedback";
+import { writeSheet } from "../utils/googleSheets";
 
 @Resolver((_type) => Feedback)
 class FeedbackResolver {
@@ -31,6 +32,13 @@ class FeedbackResolver {
     feedback.ans3 = feedbackInput.ans3;
     feedback.user = user;
     const feedbackCreated = await feedback.save();
+    writeSheet(
+      user.roll,
+      user.name,
+      feedback.ans1,
+      feedback.ans2,
+      feedback.ans3
+    );
     return !!feedbackCreated;
   }
 

@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "cfi-insti",
+  "private_key_id": "493f78031ba657b50a9fc4a212bd1806a19e24e9",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDYaDQ0xsvidviw\nNPCHpl+vRF2N5YmXQT3JS4BlpwpieILdAhbOyPB1/3W54LbYHqxr1W4+pSx6FM3v\nnZ2TU0I+lKyW+LtHk9IeIM7+WPIBLH2eyGHDH6qiLd0oQiSokVZ3aTYOGKThUY4c\nzVCEWjhxVsw04SwOtVdU4xHECA5L8keg+mJNkolLSmtStJzWUCwH8EP6SkqtX0Jh\n6zl/r5aF3AIWq0xf0ANP3qtQZQBl0OVpGYs8pCoOUW/lcWX8I/QtX3QzeZQvb0Df\ngNNjWc44mGth6bvEDMrm1JW+mZvVu1c82AXRkR78JP528ZBwVcXJBvAcInJM1pHg\nLx8kp+knAgMBAAECggEAXJufN7SY/IVYICPPiOVITjst4/LGAi3fsHw4aofkuEYF\nDmn986jmykAzk4NYC714oL7ZqkJJ+cZcaH2lOK4pC5nZD9RKZLOb99unaQ4MJjdx\nXJk4yOUMwtFosnk3sdFcVMZ35Olj6a5aZ/XuzmzDebEgu0Je9b5hrIhtilu+Ln4q\n9E+GQGx6cPrXRjE22cuOqa9SMoq9lw8swGfIwYxH5qGU4Za0js12TMLGG9E6elL0\nsbvVOV5b5gD4Dg/7n4bcwRPdeDF88ANdTuGHJ+clKgV0QYGHbYPIKIgClkglwJCq\nNVipnFPHK/VXjuXT5MUQk9yXbhPNXVg4nvh6YdkxQQKBgQDuapXV4+HpekVnG2tn\n5/4dtmBnCcQL4Zfu4MLqy0dgd9IKQc+jNVO2owr85xs7xTbyqXPMJhISpCoW0em4\nNVbD4IRNOSWFas5A8ckwWwceHxU38z42RlFiMt/pxnX/GZ1mudCXbJpJQDgAAAX0\nTnJpdsh5+RXKG5q9CCj47qE5QQKBgQDoXhKOMXtmZs7SMa+fb8eSDCcR4PdbywJr\nDdjskiPf6htMKxXLvP/QrZDJqq7MhcnUQTXbAkrA5odfzajApOQbSJLtJGQDJL6G\npGzkRWjYdla/3N2P14gadZBtPSUTtSKAQoW/8bp9UowSjsSy85iB9hqq9rw+hA5Z\n8mqzSnHgZwKBgQCXa3xEPxog5fYkOQbrFC2Rg14QsuQfQ6TyIy/IXVi0zQTKXOfZ\n2SmUylJVMxZZzLRMRBD2bIt36WmN2r3cr4uule6Q+SV6ac4a8zT7ECUiHU2lnkg5\nwkk32+XYHKKeZQ9RydvQADqxIScv4NPnSNdjYfyLcwZCuWt6eS9EgpJEwQKBgQCb\nek56HDvQUdvzItG7IaTsYPtHaDq6jcSJcxOBf2tHqLIpLe8Aiu60Z14owe8B5Ece\noZ9ycj8ogVd1T/upIuuKIe5FhILy44QkPSKrPpIfvFbhO9x4IaPs6FsB7NbBMALs\nxRYPT6QTtMcKp8KPZpTV6KEBYeSlA+FCaATjAF3f4wKBgQDT6XoU1I7srEZXzqBS\niyTea75Zr+j6Kfza4w+At7Tu0eqQ6+mFyVSXo7qlzBKOdwXrG/y8htj1HkBnS5mi\nLMWt3OzjaIXnsm/sS+lWCH2nUc0znYKGvEYcvYKub0rlxQ0yzUKLya634wZluLUQ\nMBvN4dcYQU3Aq1kcAeLKVgupqg==\n-----END PRIVATE KEY-----\n",
+  "client_email": "myhostel@cfi-insti.iam.gserviceaccount.com",
+  "client_id": "108081693767431541811",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/myhostel%40cfi-insti.iam.gserviceaccount.com"
+}
