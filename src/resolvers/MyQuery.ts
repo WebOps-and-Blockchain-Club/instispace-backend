@@ -169,7 +169,7 @@ class MyQueryResolver {
   ) {
     try {
       const myQuery = await MyQuery.findOneOrFail(myQueryId, {
-        relations: ["reports"],
+        relations: ["reports", "createdBy"],
       });
       const report = await Report.create({
         query: myQuery,
@@ -179,7 +179,32 @@ class MyQueryResolver {
 
       const { affected } = await MyQuery.update(myQueryId, { isHidden: true });
 
-      return !!report && affected;
+      if (!!report && affected) {
+        const creator = myQuery.createdBy;
+
+        creator.fcmToken.split(" AND ").map((ft) => {
+          const message = {
+            to: ft,
+            notification: {
+              title: `Hi ${creator.roll}`,
+              body: "your query got reported",
+            },
+          };
+
+          fcm.send(message, (err: any, response: any) => {
+            if (err) {
+              console.log("Something has gone wrong!" + err);
+              console.log("Respponse:! " + response);
+            } else {
+              // showToast("Successfully sent with response");
+              console.log("Successfully sent with response: ", response);
+            }
+          });
+        });
+        return true;
+      }
+
+      return false;
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
@@ -261,7 +286,34 @@ class MyQueryResolver {
   ) {
     let { affected } = await MyQuery.update(myQueryId, { isHidden: true });
     let { affected: a2 } = await Report.update(reportId, { isResolved: true });
-    return affected === 1 && a2 === 1;
+
+    if (affected === 1 && a2 === 1) {
+      let myQuery = await MyQuery.findOneOrFail(myQueryId);
+
+      const creator = myQuery.createdBy;
+
+      creator.fcmToken.split(" AND ").map((ft) => {
+        const message = {
+          to: ft,
+          notification: {
+            title: `Hi ${creator.roll}`,
+            body: "your query got reported",
+          },
+        };
+
+        fcm.send(message, (err: any, response: any) => {
+          if (err) {
+            console.log("Something has gone wrong!" + err);
+            console.log("Respponse:! " + response);
+          } else {
+            // showToast("Successfully sent with response");
+            console.log("Successfully sent with response: ", response);
+          }
+        });
+      });
+      return true;
+    }
+    return false;
   }
 
   @Mutation(() => Boolean)
@@ -277,7 +329,33 @@ class MyQueryResolver {
   ) {
     let { affected } = await MyQuery.update(myQueryId, { isHidden: false });
     let { affected: a2 } = await Report.update(reportId, { isResolved: true });
-    return affected === 1 && a2 === 1;
+    if (affected === 1 && a2 === 1) {
+      let myQuery = await MyQuery.findOneOrFail(myQueryId);
+
+      const creator = myQuery.createdBy;
+
+      creator.fcmToken.split(" AND ").map((ft) => {
+        const message = {
+          to: ft,
+          notification: {
+            title: `Hi ${creator.roll}`,
+            body: "your query got resolved and now its displayed",
+          },
+        };
+
+        fcm.send(message, (err: any, response: any) => {
+          if (err) {
+            console.log("Something has gone wrong!" + err);
+            console.log("Respponse:! " + response);
+          } else {
+            // showToast("Successfully sent with response");
+            console.log("Successfully sent with response: ", response);
+          }
+        });
+      });
+      return true;
+    }
+    return false;
   }
 
   @Query(() => MyQuery, {

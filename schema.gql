@@ -492,7 +492,7 @@ type Mutation {
   """
   Mutation to delete Hostel Contact, Restrictions: {Admin, Has, hostel_secretary}
   """
-  deleteHostelContact(HostelId: String!): Boolean!
+  deleteHostelContact(ContactId: String!): Boolean!
 
   """edit Query, Restrictions:{user who created}"""
   deleteMyQuery(MyQueryId: String!): Boolean!
@@ -765,7 +765,6 @@ type Report {
   createdBy: User!
   description: String!
   id: String!
-  isHidden: Boolean!
 
   """Visiblity state of reports"""
   isResolved: Boolean!
