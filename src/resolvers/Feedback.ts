@@ -26,20 +26,18 @@ class FeedbackResolver {
     @Ctx() { user }: MyContext,
     @Arg("AddFeedback") feedbackInput: AddFeedbackInput
   ) {
-    const feedback = new Feedback();
-    feedback.ans1 = feedbackInput.ans1;
-    feedback.ans2 = feedbackInput.ans2;
-    feedback.ans3 = feedbackInput.ans3;
-    feedback.user = user;
-    const feedbackCreated = await feedback.save();
+    const feedback = await Feedback.create({ ...feedbackInput, user }).save();
     writeSheet(
       user.roll,
       user.name,
-      feedback.ans1,
-      feedback.ans2,
-      feedback.ans3
+      feedbackInput.rating1,
+      feedbackInput.rating2,
+      feedbackInput.rating3,
+      feedbackInput.ans1,
+      feedbackInput.ans2,
+      feedbackInput.ans3
     );
-    return !!feedbackCreated;
+    return !!feedback;
   }
 
   @Query(() => [Feedback], {

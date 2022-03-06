@@ -57,31 +57,31 @@ export const miliSecPerMonth = 2629800000;
 
 export const usersDevList = [
   {
-    roll: "MM19B001",
+    roll: "MM19B035",
     pass: "123456",
   },
   {
-    roll: "MM19B002",
+    roll: "BS20B039",
     pass: "123456",
   },
   {
-    roll: "MM19B003",
+    roll: "CH20B010",
     pass: "123456",
   },
   {
-    roll: "MM19B004",
+    roll: "CH20B013",
     pass: "123456",
   },
   {
-    roll: "MM19B005",
+    roll: "ED20B014",
     pass: "123456",
   },
   {
-    roll: "MM19B006",
+    roll: "EE20B114",
     pass: "123456",
   },
   {
-    roll: "MM19B007",
+    roll: "EE20B129",
     pass: "123456",
   },
 ];
