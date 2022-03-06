@@ -96,11 +96,6 @@ class UsersResolver {
           } else {
             newUser.fcmToken = fcmToken;
           }
-          newUser.notifyEvent = Notification.FOLLOWED_TAGS;
-          newUser.notifyNetop = Notification.FOLLOWED_TAGS;
-          newUser.notifyFound = false;
-          newUser.notifyMyQuery = true;
-          newUser.notifyNetopComment = true;
           await newUser.save();
           const token = jwt.sign(newUser.id, process.env.JWT_SECRET!);
           return { isNewUser: newUser.isNewUser, role: UserRole.USER, token };
@@ -112,11 +107,6 @@ class UsersResolver {
           } else {
             user.fcmToken = fcmToken;
           }
-          user.notifyEvent = Notification.FOLLOWED_TAGS;
-          user.notifyNetop = Notification.FOLLOWED_TAGS;
-          user.notifyFound = false;
-          user.notifyMyQuery = true;
-          user.notifyNetopComment = true;
           await user.save();
           console.log(user.fcmToken);
           const token = jwt.sign(user.id, process.env.JWT_SECRET!);
@@ -143,11 +133,6 @@ class UsersResolver {
               admin.fcmToken = fcmToken;
             }
             admin.password = await bcrypt.hash(adminPassword, salt);
-            admin.notifyEvent = Notification.FOLLOWED_TAGS;
-            admin.notifyNetop = Notification.FOLLOWED_TAGS;
-            admin.notifyFound = false;
-            admin.notifyMyQuery = true;
-            admin.notifyNetopComment = true;
             await admin.save();
           }
         }
@@ -202,11 +187,6 @@ class UsersResolver {
       }
       newUser.roll = createAccountInput.roll;
       newUser.name = createAccountInput.name;
-      newUser.notifyEvent = Notification.FOLLOWED_TAGS;
-      newUser.notifyNetop = Notification.FOLLOWED_TAGS;
-      newUser.notifyFound = false;
-      newUser.notifyMyQuery = true;
-      newUser.notifyNetopComment = true;
       newUser.isNewUser = true;
       newUser.password = bcrypt.hashSync(password, salt);
       await newUser.save();
