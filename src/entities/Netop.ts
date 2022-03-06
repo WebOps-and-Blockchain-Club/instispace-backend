@@ -42,8 +42,10 @@ class Netop extends BaseEntity {
   @Field({ nullable: true })
   attachments: string;
 
-  @Column()
-  @Field()
+  @Column({ type: Boolean, default: false })
+  @Field((_type) => Boolean, {
+    description: "Visiblity state of netop",
+  })
   isHidden: boolean;
 
   @Column({ type: "timestamptz" })
@@ -53,8 +55,17 @@ class Netop extends BaseEntity {
   @Field(() => Number, { description: "number of likes" })
   likeCount: number;
 
+  @Field(() => Number, { description: "number of likes" })
+  commentCount: number;
+
   @Field(() => Boolean, { description: "is this netop is stared" })
   isStared: boolean;
+
+  @Field(() => Boolean, { description: "is this netop is boolean" })
+  isReported: boolean;
+
+  @Field(() => Boolean, { description: "is this netop is liked" })
+  isLiked: boolean;
 
   @Field({ nullable: true })
   @Column({ nullable: true })

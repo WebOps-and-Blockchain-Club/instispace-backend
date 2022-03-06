@@ -8,6 +8,7 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
+  JoinTable,
 } from "typeorm";
 import Netop from "./Netop";
 import Event from "./Event";
@@ -19,7 +20,11 @@ import Announcement from "./Announcement";
 import Report from "./Common/Report";
 import Query from "./MyQuery";
 import Complaint from "./Complaint";
+<<<<<<< HEAD
 import { Notification } from "../utils/index";
+=======
+import Feedback from "./Feedback";
+>>>>>>> main
 
 @Entity("User")
 @ObjectType("User", { description: "User Entity" })
@@ -140,7 +145,7 @@ class User extends BaseEntity {
   @OneToMany((_type) => Complaint, (complaints) => complaints.user, {
     nullable: true,
   })
-  @Field((_type) => Complaint, { nullable: true })
+  @Field((_type) => [Complaint], { nullable: true })
   complaints?: Complaint[];
 
   @ManyToMany(
@@ -148,8 +153,18 @@ class User extends BaseEntity {
     (complaintsUpvoted) => complaintsUpvoted.user,
     { nullable: true }
   )
-  @Field((_type) => Complaint, { nullable: true })
+  @JoinTable()
+  @Field((_type) => [Complaint], { nullable: true })
   complaintsUpvoted?: Complaint[];
+
+  @OneToMany((__type) => Feedback, (feedbacks) => feedbacks.user, {
+    nullable: true,
+  })
+  @Field((__type) => [Feedback], {
+    nullable: true,
+    description: "feedbacks of the user",
+  })
+  feedbacks?: Feedback[];
 }
 
 export default User;

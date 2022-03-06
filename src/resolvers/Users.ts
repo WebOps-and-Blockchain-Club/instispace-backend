@@ -39,7 +39,7 @@ import {
 } from "../types/objects/users";
 import MyContext from "../utils/context";
 import bcrypt from "bcryptjs";
-import { In, Like } from "typeorm";
+import { In, ILike } from "typeorm";
 import Hostel from "../entities/Hostel";
 import Item from "../entities/Item";
 import NetopResolver from "./Netop";
@@ -47,6 +47,8 @@ import { fileringConditions } from "../types/inputs/netop";
 import Announcement from "./Announcement";
 import Event from "./Event";
 import { Notification } from "../utils/index";
+import Feedback from "../entities/Feedback";
+import { mail } from "../utils/mail";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -168,11 +170,13 @@ class UsersResolver {
 
   @Mutation(() => Boolean, {
     description:
-      "Mutation to create a Super-User account can't create Hostel_Sec, Restrictions : {Admin}",
+      "Mutation to create a Super-User account, Restrictions : {Admin}",
   })
   @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETORY])
   async createAccount(
-    @Arg("CreateAccountInput") createAccountInput: CreateAccountInput
+    @Ctx() { user }: MyContext,
+    @Arg("CreateAccountInput") createAccountInput: CreateAccountInput,
+    @Arg("HostelId", { nullable: true }) hostelId: string
   ) {
     try {
       //Autogenerating the password
@@ -180,11 +184,8 @@ class UsersResolver {
         process.env.NODE_ENV === "development"
           ? accountPassword
           : autoGenPass(8);
-
-      //Creating the User
-      const user = new User();
-
       if (
+<<<<<<< HEAD
         createAccountInput.role === UserRole.HOSTEL_SEC ||
         ([UserRole.HAS, UserRole.SECRETORY].includes(createAccountInput.role) &&
           user.role !== UserRole.ADMIN)
@@ -200,9 +201,36 @@ class UsersResolver {
       user.notifyMyQuery = true;
       user.notifyNetopComment = true;
       await user.save();
+=======
+        [UserRole.SECRETORY, UserRole.HAS].includes(createAccountInput.role) &&
+        user.role !== UserRole.ADMIN
+      ) {
+        throw new Error("Invalid Role");
+      }
+      //Creating the User
+      const newUser = new User();
+      newUser.role = createAccountInput.role;
+      //finding the hostel if provided
+      if (hostelId && [UserRole.ADMIN, UserRole.HAS].includes(user.role)) {
+        const hostel = await Hostel.findOne({ where: { id: hostelId } });
+        if (!hostel) throw new Error("Invalid Hostel");
+        newUser.hostel = hostel;
+      }
+      newUser.roll = createAccountInput.roll;
+      newUser.name = createAccountInput.name;
+      newUser.isNewUser = true;
+      newUser.password = bcrypt.hashSync(password, salt);
+      await newUser.save();
+>>>>>>> main
       console.log(password);
-      //this password is going to be emailed to lead
-      return !!user;
+      //this password is going to be emailed to the Super-User
+      if (process.env.NODE_ENV !== "development")
+        await mail({
+          email: `${newUser.roll}`,
+          subject: "Super-User login credentials",
+          htmlContent: "",
+        });
+      return !!newUser;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -250,13 +278,11 @@ class UsersResolver {
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      let superUsers = await User.find({ where: { role: In(roles) } });
-      const total = superUsers.length;
-      var superUsersList: User[] = [];
+      let superUsersList: User[] = [];
       if (search) {
         await Promise.all(
           ["name", "roll"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const userF = await User.find({
               where: filter,
             });
@@ -267,13 +293,18 @@ class UsersResolver {
         );
         const userStr = superUsersList.map((obj) => JSON.stringify(obj));
         const uniqueItemStr = new Set(userStr);
-        superUsers = Array.from(uniqueItemStr).map((str) => JSON.parse(str));
-      }
-      if (lastUserId) {
-        const index = superUsers.map((n) => n.id).indexOf(lastUserId);
-        superUsersList = superUsers.splice(index + 1, take);
+        superUsersList = Array.from(uniqueItemStr).map((str) =>
+          JSON.parse(str)
+        );
       } else {
-        superUsersList = superUsers.splice(0, take);
+        superUsersList = await User.find({ where: { role: In(roles) } });
+      }
+      const total = superUsersList.length;
+      if (lastUserId) {
+        const index = superUsersList.map((n) => n.id).indexOf(lastUserId);
+        superUsersList = superUsersList.splice(index + 1, take);
+      } else {
+        superUsersList = superUsersList.splice(0, take);
       }
       return { usersList: superUsersList, total };
     } catch (e) {
@@ -292,15 +323,11 @@ class UsersResolver {
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      let users = await User.find({
-        where: { role: In([UserRole.USER, UserRole.MODERATOR]) },
-      });
-      const total = users.length;
-      var usersList: User[] = [];
+      let usersList: User[] = [];
       if (search) {
         await Promise.all(
           ["roll", "name"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const userF = await User.find({ where: filter });
             userF.forEach((user) => {
               usersList.push(user);
@@ -308,15 +335,20 @@ class UsersResolver {
           })
         );
 
-        const userStr = users.map((obj) => JSON.stringify(obj));
+        const userStr = usersList.map((obj) => JSON.stringify(obj));
         const uniqueUserStr = new Set(userStr);
-        users = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
-      }
-      if (lastUserId) {
-        const index = users.map((n) => n.id).indexOf(lastUserId);
-        usersList = users.splice(index + 1, take);
+        usersList = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
       } else {
-        usersList = users;
+        usersList = await User.find({
+          where: { role: In([UserRole.USER, UserRole.MODERATOR]) },
+        });
+      }
+      const total = usersList.length;
+      if (lastUserId) {
+        const index = usersList.map((n) => n.id).indexOf(lastUserId);
+        usersList = usersList.splice(index + 1, take);
+      } else {
+        usersList = usersList.splice(0, take);
       }
       return { usersList: usersList, total };
     } catch (e) {
@@ -356,27 +388,26 @@ class UsersResolver {
     @Arg("take") take: number,
     @Arg("search", { nullable: true }) search?: string
   ) {
-    let users: User[] = [];
+    let usersList: User[] = [];
     await Promise.all(
       ["roll", "name"].map(async (field: string) => {
-        const filter = { [field]: Like(`%${search}%`) };
+        const filter = { [field]: ILike(`%${search}%`) };
         const userF = await User.find({ where: filter });
         userF.forEach((user) => {
-          users.push(user);
+          usersList.push(user);
         });
       })
     );
 
-    const userStr = users.map((obj) => JSON.stringify(obj));
+    const userStr = usersList.map((obj) => JSON.stringify(obj));
     const uniqueUserStr = new Set(userStr);
-    const finalList = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
-    const total = finalList.length;
-    var usersList;
+    usersList = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
+    const total = usersList.length;
     if (lastUserId) {
-      const index = finalList.map((n) => n.id).indexOf(lastUserId);
-      usersList = finalList.splice(index + 1, take);
+      const index = usersList.map((n) => n.id).indexOf(lastUserId);
+      usersList = usersList.splice(index + 1, take);
     } else {
-      usersList = users.splice(0, take);
+      usersList = usersList.splice(0, take);
     }
     return { usersList: usersList, total };
   }
@@ -385,7 +416,12 @@ class UsersResolver {
     description:
       "Mutation to change Super-Users passwords, Restrictions : {Leads, Hostel Affair Secretory and Hostel Secretory}",
   })
-  @Authorized([UserRole.LEADS, UserRole.HAS, UserRole.HOSTEL_SEC])
+  @Authorized([
+    UserRole.LEADS,
+    UserRole.HAS,
+    UserRole.HOSTEL_SEC,
+    UserRole.SECRETORY,
+  ])
   async updatePassword(
     @Ctx() { user }: MyContext,
     @Arg("NewPass") newPass: NewPass
@@ -405,7 +441,13 @@ class UsersResolver {
     description:
       "Mutation to change role of an ldap User to Moderator, Restrictions : {Admins and Leads}",
   })
-  @Authorized([UserRole.ADMIN, UserRole.LEADS])
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.LEADS,
+    UserRole.HAS,
+    UserRole.HOSTEL_SEC,
+    UserRole.SECRETORY,
+  ])
   async updateRole(@Arg("ModeratorInput") { roll }: ModeratorInput) {
     try {
       const user = await User.findOne({ where: { roll } });
@@ -547,6 +589,7 @@ class UsersResolver {
 
   @FieldResolver(() => homeOutput, { nullable: true })
   async getHome(@Root() { id, role }: User) {
+<<<<<<< HEAD
     if (
       role == UserRole.ADMIN ||
       role == UserRole.DEV_TEAM ||
@@ -585,6 +628,51 @@ class UsersResolver {
         await announcementObject.getAnnouncements("", 25, user!.hostel!.id)
       ).announcementsList;
       return { netops, announcements, events };
+=======
+    try {
+      if (
+        role == UserRole.ADMIN ||
+        role == UserRole.DEV_TEAM ||
+        role == UserRole.HAS ||
+        role == UserRole.HOSTEL_SEC ||
+        role == UserRole.LEADS ||
+        role == UserRole.SECRETORY
+      ) {
+        const user = await User.findOneOrFail(id, {
+          relations: ["networkingAndOpportunities", "event", "announcements"],
+        });
+
+        return {
+          netops: user.networkingAndOpportunities,
+          announcements: user.announcements,
+          events: user.event,
+        };
+      } else {
+        const user = await User.findOneOrFail({
+          where: { id },
+          relations: ["interest", "hostel"],
+        });
+
+        const tagIds = user.interest?.map((tag) => tag.id);
+        const myCon: MyContext = {
+          user,
+        };
+        const netopObject = new NetopResolver();
+        const announcementObject = new Announcement();
+        const eventObject = new Event();
+        const filters: fileringConditions = { tags: tagIds!, isStared: false };
+        const netops = (await netopObject.getNetops(myCon, "", 25, filters))
+          .netopList;
+        const events = (await eventObject.getEvents(myCon, "", 25, filters))
+          .list;
+        const announcements = (
+          await announcementObject.getAnnouncements("", 25, user!.hostel!.id)
+        ).announcementsList;
+        return { netops, announcements, events };
+      }
+    } catch (e) {
+      throw new Error(`message: ${e}`);
+>>>>>>> main
     }
   }
 
@@ -611,6 +699,20 @@ class UsersResolver {
         relations: ["complaintsUpvoted"],
       });
       return user?.complaintsUpvoted;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [Feedback], { nullable: true })
+  async feedbacks(@Root() { id, feedbacks }: User) {
+    try {
+      if (feedbacks) return feedbacks;
+      const user = await User.findOne({
+        where: { id: id },
+        relations: ["feedbacks"],
+      });
+      return user?.feedbacks;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

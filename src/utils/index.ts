@@ -37,6 +37,8 @@ export const adminPassword = "123456";
 
 export const accountPassword = "123456";
 
+export const smail = "@smail.iitm.ac.in";
+
 export var salt = bcryptjs.genSaltSync(Number(process.env.ITERATIONS!));
 
 export function autoGenPass(length: number) {
