@@ -19,9 +19,6 @@ class CreateAccountInput {
 
   @Field({ description: "Super-User's role" })
   role: UserRole;
-
-  @Field({ description: "Super-User's name" })
-  name: string;
 }
 
 @InputType({ description: "Input for Update-User Mutation" })
@@ -43,9 +40,12 @@ class UserInput {
 }
 
 @InputType({ description: "Input for Change-Password Mutation" })
-class NewPass {
+class UpdateSuperUserInput {
   @Field({ description: "New Password" })
   newPassword: string;
+
+  @Field({ description: "New Password" })
+  name: string;
 }
 
 @InputType({ description: "Input for updateRole Mutation" })
@@ -64,7 +64,7 @@ export {
   LoginInput,
   CreateAccountInput,
   UserInput,
-  NewPass,
+  UpdateSuperUserInput,
   ModeratorInput,
   GetUserInput,
 };

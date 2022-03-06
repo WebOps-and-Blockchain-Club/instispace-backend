@@ -23,17 +23,29 @@ class Feedback extends BaseEntity {
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date;
 
+  @Field({ description: "ratings to question-1" })
+  @Column((_type) => Number)
+  rating1: number;
+
+  @Field({ description: "ratings to questions-2" })
+  @Column((_type) => Number)
+  rating2: number;
+
+  @Field({ description: "ratings to question-3" })
+  @Column((_type) => Number)
+  rating3: number;
+
   @Field({ nullable: true, description: "answer to question-1" })
   @Column({ nullable: true })
-  ans1: string;
+  ans1?: string;
 
   @Field({ nullable: true, description: "answer to question-2" })
   @Column({ nullable: true })
-  ans2: string;
+  ans2?: string;
 
   @Field({ nullable: true, description: "answer to question-3" })
   @Column({ nullable: true })
-  ans3: string;
+  ans3?: string;
 }
 
 export default Feedback;

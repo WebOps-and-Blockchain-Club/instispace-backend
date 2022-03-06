@@ -4,7 +4,7 @@ import {
   CreateAccountInput,
   LoginInput,
   GetUserInput,
-  NewPass,
+  UpdateSuperUserInput,
 } from "../types/inputs/users";
 import {
   accountPassword,
@@ -189,7 +189,6 @@ class UsersResolver {
         newUser.hostel = hostel;
       }
       newUser.roll = createAccountInput.roll;
-      newUser.name = createAccountInput.name;
       newUser.isNewUser = true;
       newUser.password = bcrypt.hashSync(password, salt);
       await newUser.save();
@@ -199,7 +198,7 @@ class UsersResolver {
         await mail({
           email: `${newUser.roll}`,
           subject: "Super-User login credentials",
-          htmlContent: `You now have access to new Super-User account, role: ${newUser.role}, password: ${newUser.password}`,
+          htmlContent: `You now have access to new Super-User account, role: ${newUser.role}, password: ${password}`,
         });
       return !!newUser;
     } catch (e) {
@@ -393,14 +392,15 @@ class UsersResolver {
     UserRole.HOSTEL_SEC,
     UserRole.SECRETORY,
   ])
-  async updatePassword(
+  async updateSuperUser(
     @Ctx() { user }: MyContext,
-    @Arg("NewPass") newPass: NewPass
+    @Arg("UpdateSuperUserInput") { newPassword, name }: UpdateSuperUserInput
   ) {
     try {
       if (user.isNewUser === false) throw new Error("Already Signed");
+      user.name = name;
       user.isNewUser = false;
-      user.password = bcrypt.hashSync(newPass.newPassword, salt);
+      user.password = bcrypt.hashSync(newPassword, salt);
       await user.save();
       return !!user;
     } catch (e) {
