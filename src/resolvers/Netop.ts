@@ -39,7 +39,7 @@ class NetopResolver {
   async createNetop(
     @Arg("NewNetopData") createNetopsInput: createNetopsInput,
     @Ctx() { user }: MyContext,
-    @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload,
+    @Arg("Image", () => [GraphQLUpload], { nullable: true }) images?: Upload[],
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
   ): Promise<boolean> {
@@ -60,8 +60,8 @@ class NetopResolver {
       if (tags.length !== createNetopsInput.tags.length)
         throw new Error("Invalid tagIds");
 
-      if (image)
-        createNetopsInput.photo = (await addAttachments([image], true)).join(
+      if (images)
+        createNetopsInput.photo = (await addAttachments([images], true)).join(
           " AND "
         );
       if (attachments)
@@ -144,7 +144,7 @@ class NetopResolver {
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext,
     @Arg("EditNetopsData") editNetopsInput: editNetopsInput,
-    @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload,
+    @Arg("Image", () => [GraphQLUpload], { nullable: true }) images?: [Upload],
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
   ) {
@@ -154,8 +154,8 @@ class NetopResolver {
       });
 
       if (netop && user.id === netop?.createdBy.id) {
-        if (image)
-          editNetopsInput.photo = (await addAttachments([image], true)).join(
+        if (images)
+          editNetopsInput.photo = (await addAttachments([images], true)).join(
             " AND "
           );
         if (attachments)
@@ -354,17 +354,25 @@ class NetopResolver {
   async createCommentNetop(
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext,
-    @Arg("content") content: string
+    @Arg("content") content: string,
+    @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
   ) {
     try {
       const netop = await Netop.findOne(netopId, {
         relations: ["comments", "createdBy"],
       });
       if (netop) {
+        let photos;
+
+        if (images) {
+          photos = (await addAttachments([...images], true)).join(" AND ");
+        }
+
         const comment = await Comment.create({
           content,
           netop,
           createdBy: user,
+          images: photos,
         }).save();
 
         const creator = netop.createdBy;
