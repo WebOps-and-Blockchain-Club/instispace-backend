@@ -53,9 +53,18 @@ class AmenitiesResolver {
     description: "Query to get all amenities, Restrictions: {Admins}",
   })
   @Authorized([UserRole.ADMIN, UserRole.HAS])
-  async getAmenities() {
+  async getAmenities(@Arg("HostelId") hostelId?: string) {
     try {
-      const amenities = await Amenity.find();
+      let amenities: Amenity[] = [];
+      if (hostelId) {
+        const hostel = await Hostel.findOne({
+          where: { id: hostelId },
+          relations: ["amenities"],
+        });
+        amenities = hostel!.amenities;
+      } else {
+        amenities = await Amenity.find();
+      }
       return amenities;
     } catch (e) {
       throw new Error(`message : ${e}`);

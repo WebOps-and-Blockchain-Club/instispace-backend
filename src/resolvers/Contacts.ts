@@ -56,9 +56,18 @@ class ContactResolver {
       "Query to return contact information, Restrictions: {Admins, HAS}",
   })
   @Authorized([UserRole.ADMIN, UserRole.HAS])
-  async getContact() {
+  async getContact(@Arg("HostelId") hostelId: string) {
     try {
-      const contacts = await Contact.find();
+      let contacts: Contact[] = [];
+      if (hostelId) {
+        const hostel = await Hostel.findOne({
+          where: { id: hostelId },
+          relations: ["contacts"],
+        });
+        contacts = hostel!.contacts;
+      } else {
+        contacts = await Contact.find();
+      }
       return contacts;
     } catch (e) {
       throw new Error(`message : ${e}`);
