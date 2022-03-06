@@ -46,23 +46,23 @@ class User extends BaseEntity {
   role: UserRole;
 
   //Notifications
-  @Column("enum", { enum: Notification })
+  @Column("enum", { enum: Notification, default: Notification.FOLLOWED_TAGS })
   @Field(() => Notification)
   notifyNetop: Notification;
 
-  @Column("enum", { enum: Notification })
+  @Column("enum", { enum: Notification, default: Notification.FOLLOWED_TAGS })
   @Field(() => Notification)
   notifyEvent: Notification;
 
-  @Column("boolean")
+  @Column("boolean", { default: true })
   @Field(() => Boolean)
   notifyMyQuery: boolean;
 
-  @Column("boolean")
+  @Column("boolean", { default: false })
   @Field(() => Boolean)
   notifyFound: boolean;
 
-  @Column("boolean")
+  @Column("boolean", { default: true })
   @Field(() => Boolean)
   notifyNetopComment: boolean;
 
