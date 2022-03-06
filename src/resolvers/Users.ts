@@ -445,13 +445,10 @@ class UsersResolver {
       user.role = UserRole.MODERATOR;
       await user.save();
 
-      console.log(user.fcmToken.split(" AND "), user.fcmToken);
-
       if (!!user) {
-        user.fcmToken.split(" AND ").map(() => {
-          console.log("inside notifications");
+        user.fcmToken.split(" AND ").map((ft) => {
           const message = {
-            to: "f_ai5jptQpm8kpw0DgPguo:APA91bFimvIpTaloCUUx-aGz0iHH-U7d-uwh7JJ-VqMTXmouKMZaXcw6nte9uARynQwTqQ_uAJ6Xd7v-RL1ZTvbLS4a3ytm9BXVfZUrB8Q-EBbCl6jpxvrAmeYXtkbxuzqKZ8pMKgUiB",
+            to: ft,
             notification: {
               title: `Hi ${user.name}`,
               body: `Your role changed to ${user.role}`,
