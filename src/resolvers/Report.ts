@@ -8,16 +8,14 @@ import { UserRole } from "../utils";
 @Resolver(Report)
 class ReportResolver {
   @Query(() => [Report], { nullable: true })
-  @Authorized([
-    UserRole.ADMIN,
-    UserRole.LEADS,
-    UserRole.HAS,
-    UserRole.SECRETORY,
-    UserRole.HOSTEL_SEC,
-    UserRole.MODERATOR,
-  ])
+  @Authorized()
   async getReports() {
-    return await Report.find({ where: { isHidden: false } });
+    let reports = await Report.find({
+      where: { isResolved: false },
+      relations: ["netop", "createdBy", "query"],
+      order: { createdAt: "DESC" },
+    });
+    return reports;
   }
 
   @FieldResolver(() => User)

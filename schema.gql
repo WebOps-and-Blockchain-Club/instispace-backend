@@ -3,6 +3,12 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+input AddFeedbackInput {
+  ans1: String
+  ans2: String
+  ans3: String
+}
+
 type Amenity {
   """Amenity image"""
   description: String!
@@ -54,6 +60,7 @@ enum Category {
 
 type Comment {
   content: String!
+  createdAt: DateTime!
   createdBy: User!
   id: String!
   images: String
@@ -140,6 +147,9 @@ type Contact {
 
 """Input For Create Account Mutation"""
 input CreateAccountInput {
+  """Super-User's name"""
+  name: String!
+
   """Super-User's role"""
   role: String!
 
@@ -271,6 +281,8 @@ type Event {
   createdAt: DateTime!
   createdBy: User!
   id: String!
+
+  """Visiblity state of announcements"""
   isHidden: Boolean!
 
   """Returns true if the User has likes this Event, else false"""
@@ -290,6 +302,23 @@ type Event {
   tags: [Tag!]
   time: DateTime!
   title: String!
+}
+
+type Feedback {
+  """answer to question-1"""
+  ans1: String
+
+  """answer to question-2"""
+  ans2: String
+
+  """answer to question-3"""
+  ans3: String
+
+  """Auto generated uuid for a feedback"""
+  id: String!
+
+  """User who added this feedback"""
+  user: User!
 }
 
 """Input for Query get User"""
@@ -394,12 +423,20 @@ input ModeratorInput {
 }
 
 type Mutation {
+<<<<<<< HEAD
   changeNotificationSettings(notifyEvent: Notification, notifyNetop: Notification, toggleNotifyFound: Boolean!, toggleNotifyMyQuery: Boolean!): Boolean!
 
   """
   Mutation to create a Super-User account can't create Hostel_Sec, Restrictions : {Admin}
   """
   createAccount(CreateAccountInput: CreateAccountInput!): Boolean!
+=======
+  """Mutation to add a feedback, Restrictions: {anyone who is authorized}"""
+  addFeedback(AddFeedback: AddFeedbackInput!): Boolean!
+
+  """Mutation to create a Super-User account, Restrictions : {Admin}"""
+  createAccount(CreateAccountInput: CreateAccountInput!, HostelId: String): Boolean!
+>>>>>>> main
 
   """
   Mutation to create Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
@@ -444,8 +481,7 @@ type Mutation {
   """create network and opportunity, Restrictions:{any authorized user}"""
   createNetop(Attachments: [Upload!], Image: Upload, NewNetopData: createNetopsInput!): Boolean!
 
-  """ Mutation to create Hostel secretory, Restrictions : {Admin, Hostel Affair Secretory} 
-  """
+  """Mutation deprecated"""
   createSec(CreateSecInput: CreateSecInput!, HostelId: String!): Boolean!
 
   """Mutation to Create Tags, Restrictions : {Admin}"""
@@ -457,14 +493,14 @@ type Mutation {
   deleteAmenity(AmenityId: String!): Boolean!
 
   """
-  Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}
-  """
-  deleteComplaint(ComplaintId: String!, DeleteComplaintInput: DeleteComplaintInput!, ProofImages: [Upload!]): Boolean!
-
-  """
   Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETORY, HAS}
   """
   deleteEvent(EventId: String!): Boolean!
+
+  """
+  Mutation to delete Hostel Contact, Restrictions: {Admin, Has, hostel_secretary}
+  """
+  deleteHostelContact(HostelId: String!): Boolean!
 
   """edit Query, Restrictions:{user who created}"""
   deleteMyQuery(MyQueryId: String!): Boolean!
@@ -495,8 +531,12 @@ type Mutation {
   editNetop(Attachments: [Upload!], EditNetopsData: editNetopsInput!, Image: Upload, NetopId: String!): Boolean!
 
   """Mutation to login, Restrictions : {none}"""
+<<<<<<< HEAD
   login(LoginInputs: LoginInput!, fcmToken: String!): LoginOutput!
   logout(fcmToken: String!): Boolean!
+=======
+  login(LoginInputs: LoginInput!): LoginOutput!
+>>>>>>> main
   removeMyQuery(MyQueryId: String!, ReportId: String!): Boolean!
   removeNetop(NetopId: String!, ReportId: String!): Boolean!
 
@@ -512,13 +552,23 @@ type Mutation {
   resolveAnnouncement(AnnouncementId: String!): Boolean!
 
   """
+  Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}
+  """
+  resolveComplaint(ComplaintId: String!, DeleteComplaintInput: DeleteComplaintInput!, ProofImages: [Upload!]): Boolean!
+
+  """
   Mutation to resolve the item, User who finds his lost entity will update, Restriction : {anyone who is authorised}
   """
   resolveItem(ItemId: String!): Boolean!
+<<<<<<< HEAD
   resolveReportMyQuery(MyQueryId: String!, ReportId: String!): Boolean!
   resolveReportNetop(NetopId: String!, ReportId: String!): Boolean!
+=======
+  resolveMyQuery(MyQueryId: String!, ReportId: String!): Boolean!
+  resolveNetop(NetopId: String!, ReportId: String!): Boolean!
+>>>>>>> main
 
-  """Like or Unlike the event, Restrictions:{ AUTHORIZED USER }"""
+  """ILike or Unlike the event, Restrictions:{ AUTHORIZED USER }"""
   toggleLikeEvent(EventId: String!): Boolean!
 
   """
@@ -573,6 +623,7 @@ type Mutation {
 """querys"""
 type MyQuery {
   attachments: String
+  commentCount: Float!
 
   """get list of comments"""
   comments: [Comment!]
@@ -580,6 +631,8 @@ type MyQuery {
   createdAt: DateTime!
   createdBy: User!
   id: String!
+
+  """Visiblity state of query"""
   isHidden: Boolean!
 
   """check if Query is liked by current user"""
@@ -598,6 +651,9 @@ type MyQuery {
 type Netop {
   attachments: String
 
+  """number of likes"""
+  commentCount: Float!
+
   """get list of comments"""
   comments: [Comment!]
   content: String!
@@ -605,10 +661,15 @@ type Netop {
   createdBy: User!
   endTime: DateTime!
   id: String!
+
+  """Visiblity state of netop"""
   isHidden: Boolean!
 
-  """check if network and opportunity is liked by current user"""
+  """is this netop is liked"""
   isLiked: Boolean!
+
+  """is this netop is boolean"""
+  isReported: Boolean!
 
   """is this netop is stared"""
   isStared: Boolean!
@@ -640,20 +701,27 @@ enum Notification {
 }
 
 type Query {
-  """
-  Query to fetch announcements of each hostel, Restrictions : { Admin, Hostel Affair Secretory} 
-  """
+  """Query depricated"""
   getAllAnnouncements(LastAnnouncementId: String!, search: String, take: Float!): getAllAnnouncementsOutput!
+
+  """Query to fetch all feedbacks, Restrictions: {Admins}"""
+  getAllFeedbacks(LastAnnouncementId: String!, take: Float!): [Feedback!]!
+
+  """Query to get all amenities, Restrictions: {Admins}"""
+  getAmenities: [Amenity!]!
 
   """
   Query to fetch announcements of a particular hostel, Restrictions : { anyone who is authorised } 
   """
-  getAnnouncements(HostelId: String!, LastAnnouncementId: String!, search: String, take: Float!): getAnnouncementsOutput!
+  getAnnouncements(HostelId: String, LastAnnouncementId: String!, search: String, take: Float!): getAnnouncementsOutput!
 
   """
   get a list of Complaints sorted by date, ordered by upvotes if true, and order by isResolved(upresolved at the top)
   """
   getComplaints(OrderByIsResolved: Boolean, OrderByUpvotes: Boolean, skip: Float!, take: Float!): getComplaintsOutput!
+
+  """Query to return contact information, Restrictions: {Admins, HAS}"""
+  getContact: [Contact!]!
 
   """Get the event details by id, Restrictions:{ AUTHORIZED USER }"""
   getEvent(EventId: String!): Event!
@@ -714,7 +782,13 @@ type Report {
   createdBy: User!
   description: String!
   id: String!
+<<<<<<< HEAD
   isHidden: Boolean!
+=======
+
+  """Visiblity state of reports"""
+  isResolved: Boolean!
+>>>>>>> main
   netop: Netop
   query: MyQuery
 }
@@ -757,9 +831,17 @@ scalar Upload
 type User {
   """Announcements Created by User, can only be created if its a Super User"""
   announcements: [Announcement!]
+<<<<<<< HEAD
   complaints: Complaint
   complaintsUpvoted: Complaint
   fcmToken: String!
+=======
+  complaints: [Complaint!]
+  complaintsUpvoted: [Complaint!]
+
+  """feedbacks of the user"""
+  feedbacks: [Feedback!]
+>>>>>>> main
   getHome: homeOutput
 
   """User's Hostel amd its details"""

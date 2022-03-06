@@ -19,8 +19,12 @@ import { UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
+<<<<<<< HEAD
 import { Like } from "typeorm";
 import fcm from "../utils/fcmTokens";
+=======
+import { ILike } from "typeorm";
+>>>>>>> main
 
 @Resolver(MyQuery)
 class MyQueryResolver {
@@ -168,43 +172,18 @@ class MyQueryResolver {
     @Arg("description") description: string
   ) {
     try {
-      const myQuery = await MyQuery.findOne(myQueryId, {
-        relations: ["reports", "createdBy"],
+      const myQuery = await MyQuery.findOneOrFail(myQueryId, {
+        relations: ["reports"],
       });
-      if (myQuery) {
-        const report = await Report.create({
-          query: myQuery,
-          description,
-          createdBy: user,
-          isHidden: false,
-        }).save();
+      const report = await Report.create({
+        query: myQuery,
+        description,
+        createdBy: user,
+      }).save();
 
-        const creator = myQuery.createdBy;
+      const { affected } = await MyQuery.update(myQueryId, { isHidden: true });
 
-        myQuery.isHidden = true;
-        await myQuery.save();
-
-        const message = {
-          to: creator.fcmToken,
-          notification: {
-            title: `Hi ${creator.name}`,
-            body: "Your Query got reported!!! contact admin for more info",
-          },
-        };
-
-        await fcm.send(message, (err: any, response: any) => {
-          if (err) {
-            console.log("Something has gone wrong!" + err);
-            console.log("Respponse:! " + response);
-          } else {
-            // showToast("Successfully sent with response");
-            console.log("Successfully sent with response: ", response);
-          }
-        });
-        return !!report;
-      } else {
-        return false;
-      }
+      return !!report && affected;
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
@@ -284,33 +263,25 @@ class MyQueryResolver {
     @Arg("MyQueryId") myQueryId: string,
     @Arg("ReportId") reportId: string
   ) {
-    const affected = await Report.update(reportId, { isHidden: true });
-    const update = await MyQuery.update(myQueryId, {
-      isHidden: true,
-      reports: [],
-    });
-    return update && affected && true;
+    let { affected } = await MyQuery.update(myQueryId, { isHidden: true });
+    let { affected: a2 } = await Report.update(reportId, { isResolved: true });
+    return affected === 1 && a2 === 1;
   }
 
   @Mutation(() => Boolean)
   @Authorized([
     UserRole.ADMIN,
-    UserRole.LEADS,
-    UserRole.HAS,
     UserRole.SECRETORY,
+    UserRole.HAS,
     UserRole.HOSTEL_SEC,
-    UserRole.MODERATOR,
   ])
-  async resolveReportMyQuery(
+  async resolveMyQuery(
     @Arg("MyQueryId") myQueryId: string,
     @Arg("ReportId") reportId: string
   ) {
-    const affected = await Report.update(reportId, { isHidden: true });
-    const update = await MyQuery.update(myQueryId, {
-      isHidden: false,
-      reports: [],
-    });
-    return update && affected && true;
+    let { affected } = await MyQuery.update(myQueryId, { isHidden: false });
+    let { affected: a2 } = await Report.update(reportId, { isResolved: true });
+    return affected === 1 && a2 === 1;
   }
 
   @Query(() => MyQuery, {
@@ -345,7 +316,7 @@ class MyQueryResolver {
       if (search) {
         await Promise.all(
           ["title"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const queryF = await MyQuery.find({
               where: filter,
               relations: ["likedBy"],
@@ -409,7 +380,7 @@ class MyQueryResolver {
 
     await Promise.all(
       ["title"].map(async (field: string) => {
-        const filter = { [field]: Like(`%${search}%`) };
+        const filter = { [field]: ILike(`%${search}%`) };
         const queryF = await MyQuery.find({
           where: filter,
           relations: ["likedBy"],
@@ -486,6 +457,7 @@ class MyQueryResolver {
     return myQuery?.createdBy;
   }
 
+<<<<<<< HEAD
   @FieldResolver(() => [Comment], {
     nullable: true,
     description: "get list of reports",
@@ -496,6 +468,15 @@ class MyQueryResolver {
       relations: ["reports"],
     });
     return myQuery?.reports;
+=======
+  @FieldResolver(() => Number)
+  async commentCount(@Root() { id, comments }: MyQuery) {
+    if (comments) return comments.length;
+    const myQuerys = await MyQuery.findOneOrFail(id, {
+      relations: ["comments"],
+    });
+    return myQuerys.comments.length;
+>>>>>>> main
   }
 }
 

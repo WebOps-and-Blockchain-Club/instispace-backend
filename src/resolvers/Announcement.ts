@@ -24,8 +24,12 @@ import {
   getAllAnnouncementsOutput,
   getAnnouncementsOutput,
 } from "../types/objects/announcements";
+<<<<<<< HEAD
 import { Like } from "typeorm";
 import fcm from "../utils/fcmTokens";
+=======
+import { ILike } from "typeorm";
+>>>>>>> main
 
 @Resolver((_type) => Announcement)
 class AnnouncementResolver {
@@ -102,8 +106,7 @@ class AnnouncementResolver {
   }
 
   @Query(() => getAllAnnouncementsOutput, {
-    description:
-      "Query to fetch announcements of each hostel, Restrictions : { Admin, Hostel Affair Secretory} ",
+    description: "Query depricated",
   })
   @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETORY])
   async getAllAnnouncements(
@@ -112,16 +115,11 @@ class AnnouncementResolver {
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      let announcements = await Announcement.find({
-        where: { isHidden: false },
-        order: { createdAt: "DESC" },
-      });
-      const total = announcements.length;
-      var announcementsList: Announcement[] = [];
+      let announcementsList: Announcement[] = [];
       if (search) {
         await Promise.all(
           ["title"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const announcementF = await Announcement.find({
               where: filter,
               order: { createdAt: "DESC" },
@@ -131,17 +129,20 @@ class AnnouncementResolver {
             });
           })
         );
-        const annStr = announcementsList.map((obj) => JSON.stringify(obj));
-        const uniqueAnnStr = new Set(annStr);
-        announcements = Array.from(uniqueAnnStr).map((str) => JSON.parse(str));
+      } else {
+        announcementsList = await Announcement.find({
+          where: { isHidden: false },
+          order: { createdAt: "DESC" },
+        });
       }
+      const total = announcementsList.length;
       if (lastAnnouncementId) {
-        const index = announcements
+        const index = announcementsList
           .map((n) => n.id)
           .indexOf(lastAnnouncementId);
-        announcementsList = announcements.splice(index + 1, take);
+        announcementsList = announcementsList.splice(index + 1, take);
       } else {
-        announcementsList = announcements.splice(0, take);
+        announcementsList = announcementsList.splice(0, take);
       }
       return { announcementsList: announcementsList, total };
     } catch (e) {
@@ -157,31 +158,15 @@ class AnnouncementResolver {
   async getAnnouncements(
     @Arg("LastAnnouncementId") lastAnnouncementId: string,
     @Arg("take") take: number,
-    @Arg("HostelId") hostelId: string,
+    @Arg("HostelId") hostelId?: string,
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      let hostel = await Hostel.findOne({
-        where: { id: hostelId },
-        relations: ["announcements"],
-      });
-
-      const d = new Date();
-      let announcements = hostel?.announcements!.filter(
-        (n) =>
-          new Date(n.endTime).getTime() > d.getTime() && n.isHidden === false
-      );
-      if (!announcements) throw new Error("No Announcements Found");
-      const total = announcements.length;
-      announcements?.sort((a, b) =>
-        a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
-      );
-
-      var announcementsList: Announcement[] = [];
+      let announcementsList: Announcement[] = [];
       if (search) {
         await Promise.all(
           ["title"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const announcementF = await Announcement.find({
               where: filter,
               order: { createdAt: "DESC" },
@@ -191,17 +176,35 @@ class AnnouncementResolver {
             });
           })
         );
-        const annStr = announcementsList.map((obj) => JSON.stringify(obj));
-        const uniqueAnnStr = new Set(annStr);
-        announcements = Array.from(uniqueAnnStr).map((str) => JSON.parse(str));
+      } else {
+        if (hostelId) {
+          let hostel = await Hostel.findOne({
+            where: { id: hostelId },
+            relations: ["announcements"],
+          });
+          announcementsList = hostel!.announcements!;
+          announcementsList.sort((a, b) =>
+            a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+          );
+        } else {
+          announcementsList = await Announcement.find({
+            order: { createdAt: "DESC" },
+          });
+        }
       }
+      const d = new Date();
+      announcementsList.filter(
+        (n) =>
+          new Date(n.endTime).getTime() > d.getTime() && n.isHidden === false
+      );
+      const total = announcementsList.length;
       if (lastAnnouncementId) {
-        const index = announcements
+        const index = announcementsList
           .map((n) => n.id)
           .indexOf(lastAnnouncementId);
-        announcementsList = announcements.splice(index + 1, take);
+        announcementsList = announcementsList.splice(index + 1, take);
       } else {
-        announcementsList = announcements.splice(0, take);
+        announcementsList = announcementsList.splice(0, take);
       }
       return { announcementsList: announcementsList, total };
     } catch (e) {

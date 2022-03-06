@@ -37,6 +37,11 @@ class Report extends BaseEntity {
   @Column()
   @Field()
   isHidden: boolean;
+  @Column({ type: Boolean, default: false })
+  @Field((_type) => Boolean, {
+    description: "Visiblity state of reports",
+  })
+  isResolved: boolean;
 
   @CreateDateColumn({ type: "timestamptz" })
   @Field()

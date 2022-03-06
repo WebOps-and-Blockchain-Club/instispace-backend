@@ -35,8 +35,10 @@ class Event extends BaseEntity {
   @Field({ nullable: true })
   photo: string;
 
-  @Column()
-  @Field()
+  @Column({ type: Boolean, default: false })
+  @Field((_type) => Boolean, {
+    description: "Visiblity state of announcements",
+  })
   isHidden: boolean;
 
   @Column()

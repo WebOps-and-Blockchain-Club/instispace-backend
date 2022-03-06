@@ -20,13 +20,18 @@ import Netop from "../entities/Netop";
 import Comment from "../entities/Common/Comment";
 import { GraphQLUpload, Upload } from "graphql-upload";
 import getNetopOutput from "../types/objects/netop";
-import { UserRole } from "../utils";
+import { smail, UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
+<<<<<<< HEAD
 import { Like } from "typeorm";
 import fcm from "../utils/fcmTokens";
 import { Notification } from "../utils/index";
+=======
+import { ILike, In } from "typeorm";
+import { mail } from "../utils/mail";
+>>>>>>> main
 
 @Resolver(Netop)
 class NetopResolver {
@@ -153,18 +158,7 @@ class NetopResolver {
         relations: ["tags", "createdBy"],
       });
 
-      if (
-        netop &&
-        (user.id === netop?.createdBy.id ||
-          [
-            UserRole.ADMIN,
-            UserRole.LEADS,
-            UserRole.HAS,
-            UserRole.SECRETORY,
-            UserRole.HOSTEL_SEC,
-            UserRole.MODERATOR,
-          ].includes(user.role))
-      ) {
+      if (netop && user.id === netop?.createdBy.id) {
         if (image)
           editNetopsInput.photo = (await addAttachments([image], true)).join(
             " AND "
@@ -294,42 +288,38 @@ class NetopResolver {
     @Arg("description") description: string
   ) {
     try {
-      let netop = await Netop.findOne(netopId, {
-        relations: ["reports", "createdBy"],
+      let netop = await Netop.findOneOrFail(netopId, {
+        relations: ["reports"],
       });
-      if (netop) {
-        const report = await Report.create({
-          netop,
-          description,
-          createdBy: user,
-          isHidden: false,
-        }).save();
+      const report = await Report.create({
+        netop,
+        description,
+        createdBy: user,
+      }).save();
 
-        const creator = netop.createdBy;
+      const { affected } = await Netop.update(netop.id, { isHidden: true });
+      const superUsersList = await User.find({
+        where: {
+          role: In([UserRole.ADMIN, UserRole.LEADS, UserRole.MODERATOR]),
+        },
+      });
+      let mailList: String[] = [];
+      superUsersList.forEach((user) => {
+        if (user.role === UserRole.MODERATOR) {
+          const email = user.roll.concat(smail);
+          mailList.push(email);
+        } else {
+          mailList.push(user.roll);
+        }
+      });
+      console.log(mailList);
+      await mail({
+        email: mailList.join(", "),
+        subject: "Report",
+        htmlContent: "",
+      });
 
-        creator.fcmToken.split(" AND ").map((ft) => {
-          const message = {
-            to: ft,
-            notification: {
-              title: `Hi ${creator.name}`,
-              body: "Your netop got reported!!! contact admin for more info",
-            },
-          };
-
-          fcm.send(message, (err: any, response: any) => {
-            if (err) {
-              console.log("Something has gone wrong!" + err);
-              console.log("Respponse:! " + response);
-            } else {
-              // showToast("Successfully sent with response");
-              console.log("Successfully sent with response: ", response);
-            }
-          });
-        });
-
-        return !!report;
-      }
-      return false;
+      return !!report && affected;
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
@@ -404,12 +394,11 @@ class NetopResolver {
     @Arg("NetopId") netopId: string,
     @Arg("ReportId") reportId: string
   ) {
-    const affected = await Report.update(reportId, { isHidden: true });
-    const update = await Netop.update(netopId, {
+    let { affected } = await Netop.update(netopId, {
       isHidden: true,
-      reports: [],
     });
-    return update && affected && true;
+    let { affected: a2 } = await Report.update(reportId, { isResolved: true });
+    return affected === 1 && a2 === 1;
   }
 
   @Mutation(() => Boolean)
@@ -421,15 +410,15 @@ class NetopResolver {
     UserRole.HOSTEL_SEC,
     UserRole.MODERATOR,
   ])
-  async resolveReportNetop(
+  async resolveNetop(
     @Arg("NetopId") netopId: string,
     @Arg("ReportId") reportId: string
   ) {
-    const affected = await Report.update(reportId, { isHidden: true });
-    const update = await Netop.update(netopId, {
+    let { affected } = await Netop.update(netopId, {
       isHidden: false,
     });
-    return update && affected && true;
+    let { affected: a2 } = await Report.update(reportId, { isResolved: true });
+    return affected === 1 && a2 === 1;
   }
 
   @Query(() => Netop, {
@@ -467,15 +456,15 @@ class NetopResolver {
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
-      var netopList: Netop[] = [];
+      let netopList: Netop[] = [];
 
       if (search) {
         await Promise.all(
           ["title"].map(async (field: string) => {
-            const filter = { [field]: Like(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`) };
             const netopF = await Netop.find({
               where: filter,
-              relations: ["tags", "likedBy", "staredBy"],
+              relations: ["tags", "likedBy", "staredBy", "reports"],
               order: { createdAt: "DESC" },
             });
             netopF.forEach((netop) => {
@@ -486,7 +475,7 @@ class NetopResolver {
       } else {
         netopList = await Netop.find({
           where: { isHidden: false },
-          relations: ["tags", "likedBy", "staredBy"],
+          relations: ["tags", "likedBy", "staredBy", "reports"],
           order: { createdAt: "DESC" },
         });
       }
@@ -575,6 +564,18 @@ class NetopResolver {
     return netop?.comments;
   }
 
+  @FieldResolver(() => [Report], {
+    nullable: true,
+    description: "get list of reports",
+  })
+  async reports(@Root() { id, reports }: Netop) {
+    if (reports) return reports;
+    const netop = await Netop.findOne(id, {
+      relations: ["reports"],
+    });
+    return netop?.reports;
+  }
+
   @FieldResolver(() => Number, { description: "get number of likes" })
   async likeCount(@Root() { id, likedBy }: Netop) {
     if (likedBy) return likedBy.length;
@@ -613,12 +614,34 @@ class NetopResolver {
     return netop?.likedBy.filter((u) => u.id === user.id).length;
   }
 
+  @FieldResolver(() => Boolean)
+  async isReported(@Root() { id }: Netop) {
+    const netop = await Netop.findOneOrFail(id, { relations: ["reports"] });
+    return netop.reports.length && true;
+  }
+
   @FieldResolver(() => User)
   async createdBy(@Root() { id, createdBy }: Netop) {
     if (createdBy) return createdBy;
     const netop = await Netop.findOne(id, { relations: ["createdBy"] });
     return netop?.createdBy;
   }
+<<<<<<< HEAD
+=======
+
+  @FieldResolver(() => Number)
+  async commentCount(@Root() { id, comments }: Netop) {
+    if (comments) return comments.length;
+    const netop = await Netop.findOneOrFail(id, { relations: ["comments"] });
+    return netop.comments.length;
+  }
+
+  @Subscription({ topics: "NETOP" })
+  createNetop2(@Root() netop: Netop): Netop {
+    console.log(netop.title);
+    return netop;
+  }
+>>>>>>> main
 }
 
 export default NetopResolver;
