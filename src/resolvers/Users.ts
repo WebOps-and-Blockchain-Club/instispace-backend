@@ -49,6 +49,7 @@ import Event from "./Event";
 import { Notification } from "../utils/index";
 import Feedback from "../entities/Feedback";
 import { mail } from "../utils/mail";
+import fcm from "../utils/fcmTokens";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -442,6 +443,28 @@ class UsersResolver {
       if (user.role !== UserRole.USER) throw new Error("Invalid Role");
       user.role = UserRole.MODERATOR;
       await user.save();
+
+      if (!!user) {
+        user.fcmToken.split(" AND ").map((ft) => {
+          const message = {
+            to: ft,
+            notification: {
+              title: `Hi ${user.name}`,
+              body: `Your role changed to ${user.role}`,
+            },
+          };
+
+          fcm.send(message, (err: any, response: any) => {
+            if (err) {
+              console.log("Something has gone wrong!" + err);
+              console.log("Respponse:! " + response);
+            } else {
+              // showToast("Successfully sent with response");
+              console.log("Successfully sent with response: ", response);
+            }
+          });
+        });
+      }
       return !!user;
     } catch (e) {
       throw new Error(`message: ${e}`);
