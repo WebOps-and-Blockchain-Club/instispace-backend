@@ -44,12 +44,15 @@ import Hostel from "../entities/Hostel";
 import Item from "../entities/Item";
 import NetopResolver from "./Netop";
 import { fileringConditions } from "../types/inputs/netop";
-import Announcement from "./Announcement";
-import Event from "./Event";
+import AnnouncementResolver from "./Announcement";
+import EventResolver from "./Event";
 import { Notification } from "../utils/index";
 import Feedback from "../entities/Feedback";
 import { mail } from "../utils/mail";
 import fcm from "../utils/fcmTokens";
+import Netop from "../entities/Netop";
+import Event from "../entities/Event";
+import Announcement from "../entities/Announcement";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -579,6 +582,7 @@ class UsersResolver {
 
   @FieldResolver(() => homeOutput, { nullable: true })
   async getHome(@Root() { id, role }: User) {
+    console.log({ id, role });
     try {
       if (
         role == UserRole.ADMIN ||
@@ -592,11 +596,52 @@ class UsersResolver {
           relations: ["networkingAndOpportunities", "event", "announcements"],
         });
 
-        return {
-          netops: user.networkingAndOpportunities,
-          announcements: user.announcements,
-          events: user.event,
-        };
+        let netops = user.networkingAndOpportunities;
+        let announcements = user.announcements;
+        let events = user.event;
+
+        // console.log(netops, announcements, events);
+
+        let nList: Netop[] = [];
+        const eList: Event[] = [];
+        const aList: Announcement[] = [];
+
+        // endtime ishidden createdAt
+        await Promise.all(
+          netops.map(async (netop) => {
+            netop = await Netop.findOneOrFail(netop.id);
+            let d = new Date();
+            if (
+              !netop.isHidden &&
+              new Date(netop.endTime).getTime() > d.getTime()
+            )
+              nList.push(netop);
+          })
+        );
+
+        await Promise.all(
+          events.map(async (event) => {
+            event = await Event.findOneOrFail(event.id);
+            console.log(event);
+            let d = new Date();
+            if (!event.isHidden && new Date(event.time).getDate() > d.getDate())
+              eList.push(event);
+          })
+        );
+
+        await Promise.all(
+          announcements.map(async (announcement) => {
+            announcement = await Announcement.findOneOrFail(announcement.id);
+            let d = new Date();
+            if (
+              !announcement.isHidden &&
+              new Date(announcement.endTime).getTime() > d.getTime()
+            )
+              aList.push(announcement);
+          })
+        );
+
+        return { announcements: aList, netops: nList, events: eList };
       } else {
         const user = await User.findOneOrFail({
           where: { id },
@@ -608,8 +653,9 @@ class UsersResolver {
           user,
         };
         const netopObject = new NetopResolver();
-        const announcementObject = new Announcement();
-        const eventObject = new Event();
+        const announcementObject = new AnnouncementResolver();
+        const eventObject = new EventResolver();
+
         const filters: fileringConditions = { tags: tagIds!, isStared: false };
         const netops = (await netopObject.getNetops(myCon, "", 25, filters))
           .netopList;

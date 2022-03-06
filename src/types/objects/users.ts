@@ -30,13 +30,13 @@ class LoginOutput {
 
 @ObjectType("homeOutput", { description: " Output type for getHome query" })
 class homeOutput {
-  @Field(() => [Netop])
+  @Field(() => [Netop], { nullable: true })
   netops: Netop[];
 
-  @Field(() => [Announcement])
+  @Field(() => [Announcement], { nullable: true })
   announcements: Announcement[];
 
-  @Field(() => [Event])
+  @Field(() => [Event], { nullable: true })
   events: Event[];
 }
 
