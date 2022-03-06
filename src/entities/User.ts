@@ -20,11 +20,8 @@ import Announcement from "./Announcement";
 import Report from "./Common/Report";
 import Query from "./MyQuery";
 import Complaint from "./Complaint";
-<<<<<<< HEAD
 import { Notification } from "../utils/index";
-=======
 import Feedback from "./Feedback";
->>>>>>> main
 
 @Entity("User")
 @ObjectType("User", { description: "User Entity" })
