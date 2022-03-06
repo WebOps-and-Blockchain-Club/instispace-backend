@@ -7,6 +7,9 @@ input AddFeedbackInput {
   ans1: String
   ans2: String
   ans3: String
+  rating1: Float!
+  rating2: Float!
+  rating3: Float!
 }
 
 type Amenity {
@@ -316,6 +319,15 @@ type Feedback {
 
   """Auto generated uuid for a feedback"""
   id: String!
+
+  """ratings to question-1"""
+  rating1: Float!
+
+  """ratings to questions-2"""
+  rating2: Float!
+
+  """ratings to question-3"""
+  rating3: Float!
 
   """User who added this feedback"""
   user: User!
