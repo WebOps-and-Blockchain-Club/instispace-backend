@@ -32,15 +32,16 @@ class MyQueryResolver {
   async createMyQuery(
     @Arg("createQuerysInput") createMyQuerysInput: createQuerysInput,
     @Ctx() { user }: MyContext,
-    @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload,
+    @Arg("Images", () => GraphQLUpload, { nullable: true }) images?: Upload[],
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
   ): Promise<boolean> {
     try {
-      if (image)
-        createMyQuerysInput.photo = (await addAttachments([image], true)).join(
+      if (images)
+        createMyQuerysInput.photo = (await addAttachments([images], true)).join(
           " AND "
         );
+
       if (attachments)
         createMyQuerysInput.attachments = (
           await addAttachments([...attachments], false)
@@ -68,7 +69,7 @@ class MyQueryResolver {
     @Arg("EditMyQuerysData") editMyQuerysInput: editQuerysInput,
     @Arg("MyQueryId") myQueryId: string,
     @Ctx() { user }: MyContext,
-    @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload,
+    @Arg("Image", () => [GraphQLUpload], { nullable: true }) images?: Upload[],
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
   ) {
@@ -84,8 +85,8 @@ class MyQueryResolver {
             user.role
           ))
       ) {
-        if (image)
-          editMyQuerysInput.photo = (await addAttachments([image], true)).join(
+        if (images)
+          editMyQuerysInput.photo = (await addAttachments([images], true)).join(
             " AND "
           );
         if (attachments)
