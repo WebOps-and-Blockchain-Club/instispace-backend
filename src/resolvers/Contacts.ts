@@ -118,7 +118,7 @@ class ContactResolver {
       "Mutation to delete Hostel Contact, Restrictions: {Admin, Has, hostel_secretary}",
   })
   async deleteHostelContact(
-    @Arg("HostelId") id: string,
+    @Arg("ContactId") id: string,
     @Ctx() { user }: MyContext
   ) {
     try {
