@@ -47,6 +47,7 @@ import { fileringConditions } from "../types/inputs/netop";
 import Announcement from "./Announcement";
 import Event from "./Event";
 import Feedback from "../entities/Feedback";
+import { mail } from "../utils/mail";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -162,7 +163,13 @@ class UsersResolver {
       newUser.password = bcrypt.hashSync(password, salt);
       await newUser.save();
       console.log(password);
-      //this password is going to be emailed to lead
+      //this password is going to be emailed to the Super-User
+      if (process.env.NODE_ENV !== "development")
+        await mail({
+          email: `${newUser.roll}`,
+          subject: "Super-User login credentials",
+          htmlContent: "",
+        });
       return !!newUser;
     } catch (e) {
       throw new Error(`message : ${e}`);
