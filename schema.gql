@@ -772,11 +772,6 @@ type Report {
   query: MyQuery
 }
 
-type Subscription {
-  createAnnoucementSubs(hostel: String!): Announcement!
-  createEventS(tag: String!): Event!
-}
-
 """Tag Entity, Users will follow these tags"""
 type Tag {
   """Tag's Category"""

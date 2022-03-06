@@ -12,8 +12,6 @@ import express from "express";
 import cors from "cors";
 //subscrib
 import { createServer } from "http";
-import { execute, subscribe } from "graphql";
-import { SubscriptionServer } from "subscriptions-transport-ws";
 
 import { graphqlUploadExpress } from "graphql-upload";
 import { FILE_SIZE_LIMIT_MB } from "./utils/config";
@@ -27,11 +25,6 @@ const main = async () => {
   const schema = await buildSchema({ resolvers, authChecker });
 
   await emitSchemaDefinitionFile("./schema.gql", schema);
-
-  const subscriptionServer = SubscriptionServer.create(
-    { schema, execute, subscribe },
-    { server: httpServer, path: "/graphql" }
-  );
 
   const server = new ApolloServer({
     schema,
@@ -51,17 +44,6 @@ const main = async () => {
       }
       return { user: user };
     },
-    plugins: [
-      {
-        async serverWillStart() {
-          return {
-            async drainServer() {
-              subscriptionServer.close();
-            },
-          };
-        },
-      },
-    ],
   });
 
   await server.start();

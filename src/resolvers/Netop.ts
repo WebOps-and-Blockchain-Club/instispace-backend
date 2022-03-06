@@ -37,7 +37,6 @@ class NetopResolver {
   })
   @Authorized()
   async createNetop(
-    // @PubSub() pubSub: PubSubEngine,
     @Arg("NewNetopData") createNetopsInput: createNetopsInput,
     @Ctx() { user }: MyContext,
     @Arg("Image", () => GraphQLUpload, { nullable: true }) image?: Upload,
