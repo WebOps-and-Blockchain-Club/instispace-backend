@@ -1,0 +1,43 @@
+@Query(() => Boolean)
+async isInterested(@Ctx() { user }: MyContext, @Arg("tag") tag: string) {
+    if (user.interest) {
+        user.interest.filter((interest) => {
+            console.log(interest.id, tag);
+            return interest.id == tag;
+        });
+        return !!user;
+    } else {
+        const u = await User.findOne(user.id, { relations: ["interest"] });
+        var t = u?.interest?.filter((interest) => {
+            console.log(interest.id, tag);
+            return interest.id == tag;
+        });
+        return !!t;
+    }
+}
+
+
+const fcmTokenArr = user?.fcmToken.split(" AND ");
+    let ft = "";
+    if (fcmTokenArr) {
+      ft = fcmTokenArr[fcmTokenArr.length - 1];
+    }
+    const message = {
+      to: ft,
+      notification: {
+        title: `Hi ${user?.name}`,
+        body: "welcome to the app",
+      },
+    };
+
+    await fcm.send(message, (err: any, response: any) => {
+      if (err) {
+        console.log("Something has gone wrong!" + err);
+        console.log("Respponse:! " + response);
+      } else {
+        // showToast("Successfully sent with response");
+        console.log("Successfully sent with response: ", response);
+      }
+    });
+
+ 
