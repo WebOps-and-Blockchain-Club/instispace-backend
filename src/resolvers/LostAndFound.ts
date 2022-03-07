@@ -12,7 +12,7 @@ import {
 import Item from "../entities/Item";
 import { Category, miliSecPerMonth } from "../utils/index";
 import User from "../entities/User";
-import MyContext from "src/utils/context";
+import MyContext from "../utils/context";
 import { ILike, In } from "typeorm";
 import { GraphQLUpload, Upload } from "graphql-upload";
 import addAttachments from "../utils/uploads";

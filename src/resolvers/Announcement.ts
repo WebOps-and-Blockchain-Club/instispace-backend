@@ -19,10 +19,7 @@ import MyContext from "src/utils/context";
 import { UserRole } from "../utils";
 import addAttachments from "../utils/uploads";
 import { GraphQLUpload, Upload } from "graphql-upload";
-import {
-  getAllAnnouncementsOutput,
-  getAnnouncementsOutput,
-} from "../types/objects/announcements";
+import { getAnnouncementsOutput } from "../types/objects/announcements";
 import fcm from "../utils/fcmTokens";
 import { ILike } from "typeorm";
 
@@ -95,51 +92,6 @@ class AnnouncementResolver {
       );
 
       return !!announcementCreated;
-    } catch (e) {
-      throw new Error(`message : ${e}`);
-    }
-  }
-
-  @Query(() => getAllAnnouncementsOutput, {
-    description: "Query depricated",
-  })
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETORY])
-  async getAllAnnouncements(
-    @Arg("LastAnnouncementId") lastAnnouncementId: string,
-    @Arg("take") take: number,
-    @Arg("search", { nullable: true }) search?: string
-  ) {
-    try {
-      let announcementsList: Announcement[] = [];
-      if (search) {
-        await Promise.all(
-          ["title"].map(async (field: string) => {
-            const filter = { [field]: ILike(`%${search}%`) };
-            const announcementF = await Announcement.find({
-              where: filter,
-              order: { createdAt: "DESC" },
-            });
-            announcementF.forEach((ann) => {
-              announcementsList.push(ann);
-            });
-          })
-        );
-      } else {
-        announcementsList = await Announcement.find({
-          where: { isHidden: false },
-          order: { createdAt: "DESC" },
-        });
-      }
-      const total = announcementsList.length;
-      if (lastAnnouncementId) {
-        const index = announcementsList
-          .map((n) => n.id)
-          .indexOf(lastAnnouncementId);
-        announcementsList = announcementsList.splice(index + 1, take);
-      } else {
-        announcementsList = announcementsList.splice(0, take);
-      }
-      return { announcementsList: announcementsList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -292,7 +244,7 @@ class AnnouncementResolver {
     UserRole.HOSTEL_SEC,
     UserRole.SECRETORY,
   ])
-  async resolveAnnouncement(
+  async deleteAnnouncement(
     @Ctx() { user }: MyContext,
     @Arg("AnnouncementId") id: string
   ) {
