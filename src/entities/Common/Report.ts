@@ -41,7 +41,7 @@ class Report extends BaseEntity {
   isResolved: boolean;
 
   @CreateDateColumn({ type: "timestamptz" })
-  @Field()
+  @Field(() => Date)
   createdAt: Date;
 }
 
