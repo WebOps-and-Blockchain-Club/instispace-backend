@@ -8,7 +8,6 @@ import {
   Resolver,
   Root,
 } from "type-graphql";
-
 import MyContext from "../utils/context";
 import { fileringConditions } from "../types/inputs/netop";
 import Tag from "../entities/Tag";
@@ -67,7 +66,6 @@ class EventResolver {
       const event = await Event.create({
         ...createEventInput,
         createdBy: user,
-        isHidden: false,
         time: new Date(createEventInput.time),
         tags,
       }).save();
@@ -89,39 +87,39 @@ class EventResolver {
           const u = await User.findOneOrFail({
             where: { fcmToken: ft },
           });
-          console.log("Bahar", u.roll, u.notifyEvent, u.notifyNetop);
           if (u.notifyEvent !== Notification.NONE && u.id != user.id)
             iUsers.push(u);
         })
       );
 
-      await Promise.all(
-        iUsers.map(async (u) => {
-          console.log(u.name, u.fcmToken);
-          u.fcmToken &&
-            u.fcmToken.split(" AND ").map(async (ft) => {
-              const message = {
-                to: ft,
-                notification: {
-                  title: `Hi ${u.name}`,
-                  body: "you may interested in this event",
-                },
-              };
+      if (!!event) {
+        await Promise.all(
+          iUsers.map(async (u) => {
+            u.fcmToken &&
+              u.fcmToken.split(" AND ").map(async (ft) => {
+                const message = {
+                  to: ft,
+                  notification: {
+                    title: `Hi ${u.name}`,
+                    body: "you may interested in this event",
+                  },
+                };
 
-              await fcm.send(message, (err: any, response: any) => {
-                if (err) {
-                  console.log("Something has gone wrong!" + err);
-                  console.log("Respponse:! " + response);
-                } else {
-                  // showToast("Successfully sent with response");
-                  console.log("Successfully sent with response: ", response);
-                }
+                await fcm.send(message, (err: any, response: any) => {
+                  if (err) {
+                    console.log("Something has gone wrong!" + err);
+                    console.log("Respponse:! " + response);
+                  } else {
+                    // showToast("Successfully sent with response");
+                    console.log("Successfully sent with response: ", response);
+                  }
+                });
               });
-            });
-        })
-      );
-
-      return !!event;
+          })
+        );
+        return true;
+      }
+      return false;
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
