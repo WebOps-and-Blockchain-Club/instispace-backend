@@ -61,7 +61,7 @@ class NetopResolver {
         throw new Error("Invalid tagIds");
 
       if (images)
-        createNetopsInput.photo = (await addAttachments([images], true)).join(
+        createNetopsInput.photo = (await addAttachments([...images], true)).join(
           " AND "
         );
       if (attachments)
@@ -154,7 +154,7 @@ class NetopResolver {
 
       if (netop && user.id === netop?.createdBy.id) {
         if (images)
-          editNetopsInput.photo = (await addAttachments([images], true)).join(
+          editNetopsInput.photo = (await addAttachments([...images], true)).join(
             " AND "
           );
         if (attachments)

@@ -477,7 +477,7 @@ type Mutation {
   createItem(Images: [Upload!], ItemInput: ItemInput!): Boolean!
 
   """create Query, Restrictions:{any authorized user}"""
-  createMyQuery(Attachments: [Upload!], Images: Upload, createQuerysInput: createQuerysInput!): Boolean!
+  createMyQuery(Attachments: [Upload!], Images: [Upload!], createQuerysInput: createQuerysInput!): Boolean!
 
   """create network and opportunity, Restrictions:{any authorized user}"""
   createNetop(Attachments: [Upload!], Image: [Upload!], NewNetopData: createNetopsInput!): Boolean!
@@ -492,6 +492,11 @@ type Mutation {
   Mutation to delete Hostel-Amenity, Restrictions : {Admin, Hostel-Secretory(related to hostel), HAS}
   """
   deleteAmenity(AmenityId: String!): Boolean!
+
+  """
+  hide Announcement Mutation, Restrictions : {Admin, Hostel Affair Secretory and Hostel secretory }
+  """
+  deleteAnnouncement(AnnouncementId: String!): Boolean!
 
   """
   Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETORY, HAS}
@@ -542,11 +547,6 @@ type Mutation {
 
   """report network and opportunity, Restrictions:{any authorized user}"""
   reportNetop(NetopId: String!, description: String!): Boolean!
-
-  """
-  hide Announcement Mutation, Restrictions : {Admin, Hostel Affair Secretory and Hostel secretory }
-  """
-  resolveAnnouncement(AnnouncementId: String!): Boolean!
 
   """
   Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}
@@ -687,9 +687,6 @@ enum Notification {
 }
 
 type Query {
-  """Query depricated"""
-  getAllAnnouncements(LastAnnouncementId: String!, search: String, take: Float!): getAllAnnouncementsOutput!
-
   """Query to fetch all feedbacks, Restrictions: {Admins}"""
   getAllFeedbacks(LastAnnouncementId: String!, take: Float!): [Feedback!]!
 
@@ -938,12 +935,6 @@ input editQuerysInput {
 input fileringConditions {
   isStared: Boolean
   tags: [String!]
-}
-
-""" Output type for getAllAnnouncements query"""
-type getAllAnnouncementsOutput {
-  announcementsList: [Announcement!]
-  total: Float!
 }
 
 """Output Type for getAnnouncements query"""
