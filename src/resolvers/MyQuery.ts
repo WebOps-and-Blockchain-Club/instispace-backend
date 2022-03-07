@@ -265,7 +265,7 @@ class MyQueryResolver {
 
         const creator = await User.findOneOrFail(myQuery.createdBy.id);
 
-        if (creator.notifyMyQuery) {
+        if (!!comment && creator.notifyMyQuery) {
           creator.fcmToken &&
             creator.fcmToken.split(" AND ").map(async (ft) => {
               const message = {

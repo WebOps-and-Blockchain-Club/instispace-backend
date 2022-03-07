@@ -93,30 +93,28 @@ class EventResolver {
       );
 
       if (!!event) {
-        await Promise.all(
-          iUsers.map(async (u) => {
-            u.fcmToken &&
-              u.fcmToken.split(" AND ").map(async (ft) => {
-                const message = {
-                  to: ft,
-                  notification: {
-                    title: `Hi ${u.name}`,
-                    body: "you may interested in this event",
-                  },
-                };
+        iUsers.map((u) => {
+          u.fcmToken &&
+            u.fcmToken.split(" AND ").map(async (ft) => {
+              const message = {
+                to: ft,
+                notification: {
+                  title: `Hi ${u.name}`,
+                  body: "you may interested in this event",
+                },
+              };
 
-                await fcm.send(message, (err: any, response: any) => {
-                  if (err) {
-                    console.log("Something has gone wrong!" + err);
-                    console.log("Respponse:! " + response);
-                  } else {
-                    // showToast("Successfully sent with response");
-                    console.log("Successfully sent with response: ", response);
-                  }
-                });
+              fcm.send(message, (err: any, response: any) => {
+                if (err) {
+                  console.log("Something has gone wrong!" + err);
+                  console.log("Respponse:! " + response);
+                } else {
+                  // showToast("Successfully sent with response");
+                  console.log("Successfully sent with response: ", response);
+                }
               });
-          })
-        );
+            });
+        });
         return true;
       }
       return false;
@@ -384,13 +382,12 @@ class EventResolver {
     description: "Get Number of likes of an Event",
   })
   async likeCount(@Root() { id }: Event) {
-    const event = await Event.findOne(id, { relations: ["likedBy"] });
-    const likeCount = event?.likedBy.length;
+    const event = await Event.findOneOrFail(id, { relations: ["likedBy"] });
+    const likeCount = event.likedBy.length;
     return likeCount;
   }
 
   @FieldResolver(() => [Tag], {
-    nullable: true,
     description: "Get the list of Tags added for an Event",
   })
   async tags(@Root() { id, tags }: Event) {

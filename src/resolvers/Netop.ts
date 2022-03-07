@@ -72,7 +72,6 @@ class NetopResolver {
       const netop = await Netop.create({
         ...createNetopsInput,
         createdBy: user,
-        isHidden: false,
         endTime: new Date(createNetopsInput.endTime),
         likeCount: 0,
         tags,
@@ -100,9 +99,8 @@ class NetopResolver {
             iUsers.push(u);
         })
       );
-
-      await Promise.all(
-        iUsers.map(async (u) => {
+      if (!!netop) {
+        iUsers.map((u) => {
           u.fcmToken &&
             u.fcmToken.split(" AND ").map(async (ft) => {
               console.log("inside netop create", u.name, ft);
@@ -115,7 +113,7 @@ class NetopResolver {
                 },
               };
 
-              await fcm.send(message, (err: any, response: any) => {
+              fcm.send(message, (err: any, response: any) => {
                 if (err) {
                   console.log("Something has gone wrong!" + err);
                   console.log("Respponse:! " + response);
@@ -125,8 +123,9 @@ class NetopResolver {
                 }
               });
             });
-        })
-      );
+        });
+        return true;
+      }
 
       return !!netop;
     } catch (e) {
@@ -319,27 +318,29 @@ class NetopResolver {
 
       const creator = netop.createdBy;
 
-      creator.fcmToken.split(" AND ").map((ft) => {
-        const message = {
-          to: ft,
-          notification: {
-            title: `Hi ${creator.name}`,
-            body: "your netop got reported",
-          },
-        };
+      if (!!report && affected) {
+        creator.fcmToken.split(" AND ").map((ft) => {
+          const message = {
+            to: ft,
+            notification: {
+              title: `Hi ${creator.name}`,
+              body: "your netop got reported",
+            },
+          };
 
-        fcm.send(message, (err: any, response: any) => {
-          if (err) {
-            console.log("Something has gone wrong!" + err);
-            console.log("Respponse:! " + response);
-          } else {
-            // showToast("Successfully sent with response");
-            console.log("Successfully sent with response: ", response);
-          }
+          fcm.send(message, (err: any, response: any) => {
+            if (err) {
+              console.log("Something has gone wrong!" + err);
+              console.log("Respponse:! " + response);
+            } else {
+              // showToast("Successfully sent with response");
+              console.log("Successfully sent with response: ", response);
+            }
+          });
         });
-      });
-
-      return !!report && affected;
+        return true;
+      }
+      return false;
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
@@ -377,7 +378,7 @@ class NetopResolver {
 
         const creator = netop.createdBy;
 
-        if (creator.notifyNetopComment) {
+        if (!!comment && creator.notifyNetopComment) {
           creator.fcmToken &&
             creator.fcmToken.split(" AND ").map((ft) => {
               const message = {
