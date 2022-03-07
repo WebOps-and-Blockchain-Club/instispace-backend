@@ -29,7 +29,6 @@ class Amenity extends BaseEntity {
 
   @ManyToOne((_type) => Hostel, (hostel) => hostel.amenities, { cascade: true })
   @Field((_type) => Hostel, {
-    nullable: true,
     description: "Hostel to which amenity is related",
   })
   hostel: Hostel;

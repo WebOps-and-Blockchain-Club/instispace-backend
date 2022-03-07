@@ -39,6 +39,7 @@ class Hostel extends BaseEntity {
     }
   )
   @Field((_type) => [Announcement], {
+    nullable: true,
     description:
       "Hostel's Announcement, they will be displayed on the notice board",
   })
@@ -49,7 +50,7 @@ class Hostel extends BaseEntity {
   })
   @Field((_type) => [HostelContact], {
     nullable: true,
-    description: "Contacs related to a Hostel",
+    description: "Contacts related to a Hostel",
   })
   contacts: HostelContact[];
 
