@@ -34,15 +34,10 @@ class Tag extends BaseEntity {
   })
   users: [User];
 
-  @ManyToMany(() => Netop, (Netop) => Netop.tags, {
-    cascade: true,
-    nullable: true,
-  })
+  @ManyToMany(() => Netop, (Netop) => Netop.tags)
   netops: Netop[];
 
-  @ManyToMany(() => Event, (event) => event.tags, {
-    nullable: true,
-  })
+  @ManyToMany(() => Event, (event) => event.tags)
   event: Event[];
 }
 
