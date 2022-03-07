@@ -15,7 +15,7 @@ import {
   Resolver,
   Root,
 } from "type-graphql";
-import MyContext from "src/utils/context";
+import MyContext from "../utils/context";
 import { UserRole } from "../utils";
 import addAttachments from "../utils/uploads";
 import { GraphQLUpload, Upload } from "graphql-upload";
