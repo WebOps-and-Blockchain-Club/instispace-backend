@@ -60,7 +60,7 @@ class AnnouncementResolver {
       announcement.user = user;
       announcement.endTime = new Date(announcementInput.endTime);
       if (images) {
-        announcementInput.images = (await addAttachments(images, true)).join(
+        announcementInput.images = (await addAttachments([...images], true)).join(
           " AND "
         );
         announcement.images = announcementInput.images;
@@ -205,7 +205,7 @@ class AnnouncementResolver {
           ))
       ) {
         if (images) {
-          announcementInput.images = (await addAttachments(images, true)).join(
+          announcementInput.images = (await addAttachments([...images], true)).join(
             " AND "
           );
           announcement.images = announcementInput.images;

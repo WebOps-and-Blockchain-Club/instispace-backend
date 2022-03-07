@@ -172,7 +172,7 @@ class LostAndFoundResolver {
     try {
       //stroring the image
       if (images)
-        editItemInput.images = (await addAttachments([images], true)).join(
+        editItemInput.images = (await addAttachments([...images], true)).join(
           " AND "
         );
 

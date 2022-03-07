@@ -32,13 +32,13 @@ class MyQueryResolver {
   async createMyQuery(
     @Arg("createQuerysInput") createMyQuerysInput: createQuerysInput,
     @Ctx() { user }: MyContext,
-    @Arg("Images", () => GraphQLUpload, { nullable: true }) images?: Upload[],
+    @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[],
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
   ): Promise<boolean> {
     try {
       if (images)
-        createMyQuerysInput.photo = (await addAttachments([images], true)).join(
+        createMyQuerysInput.photo = (await addAttachments([...images], true)).join(
           " AND "
         );
 
@@ -86,7 +86,7 @@ class MyQueryResolver {
           ))
       ) {
         if (images)
-          editMyQuerysInput.photo = (await addAttachments([images], true)).join(
+          editMyQuerysInput.photo = (await addAttachments([...images], true)).join(
             " AND "
           );
         if (attachments)
