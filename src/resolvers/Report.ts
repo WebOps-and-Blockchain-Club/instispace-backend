@@ -11,7 +11,6 @@ class ReportResolver {
   async getReports() {
     let reports = await Report.find({
       where: { isResolved: false },
-      relations: ["netop", "createdBy", "query"],
       order: { createdAt: "DESC" },
     });
     return reports;
@@ -21,24 +20,24 @@ class ReportResolver {
   @Authorized()
   async createdBy(@Root() { id, createdBy }: Report) {
     if (createdBy) return createdBy;
-    const report = await Report.findOne(id, { relations: ["createdBy"] });
-    return report?.createdBy;
+    const report = await Report.findOneOrFail(id, { relations: ["createdBy"] });
+    return report.createdBy;
   }
 
   @FieldResolver(() => Netop, { nullable: true })
   @Authorized()
   async netop(@Root() { id, netop }: Report) {
     if (netop) return netop;
-    const report = await Report.findOne(id, { relations: ["netop"] });
-    return report?.netop;
+    const report = await Report.findOneOrFail(id, { relations: ["netop"] });
+    return report.netop;
   }
 
   @FieldResolver(() => MyQuery, { nullable: true })
   @Authorized()
   async query(@Root() { id, query }: Report) {
     if (query) return query;
-    const report = await Report.findOne(id, { relations: ["query"] });
-    return report?.query;
+    const report = await Report.findOneOrFail(id, { relations: ["query"] });
+    return report.query;
   }
 }
 

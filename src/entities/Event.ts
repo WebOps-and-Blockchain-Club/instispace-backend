@@ -63,23 +63,20 @@ class Event extends BaseEntity {
   @Column({ nullable: true })
   linkToAction: string;
 
-  @ManyToMany(() => User, (user) => user.staredEvent, {
-    nullable: true,
-  })
+  @ManyToMany(() => User, (user) => user.staredEvent)
   @JoinTable()
   staredBy: User[];
 
-  @ManyToMany((_type) => Tag, (tag) => tag.event, {
-    nullable: true,
-    cascade: true,
-  })
+  @ManyToMany((_type) => Tag, (tag) => tag.event)
   @JoinTable()
   tags: Tag[];
 
-  @ManyToOne(() => User, (user) => user.event)
+  @ManyToOne(() => User, (user) => user.event, {
+    cascade: true,
+  })
   createdBy: User;
 
-  @ManyToMany(() => User, (user) => user.likedEvent, { nullable: true })
+  @ManyToMany(() => User, (user) => user.likedEvent)
   @JoinTable()
   likedBy: User[];
 }
