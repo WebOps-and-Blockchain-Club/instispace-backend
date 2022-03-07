@@ -53,7 +53,9 @@ class Announcement extends BaseEntity {
   @Field((_type) => User, { description: "User who created the announcement" })
   user: User;
 
-  @ManyToMany((_type) => Hostel, (hostels) => hostels.announcements, {cascade: true})
+  @ManyToMany((_type) => Hostel, (hostels) => hostels.announcements, {
+    cascade: true,
+  })
   @JoinTable()
   @Field((_type) => [Hostel], {
     description: "Hostels on which the announcement needs to be diplayed",
