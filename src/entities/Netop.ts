@@ -75,24 +75,26 @@ class Netop extends BaseEntity {
   @Column({ nullable: true })
   linkToAction: string;
 
-  @OneToMany(() => Comment, (comment) => comment.netop, { nullable: true })
+  @OneToMany(() => Comment, (comment) => comment.netop)
   comments: Comment[];
 
-  @OneToMany(() => Report, (report) => report.netop, { nullable: true })
+  @OneToMany(() => Report, (report) => report.netop)
   reports: Report[];
 
-  @ManyToMany(() => User, (user) => user.staredNetop, { nullable: true })
+  @ManyToMany(() => User, (user) => user.staredNetop)
   @JoinTable()
   staredBy: User[];
 
-  @ManyToMany((_type) => Tag, (tag) => tag.netops, { nullable: true })
+  @ManyToMany((_type) => Tag, (tag) => tag.netops)
   @JoinTable()
   tags: Tag[];
 
-  @ManyToOne(() => User, (user) => user.networkingAndOpportunities)
+  @ManyToOne(() => User, (user) => user.networkingAndOpportunities, {
+    cascade: true,
+  })
   createdBy: User;
 
-  @ManyToMany(() => User, (user) => user.likedNetop, { nullable: true })
+  @ManyToMany(() => User, (user) => user.likedNetop)
   @JoinTable()
   likedBy: User[];
 }

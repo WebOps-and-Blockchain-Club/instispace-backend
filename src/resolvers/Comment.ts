@@ -9,24 +9,27 @@ class CommentResolver {
   @FieldResolver(() => User)
   @Authorized()
   async createdBy(@Root() { id }: Comment) {
-    const comment = await Comment.findOne(id, { relations: ["createdBy"] });
-    return comment?.createdBy;
+    const comment = await Comment.findOneOrFail(id, {
+      relations: ["createdBy"],
+      order: { createdAt: "DESC" },
+    });
+    return comment.createdBy;
   }
 
   @FieldResolver(() => Netop)
   @Authorized()
   async netop(@Root() { id, netop }: Comment) {
     if (netop) return netop;
-    const comment = await Comment.findOne(id, { relations: ["netop"] });
-    return comment?.netop;
+    const comment = await Comment.findOneOrFail(id, { relations: ["netop"] });
+    return comment.netop;
   }
 
   @FieldResolver(() => MyQuery)
   @Authorized()
   async query(@Root() { id, query }: Comment) {
     if (query) return query;
-    const comment = await Comment.findOne(id, { relations: ["query"] });
-    return comment?.query;
+    const comment = await Comment.findOneOrFail(id, { relations: ["query"] });
+    return comment.query;
   }
 }
 

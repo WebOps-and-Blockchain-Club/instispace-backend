@@ -36,7 +36,7 @@ class Comment extends BaseEntity {
   images: string;
   
   @CreateDateColumn({ type: "timestamptz" })
-  @Field()
+  @Field(() => Date)
   createdAt: Date;
 }
 
