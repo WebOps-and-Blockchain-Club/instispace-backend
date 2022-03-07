@@ -72,8 +72,8 @@ class AnnouncementResolver {
 
       const announcementCreated = await announcement.save();
 
-      await Promise.all(
-        iUsers.map(async (u) => {
+      if (!!announcementCreated) {
+        iUsers.map((u) => {
           const message = {
             to: u.fcmToken,
             notification: {
@@ -82,7 +82,7 @@ class AnnouncementResolver {
             },
           };
 
-          await fcm.send(message, (err: any, response: any) => {
+          fcm.send(message, (err: any, response: any) => {
             if (err) {
               console.log("Something has gone wrong!" + err);
               console.log("Respponse:! " + response);
@@ -91,8 +91,9 @@ class AnnouncementResolver {
               console.log("Successfully sent with response: ", response);
             }
           });
-        })
-      );
+        });
+        return true;
+      }
 
       return !!announcementCreated;
     } catch (e) {
