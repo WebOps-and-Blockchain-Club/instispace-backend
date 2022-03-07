@@ -150,9 +150,6 @@ type Contact {
 
 """Input For Create Account Mutation"""
 input CreateAccountInput {
-  """Super-User's name"""
-  name: String!
-
   """Super-User's role"""
   role: String!
 
@@ -600,14 +597,14 @@ type Mutation {
   updateHostelContact(ContactId: String!, HostelId: String, UpdateContactInput: EditContactInput!): Boolean!
 
   """
-  Mutation to change Super-Users passwords, Restrictions : {Leads, Hostel Affair Secretory and Hostel Secretory}
-  """
-  updatePassword(NewPass: NewPass!): Boolean!
-
-  """
   Mutation to change role of an ldap User to Moderator, Restrictions : {Admins and Leads}
   """
   updateRole(ModeratorInput: ModeratorInput!): Boolean!
+
+  """
+  Mutation to change Super-Users passwords, Restrictions : {Leads, Hostel Affair Secretory and Hostel Secretory}
+  """
+  updateSuperUser(UpdateSuperUserInput: UpdateSuperUserInput!): Boolean!
 
   """
   Mutation to Update/Add User's name, interest, password, Restrictions : {User}
@@ -681,12 +678,6 @@ type Netop {
   """get all the tags associated"""
   tags: [Tag!]
   title: String!
-}
-
-"""Input for Change-Password Mutation"""
-input NewPass {
-  """New Password"""
-  newPassword: String!
 }
 
 enum Notification {
@@ -809,6 +800,15 @@ input TagInput {
 
   """Tag's Title"""
   title: String!
+}
+
+"""Input for Change-Password Mutation"""
+input UpdateSuperUserInput {
+  """New Password"""
+  name: String!
+
+  """New Password"""
+  newPassword: String!
 }
 
 """The `Upload` scalar type represents a file upload."""
