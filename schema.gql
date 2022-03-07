@@ -17,7 +17,7 @@ type Amenity {
   description: String!
 
   """Hostel to which amenity is related"""
-  hostel: Hostel
+  hostel: Hostel!
 
   """Auto generated uuid for an Amenity"""
   id: String!
@@ -136,7 +136,7 @@ type Contact {
   contact: String!
 
   """relation which stores the contact-hostel"""
-  hostel: Hostel
+  hostel: Hostel!
 
   """Auto generated uuid"""
   id: String!
@@ -342,9 +342,9 @@ type Hostel {
   amenities: [Amenity!]
 
   """Hostel's Announcement, they will be displayed on the notice board"""
-  announcements: [Announcement!]!
+  announcements: [Announcement!]
 
-  """Contacs related to a Hostel"""
+  """Contacts related to a Hostel"""
   contacts: [Contact!]
 
   """Unique uuid generated for each Hostel"""

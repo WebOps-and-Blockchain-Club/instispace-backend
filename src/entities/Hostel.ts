@@ -35,7 +35,6 @@ class Hostel extends BaseEntity {
     (announcements) => announcements.hostels,
     {
       nullable: true,
-      cascade: true,
     }
   )
   @Field((_type) => [Announcement], {
