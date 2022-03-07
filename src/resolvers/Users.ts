@@ -582,7 +582,6 @@ class UsersResolver {
 
   @FieldResolver(() => homeOutput, { nullable: true })
   async getHome(@Root() { id, role }: User) {
-    console.log({ id, role });
     try {
       if (
         role == UserRole.ADMIN ||
@@ -600,13 +599,10 @@ class UsersResolver {
         let announcements = user.announcements;
         let events = user.event;
 
-        // console.log(netops, announcements, events);
-
         let nList: Netop[] = [];
         const eList: Event[] = [];
         const aList: Announcement[] = [];
 
-        // endtime ishidden createdAt
         await Promise.all(
           netops.map(async (netop) => {
             netop = await Netop.findOneOrFail(netop.id);
@@ -641,7 +637,23 @@ class UsersResolver {
           })
         );
 
-        return { announcements: aList, netops: nList, events: eList };
+        aList
+          .sort((a, b) =>
+            a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+          )
+          .splice(5);
+        nList.sort((a, b) =>
+          a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+        );
+        eList.sort((a, b) =>
+          a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+        );
+
+        return {
+          announcements: aList,
+          netops: nList,
+          events: eList,
+        };
       } else {
         const user = await User.findOneOrFail({
           where: { id },
@@ -657,12 +669,13 @@ class UsersResolver {
         const eventObject = new EventResolver();
 
         const filters: fileringConditions = { tags: tagIds!, isStared: false };
-        const netops = (await netopObject.getNetops(myCon, "", 25, filters))
+        // take = -1 means return all
+        const netops = (await netopObject.getNetops(myCon, "", 15, filters))
           .netopList;
-        const events = (await eventObject.getEvents(myCon, "", 25, filters))
+        const events = (await eventObject.getEvents(myCon, "", 15, filters))
           .list;
         const announcements = (
-          await announcementObject.getAnnouncements("", 25, user!.hostel!.id)
+          await announcementObject.getAnnouncements("", 5, user.hostel!.id)
         ).announcementsList;
         return { netops, announcements, events };
       }

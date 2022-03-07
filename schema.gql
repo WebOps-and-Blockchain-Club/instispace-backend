@@ -299,7 +299,7 @@ type Event {
   photo: String
 
   """Get the list of Tags added for an Event"""
-  tags: [Tag!]
+  tags: [Tag!]!
   time: DateTime!
   title: String!
 }

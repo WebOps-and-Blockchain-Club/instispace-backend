@@ -56,7 +56,7 @@ class LostAndFoundResolver {
       await item.save();
 
       if (item.category == Category.FOUND) {
-        const iUsers = await User.find({});
+        const iUsers = await User.find({ where: { notifyFound: true } });
 
         iUsers.map(async (u) => {
           u.fcmToken &&
