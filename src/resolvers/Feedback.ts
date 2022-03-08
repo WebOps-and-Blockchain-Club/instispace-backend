@@ -10,7 +10,7 @@ import {
   Root,
 } from "type-graphql";
 import MyContext from "../utils/context";
-import { UserRole } from "../utils";
+import { sheetLink, UserRole } from "../utils";
 import User from "../entities/User";
 import AddFeedbackInput from "../types/inputs/feedback";
 import { writeSheet } from "../utils/googleSheets";
@@ -38,6 +38,14 @@ class FeedbackResolver {
       feedbackInput.ans3
     );
     return !!feedback;
+  }
+
+  @Query(() => String, {
+    description: "Query to return the spread-sheet link, Restrictions: {ADMIN}",
+  })
+  @Authorized([UserRole.ADMIN])
+  async getSheetLink() {
+    return sheetLink;
   }
 
   @Query(() => [Feedback], {
