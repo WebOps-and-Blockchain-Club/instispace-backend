@@ -397,7 +397,6 @@ class UsersResolver {
     @Arg("UpdateSuperUserInput") { newPassword, name }: UpdateSuperUserInput
   ) {
     try {
-      if (user.isNewUser === false) throw new Error("Already Signed");
       user.name = name;
       user.isNewUser = false;
       user.password = bcrypt.hashSync(newPassword, salt);
@@ -458,7 +457,7 @@ class UsersResolver {
     description:
       "Mutation to Update/Add User's name, interest, password, Restrictions : {User}",
   })
-  @Authorized([UserRole.USER])
+  @Authorized([UserRole.MODERATOR, UserRole.USER])
   async updateUser(
     @Ctx() { user }: MyContext,
     @Arg("UserInput") userInput: UserInput
