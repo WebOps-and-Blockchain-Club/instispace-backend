@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken";
 import authChecker from "./utils/authcheker";
 import express from "express";
 import cors from "cors";
-//subscrib
+//subscribe
 import { createServer } from "http";
 
 import { graphqlUploadExpress } from "graphql-upload";

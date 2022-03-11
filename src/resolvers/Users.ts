@@ -94,7 +94,7 @@ class UsersResolver {
           newUser.roll = roll;
           newUser.role = UserRole.USER;
           newUser.isNewUser = true;
-          if (newUser.fcmToken) {
+          if (newUser.fcmToken && newUser.fcmToken.length) {
             newUser.fcmToken += " AND " + fcmToken;
           } else {
             newUser.fcmToken = fcmToken;
@@ -105,7 +105,7 @@ class UsersResolver {
         }
         //If user exists
         else {
-          if (user.fcmToken) {
+          if (user.fcmToken && user.fcmToken.length) {
             user.fcmToken += " AND " + fcmToken;
           } else {
             user.fcmToken = fcmToken;
@@ -125,12 +125,15 @@ class UsersResolver {
       else {
         if (process.env.NODE_ENV === "development") {
           const admins = await User.find({ where: { roll } });
+          console.log("I M here");
+
           if (admins.length === 0) {
+            console.log("I M here inside if");
             const admin = new User();
             admin.roll = adminEmail;
             admin.role = UserRole.ADMIN;
             admin.isNewUser = false;
-            if (admin.fcmToken) {
+            if (admin.fcmToken && admin.fcmToken.length) {
               admin.fcmToken += " AND " + fcmToken;
             } else {
               admin.fcmToken = fcmToken;
@@ -139,13 +142,27 @@ class UsersResolver {
             await admin.save();
           }
         }
+        console.log("I M here not in development");
         const user = await User.findOne({ where: { roll } });
         if (!user) throw new Error("Email Not Registered!");
         else {
           var passwordIsValid = await bcrypt.compare(pass, user.password);
+          console.log("myhostel in else");
+
           if (passwordIsValid === true) {
             const token = jwt.sign(user.id, process.env.JWT_SECRET!);
-            return { isNewUser: user.isNewUser, role: user.role, token };
+            if (user.fcmToken && user.fcmToken.length) {
+              user.fcmToken += " AND " + fcmToken;
+            } else {
+              user.fcmToken = fcmToken;
+            }
+            user.save();
+            return {
+              isNewUser: user.isNewUser,
+              role: user.role,
+              token,
+              fcmToken: user.fcmToken,
+            };
           } else {
             throw new Error("Invalid Credentials");
           }
@@ -209,7 +226,7 @@ class UsersResolver {
   @Mutation(() => Boolean)
   @Authorized()
   async logout(@Ctx() { user }: MyContext, @Arg("fcmToken") fcmToken: string) {
-    console.log("inside logout for", user.name, fcmToken);
+    console.log("inside logout for", user.name, user.fcmToken, fcmToken);
     const u = await User.findOneOrFail(user.id);
     let fcmTokenArr = u.fcmToken.split(" AND ");
     const index = fcmTokenArr.indexOf(fcmToken);

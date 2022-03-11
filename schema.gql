@@ -741,6 +741,9 @@ type Query {
   getNetops(FileringCondition: fileringConditions, LastNetopId: String!, OrderByLikes: Boolean, search: String, take: Float!): getNetopOutput!
   getReports: [Report!]
 
+  """Query to return the spread-sheet link, Restrictions: {ADMIN}"""
+  getSheetLink: String!
+
   """
   Query to fetch Super-Users, Restrictions : {Admins, Leads, Moderators, Hostel Affair Secretory and Hostel Secretory}
   """
