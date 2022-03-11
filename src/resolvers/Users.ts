@@ -455,7 +455,7 @@ class UsersResolver {
 
   @Mutation(() => Boolean, {
     description:
-      "Mutation to Update/Add User's name, interest, password, Restrictions : {User}",
+      "Mutation to Update/Add User's name, interest, password, Restrictions : {User, Moderator}",
   })
   @Authorized([UserRole.MODERATOR, UserRole.USER])
   async updateUser(
