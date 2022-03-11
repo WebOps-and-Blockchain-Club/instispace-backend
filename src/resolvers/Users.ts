@@ -125,10 +125,8 @@ class UsersResolver {
       else {
         if (process.env.NODE_ENV === "development") {
           const admins = await User.find({ where: { roll } });
-          console.log("I M here");
 
           if (admins.length === 0) {
-            console.log("I M here inside if");
             const admin = new User();
             admin.roll = adminEmail;
             admin.role = UserRole.ADMIN;
@@ -142,12 +140,10 @@ class UsersResolver {
             await admin.save();
           }
         }
-        console.log("I M here not in development");
         const user = await User.findOne({ where: { roll } });
         if (!user) throw new Error("Email Not Registered!");
         else {
           var passwordIsValid = await bcrypt.compare(pass, user.password);
-          console.log("myhostel in else");
 
           if (passwordIsValid === true) {
             const token = jwt.sign(user.id, process.env.JWT_SECRET!);
