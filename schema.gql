@@ -607,7 +607,7 @@ type Mutation {
   updateSuperUser(UpdateSuperUserInput: UpdateSuperUserInput!): Boolean!
 
   """
-  Mutation to Update/Add User's name, interest, password, Restrictions : {User}
+  Mutation to Update/Add User's name, interest, password, Restrictions : {User, Moderator}
   """
   updateUser(UserInput: UserInput!): Boolean!
 }

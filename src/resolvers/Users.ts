@@ -630,7 +630,6 @@ class UsersResolver {
         await Promise.all(
           events.map(async (event) => {
             event = await Event.findOneOrFail(event.id);
-            console.log(event);
             let d = new Date();
             if (!event.isHidden && new Date(event.time).getDate() > d.getDate())
               eList.push(event);
