@@ -16,6 +16,25 @@ export enum Category {
   FOUND = "FOUND",
 }
 
+export enum Department {
+  BT = "BT",
+  CH = "CH",
+  MA = "MA",
+  NA = "NA",
+  CS = "CS",
+  EE = "EE",
+  ME = "ME",
+  CE = "CE",
+  ED = "ED",
+  EP = "EP",
+  AE = "AE",
+  MM = "MM",
+  HS = "HS",
+  PH = "PH",
+  OE = "OE",
+  ALL = "ALL",
+}
+
 export enum Notification {
   FORALL = "FORALL",
   FOLLOWED_TAGS = "FOLLOWED_TAGS",
@@ -26,6 +45,11 @@ export enum ComplaintCategory {
   MESS_COMPLAINTS = "MESS_COMPLAINTS",
   GENERAL_COMPLAINTS = "GENERAL_COMPLAINTS",
   HOSTEL_COMPLAINTS = "HOSTEL_COMPLAINTS",
+}
+
+export enum PollType {
+  SINGLE = "SINGLE_CORRECT",
+  MULTI = "MULTI_CORRECT",
 }
 
 export const emailExpresion =
@@ -39,7 +63,8 @@ export const accountPassword = "123456";
 
 export const smail = "@smail.iitm.ac.in";
 
-export const sheetLink = "https://docs.google.com/spreadsheets/d/1ECJ1V1KoJB7W3jNyrOD_F-46tKl_ZNPGRPNqMqZkNsA/edit?usp=sharing";
+export const sheetLink =
+  "https://docs.google.com/spreadsheets/d/1ECJ1V1KoJB7W3jNyrOD_F-46tKl_ZNPGRPNqMqZkNsA/edit?usp=sharing";
 
 export var salt = bcryptjs.genSaltSync(Number(process.env.ITERATIONS!));
 
@@ -54,8 +79,19 @@ export function autoGenPass(length: number) {
   return result;
 }
 
+export function userDept(roll: string) {
+  const dept = roll.slice(0, 2).toUpperCase();
+  return dept;
+}
+
+export function userBatch(roll: string) {
+  return roll.slice(2, 4);
+}
+
 //miliseconds per month = 2629800000
 export const miliSecPerMonth = 2629800000;
+
+export const miliSecPerHour = 3600000;
 
 export const usersDevList = [
   {
@@ -79,7 +115,7 @@ export const usersDevList = [
     pass: "123456",
   },
   {
-    roll: "EE20B114",
+    roll: "EE20B144",
     pass: "123456",
   },
   {

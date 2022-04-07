@@ -115,9 +115,11 @@ class LostAndFoundResolver {
             });
           })
         );
-        const itemStr = itemsList.map((obj) => JSON.stringify(obj));
-        const uniqueItemStr = new Set(itemStr);
-        itemsList = Array.from(uniqueItemStr).map((str) => JSON.parse(str));
+        let uniqueItems: Item[] = [];
+        itemsList.forEach((item) => {
+          if (!uniqueItems.includes(item)) uniqueItems.push(item);
+        });
+        itemsList = uniqueItems;
       } else {
         itemsList = await Item.find({
           where: { category: In(categories), isResolved: false },

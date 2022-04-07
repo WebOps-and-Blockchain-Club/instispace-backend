@@ -13,6 +13,8 @@ import Event from "./Event";
 import HostelContact from "./Contact";
 import Amenity from "./Amenity";
 import Feedback from "./Feedback";
+import Poll from "./Polls/Poll";
+import PollOption from "./Polls/PollOption";
 
 export default [
   User,
@@ -30,4 +32,6 @@ export default [
   HostelContact,
   Amenity,
   Feedback,
+  Poll,
+  PollOption,
 ];

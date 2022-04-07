@@ -53,6 +53,8 @@ import fcm from "../utils/fcmTokens";
 import Netop from "../entities/Netop";
 import Event from "../entities/Event";
 import Announcement from "../entities/Announcement";
+import Poll from "../entities/Polls/Poll";
+import PollOption from "./Poll/PollOption";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -720,6 +722,48 @@ class UsersResolver {
         relations: ["feedbacks"],
       });
       return user?.feedbacks;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [Poll])
+  async pollsCreated({ id, pollsCreated }: User) {
+    try {
+      if (pollsCreated) return pollsCreated;
+      const user = await User.findOne({
+        where: { id: id },
+        relations: ["pollsCreated"],
+      });
+      return user?.pollsCreated;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [Poll])
+  async polls({ id, polls }: User) {
+    try {
+      if (polls) return polls;
+      const user = await User.findOne({
+        where: { id: id },
+        relations: ["polls"],
+      });
+      return user?.polls;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [PollOption])
+  async pollOptions({ id, pollOptions }: User) {
+    try {
+      if (pollOptions) return pollOptions;
+      const user = await User.findOne({
+        where: { id: id },
+        relations: ["pollOptions"],
+      });
+      return user?.pollOptions;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

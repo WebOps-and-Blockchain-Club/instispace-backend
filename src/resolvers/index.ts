@@ -12,6 +12,8 @@ import EventResolver from "./Event";
 import FeedbackResolver from "./Feedback";
 import AmenitiesResolver from "./Amenities";
 import ContactResolver from "./Contacts";
+import PollsResolver from "./Poll/Poll";
+import PollOptionResolver from "./Poll/PollOption";
 
 export default [
   UsersResolver,
@@ -28,4 +30,6 @@ export default [
   FeedbackResolver,
   AmenitiesResolver,
   ContactResolver,
+  PollsResolver,
+  PollOptionResolver,
 ] as const;

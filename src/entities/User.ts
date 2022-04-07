@@ -8,7 +8,6 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
-  JoinTable,
 } from "typeorm";
 import Netop from "./Netop";
 import Event from "./Event";
@@ -22,6 +21,8 @@ import Query from "./MyQuery";
 import Complaint from "./Complaint";
 import { Notification } from "../utils/index";
 import Feedback from "./Feedback";
+import Poll from "./Polls/Poll";
+import PollOption from "./Polls/PollOption";
 
 @Entity("User")
 @ObjectType("User", { description: "User Entity" })
@@ -147,7 +148,6 @@ class User extends BaseEntity {
     (complaintsUpvoted) => complaintsUpvoted.user,
     { nullable: true }
   )
-  @JoinTable()
   @Field((_type) => [Complaint], { nullable: true })
   complaintsUpvoted?: Complaint[];
 
@@ -159,6 +159,28 @@ class User extends BaseEntity {
     description: "feedbacks of the user",
   })
   feedbacks?: Feedback[];
+
+  @OneToMany((_type) => Poll, (pollsCreated) => pollsCreated.createdBy, {
+    nullable: true,
+  })
+  @Field((_type) => [Poll], {
+    nullable: true,
+    description: "User who Creates the poll",
+  })
+  pollsCreated: Poll[];
+
+  @ManyToMany((_type) => Poll, (polls) => polls.answeredBy, { nullable: true })
+  @Field((_type) => [Poll], { nullable: true, description: "" })
+  polls?: Poll[];
+
+  @ManyToMany((_type) => PollOption, (pollOptions) => pollOptions.upvotedBy, {
+    nullable: true,
+  })
+  @Field((_type) => [PollOption], {
+    nullable: true,
+    description: "Poll options which are upvoted by the user",
+  })
+  pollOptions?: PollOption[];
 }
 
 export default User;

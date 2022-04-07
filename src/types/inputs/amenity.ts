@@ -1,6 +1,6 @@
 import { Field, InputType } from "type-graphql";
 
-@InputType()
+@InputType({ description: "Input for create Amenity" })
 class CreateAmenityInput {
   @Field({ description: "Amenity's name" })
   name: string;
@@ -9,7 +9,7 @@ class CreateAmenityInput {
   description: string;
 }
 
-@InputType()
+@InputType({ description: "Input for Edit Amenity" })
 class EditAmenityInput {
   @Field({ nullable: true, description: "name" })
   name: string;

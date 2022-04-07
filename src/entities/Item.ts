@@ -32,7 +32,9 @@ class Item extends BaseEntity {
   location: string;
 
   @Column({ type: "timestamptz" })
-  @Field({ description: "Time at which item is lost or found" })
+  @Field(() => Date, {
+    description: "Time at which item is lost or found",
+  })
   time: Date;
 
   @Column({ nullable: true })
@@ -40,6 +42,9 @@ class Item extends BaseEntity {
   images?: string;
 
   @CreateDateColumn({ type: "timestamptz" })
+  @Field(() => Date, {
+    description: "Date at which writer sent the item request",
+  })
   createdAt: Date;
 
   @Column({ nullable: true })
@@ -56,10 +61,6 @@ class Item extends BaseEntity {
       "Item's Status, describes whether the issue is resolved or not",
   })
   isResolved: boolean;
-
-  //   @Column((_type) => Boolean)
-  //   @Field((_type) => Boolean, {description : "describes whether the issue is resolved"})
-  //   isResolved: boolean;
 }
 
 export default Item;

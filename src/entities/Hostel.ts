@@ -10,6 +10,7 @@ import {
 import Amenity from "./Amenity";
 import Announcement from "./Announcement";
 import HostelContact from "./Contact";
+import Poll from "./Polls/Poll";
 import User from "./User";
 
 @Entity("Hostel")
@@ -61,6 +62,13 @@ class Hostel extends BaseEntity {
     description: "amenities for hostel",
   })
   amenities: Amenity[];
+
+  @OneToMany((_type) => Poll, (polls) => polls.hostel, { nullable: true })
+  @Field((_type) => [Poll], {
+    nullable: true,
+    description: "Polls realted to the hostel",
+  })
+  polls: Poll[];
 }
 
 export default Hostel;
