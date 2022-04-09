@@ -300,7 +300,7 @@ class EventResolver {
       if (search) {
         await Promise.all(
           ["title"].map(async (field: string) => {
-            const filter = { [field]: ILike(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`), isHidden: false };
             const eventF = await Event.find({
               where: filter,
               relations: ["tags", "likedBy", "staredBy"],

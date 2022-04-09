@@ -115,8 +115,8 @@ class MyQueryResolver {
     @Ctx() { user }: MyContext
   ) {
     try {
-      const myQuery = await MyQuery.findOne(myQueryId);
-      if (myQuery && user.id === myQuery?.createdBy.id) {
+      const myQuery = await MyQuery.findOne(myQueryId,{relations: ["createdBy"]});
+      if (myQuery && user.id === myQuery?.createdBy?.id) {
         const { affected } = await MyQuery.update(myQueryId, {
           isHidden: true,
         });
@@ -414,7 +414,7 @@ class MyQueryResolver {
       if (search) {
         await Promise.all(
           ["title"].map(async (field: string) => {
-            const filter = { [field]: ILike(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`), isHidden: false };
             const queryF = await MyQuery.find({
               where: filter,
               relations: ["likedBy"],
