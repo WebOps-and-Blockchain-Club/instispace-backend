@@ -75,7 +75,7 @@ class MyQueryResolver {
   ) {
     try {
       const myQuery = await MyQuery.findOne(myQueryId, {
-        relations: ["tags", "createdBy"],
+        relations: ["createdBy"],
       });
 
       if (
