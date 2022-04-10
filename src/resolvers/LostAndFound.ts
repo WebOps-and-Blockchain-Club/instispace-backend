@@ -105,7 +105,10 @@ class LostAndFoundResolver {
       if (search) {
         await Promise.all(
           ["name", "location"].map(async (field: string) => {
-            const filter = { [field]: ILike(`%${search}%`) };
+            const filter = {
+              [field]: ILike(`%${search}%`),
+              category: In(categories),
+            };
             const itemF = await Item.find({
               where: filter,
               order: { createdAt: "DESC" },
