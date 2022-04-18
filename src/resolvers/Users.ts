@@ -53,6 +53,7 @@ import fcm from "../utils/fcmTokens";
 import Netop from "../entities/Netop";
 import Event from "../entities/Event";
 import Announcement from "../entities/Announcement";
+import { LDAPAuth } from "../utils/LDAPAuth";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -83,7 +84,8 @@ class UsersResolver {
           if (!ldapUser) throw new Error("Invalid Credentials");
         } else {
           //Check with LDAP
-          //TODO: Add function to check the credentials with LDAP
+          const ldapUser = await LDAPAuth(roll, pass);
+          if (!ldapUser) throw new Error("Invalid Credentials");
         }
 
         /************ Check the user details ************/

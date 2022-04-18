@@ -3,21 +3,12 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
-input AddFeedbackInput {
-  ans1: String
-  ans2: String
-  ans3: String
-  rating1: Float!
-  rating2: Float!
-  rating3: Float!
-}
-
 type Amenity {
   """Amenity image"""
   description: String!
 
   """Hostel to which amenity is related"""
-  hostel: Hostel!
+  hostel: Hostel
 
   """Auto generated uuid for an Amenity"""
   id: String!
@@ -63,10 +54,8 @@ enum Category {
 
 type Comment {
   content: String!
-  createdAt: DateTime!
   createdBy: User!
   id: String!
-  images: String
   netop: Netop!
   query: MyQuery!
 }
@@ -136,7 +125,7 @@ type Contact {
   contact: String!
 
   """relation which stores the contact-hostel"""
-  hostel: Hostel!
+  hostel: Hostel
 
   """Auto generated uuid"""
   id: String!
@@ -281,8 +270,6 @@ type Event {
   createdAt: DateTime!
   createdBy: User!
   id: String!
-
-  """Visiblity state of announcements"""
   isHidden: Boolean!
 
   """Returns true if the User has likes this Event, else false"""
@@ -299,35 +286,9 @@ type Event {
   photo: String
 
   """Get the list of Tags added for an Event"""
-  tags: [Tag!]!
+  tags: [Tag!]
   time: DateTime!
   title: String!
-}
-
-type Feedback {
-  """answer to question-1"""
-  ans1: String
-
-  """answer to question-2"""
-  ans2: String
-
-  """answer to question-3"""
-  ans3: String
-
-  """Auto generated uuid for a feedback"""
-  id: String!
-
-  """ratings to question-1"""
-  rating1: Float!
-
-  """ratings to questions-2"""
-  rating2: Float!
-
-  """ratings to question-3"""
-  rating3: Float!
-
-  """User who added this feedback"""
-  user: User!
 }
 
 """Input for Query get User"""
@@ -342,9 +303,9 @@ type Hostel {
   amenities: [Amenity!]
 
   """Hostel's Announcement, they will be displayed on the notice board"""
-  announcements: [Announcement!]
+  announcements: [Announcement!]!
 
-  """Contacts related to a Hostel"""
+  """Contacs related to a Hostel"""
   contacts: [Contact!]
 
   """Unique uuid generated for each Hostel"""
@@ -363,7 +324,6 @@ type Item {
 
   """Contact Number of User"""
   contact: String
-  createdAt: DateTime!
 
   """Unique uuid generated for each Item"""
   id: String!
@@ -433,12 +393,10 @@ input ModeratorInput {
 }
 
 type Mutation {
-  """Mutation to add a feedback, Restrictions: {anyone who is authorized}"""
-  addFeedback(AddFeedback: AddFeedbackInput!): Boolean!
-  changeNotificationSettings(notifyEvent: Notification, notifyNetop: Notification, toggleNotifyFound: Boolean!, toggleNotifyMyQuery: Boolean!): Boolean!
-
-  """Mutation to create a Super-User account, Restrictions : {Admin}"""
-  createAccount(CreateAccountInput: CreateAccountInput!, HostelId: String): Boolean!
+  """
+  Mutation to create a Super-User account can't create Hostel_Sec, Restrictions : {Admin}
+  """
+  createAccount(CreateAccountInput: CreateAccountInput!): Boolean!
 
   """
   Mutation to create Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
@@ -451,10 +409,10 @@ type Mutation {
   createAnnouncement(AnnouncementInput: CreateAnnouncementInput!, Images: [Upload!]): Boolean!
 
   """comment on network and opportunity, Restrictions:{any authorized user}"""
-  createCommentNetop(Images: [Upload!], NetopId: String!, content: String!): Boolean!
+  createCommentNetop(NetopId: String!, content: String!): Boolean!
 
   """comment on Query, Restrictions:{any authorized user}"""
-  createCommentQuery(Images: [Upload!], MyQueryId: String!, content: String!): Boolean!
+  createCommentQuery(MyQueryId: String!, content: String!): Boolean!
 
   """Mutation to add Complaint, Restrictions : {anyone who is Authorised}"""
   createComplaint(CreateComplaintInput: ComplaintInput!, Images: [Upload!]): Boolean!
@@ -478,12 +436,13 @@ type Mutation {
   createItem(Images: [Upload!], ItemInput: ItemInput!): Boolean!
 
   """create Query, Restrictions:{any authorized user}"""
-  createMyQuery(Attachments: [Upload!], Images: [Upload!], createQuerysInput: createQuerysInput!): Boolean!
+  createMyQuery(Attachments: [Upload!], Image: Upload, createQuerysInput: createQuerysInput!): Boolean!
 
   """create network and opportunity, Restrictions:{any authorized user}"""
-  createNetop(Attachments: [Upload!], Image: [Upload!], NewNetopData: createNetopsInput!): Boolean!
+  createNetop(Attachments: [Upload!], Image: Upload, NewEventData: createNetopsInput!): Boolean!
 
-  """Mutation deprecated"""
+  """ Mutation to create Hostel secretory, Restrictions : {Admin, Hostel Affair Secretory} 
+  """
   createSec(CreateSecInput: CreateSecInput!, HostelId: String!): Boolean!
 
   """Mutation to Create Tags, Restrictions : {Admin}"""
@@ -495,19 +454,14 @@ type Mutation {
   deleteAmenity(AmenityId: String!): Boolean!
 
   """
-  hide Announcement Mutation, Restrictions : {Admin, Hostel Affair Secretory and Hostel secretory }
+  Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}
   """
-  deleteAnnouncement(AnnouncementId: String!): Boolean!
+  deleteComplaint(ComplaintId: String!, DeleteComplaintInput: DeleteComplaintInput!, ProofImages: [Upload!]): Boolean!
 
   """
   Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETORY, HAS}
   """
   deleteEvent(EventId: String!): Boolean!
-
-  """
-  Mutation to delete Hostel Contact, Restrictions: {Admin, Has, hostel_secretary}
-  """
-  deleteHostelContact(ContactId: String!): Boolean!
 
   """edit Query, Restrictions:{user who created}"""
   deleteMyQuery(MyQueryId: String!): Boolean!
@@ -532,16 +486,15 @@ type Mutation {
   editItems(EditItemInput: EditItemInput!, Images: [Upload!], ItemId: String!): Boolean!
 
   """edit Query, Restrictions:{user who created}"""
-  editMyQuery(Attachments: [Upload!], EditMyQuerysData: editQuerysInput!, Image: [Upload!], MyQueryId: String!): Boolean!
+  editMyQuery(Attachments: [Upload!], EditMyQuerysData: editQuerysInput!, Image: Upload, MyQueryId: String!): Boolean!
 
   """edit network and opportunity, Restrictions:{user who created}"""
-  editNetop(Attachments: [Upload!], EditNetopsData: editNetopsInput!, Image: [Upload!], NetopId: String!): Boolean!
+  editNetop(Attachments: [Upload!], EditNetopsData: editNetopsInput!, Image: Upload, NetopId: String!): Boolean!
 
   """Mutation to login, Restrictions : {none}"""
-  login(LoginInputs: LoginInput!, fcmToken: String!): LoginOutput!
-  logout(fcmToken: String!): Boolean!
-  removeMyQuery(MyQueryId: String!, ReportId: String!): Boolean!
-  removeNetop(NetopId: String!, ReportId: String!): Boolean!
+  login(LoginInputs: LoginInput!): LoginOutput!
+  removeMyQuery(MyQueryId: String!): Boolean!
+  removeNetop(NetopId: String!): Boolean!
 
   """report Query, Restrictions:{any authorized user}"""
   reportMyQuery(MyQueryId: String!, description: String!): Boolean!
@@ -550,18 +503,16 @@ type Mutation {
   reportNetop(NetopId: String!, description: String!): Boolean!
 
   """
-  Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}
+  hide Announcement Mutation, Restrictions : {Admin, Hostel Affair Secretory and Hostel secretory }
   """
-  resolveComplaint(ComplaintId: String!, DeleteComplaintInput: DeleteComplaintInput!, ProofImages: [Upload!]): Boolean!
+  resolveAnnouncement(AnnouncementId: String!): Boolean!
 
   """
   Mutation to resolve the item, User who finds his lost entity will update, Restriction : {anyone who is authorised}
   """
   resolveItem(ItemId: String!): Boolean!
-  resolveMyQuery(MyQueryId: String!, ReportId: String!): Boolean!
-  resolveNetop(NetopId: String!, ReportId: String!): Boolean!
 
-  """ILike or Unlike the event, Restrictions:{ AUTHORIZED USER }"""
+  """Like or Unlike the event, Restrictions:{ AUTHORIZED USER }"""
   toggleLikeEvent(EventId: String!): Boolean!
 
   """
@@ -590,12 +541,17 @@ type Mutation {
   """
   Mutation to update Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
   """
-  updateAmenity(AmenityId: String!, UpdateAmenityInput: EditAmenityInput!): Boolean!
+  updateAmenity(AmenityId: String!, UpdateAmenityInput: EditAmenityInput): Boolean!
 
   """
   Mutation to update Hostel-Contact, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
   """
-  updateHostelContact(ContactId: String!, HostelId: String, UpdateContactInput: EditContactInput!): Boolean!
+  updateHostelContact(ContactId: String!, HostelId: String, UpdateContactInput: EditContactInput): Boolean!
+
+  """
+  Mutation to change Super-Users passwords, Restrictions : {Leads, Hostel Affair Secretory and Hostel Secretory}
+  """
+  updatePassword(NewPass: NewPass!): Boolean!
 
   """
   Mutation to change role of an ldap User to Moderator, Restrictions : {Admins and Leads}
@@ -603,12 +559,7 @@ type Mutation {
   updateRole(ModeratorInput: ModeratorInput!): Boolean!
 
   """
-  Mutation to change Super-Users passwords, Restrictions : {Leads, Hostel Affair Secretory and Hostel Secretory}
-  """
-  updateSuperUser(UpdateSuperUserInput: UpdateSuperUserInput!): Boolean!
-
-  """
-  Mutation to Update/Add User's name, interest, password, Restrictions : {User, Moderator}
+  Mutation to Update/Add User's name, interest, password, Restrictions : {User}
   """
   updateUser(UserInput: UserInput!): Boolean!
 }
@@ -616,7 +567,6 @@ type Mutation {
 """querys"""
 type MyQuery {
   attachments: String
-  commentCount: Float!
 
   """get list of comments"""
   comments: [Comment!]
@@ -624,8 +574,6 @@ type MyQuery {
   createdAt: DateTime!
   createdBy: User!
   id: String!
-
-  """Visiblity state of query"""
   isHidden: Boolean!
 
   """check if Query is liked by current user"""
@@ -634,18 +582,12 @@ type MyQuery {
   """number of likes"""
   likeCount: Float!
   photo: String
-
-  """get list of reports"""
-  reports: [Comment!]
   title: String!
 }
 
 """networking and opportunity"""
 type Netop {
   attachments: String
-
-  """number of likes"""
-  commentCount: Float!
 
   """get list of comments"""
   comments: [Comment!]
@@ -654,15 +596,10 @@ type Netop {
   createdBy: User!
   endTime: DateTime!
   id: String!
-
-  """Visiblity state of netop"""
   isHidden: Boolean!
 
-  """is this netop is liked"""
+  """check if network and opportunity is liked by current user"""
   isLiked: Boolean!
-
-  """is this netop is boolean"""
-  isReported: Boolean!
 
   """is this netop is stared"""
   isStared: Boolean!
@@ -673,40 +610,32 @@ type Netop {
   linkToAction: String
   photo: String
 
-  """get list of reports"""
-  reports: [Report!]
-
   """get all the tags associated"""
   tags: [Tag!]
   title: String!
 }
 
-enum Notification {
-  FOLLOWED_TAGS
-  FORALL
-  NONE
+"""Input for Change-Password Mutation"""
+input NewPass {
+  """New Password"""
+  newPassword: String!
 }
 
 type Query {
-  """Query to fetch all feedbacks, Restrictions: {Admins}"""
-  getAllFeedbacks(LastAnnouncementId: String!, take: Float!): [Feedback!]!
-
-  """Query to get all amenities, Restrictions: {Admins}"""
-  getAmenities(HostelId: String!): [Amenity!]!
-  getAnnouncement(announcementId: String!): Announcement!
+  """
+  Query to fetch announcements of each hostel, Restrictions : { Admin, Hostel Affair Secretory} 
+  """
+  getAllAnnouncements(skip: Float!, take: Float!): getAllAnnouncementsOutput!
 
   """
   Query to fetch announcements of a particular hostel, Restrictions : { anyone who is authorised } 
   """
-  getAnnouncements(HostelId: String!, LastAnnouncementId: String!, search: String, take: Float!): getAnnouncementsOutput!
+  getAnnouncements(HostelId: String!, skip: Float!, take: Float!): getAnnouncementsOutput!
 
   """
   get a list of Complaints sorted by date, ordered by upvotes if true, and order by isResolved(upresolved at the top)
   """
   getComplaints(OrderByIsResolved: Boolean, OrderByUpvotes: Boolean, skip: Float!, take: Float!): getComplaintsOutput!
-
-  """Query to return contact information, Restrictions: {Admins, HAS}"""
-  getContact(HostelId: String!): [Contact!]!
 
   """Get the event details by id, Restrictions:{ AUTHORIZED USER }"""
   getEvent(EventId: String!): Event!
@@ -714,7 +643,7 @@ type Query {
   """
   Get the list of event details with filters, Restrictions:{ AUTHORIZED USER }
   """
-  getEvents(FileringCondition: fileringConditions, OrderByLikes: Boolean, lastEventId: String!, search: String, take: Float!): getEventOutput!
+  getEvents(FileringCondition: fileringConditions, OrderByLikes: Boolean, skip: Float!, take: Float!): getEventOutput!
 
   """query to fetch hostels, Restrictions : {anyone who is authorized}"""
   getHostels: [Hostel!]!
@@ -722,7 +651,7 @@ type Query {
   """
   Query to fetch all the unresolved items, filter by time of creation, Restrictions : {anyone who is authorised}
   """
-  getItems(ItemsFilter: [Category!]!, LastItemId: String!, search: String, take: Float!): getItemsOutput!
+  getItems(ItemsFilter: [Category!]!, skip: Float!, take: Float!): getItemsOutput!
 
   """
   Query to fetch personal profile, Restrictions : {anyone who is authoried}
@@ -733,22 +662,19 @@ type Query {
   getMyQuery(MyQueryId: String!): MyQuery!
 
   """get a list of myQuerys by filer and order conditions"""
-  getMyQuerys(OrderByLikes: Boolean, lastEventId: String!, search: String, take: Float!): getQueryOutput!
+  getMyQuerys(OrderByLikes: Boolean, skip: Float!, take: Float!): getQueryOutput!
 
   """get an netop by id network and opportunity"""
   getNetop(NetopId: String!): Netop!
 
   """get a list of netops by filer and order conditions"""
-  getNetops(FileringCondition: fileringConditions, LastNetopId: String!, OrderByLikes: Boolean, search: String, take: Float!): getNetopOutput!
+  getNetops(FileringCondition: fileringConditions, OrderByLikes: Boolean, skip: Float!, take: Float!): getNetopOutput!
   getReports: [Report!]
-
-  """Query to return the spread-sheet link, Restrictions: {ADMIN}"""
-  getSheetLink: String!
 
   """
   Query to fetch Super-Users, Restrictions : {Admins, Leads, Moderators, Hostel Affair Secretory and Hostel Secretory}
   """
-  getSuperUsers(LastUserId: String!, RolesFilter: [UserRole!]!, search: String, take: Float!): getSuperUsersOutput!
+  getSuperUsers(RolesFilter: [UserRole!]!, skip: Float!, take: Float!): getSuperUsersOutput!
 
   """Query to Fetch the tag, Restrictions : {anyone who is authorized}"""
   getTag(Tag: String!): Tag!
@@ -760,21 +686,25 @@ type Query {
   getUser(GetUserInput: GetUserInput!): User!
 
   """Query to fetch ldap Users, Restrictions : {anyone who is authorized}"""
-  getUsers(LastUserId: String!, search: String, take: Float!): getUsersOutput!
-  searchQueries(OrderByLikes: Boolean, lastEventId: String!, search: String!, take: Float!): getQueryOutput!
-  searchUser(LastUserId: String!, search: String, take: Float!): searchUserOutput
+  getUsers(skip: Float!, take: Float!): getUsersOutput!
+  isInterested(tag: String!): Boolean!
+  searchQueries(OrderByLikes: Boolean, search: String!, skip: Float!, take: Float!): getQueryOutput!
+  searchUser(search: String!, skip: Float!, take: Float!): searchUserOutput
 }
 
 type Report {
-  createdAt: DateTime!
   createdBy: User!
   description: String!
   id: String!
+  netop: Netop!
+  query: MyQuery!
+}
 
-  """Visiblity state of reports"""
-  isResolved: Boolean!
-  netop: Netop
-  query: MyQuery
+type Subscription {
+  createAnnoucementSubs(hostel: String!): Announcement!
+  createEventS(tag: String!): Event!
+  createNetop2: Netop!
+  createNetopS(tag: String!): Netop!
 }
 
 """Tag Entity, Users will follow these tags"""
@@ -803,28 +733,15 @@ input TagInput {
   title: String!
 }
 
-"""Input for Change-Password Mutation"""
-input UpdateSuperUserInput {
-  """New Password"""
-  name: String!
-
-  """New Password"""
-  newPassword: String!
-}
-
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
 
 """User Entity"""
 type User {
   """Announcements Created by User, can only be created if its a Super User"""
-  announcements: [Announcement!]!
-  complaints: [Complaint!]
-  complaintsUpvoted: [Complaint!]
-  fcmToken: String!
-
-  """feedbacks of the user"""
-  feedbacks: [Feedback!]
+  announcements: [Announcement!]
+  complaints: Complaint
+  complaintsUpvoted: Complaint
   getHome: homeOutput
 
   """User's Hostel amd its details"""
@@ -847,11 +764,6 @@ type User {
 
   """User's name"""
   name: String
-  notifyEvent: Notification!
-  notifyFound: Boolean!
-  notifyMyQuery: Boolean!
-  notifyNetop: Notification!
-  notifyNetopComment: Boolean!
 
   """User's role"""
   role: UserRole!
@@ -941,6 +853,12 @@ input fileringConditions {
   tags: [String!]
 }
 
+""" Output type for getAllAnnouncements query"""
+type getAllAnnouncementsOutput {
+  announcementsList: [Announcement!]
+  total: Float!
+}
+
 """Output Type for getAnnouncements query"""
 type getAnnouncementsOutput {
   announcementsList: [Announcement!]
@@ -990,9 +908,9 @@ type getUsersOutput {
 
 """ Output type for getHome query"""
 type homeOutput {
-  announcements: [Announcement!]
-  events: [Event!]
-  netops: [Netop!]
+  announcements: [Announcement!]!
+  events: [Event!]!
+  netops: [Netop!]!
 }
 
 """Output type for serachUsers query"""
