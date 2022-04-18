@@ -546,7 +546,7 @@ class NetopResolver {
       if (search) {
         await Promise.all(
           ["title"].map(async (field: string) => {
-            const filter = { [field]: ILike(`%${search}%`) };
+            const filter = { [field]: ILike(`%${search}%`), isHidden: false };
             const netopF = await Netop.find({
               where: filter,
               relations: ["tags", "likedBy", "staredBy", "reports"],
