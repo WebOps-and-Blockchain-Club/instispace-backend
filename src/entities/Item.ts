@@ -40,6 +40,7 @@ class Item extends BaseEntity {
   images?: string;
 
   @CreateDateColumn({ type: "timestamptz" })
+  @Field(() => Date)
   createdAt: Date;
 
   @Column({ nullable: true })

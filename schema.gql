@@ -363,6 +363,7 @@ type Item {
 
   """Contact Number of User"""
   contact: String
+  createdAt: DateTime!
 
   """Unique uuid generated for each Item"""
   id: String!
