@@ -543,7 +543,6 @@ class UsersResolver {
         where: { name: userInput.hostel },
         relations: ["users"],
       });
-      if (!hostel) throw new Error("Invalid Hostel");
 
       //updating user
       user.name = userInput.name;

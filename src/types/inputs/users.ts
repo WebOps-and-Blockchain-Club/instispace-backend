@@ -26,8 +26,8 @@ class UserInput {
   @Field({ description: "LDAP User's name" })
   name: string;
 
-  @Field({ description: "LDAP User's hostel" })
-  hostel: string;
+  @Field({ description: "LDAP User's hostel", nullable: true })
+  hostel?: string;
 
   @Field((_type) => [String], {
     description: "LDAP User's interests, collection of tags",
