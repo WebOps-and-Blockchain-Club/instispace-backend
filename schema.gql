@@ -716,6 +716,11 @@ type Query {
   getAnnouncements(HostelId: String!, LastAnnouncementId: String!, search: String, take: Float!): getAnnouncementsOutput!
 
   """
+  Query to return the tag categories, Restrictions : {anyone who is authorized}
+  """
+  getCategories: [String!]!
+
+  """
   get a list of Complaints sorted by date, ordered by upvotes if true, and order by isResolved(upresolved at the top)
   """
   getComplaints(OrderByIsResolved: Boolean, OrderByUpvotes: Boolean, skip: Float!, take: Float!): getComplaintsOutput!

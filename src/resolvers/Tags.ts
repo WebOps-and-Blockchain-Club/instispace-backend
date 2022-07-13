@@ -58,6 +58,16 @@ class TagsResolver {
     }
   }
 
+  @Query(() => [String], {
+    description:
+      "Query to return the tag categories, Restrictions : {anyone who is authorized}",
+  })
+  @Authorized()
+  async getCategories() {
+    const categories = ["Sports", "Culture", "Academics", "Technical"];
+    return categories;
+  }
+
   @FieldResolver(() => [User])
   async users(@Root() { id }: Tag) {
     try {
