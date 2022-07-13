@@ -1,3 +1,4 @@
+import { EditDelPermission } from "../utils";
 import { Field, ObjectType } from "type-graphql";
 import {
   BaseEntity,
@@ -61,6 +62,9 @@ class Announcement extends BaseEntity {
     description: "Hostels on which the announcement needs to be diplayed",
   })
   hostels: Hostel[];
+
+  @Field(() => [EditDelPermission], { nullable: true })
+  permissions: EditDelPermission[];
 }
 
 export default Announcement;

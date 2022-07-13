@@ -1,3 +1,4 @@
+import { EditDelPermission } from "../utils";
 import { Field, ObjectType } from "type-graphql";
 import {
   BaseEntity,
@@ -36,6 +37,9 @@ class HostelContact extends BaseEntity {
     description: "relation which stores the contact-hostel",
   })
   hostel: Hostel;
+
+  @Field(() => [EditDelPermission], { nullable: true })
+  permissions: EditDelPermission[];
 }
 
 export default HostelContact;

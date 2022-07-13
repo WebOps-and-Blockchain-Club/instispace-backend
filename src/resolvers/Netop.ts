@@ -20,7 +20,7 @@ import Netop from "../entities/Netop";
 import Comment from "../entities/Common/Comment";
 import { GraphQLUpload, Upload } from "graphql-upload";
 import getNetopOutput from "../types/objects/netop";
-import { smail, UserRole } from "../utils";
+import { EditDelPermission, smail, UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
@@ -61,9 +61,9 @@ class NetopResolver {
         throw new Error("Invalid tagIds");
 
       if (images)
-        createNetopsInput.photo = (await addAttachments([...images], true)).join(
-          " AND "
-        );
+        createNetopsInput.photo = (
+          await addAttachments([...images], true)
+        ).join(" AND ");
       if (attachments)
         createNetopsInput.attachments = (
           await addAttachments([...attachments], false)
@@ -154,9 +154,9 @@ class NetopResolver {
 
       if (netop && user.id === netop?.createdBy.id) {
         if (images)
-          editNetopsInput.photo = (await addAttachments([...images], true)).join(
-            " AND "
-          );
+          editNetopsInput.photo = (
+            await addAttachments([...images], true)
+          ).join(" AND ");
         if (attachments)
           editNetopsInput.attachments = (
             await addAttachments([...attachments], false)
@@ -705,6 +705,37 @@ class NetopResolver {
     if (comments) return comments.length;
     const netop = await Netop.findOneOrFail(id, { relations: ["comments"] });
     return netop.comments.length;
+  }
+
+  @FieldResolver(() => [EditDelPermission])
+  async permissions(
+    @Ctx() { user }: MyContext,
+    @Root() { id, permissions }: Netop
+  ) {
+    try {
+      if (permissions) return permissions;
+      const permissionList: EditDelPermission[] = [
+        EditDelPermission.COMMENT,
+        EditDelPermission.REPORT,
+      ];
+      const netop = await Netop.findOne(id, { relations: ["createdBy"] });
+      if (user.id === netop?.createdBy.id)
+        permissionList.push(EditDelPermission.EDIT, EditDelPermission.DELETE);
+      if (
+        [
+          UserRole.ADMIN,
+          UserRole.LEADS,
+          UserRole.HAS,
+          UserRole.SECRETORY,
+          UserRole.HOSTEL_SEC,
+          UserRole.MODERATOR,
+        ].includes(user.role)
+      )
+        permissionList.push(EditDelPermission.RESOLVE);
+      return permissionList;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
   }
 }
 

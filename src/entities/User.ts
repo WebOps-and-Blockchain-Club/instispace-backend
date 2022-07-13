@@ -1,4 +1,4 @@
-import { UserRole } from "../utils";
+import { UserPermission, UserRole } from "../utils";
 import { Field, ObjectType } from "type-graphql";
 import {
   BaseEntity,
@@ -159,6 +159,9 @@ class User extends BaseEntity {
     description: "feedbacks of the user",
   })
   feedbacks?: Feedback[];
+
+  @Field(() => [UserPermission], { nullable: true })
+  permissions: UserPermission[];
 }
 
 export default User;

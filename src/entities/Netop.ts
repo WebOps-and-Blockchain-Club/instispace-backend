@@ -14,6 +14,7 @@ import User from "./User";
 import Comment from "./Common/Comment";
 import Tag from "./Tag";
 import Report from "./Common/Report";
+import { EditDelPermission } from "../utils";
 
 @Entity("Netop")
 @ObjectType("Netop", { description: "networking and opportunity" })
@@ -97,6 +98,9 @@ class Netop extends BaseEntity {
   @ManyToMany(() => User, (user) => user.likedNetop)
   @JoinTable()
   likedBy: User[];
+
+  @Field(() => [EditDelPermission], { nullable: true })
+  permissions: EditDelPermission[];
 }
 
 export default Netop;

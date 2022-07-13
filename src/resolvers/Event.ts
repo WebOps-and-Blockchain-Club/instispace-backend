@@ -12,7 +12,7 @@ import MyContext from "../utils/context";
 import { fileringConditions } from "../types/inputs/netop";
 import Tag from "../entities/Tag";
 import { GraphQLUpload, Upload } from "graphql-upload";
-import { UserRole } from "../utils";
+import { EditDelPermission, UserRole } from "../utils";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
 import Event from "../entities/Event";
@@ -421,6 +421,31 @@ class EventResolver {
     if (createdBy) return createdBy;
     const event = await Event.findOne(id, { relations: ["createdBy"] });
     return event?.createdBy;
+  }
+
+  @FieldResolver(() => [EditDelPermission])
+  async permissions(
+    @Ctx() { user }: MyContext,
+    @Root() { id, permissions }: Event
+  ) {
+    try {
+      if (permissions) return permissions;
+      const permissionList: EditDelPermission[] = [];
+      const event = await Event.findOne(id, {
+        relations: ["createdBy"],
+      });
+      if (
+        event &&
+        ([UserRole.ADMIN, UserRole.SECRETORY, UserRole.HAS].includes(
+          user.role
+        ) ||
+          user.id === event.createdBy.id)
+      )
+        permissionList.push(EditDelPermission.EDIT, EditDelPermission.DELETE);
+      return permissionList;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
   }
 }
 

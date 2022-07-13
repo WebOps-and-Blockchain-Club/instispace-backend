@@ -15,7 +15,7 @@ import MyQuery from "../entities/MyQuery";
 import Comment from "../entities/Common/Comment";
 import { GraphQLUpload, Upload } from "graphql-upload";
 import getMyQueryOutput from "../types/objects/query";
-import { smail, UserRole } from "../utils";
+import { EditDelPermission, smail, UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
@@ -38,9 +38,9 @@ class MyQueryResolver {
   ): Promise<boolean> {
     try {
       if (images)
-        createMyQuerysInput.photo = (await addAttachments([...images], true)).join(
-          " AND "
-        );
+        createMyQuerysInput.photo = (
+          await addAttachments([...images], true)
+        ).join(" AND ");
 
       if (attachments)
         createMyQuerysInput.attachments = (
@@ -86,9 +86,9 @@ class MyQueryResolver {
           ))
       ) {
         if (images)
-          editMyQuerysInput.photo = (await addAttachments([...images], true)).join(
-            " AND "
-          );
+          editMyQuerysInput.photo = (
+            await addAttachments([...images], true)
+          ).join(" AND ");
         if (attachments)
           editMyQuerysInput.attachments = (
             await addAttachments([...attachments], false)
@@ -115,7 +115,9 @@ class MyQueryResolver {
     @Ctx() { user }: MyContext
   ) {
     try {
-      const myQuery = await MyQuery.findOne(myQueryId,{relations: ["createdBy"]});
+      const myQuery = await MyQuery.findOne(myQueryId, {
+        relations: ["createdBy"],
+      });
       if (myQuery && user.id === myQuery?.createdBy?.id) {
         const { affected } = await MyQuery.update(myQueryId, {
           isHidden: true,
@@ -574,6 +576,35 @@ class MyQueryResolver {
       relations: ["comments"],
     });
     return myQuerys.comments.length;
+  }
+
+  @FieldResolver(() => [EditDelPermission])
+  async permissions(
+    @Ctx() { user }: MyContext,
+    @Root() { id, permissions }: MyQuery
+  ) {
+    try {
+      if (permissions) return permissions;
+      const permissionList: EditDelPermission[] = [
+        EditDelPermission.COMMENT,
+        EditDelPermission.REPORT,
+      ];
+      const query = await MyQuery.findOne(id, { relations: ["createdBy"] });
+      if (user.id === query?.createdBy.id)
+        permissionList.push(EditDelPermission.EDIT, EditDelPermission.DELETE);
+      if (
+        [
+          UserRole.ADMIN,
+          UserRole.SECRETORY,
+          UserRole.HAS,
+          UserRole.HOSTEL_SEC,
+        ].includes(user.role)
+      )
+        permissionList.push(EditDelPermission.RESOLVE);
+      return permissionList;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
   }
 }
 

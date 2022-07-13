@@ -10,7 +10,7 @@ import {
   Root,
 } from "type-graphql";
 import HostelContact from "../entities/Contact";
-import { UserRole } from "../utils";
+import { EditDelPermission, UserRole } from "../utils";
 import Hostel from "../entities/Hostel";
 import MyContext from "../utils/context";
 import { CreateContactInput, EditContactInput } from "../types/inputs/contact";
@@ -55,7 +55,7 @@ class ContactResolver {
     description:
       "Query to return contact information, Restrictions: {Admins, HAS}",
   })
-  @Authorized([UserRole.ADMIN, UserRole.HAS])
+  @Authorized()
   async getContact(@Arg("HostelId") hostelId?: string) {
     try {
       let contacts: Contact[] = [];
@@ -149,6 +149,29 @@ class ContactResolver {
         relations: ["hostel"],
       });
       return contact?.hostel;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [EditDelPermission])
+  async permissions(
+    @Ctx() { user }: MyContext,
+    @Root() { id, permissions }: Contact
+  ) {
+    try {
+      if (permissions) return permissions;
+      const permissionList: EditDelPermission[] = [];
+      const contact = await Contact.findOne(id, {
+        relations: ["hostel"],
+      });
+      if (
+        contact &&
+        ([UserRole.ADMIN, UserRole.HAS].includes(user.role) ||
+          user.hostel === contact.hostel)
+      )
+        permissionList.push(EditDelPermission.EDIT, EditDelPermission.DELETE);
+      return permissionList;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

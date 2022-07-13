@@ -11,6 +11,37 @@ export enum UserRole {
   HAS = "HAS",
 }
 
+export enum UserPermission {
+  CREATE_ITEM = "CREATE_ITEM",
+  CREATE_QUERY = "CREATE_QUERY",
+  CREATE_EVENT = "CREATE_EVENT",
+  CREATE_NETOP = "CREATE_NETOP",
+  CREATE_CONTACT = "CREATE_CONTACT",
+  CREATE_AMENITY = "CREATE_AMENITY",
+  CREATE_ANNOUNCEMENT = "CREATE_ANNOUNCEMENT",
+  CREATE_HOSTEL = "CREATE_HOSTEL",
+  CREATE_FEEDBACK = "CREATE_FEEDBACK",
+  CREATE_ACCOUNT = "CREATE_ACCOUNT",
+  CREATE_TAG = "CREATE_TAG",
+  GET_REPORTS = "GET_REPORTS",
+  GET_AMENITIES = "GET_AMENITIES",
+  GET_ALL_AMENITIES = "GET_ALL_AMENITIES",
+  GET_CONTACTS = "GET_CONTACTS",
+  GET_ALL_CONTACTS = "GET_ALL_CONTACTS",
+  GET_ANNOUNCEMENTS = "GET_ANNOUNCEMENTS",
+  GET_ALL_ANNOUNCEMENTS = "GET_ALL_ANNOUNCEMENTS",
+  VIEW_FEEDBACK = "VIEW_FEEDBACK",
+  UPDATE_ROLE = "UPDATE_ROLE",
+}
+
+export enum EditDelPermission {
+  EDIT = "EDIT",
+  DELETE = "DELETE",
+  COMMENT = "COMMENT",
+  REPORT = "REPORT",
+  RESOLVE = "RESOLVE",
+}
+
 export enum Category {
   LOST = "LOST",
   FOUND = "FOUND",
@@ -39,7 +70,8 @@ export const accountPassword = "123456";
 
 export const smail = "@smail.iitm.ac.in";
 
-export const sheetLink = "https://docs.google.com/spreadsheets/d/1ECJ1V1KoJB7W3jNyrOD_F-46tKl_ZNPGRPNqMqZkNsA/edit?usp=sharing";
+export const sheetLink =
+  "https://docs.google.com/spreadsheets/d/1ECJ1V1KoJB7W3jNyrOD_F-46tKl_ZNPGRPNqMqZkNsA/edit?usp=sharing";
 
 export var salt = bcryptjs.genSaltSync(Number(process.env.ITERATIONS!));
 

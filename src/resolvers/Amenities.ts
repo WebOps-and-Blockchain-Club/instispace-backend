@@ -1,6 +1,6 @@
 import Amenity from "../entities/Amenity";
 import { CreateAmenityInput, EditAmenityInput } from "../types/inputs/amenity";
-import { UserRole } from "../utils/index";
+import { EditDelPermission, UserRole } from "../utils/index";
 import MyContext from "../utils/context";
 import {
   Arg,
@@ -52,7 +52,7 @@ class AmenitiesResolver {
   @Query(() => [Amenity], {
     description: "Query to get all amenities, Restrictions: {Admins}",
   })
-  @Authorized([UserRole.ADMIN, UserRole.HAS])
+  @Authorized()
   async getAmenities(@Arg("HostelId") hostelId?: string) {
     try {
       let amenities: Amenity[] = [];
@@ -140,6 +140,29 @@ class AmenitiesResolver {
         relations: ["hostel"],
       });
       return amenity?.hostel;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [EditDelPermission])
+  async permissions(
+    @Ctx() { user }: MyContext,
+    @Root() { id, permissions }: Amenity
+  ) {
+    try {
+      if (permissions) return permissions;
+      const permissionList: EditDelPermission[] = [];
+      const amenity = await Amenity.findOne(id, {
+        relations: ["hostel"],
+      });
+      if (
+        amenity &&
+        ([UserRole.ADMIN, UserRole.HAS].includes(user.role) ||
+          user.hostel === amenity.hostel)
+      )
+        permissionList.push(EditDelPermission.EDIT, EditDelPermission.DELETE);
+      return permissionList;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

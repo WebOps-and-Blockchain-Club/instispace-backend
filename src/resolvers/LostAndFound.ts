@@ -10,7 +10,7 @@ import {
   Root,
 } from "type-graphql";
 import Item from "../entities/Item";
-import { Category, miliSecPerMonth } from "../utils/index";
+import { Category, EditDelPermission, miliSecPerMonth } from "../utils/index";
 import User from "../entities/User";
 import MyContext from "../utils/context";
 import { ILike, In } from "typeorm";
@@ -105,7 +105,11 @@ class LostAndFoundResolver {
       if (search) {
         await Promise.all(
           ["name", "location"].map(async (field: string) => {
-            const filter = { [field]: ILike(`%${search}%`), isResolved: false, category: In(categories) };
+            const filter = {
+              [field]: ILike(`%${search}%`),
+              isResolved: false,
+              category: In(categories),
+            };
             const itemF = await Item.find({
               where: filter,
               order: { createdAt: "DESC" },
@@ -115,7 +119,7 @@ class LostAndFoundResolver {
             });
           })
         );
-	let uniqueItems: Item[] = [];
+        let uniqueItems: Item[] = [];
         itemsList.forEach((item) => {
           if (!uniqueItems.includes(item)) uniqueItems.push(item);
         });
@@ -203,6 +207,25 @@ class LostAndFoundResolver {
         relations: ["user"],
       });
       return item?.user;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [EditDelPermission])
+  async permissions(
+    @Ctx() { user }: MyContext,
+    @Root() { id, permissions }: Item
+  ) {
+    try {
+      if (permissions) return permissions;
+      const permissionList: EditDelPermission[] = [];
+      const item = await Item.findOne(id, {
+        relations: ["user"],
+      });
+      if (item && user.id === item.user.id)
+        permissionList.push(EditDelPermission.EDIT, EditDelPermission.DELETE);
+      return permissionList;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

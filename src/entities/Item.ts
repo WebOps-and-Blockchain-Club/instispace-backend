@@ -1,4 +1,4 @@
-import { Category } from "../utils/index";
+import { Category, EditDelPermission } from "../utils/index";
 import { Field, ObjectType } from "type-graphql";
 import {
   BaseEntity,
@@ -58,6 +58,8 @@ class Item extends BaseEntity {
   })
   isResolved: boolean;
 
+  @Field(() => [EditDelPermission], { nullable: true })
+  permissions: EditDelPermission[];
   //   @Column((_type) => Boolean)
   //   @Field((_type) => Boolean, {description : "describes whether the issue is resolved"})
   //   isResolved: boolean;

@@ -3,6 +3,8 @@ import {
   ComplaintCategory,
   UserRole,
   Notification,
+  UserPermission,
+  EditDelPermission,
 } from "../../utils";
 import { Field, ObjectType, registerEnumType } from "type-graphql";
 import Netop from "../../entities/Netop";
@@ -13,6 +15,8 @@ registerEnumType(UserRole, { name: "UserRole" });
 registerEnumType(Category, { name: "Category" });
 registerEnumType(ComplaintCategory, { name: "ComplaintCategory" });
 registerEnumType(Notification, { name: "Notification" });
+registerEnumType(UserPermission, { name: "UserPermission" });
+registerEnumType(EditDelPermission, { name: "EditDelPermission" });
 
 @ObjectType({ description: "Output for Login Mutation" })
 class LoginOutput {
@@ -76,10 +80,20 @@ class getUsersOutput {
   total: number;
 }
 
+@ObjectType("getMeOutput", { description: "Output type for get Me Query" })
+class getMeOutput {
+  @Field(() => User)
+  user: User;
+
+  @Field(() => [UserPermission], { nullable: true })
+  permissions: UserPermission[];
+}
+
 export {
   LoginOutput,
   homeOutput,
   getUsersOutput,
   getSuperUsersOutput,
   searchUsersOutput,
+  getMeOutput,
 };

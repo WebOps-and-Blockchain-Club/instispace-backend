@@ -16,7 +16,7 @@ import {
   Root,
 } from "type-graphql";
 import MyContext from "../utils/context";
-import { UserRole } from "../utils";
+import { EditDelPermission, UserRole } from "../utils";
 import addAttachments from "../utils/uploads";
 import { GraphQLUpload, Upload } from "graphql-upload";
 import { getAnnouncementsOutput } from "../types/objects/announcements";
@@ -60,9 +60,9 @@ class AnnouncementResolver {
       announcement.user = user;
       announcement.endTime = new Date(announcementInput.endTime);
       if (images) {
-        announcementInput.images = (await addAttachments([...images], true)).join(
-          " AND "
-        );
+        announcementInput.images = (
+          await addAttachments([...images], true)
+        ).join(" AND ");
         announcement.images = announcementInput.images;
       }
       announcement.hostels = hostels;
@@ -205,9 +205,9 @@ class AnnouncementResolver {
           ))
       ) {
         if (images) {
-          announcementInput.images = (await addAttachments([...images], true)).join(
-            " AND "
-          );
+          announcementInput.images = (
+            await addAttachments([...images], true)
+          ).join(" AND ");
           announcement.images = announcementInput.images;
         }
         if (announcementInput.title)
@@ -293,6 +293,31 @@ class AnnouncementResolver {
         relations: ["user"],
       });
       return announcement?.user;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [EditDelPermission])
+  async permissions(
+    @Ctx() { user }: MyContext,
+    @Root() { id, permissions }: Announcement
+  ) {
+    try {
+      if (permissions) return permissions;
+      const permissionList: EditDelPermission[] = [];
+      const announcement = await Announcement.findOne(id, {
+        relations: ["user"],
+      });
+      if (
+        announcement &&
+        ([UserRole.ADMIN, UserRole.SECRETORY, UserRole.HAS].includes(
+          user.role
+        ) ||
+          user.id === announcement.user.id)
+      )
+        permissionList.push(EditDelPermission.EDIT, EditDelPermission.DELETE);
+      return permissionList;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

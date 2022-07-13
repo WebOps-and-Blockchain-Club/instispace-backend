@@ -11,6 +11,7 @@ import {
 } from "typeorm";
 import User from "./User";
 import Tag from "./Tag";
+import { EditDelPermission } from "../utils";
 
 @Entity("Event")
 @ObjectType("Event")
@@ -79,6 +80,9 @@ class Event extends BaseEntity {
   @ManyToMany(() => User, (user) => user.likedEvent)
   @JoinTable()
   likedBy: User[];
+
+  @Field(() => [EditDelPermission], { nullable: true })
+  permissions: EditDelPermission[];
 }
 
 export default Event;

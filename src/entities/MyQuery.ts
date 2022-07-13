@@ -13,6 +13,7 @@ import {
 import User from "./User";
 import Comment from "./Common/Comment";
 import Report from "./Common/Report";
+import { EditDelPermission } from "../utils";
 
 @Entity("MyQuery")
 @ObjectType("MyQuery", { description: "querys" })
@@ -62,6 +63,9 @@ class MyQuery extends BaseEntity {
   @ManyToMany(() => User, (user) => user.likedMyQuery, { nullable: true })
   @JoinTable()
   likedBy: User[];
+
+  @Field(() => [EditDelPermission], { nullable: true })
+  permissions: EditDelPermission[];
 }
 
 export default MyQuery;

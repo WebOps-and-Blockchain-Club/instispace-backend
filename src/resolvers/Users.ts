@@ -13,6 +13,7 @@ import {
   autoGenPass,
   emailExpresion,
   salt,
+  UserPermission,
   UserRole,
   usersDevList,
 } from "../utils";
@@ -31,6 +32,7 @@ import UsersDev from "../entities/UsersDev";
 import User from "../entities/User";
 import Tag from "../entities/Tag";
 import {
+  getMeOutput,
   getSuperUsersOutput,
   getUsersOutput,
   homeOutput,
@@ -341,13 +343,71 @@ class UsersResolver {
     }
   }
 
-  @Query(() => User, {
+  @Query(() => getMeOutput, {
     description:
       "Query to fetch personal profile, Restrictions : {anyone who is authoried}",
   })
   @Authorized()
   async getMe(@Ctx() { user }: MyContext) {
-    return user;
+    let permissions: UserPermission[] = [
+      UserPermission.CREATE_FEEDBACK,
+      UserPermission.CREATE_ITEM,
+      UserPermission.CREATE_NETOP,
+      UserPermission.CREATE_QUERY,
+      UserPermission.GET_AMENITIES,
+      UserPermission.GET_ANNOUNCEMENTS,
+      UserPermission.GET_CONTACTS,
+    ];
+    if (user.role !== UserRole.USER) {
+      permissions.push(UserPermission.CREATE_EVENT, UserPermission.UPDATE_ROLE);
+    }
+    if (user.role === UserRole.HOSTEL_SEC)
+      permissions.push(
+        UserPermission.CREATE_AMENITY,
+        UserPermission.CREATE_ANNOUNCEMENT,
+        UserPermission.CREATE_CONTACT,
+        UserPermission.CREATE_HOSTEL,
+        UserPermission.UPDATE_ROLE
+      );
+    if (user.role === UserRole.SECRETORY)
+      permissions.push(
+        UserPermission.CREATE_ACCOUNT,
+        UserPermission.CREATE_ANNOUNCEMENT,
+        UserPermission.CREATE_TAG,
+        UserPermission.GET_ALL_ANNOUNCEMENTS,
+        UserPermission.GET_REPORTS,
+        UserPermission.UPDATE_ROLE
+      );
+    if (user.role === UserRole.HAS)
+      permissions.push(
+        UserPermission.CREATE_ACCOUNT,
+        UserPermission.CREATE_AMENITY,
+        UserPermission.CREATE_ANNOUNCEMENT,
+        UserPermission.CREATE_CONTACT,
+        UserPermission.CREATE_HOSTEL,
+        UserPermission.CREATE_TAG,
+        UserPermission.GET_ALL_AMENITIES,
+        UserPermission.GET_ALL_ANNOUNCEMENTS,
+        UserPermission.GET_ALL_CONTACTS,
+        UserPermission.GET_REPORTS,
+        UserPermission.UPDATE_ROLE
+      );
+    if (user.role === UserRole.ADMIN)
+      permissions.push(
+        UserPermission.CREATE_ACCOUNT,
+        UserPermission.CREATE_AMENITY,
+        UserPermission.CREATE_ANNOUNCEMENT,
+        UserPermission.CREATE_CONTACT,
+        UserPermission.CREATE_HOSTEL,
+        UserPermission.CREATE_TAG,
+        UserPermission.GET_ALL_AMENITIES,
+        UserPermission.GET_ALL_CONTACTS,
+        UserPermission.GET_ALL_ANNOUNCEMENTS,
+        UserPermission.GET_REPORTS,
+        UserPermission.VIEW_FEEDBACK,
+        UserPermission.UPDATE_ROLE
+      );
+    return { user: user, permissions: permissions };
   }
 
   @Query(() => User, {
@@ -734,6 +794,80 @@ class UsersResolver {
         relations: ["feedbacks"],
       });
       return user?.feedbacks;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver(() => [UserPermission])
+  async permissions(@Root() { id, permissions }: User) {
+    try {
+      if (permissions) return permissions;
+      const user = await User.findOne({
+        where: { id: id },
+      });
+      let permissionList: UserPermission[] = [
+        UserPermission.CREATE_FEEDBACK,
+        UserPermission.CREATE_ITEM,
+        UserPermission.CREATE_NETOP,
+        UserPermission.CREATE_QUERY,
+        UserPermission.GET_AMENITIES,
+        UserPermission.GET_ANNOUNCEMENTS,
+        UserPermission.GET_CONTACTS,
+      ];
+      if (user?.role !== UserRole.USER) {
+        permissionList.push(
+          UserPermission.CREATE_EVENT,
+          UserPermission.UPDATE_ROLE
+        );
+      }
+      if (user?.role === UserRole.HOSTEL_SEC)
+        permissionList.push(
+          UserPermission.CREATE_AMENITY,
+          UserPermission.CREATE_ANNOUNCEMENT,
+          UserPermission.CREATE_CONTACT,
+          UserPermission.CREATE_HOSTEL,
+          UserPermission.UPDATE_ROLE
+        );
+      if (user?.role === UserRole.SECRETORY)
+        permissionList.push(
+          UserPermission.CREATE_ACCOUNT,
+          UserPermission.CREATE_ANNOUNCEMENT,
+          UserPermission.CREATE_TAG,
+          UserPermission.GET_ALL_ANNOUNCEMENTS,
+          UserPermission.GET_REPORTS,
+          UserPermission.UPDATE_ROLE
+        );
+      if (user?.role === UserRole.HAS)
+        permissionList.push(
+          UserPermission.CREATE_ACCOUNT,
+          UserPermission.CREATE_AMENITY,
+          UserPermission.CREATE_ANNOUNCEMENT,
+          UserPermission.CREATE_CONTACT,
+          UserPermission.CREATE_HOSTEL,
+          UserPermission.CREATE_TAG,
+          UserPermission.GET_ALL_AMENITIES,
+          UserPermission.GET_ALL_ANNOUNCEMENTS,
+          UserPermission.GET_ALL_CONTACTS,
+          UserPermission.GET_REPORTS,
+          UserPermission.UPDATE_ROLE
+        );
+      if (user?.role === UserRole.ADMIN)
+        permissionList.push(
+          UserPermission.CREATE_ACCOUNT,
+          UserPermission.CREATE_AMENITY,
+          UserPermission.CREATE_ANNOUNCEMENT,
+          UserPermission.CREATE_CONTACT,
+          UserPermission.CREATE_HOSTEL,
+          UserPermission.CREATE_TAG,
+          UserPermission.GET_ALL_AMENITIES,
+          UserPermission.GET_ALL_CONTACTS,
+          UserPermission.GET_ALL_ANNOUNCEMENTS,
+          UserPermission.GET_REPORTS,
+          UserPermission.VIEW_FEEDBACK,
+          UserPermission.UPDATE_ROLE
+        );
+      return permissionList;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
