@@ -418,6 +418,12 @@ input ItemInput {
   time: String!
 }
 
+type LDAPUser {
+  department: String!
+  name: String!
+  roll: String!
+}
+
 """Input for Login Mutation"""
 input LoginInput {
   """User's Password"""
@@ -747,7 +753,7 @@ type Query {
   """
   Query to fetch personal profile, Restrictions : {anyone who is authoried}
   """
-  getMe: getMeOutput!
+  getMe: User!
 
   """get an myQuery by id Query"""
   getMyQuery(MyQueryId: String!): MyQuery!
@@ -781,6 +787,7 @@ type Query {
 
   """Query to fetch ldap Users, Restrictions : {anyone who is authorized}"""
   getUsers(LastUserId: String!, search: String, take: Float!): getUsersOutput!
+  searchLDAPUser(search: String!, skip: Float!, take: Float!): [LDAPUser!]
   searchQueries(OrderByLikes: Boolean, lastEventId: String!, search: String!, take: Float!): getQueryOutput!
   searchUser(LastUserId: String!, search: String, take: Float!): searchUserOutput
 }
@@ -862,6 +869,9 @@ type User {
   """User's Lost and Found Items"""
   items: [Item!]
 
+  """username in ldap"""
+  ldapName: String
+
   """LDAP User's Phone number"""
   mobile: String
 
@@ -884,7 +894,7 @@ type User {
 """Input for Update-User Mutation"""
 input UserInput {
   """LDAP User's hostel"""
-  hostel: String!
+  hostel: String
 
   """LDAP User's interests, collection of tags"""
   interest: [String!]!
@@ -1006,12 +1016,6 @@ type getEventOutput {
 type getItemsOutput {
   itemsList: [Item!]
   total: Float!
-}
-
-"""Output type for get Me Query"""
-type getMeOutput {
-  permissions: [UserPermission!]
-  user: User!
 }
 
 """Output type for getNetop query"""

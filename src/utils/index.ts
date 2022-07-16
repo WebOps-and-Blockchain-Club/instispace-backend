@@ -119,3 +119,43 @@ export const usersDevList = [
     pass: "123456",
   },
 ];
+
+export const getDepartment = (code: string) => {
+  let deptCode = code.toUpperCase();
+  switch (deptCode) {
+    case "AE":
+      return "Aerospace Engineering";
+    case "AM":
+      return "Applied Mechanics";
+    case "BT" || "BS":
+      return "Biotechnology";
+    case "CH":
+      return "Chemical Engineering";
+    case "CY":
+      return "Chemistry";
+    case "CE":
+      return "Civil Engineering";
+    case "CS":
+      return "Computer Science and Engineering";
+    case "EE":
+      return "Electrical Engineering";
+    case "ED":
+      return "Engineering Design";
+    case "HS":
+      return "Humanities and Social Sciences";
+    case "MS":
+      return "Management Studies";
+    case "MA":
+      return "Mathematics";
+    case "ME":
+      return "Mechanical Engineering";
+    case "MM":
+      return "Metallurgical and Materials Engineering";
+    case "OE" || "NA":
+      return "Ocean Engineering";
+    case "PH":
+      return "Physics";
+    default:
+      return "Null";
+  }
+};

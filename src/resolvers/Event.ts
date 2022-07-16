@@ -323,7 +323,7 @@ class EventResolver {
       d.setHours(d.getHours() - 2); //Filter the events after the 2 hours time of completion
       if (fileringConditions && fileringConditions.isStared) {
         eventList = eventList.filter((n) => {
-          return fileringConditions.tags
+          return fileringConditions.tags && fileringConditions.tags.length
             ? n.staredBy.filter((u) => u.id === user.id).length &&
                 new Date(n.time).getTime() > d.getTime() &&
                 n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))

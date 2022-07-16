@@ -121,10 +121,14 @@ class AnnouncementResolver {
   async getAnnouncements(
     @Arg("LastAnnouncementId") lastAnnouncementId: string,
     @Arg("take") take: number,
+    @Ctx() { user }: MyContext,
     @Arg("HostelId") hostelId?: string,
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
+      if ([UserRole.MODERATOR, UserRole.USER].includes(user.role) && !hostelId)
+        throw new Error("Invalid Hostel Input");
+
       let announcementsList: Announcement[] = [];
       if (search) {
         await Promise.all(

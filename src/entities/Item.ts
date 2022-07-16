@@ -45,7 +45,7 @@ class Item extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true, description: "Contact Number of User" })
-  contact: string;
+  contact?: string;
 
   @ManyToOne((_type) => User, (user) => user.items, { cascade: true })
   @Field((_type) => User, { description: "Item's User" })

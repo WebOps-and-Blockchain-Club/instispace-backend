@@ -5,6 +5,7 @@ import {
   Notification,
   UserPermission,
   EditDelPermission,
+  getDepartment,
 } from "../../utils";
 import { Field, ObjectType, registerEnumType } from "type-graphql";
 import Netop from "../../entities/Netop";
@@ -80,13 +81,22 @@ class getUsersOutput {
   total: number;
 }
 
-@ObjectType("getMeOutput", { description: "Output type for get Me Query" })
-class getMeOutput {
-  @Field(() => User)
-  user: User;
+@ObjectType("LDAPUser")
+class LDAPUser {
+  @Field()
+  name: string;
 
-  @Field(() => [UserPermission], { nullable: true })
-  permissions: UserPermission[];
+  @Field()
+  roll: string;
+
+  @Field()
+  department: string;
+
+  constructor(name: string, roll: string) {
+    this.name = name;
+    this.roll = roll;
+    this.department = getDepartment(roll.slice(0, 2));
+  }
 }
 
 export {
@@ -95,5 +105,5 @@ export {
   getUsersOutput,
   getSuperUsersOutput,
   searchUsersOutput,
-  getMeOutput,
+  LDAPUser,
 };

@@ -36,7 +36,7 @@ class UserInput {
 
   @IsMobilePhone("en-IN")
   @Field({ nullable: true, description: "LDAP User's Phone number" })
-  mobile: string;
+  mobile?: string;
 }
 
 @InputType({ description: "Input for Change-Password Mutation" })

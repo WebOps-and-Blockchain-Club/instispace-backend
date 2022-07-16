@@ -32,10 +32,10 @@ import UsersDev from "../entities/UsersDev";
 import User from "../entities/User";
 import Tag from "../entities/Tag";
 import {
-  getMeOutput,
   getSuperUsersOutput,
   getUsersOutput,
   homeOutput,
+  LDAPUser,
   LoginOutput,
   searchUsersOutput,
 } from "../types/objects/users";
@@ -55,7 +55,7 @@ import fcm from "../utils/fcmTokens";
 import Netop from "../entities/Netop";
 import Event from "../entities/Event";
 import Announcement from "../entities/Announcement";
-import { LDAPAuth } from "../utils/LDAPAuth";
+import ldapClient from "../utils/ldap";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -70,6 +70,7 @@ class UsersResolver {
     //For users
     try {
       if (emailExpresion.test(roll) === false) {
+        let ldapUser: any;
         if (process.env.NODE_ENV === "development") {
           //If user development database is empty add few random users in database
           const usersDevCount = await UsersDev.count();
@@ -82,21 +83,24 @@ class UsersResolver {
           }
 
           //Check the user credentials in development database
-          const ldapUser = await UsersDev.findOne({ where: { roll, pass } });
+          ldapUser = await UsersDev.findOne({ where: { roll, pass } });
           if (!ldapUser) throw new Error("Invalid Credentials");
         } else {
           //Check with LDAP
-          const ldapUser = await LDAPAuth(roll, pass);
+          ldapUser = await ldapClient.auth(roll, pass);
           if (!ldapUser) throw new Error("Invalid Credentials");
         }
 
         /************ Check the user details ************/
-        const user = await User.findOne({ roll });
+        console.log(roll);
+        const user = await User.findOne({ roll: roll.toLowerCase() });
         //If user doesn't exists
+        console.log(user);
         if (!user) {
           const newUser = new User();
-          newUser.roll = roll;
+          newUser.roll = roll.toLowerCase();
           newUser.role = UserRole.USER;
+          newUser.ldapName = ldapUser.displayName;
           newUser.isNewUser = true;
           if (newUser.fcmToken && newUser.fcmToken.length) {
             newUser.fcmToken += " AND " + fcmToken;
@@ -132,7 +136,7 @@ class UsersResolver {
 
           if (admins.length === 0) {
             const admin = new User();
-            admin.roll = adminEmail;
+            admin.roll = adminEmail.toLowerCase();
             admin.role = UserRole.ADMIN;
             admin.isNewUser = false;
             if (admin.fcmToken && admin.fcmToken.length) {
@@ -205,7 +209,7 @@ class UsersResolver {
         if (!hostel) throw new Error("Invalid Hostel");
         newUser.hostel = hostel;
       }
-      newUser.roll = createAccountInput.roll;
+      newUser.roll = createAccountInput.roll.toLowerCase();
       newUser.isNewUser = true;
       newUser.password = bcrypt.hashSync(password, salt);
       await newUser.save();
@@ -343,71 +347,13 @@ class UsersResolver {
     }
   }
 
-  @Query(() => getMeOutput, {
+  @Query(() => User, {
     description:
       "Query to fetch personal profile, Restrictions : {anyone who is authoried}",
   })
   @Authorized()
   async getMe(@Ctx() { user }: MyContext) {
-    let permissions: UserPermission[] = [
-      UserPermission.CREATE_FEEDBACK,
-      UserPermission.CREATE_ITEM,
-      UserPermission.CREATE_NETOP,
-      UserPermission.CREATE_QUERY,
-      UserPermission.GET_AMENITIES,
-      UserPermission.GET_ANNOUNCEMENTS,
-      UserPermission.GET_CONTACTS,
-    ];
-    if (user.role !== UserRole.USER) {
-      permissions.push(UserPermission.CREATE_EVENT, UserPermission.UPDATE_ROLE);
-    }
-    if (user.role === UserRole.HOSTEL_SEC)
-      permissions.push(
-        UserPermission.CREATE_AMENITY,
-        UserPermission.CREATE_ANNOUNCEMENT,
-        UserPermission.CREATE_CONTACT,
-        UserPermission.CREATE_HOSTEL,
-        UserPermission.UPDATE_ROLE
-      );
-    if (user.role === UserRole.SECRETORY)
-      permissions.push(
-        UserPermission.CREATE_ACCOUNT,
-        UserPermission.CREATE_ANNOUNCEMENT,
-        UserPermission.CREATE_TAG,
-        UserPermission.GET_ALL_ANNOUNCEMENTS,
-        UserPermission.GET_REPORTS,
-        UserPermission.UPDATE_ROLE
-      );
-    if (user.role === UserRole.HAS)
-      permissions.push(
-        UserPermission.CREATE_ACCOUNT,
-        UserPermission.CREATE_AMENITY,
-        UserPermission.CREATE_ANNOUNCEMENT,
-        UserPermission.CREATE_CONTACT,
-        UserPermission.CREATE_HOSTEL,
-        UserPermission.CREATE_TAG,
-        UserPermission.GET_ALL_AMENITIES,
-        UserPermission.GET_ALL_ANNOUNCEMENTS,
-        UserPermission.GET_ALL_CONTACTS,
-        UserPermission.GET_REPORTS,
-        UserPermission.UPDATE_ROLE
-      );
-    if (user.role === UserRole.ADMIN)
-      permissions.push(
-        UserPermission.CREATE_ACCOUNT,
-        UserPermission.CREATE_AMENITY,
-        UserPermission.CREATE_ANNOUNCEMENT,
-        UserPermission.CREATE_CONTACT,
-        UserPermission.CREATE_HOSTEL,
-        UserPermission.CREATE_TAG,
-        UserPermission.GET_ALL_AMENITIES,
-        UserPermission.GET_ALL_CONTACTS,
-        UserPermission.GET_ALL_ANNOUNCEMENTS,
-        UserPermission.GET_REPORTS,
-        UserPermission.VIEW_FEEDBACK,
-        UserPermission.UPDATE_ROLE
-      );
-    return { user: user, permissions: permissions };
+    return user;
   }
 
   @Query(() => User, {
@@ -455,6 +401,27 @@ class UsersResolver {
       usersList = usersList.splice(0, take);
     }
     return { usersList: usersList, total };
+  }
+
+  @Query(() => [LDAPUser], { nullable: true })
+  @Authorized()
+  async searchLDAPUser(
+    @Arg("skip") skip: number,
+    @Arg("take") take: number,
+    @Arg("search") search: string
+  ) {
+    try {
+      let users: any[] = (await ldapClient.search(
+        search,
+        skip + take
+      )) as any[];
+      users = users.slice(skip, skip + take);
+      return users.map(
+        (user) => new LDAPUser(user.displayName, user.givenName)
+      );
+    } catch (e) {
+      throw new Error(`message: ${e}`);
+    }
   }
 
   @Mutation(() => Boolean, {
@@ -740,15 +707,29 @@ class UsersResolver {
         const announcementObject = new AnnouncementResolver();
         const eventObject = new EventResolver();
 
-        const filters: fileringConditions = { tags: tagIds!, isStared: false };
-        // take = -1 means return all
-        const netops = (await netopObject.getNetops(myCon, "", 15, filters))
-          .netopList;
-        const events = (await eventObject.getEvents(myCon, "", 15, filters))
-          .list;
-        const announcements = (
-          await announcementObject.getAnnouncements("", 5, user.hostel!.id)
-        ).announcementsList;
+        let announcements;
+        let netops;
+        let events;
+        if (tagIds && tagIds.length) {
+          const filters: fileringConditions = {
+            tags: tagIds,
+            isStared: false,
+          };
+          // take = -1 means return all
+          netops = (await netopObject.getNetops(myCon, "", 15, filters))
+            .netopList;
+          events = (await eventObject.getEvents(myCon, "", 15, filters)).list;
+        }
+
+        if (user.hostel)
+          announcements = (
+            await announcementObject.getAnnouncements(
+              "",
+              5,
+              myCon,
+              user.hostel.id
+            )
+          ).announcementsList;
         return { netops, announcements, events };
       }
     } catch (e) {
@@ -799,12 +780,10 @@ class UsersResolver {
   }
 
   @FieldResolver(() => [UserPermission])
-  async permissions(@Root() { id, permissions }: User) {
+  async permissions(@Root() { role, permissions }: User) {
     try {
-      if (permissions) return permissions;
-      const user = await User.findOne({
-        where: { id: id },
-      });
+      if (permissions && permissions.length) return permissions;
+
       let permissionList: UserPermission[] = [
         UserPermission.CREATE_FEEDBACK,
         UserPermission.CREATE_ITEM,
@@ -814,30 +793,35 @@ class UsersResolver {
         UserPermission.GET_ANNOUNCEMENTS,
         UserPermission.GET_CONTACTS,
       ];
-      if (user?.role !== UserRole.USER) {
+      if (role === UserRole.MODERATOR) {
+        permissionList.push(UserPermission.CREATE_EVENT);
+      }
+      if (role === UserRole.LEADS) {
         permissionList.push(
           UserPermission.CREATE_EVENT,
           UserPermission.UPDATE_ROLE
         );
       }
-      if (user?.role === UserRole.HOSTEL_SEC)
+      if (role === UserRole.HOSTEL_SEC)
         permissionList.push(
           UserPermission.CREATE_AMENITY,
           UserPermission.CREATE_ANNOUNCEMENT,
           UserPermission.CREATE_CONTACT,
           UserPermission.CREATE_HOSTEL,
-          UserPermission.UPDATE_ROLE
+          UserPermission.UPDATE_ROLE,
+          UserPermission.CREATE_EVENT
         );
-      if (user?.role === UserRole.SECRETORY)
+      if (role === UserRole.SECRETORY)
         permissionList.push(
           UserPermission.CREATE_ACCOUNT,
           UserPermission.CREATE_ANNOUNCEMENT,
           UserPermission.CREATE_TAG,
           UserPermission.GET_ALL_ANNOUNCEMENTS,
           UserPermission.GET_REPORTS,
-          UserPermission.UPDATE_ROLE
+          UserPermission.UPDATE_ROLE,
+          UserPermission.CREATE_EVENT
         );
-      if (user?.role === UserRole.HAS)
+      if (role === UserRole.HAS)
         permissionList.push(
           UserPermission.CREATE_ACCOUNT,
           UserPermission.CREATE_AMENITY,
@@ -849,9 +833,10 @@ class UsersResolver {
           UserPermission.GET_ALL_ANNOUNCEMENTS,
           UserPermission.GET_ALL_CONTACTS,
           UserPermission.GET_REPORTS,
-          UserPermission.UPDATE_ROLE
+          UserPermission.UPDATE_ROLE,
+          UserPermission.CREATE_EVENT
         );
-      if (user?.role === UserRole.ADMIN)
+      if (role === UserRole.ADMIN)
         permissionList.push(
           UserPermission.CREATE_ACCOUNT,
           UserPermission.CREATE_AMENITY,
@@ -864,7 +849,8 @@ class UsersResolver {
           UserPermission.GET_ALL_ANNOUNCEMENTS,
           UserPermission.GET_REPORTS,
           UserPermission.VIEW_FEEDBACK,
-          UserPermission.UPDATE_ROLE
+          UserPermission.UPDATE_ROLE,
+          UserPermission.CREATE_EVENT
         );
       return permissionList;
     } catch (e) {

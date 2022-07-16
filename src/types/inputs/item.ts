@@ -9,7 +9,7 @@ class ItemInput {
   images?: string;
 
   @Field({ nullable: true, description: "LDAP User's Phone number" })
-  contact: string;
+  contact?: string;
 
   @Field({ description: "Item's Location" })
   location: string;
@@ -36,7 +36,7 @@ class EditItemInput {
   time?: string;
 
   @Field({ nullable: true, description: "LDAP User's Phone number" })
-  contact: string;
+  contact?: string;
 
   images?: string;
 }

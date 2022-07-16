@@ -39,6 +39,10 @@ class User extends BaseEntity {
   name: string;
 
   @Column({ nullable: true })
+  @Field({ nullable: true, description: "username in ldap" })
+  ldapName: string;
+
+  @Column({ nullable: true })
   password: string;
 
   @Column("enum", { enum: UserRole, default: UserRole.USER })
@@ -106,7 +110,7 @@ class User extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true, description: "LDAP User's Phone number" })
-  mobile: string;
+  mobile?: string;
 
   @Column({ type: Boolean })
   @Field((_type) => Boolean, {
