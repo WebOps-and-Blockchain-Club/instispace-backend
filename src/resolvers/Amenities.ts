@@ -16,7 +16,7 @@ import Hostel from "../entities/Hostel";
 
 @Resolver(() => Amenity)
 class AmenitiesResolver {
-  @Mutation(() => Boolean, {
+  @Mutation(() => Amenity, {
     description:
       "Mutation to create Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}",
   })
@@ -40,8 +40,8 @@ class AmenitiesResolver {
         amenity.name = amenityInput.name;
         amenity.description = amenityInput.description;
         amenity.hostel = hostel;
-        await amenity.save();
-        return !!amenity;
+        const createdAmenity = await amenity.save();
+        return createdAmenity;
       }
       throw new Error("Unauthorized");
     } catch (e) {

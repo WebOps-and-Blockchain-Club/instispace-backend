@@ -24,7 +24,7 @@ import { ILike } from "typeorm";
 
 @Resolver(Event)
 class EventResolver {
-  @Mutation(() => Boolean, {
+  @Mutation(() => Event, {
     description: "Mutation to create an event",
   })
   @Authorized(
@@ -39,7 +39,7 @@ class EventResolver {
     @Arg("NewEventData") createEventInput: createEventInput,
     @Ctx() { user }: MyContext,
     @Arg("Image", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
-  ): Promise<boolean> {
+  ): Promise<Event> {
     try {
       var tags: Tag[] = [];
       let iUsers: User[] = [];
@@ -115,9 +115,8 @@ class EventResolver {
               });
             });
         });
-        return true;
       }
-      return false;
+      return event;
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);

@@ -25,7 +25,7 @@ import { mail } from "../utils/mail";
 
 @Resolver(MyQuery)
 class MyQueryResolver {
-  @Mutation(() => Boolean, {
+  @Mutation(() => MyQuery, {
     description: "create Query, Restrictions:{any authorized user}",
   })
   @Authorized()
@@ -35,7 +35,7 @@ class MyQueryResolver {
     @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[],
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
-  ): Promise<boolean> {
+  ): Promise<MyQuery> {
     try {
       if (images)
         createMyQuerysInput.photo = (
@@ -54,7 +54,7 @@ class MyQueryResolver {
         likeCount: 0,
       }).save();
 
-      return !!myQuery;
+      return myQuery;
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
@@ -237,7 +237,7 @@ class MyQueryResolver {
     }
   }
 
-  @Mutation(() => Boolean, {
+  @Mutation(() => Comment, {
     description: "comment on Query, Restrictions:{any authorized user}",
   })
   @Authorized()
@@ -290,7 +290,7 @@ class MyQueryResolver {
             });
         }
 
-        return !!comment;
+        return comment;
       }
       throw new Error("Post not found");
     } catch (e) {

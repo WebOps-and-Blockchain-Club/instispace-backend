@@ -25,7 +25,7 @@ import { ILike } from "typeorm";
 
 @Resolver((_type) => Announcement)
 class AnnouncementResolver {
-  @Mutation(() => Boolean, {
+  @Mutation(() => Announcement, {
     description:
       "Mutation to create Announcements, Restrictions : {Admin, Hostel Secretary, and Hostel Affair Secretary}",
   })
@@ -92,7 +92,7 @@ class AnnouncementResolver {
         return true;
       }
 
-      return !!announcementCreated;
+      return announcementCreated;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

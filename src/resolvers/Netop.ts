@@ -31,7 +31,7 @@ import { mail } from "../utils/mail";
 
 @Resolver(Netop)
 class NetopResolver {
-  @Mutation(() => Boolean, {
+  @Mutation(() => Netop, {
     description:
       "create network and opportunity, Restrictions:{any authorized user}",
   })
@@ -42,7 +42,7 @@ class NetopResolver {
     @Arg("Image", () => [GraphQLUpload], { nullable: true }) images?: Upload[],
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
-  ): Promise<boolean> {
+  ): Promise<Netop> {
     try {
       var tags: Tag[] = [];
       let iUsers: User[] = [];
@@ -124,10 +124,9 @@ class NetopResolver {
               });
             });
         });
-        return true;
       }
 
-      return !!netop;
+      return netop;
     } catch (e) {
       console.log(e.message);
       throw new Error(e.message);
@@ -347,7 +346,7 @@ class NetopResolver {
     }
   }
 
-  @Mutation(() => Boolean, {
+  @Mutation(() => Comment, {
     description:
       "comment on network and opportunity, Restrictions:{any authorized user}",
   })
@@ -401,7 +400,7 @@ class NetopResolver {
             });
         }
 
-        return !!comment;
+        return comment;
       }
       throw new Error("Post not found");
     } catch (e) {

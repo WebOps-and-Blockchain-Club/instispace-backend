@@ -21,7 +21,7 @@ import fcm from "../utils/fcmTokens";
 
 @Resolver((_type) => Item)
 class LostAndFoundResolver {
-  @Mutation((_type) => Boolean, {
+  @Mutation((_type) => Item, {
     description:
       "Mutation to create the Item, anyone who is authorised and have either Lost an Item or have Found it can access",
   })
@@ -83,7 +83,7 @@ class LostAndFoundResolver {
             });
         });
       }
-      return !!item;
+      return item;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

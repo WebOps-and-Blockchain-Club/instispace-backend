@@ -17,7 +17,7 @@ import { CreateContactInput, EditContactInput } from "../types/inputs/contact";
 
 @Resolver(() => Contact)
 class ContactResolver {
-  @Mutation(() => Boolean, {
+  @Mutation(() => Contact, {
     description:
       "Mutation to create Hostel-Contact, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}",
   })
@@ -42,8 +42,8 @@ class ContactResolver {
         contact.name = contactInput.name;
         contact.contact = contactInput.contact;
         contact.hostel = hostel;
-        await contact.save();
-        return !!contact;
+        const createdContact = await contact.save();
+        return createdContact;
       }
       throw new Error("Unauthorized");
     } catch (e) {
