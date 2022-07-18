@@ -299,6 +299,7 @@ class MyQueryResolver {
     }
   }
 
+  /*
   @Mutation(() => Boolean)
   @Authorized([
     UserRole.ADMIN,
@@ -383,6 +384,7 @@ class MyQueryResolver {
     }
     return false;
   }
+*/
 
   @Query(() => MyQuery, {
     description: "get an myQuery by id Query",

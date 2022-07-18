@@ -1,4 +1,4 @@
-import { Field, ObjectType } from "type-graphql";
+import { Field, ObjectType, registerEnumType } from "type-graphql";
 import {
   BaseEntity,
   Column,
@@ -10,6 +10,9 @@ import {
 import Netop from "../Netop";
 import Query from "../MyQuery";
 import User from "../User";
+import { ReportStatus } from "../../utils";
+
+registerEnumType(ReportStatus, { name: "ReportStatus" });
 
 @Entity("Report")
 @ObjectType("Report")
@@ -34,11 +37,11 @@ class Report extends BaseEntity {
   @Field()
   description: string;
 
-  @Column({ type: Boolean, default: false })
-  @Field((_type) => Boolean, {
+  @Column("enum", { enum: ReportStatus, default: ReportStatus.REPORTED })
+  @Field((_type) => ReportStatus, {
     description: "Visiblity state of reports",
   })
-  isResolved: boolean;
+  status: ReportStatus;
 
   @CreateDateColumn({ type: "timestamptz" })
   @Field(() => Date)

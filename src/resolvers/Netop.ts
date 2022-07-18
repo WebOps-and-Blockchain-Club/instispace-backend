@@ -410,6 +410,7 @@ class NetopResolver {
     }
   }
 
+  /*
   @Mutation(() => Boolean)
   @Authorized([
     UserRole.ADMIN,
@@ -503,6 +504,7 @@ class NetopResolver {
     }
     return false;
   }
+*/
 
   @Query(() => Netop, {
     description: "get an netop by id network and opportunity",
