@@ -345,7 +345,10 @@ type Feedback {
 """Input for Query get User"""
 input GetUserInput {
   """User's Id"""
-  id: String!
+  id: String
+
+  """User's Roll Number"""
+  roll: String
 }
 
 """Hostel entity"""
@@ -783,11 +786,11 @@ type Query {
   getTags: [Tag!]!
 
   """Query to Fetch a User by id, Restroctions : {anyone who is authorised}"""
-  getUser(GetUserInput: GetUserInput!): User!
+  getUser(GetUserInput: GetUserInput!): User
 
   """Query to fetch ldap Users, Restrictions : {anyone who is authorized}"""
   getUsers(LastUserId: String!, search: String, take: Float!): getUsersOutput!
-  searchLDAPUser(search: String!, skip: Float!, take: Float!): [LDAPUser!]
+  searchLDAPUser(search: String!, skip: Float!, take: Float!): SearchLDAPUserOutput
   searchQueries(OrderByLikes: Boolean, lastEventId: String!, search: String!, take: Float!): getQueryOutput!
   searchUser(LastUserId: String!, search: String, take: Float!): searchUserOutput
 }
@@ -802,6 +805,11 @@ type Report {
   isResolved: Boolean!
   netop: Netop
   query: MyQuery
+}
+
+type SearchLDAPUserOutput {
+  list: [LDAPUser!]
+  total: Float!
 }
 
 """Tag Entity, Users will follow these tags"""

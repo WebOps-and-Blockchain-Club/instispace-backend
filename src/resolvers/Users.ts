@@ -37,6 +37,7 @@ import {
   homeOutput,
   LDAPUser,
   LoginOutput,
+  SearchLDAPUserOutput,
   searchUsersOutput,
 } from "../types/objects/users";
 import MyContext from "../utils/context";
@@ -357,14 +358,21 @@ class UsersResolver {
   }
 
   @Query(() => User, {
+    nullable: true,
     description:
       "Query to Fetch a User by id, Restroctions : {anyone who is authorised}",
   })
   @Authorized()
-  async getUser(@Arg("GetUserInput") { id }: GetUserInput) {
+  async getUser(@Arg("GetUserInput") { id, roll }: GetUserInput) {
     try {
+      if (!id && !roll) throw new Error("Invalid Input");
+
+      let filter: { [k: string]: any } = {};
+      if (id) filter.id = id;
+      if (roll) filter.roll = roll;
+
       const user = await User.findOne({
-        where: { id },
+        where: filter,
       });
       return user;
     } catch (e) {
@@ -403,7 +411,7 @@ class UsersResolver {
     return { usersList: usersList, total };
   }
 
-  @Query(() => [LDAPUser], { nullable: true })
+  @Query(() => SearchLDAPUserOutput, { nullable: true })
   @Authorized()
   async searchLDAPUser(
     @Arg("skip") skip: number,
@@ -415,10 +423,12 @@ class UsersResolver {
         search,
         skip + take
       )) as any[];
+      const total = users.length;
       users = users.slice(skip, skip + take);
-      return users.map(
-        (user) => new LDAPUser(user.displayName, user.givenName)
+      const list = users.map(
+        (user) => new LDAPUser(user.displayName, user.uid)
       );
+      return { list, total };
     } catch (e) {
       throw new Error(`message: ${e}`);
     }

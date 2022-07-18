@@ -95,8 +95,17 @@ class LDAPUser {
   constructor(name: string, roll: string) {
     this.name = name;
     this.roll = roll;
-    this.department = getDepartment(roll.slice(0, 2));
+    this.department = getDepartment(roll?.slice(0, 2));
   }
+}
+
+@ObjectType("SearchLDAPUserOutput")
+class SearchLDAPUserOutput {
+  @Field(() => [LDAPUser], { nullable: true })
+  list: LDAPUser[];
+
+  @Field(() => Number)
+  total: number;
 }
 
 export {
@@ -106,4 +115,5 @@ export {
   getSuperUsersOutput,
   searchUsersOutput,
   LDAPUser,
+  SearchLDAPUserOutput,
 };

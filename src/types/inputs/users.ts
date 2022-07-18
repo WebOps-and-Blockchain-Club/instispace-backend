@@ -56,8 +56,11 @@ class ModeratorInput {
 
 @InputType({ description: "Input for Query get User" })
 class GetUserInput {
-  @Field({ description: "User's Id" })
-  id: string;
+  @Field({ nullable: true, description: "User's Id" })
+  id?: string;
+
+  @Field({ nullable: true, description: "User's Roll Number" })
+  roll?: string;
 }
 
 export {
