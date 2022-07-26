@@ -164,7 +164,7 @@ class LostAndFoundResolver {
     }
   }
 
-  @Mutation(() => Boolean, {
+  @Mutation(() => Item, {
     description:
       "Mutation : Mutation to edit the item, accessible to user who created that item",
   })
@@ -176,24 +176,32 @@ class LostAndFoundResolver {
     @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
   ) {
     try {
-      //stroring the image
-      if (images)
-        editItemInput.images = (await addAttachments([...images], true)).join(
-          " AND "
-        );
+      let item = await Item.findOne(id);
 
-      //storing the contact information
-      if (!editItemInput.contact) {
-        editItemInput.contact = user.mobile;
+      if (item) {
+        //stroring the image
+        if (images) {
+          editItemInput.images = (await addAttachments([...images], true)).join(
+            " AND "
+          );
+          item.images = editItemInput.images;
+        }
+
+        //storing the contact information
+        if (!editItemInput.contact) {
+          editItemInput.contact = user.mobile;
+        }
+
+        //updating the item
+        item.contact = editItemInput.contact;
+        if (editItemInput.name) item.name = editItemInput.name;
+        if (editItemInput.location) item.location = editItemInput.location;
+        if (editItemInput.time) item.time = new Date(editItemInput.time);
+
+        const itemUpdated = await item.save();
+        return itemUpdated;
       }
-
-      editItemInput.contact = editItemInput.contact;
-
-      //updating the item
-      const { affected } = await Item.update(id, {
-        ...editItemInput,
-      });
-      return affected === 1;
+      throw new Error("Invalid Item");
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

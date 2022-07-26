@@ -179,7 +179,7 @@ class AnnouncementResolver {
     }
   }
 
-  @Mutation(() => Boolean, {
+  @Mutation(() => Announcement, {
     description:
       "Mutataion to update Announcement, Restrictions : {Admin, Hostel Affair Secretory, Hostel Secretory}",
   })
@@ -231,7 +231,7 @@ class AnnouncementResolver {
           announcement.hostels = hostels;
         }
         const announcementUpdated = await announcement.save();
-        return !!announcementUpdated;
+        return announcementUpdated;
       }
       throw new Error("Unauthorized");
     } catch (e) {

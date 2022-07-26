@@ -123,7 +123,7 @@ class EventResolver {
     }
   }
 
-  @Mutation(() => Boolean, {
+  @Mutation(() => Event, {
     description: "Edit the event by id",
   })
   @Authorized()
@@ -168,7 +168,7 @@ class EventResolver {
           event.linkToAction = editEventInput.linkToAction;
 
         const eventUpdated = await event.save();
-        return !!eventUpdated;
+        return eventUpdated;
       } else {
         throw new Error("Unauthorized");
       }

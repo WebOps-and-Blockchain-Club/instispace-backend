@@ -465,24 +465,24 @@ type Mutation {
   """
   Mutation to create Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
   """
-  createAmenity(CreateAmenityInput: CreateAmenityInput!, HostelId: String!): Boolean!
+  createAmenity(CreateAmenityInput: CreateAmenityInput!, HostelId: String!): Amenity!
 
   """
   Mutation to create Announcements, Restrictions : {Admin, Hostel Secretary, and Hostel Affair Secretary}
   """
-  createAnnouncement(AnnouncementInput: CreateAnnouncementInput!, Images: [Upload!]): Boolean!
+  createAnnouncement(AnnouncementInput: CreateAnnouncementInput!, Images: [Upload!]): Announcement!
 
   """comment on network and opportunity, Restrictions:{any authorized user}"""
-  createCommentNetop(Images: [Upload!], NetopId: String!, content: String!): Boolean!
+  createCommentNetop(Images: [Upload!], NetopId: String!, content: String!): Comment!
 
   """comment on Query, Restrictions:{any authorized user}"""
-  createCommentQuery(Images: [Upload!], MyQueryId: String!, content: String!): Boolean!
+  createCommentQuery(Images: [Upload!], MyQueryId: String!, content: String!): Comment!
 
   """Mutation to add Complaint, Restrictions : {anyone who is Authorised}"""
   createComplaint(CreateComplaintInput: ComplaintInput!, Images: [Upload!]): Boolean!
 
   """Mutation to create an event"""
-  createEvent(Image: [Upload!], NewEventData: createEventInput!): Boolean!
+  createEvent(Image: [Upload!], NewEventData: createEventInput!): Event!
 
   """
   Mutation to create Hostels, Restrictions : {Admin, Hostel Secretory and Hostel Affair Secretory}
@@ -492,18 +492,18 @@ type Mutation {
   """
   Mutation to create Hostel-Contact, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
   """
-  createHostelContact(CreateContactInput: CreateContactInput!, HostelId: String!): Boolean!
+  createHostelContact(CreateContactInput: CreateContactInput!, HostelId: String!): Contact!
 
   """
   Mutation to create the Item, anyone who is authorised and have either Lost an Item or have Found it can access
   """
-  createItem(Images: [Upload!], ItemInput: ItemInput!): Boolean!
+  createItem(Images: [Upload!], ItemInput: ItemInput!): Item!
 
   """create Query, Restrictions:{any authorized user}"""
-  createMyQuery(Attachments: [Upload!], Images: [Upload!], createQuerysInput: createQuerysInput!): Boolean!
+  createMyQuery(Attachments: [Upload!], Images: [Upload!], createQuerysInput: createQuerysInput!): MyQuery!
 
   """create network and opportunity, Restrictions:{any authorized user}"""
-  createNetop(Attachments: [Upload!], Image: [Upload!], NewNetopData: createNetopsInput!): Boolean!
+  createNetop(Attachments: [Upload!], Image: [Upload!], NewNetopData: createNetopsInput!): Netop!
 
   """Mutation deprecated"""
   createSec(CreateSecInput: CreateSecInput!, HostelId: String!): Boolean!
@@ -540,24 +540,24 @@ type Mutation {
   """
   Mutataion to update Announcement, Restrictions : {Admin, Hostel Affair Secretory, Hostel Secretory}
   """
-  editAnnouncement(AnnouncementId: String!, Images: [Upload!], UpdateAnnouncementInput: EditAnnouncementInput!): Boolean!
+  editAnnouncement(AnnouncementId: String!, Images: [Upload!], UpdateAnnouncementInput: EditAnnouncementInput!): Announcement!
 
   """Mutation to edit Complaint, Restrictions : {anyone who is Authorised}"""
   editComplaint(ComplaintId: String!, EditComplaintInput: EditComplaintInput!, Images: [Upload!]): Boolean!
 
   """Edit the event by id"""
-  editEvent(EditEventData: editEventInput!, EventId: String!, Image: [Upload!]): Boolean!
+  editEvent(EditEventData: editEventInput!, EventId: String!, Image: [Upload!]): Event!
 
   """
   Mutation : Mutation to edit the item, accessible to user who created that item
   """
-  editItems(EditItemInput: EditItemInput!, Images: [Upload!], ItemId: String!): Boolean!
+  editItems(EditItemInput: EditItemInput!, Images: [Upload!], ItemId: String!): Item!
 
   """edit Query, Restrictions:{user who created}"""
-  editMyQuery(Attachments: [Upload!], EditMyQuerysData: editQuerysInput!, Image: [Upload!], MyQueryId: String!): Boolean!
+  editMyQuery(Attachments: [Upload!], EditMyQuerysData: editQuerysInput!, Image: [Upload!], MyQueryId: String!): MyQuery!
 
   """edit network and opportunity, Restrictions:{user who created}"""
-  editNetop(Attachments: [Upload!], EditNetopsData: editNetopsInput!, Image: [Upload!], NetopId: String!): Boolean!
+  editNetop(Attachments: [Upload!], EditNetopsData: editNetopsInput!, Image: [Upload!], NetopId: String!): Netop!
 
   """Mutation to login, Restrictions : {none}"""
   login(LoginInputs: LoginInput!, fcmToken: String!): LoginOutput!
@@ -609,12 +609,12 @@ type Mutation {
   """
   Mutation to update Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
   """
-  updateAmenity(AmenityId: String!, UpdateAmenityInput: EditAmenityInput!): Boolean!
+  updateAmenity(AmenityId: String!, UpdateAmenityInput: EditAmenityInput!): Amenity!
 
   """
   Mutation to update Hostel-Contact, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
   """
-  updateHostelContact(ContactId: String!, HostelId: String, UpdateContactInput: EditContactInput!): Boolean!
+  updateHostelContact(ContactId: String!, HostelId: String, UpdateContactInput: EditContactInput!): Contact!
 
   """
   Mutation to change role of an ldap User to Moderator, Restrictions : {Admins and Leads}

@@ -133,7 +133,7 @@ class NetopResolver {
     }
   }
 
-  @Mutation(() => Boolean, {
+  @Mutation(() => Netop, {
     description:
       "edit network and opportunity, Restrictions:{user who created}",
   })
@@ -180,7 +180,7 @@ class NetopResolver {
           netop.linkToAction = editNetopsInput.linkToAction;
 
         const netopUpdated = await netop.save();
-        return !!netopUpdated;
+        return netopUpdated;
       } else {
         throw new Error("Unauthorized");
       }

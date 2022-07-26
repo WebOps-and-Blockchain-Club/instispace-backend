@@ -71,7 +71,7 @@ class AmenitiesResolver {
     }
   }
 
-  @Mutation(() => Boolean, {
+  @Mutation(() => Amenity, {
     description:
       "Mutation to update Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}",
   })
@@ -95,7 +95,7 @@ class AmenitiesResolver {
         if (amenityInput.description)
           amenity.description = amenityInput.description;
         const amenityUpdated = await amenity.save();
-        return !!amenityUpdated;
+        return amenityUpdated;
       }
       throw new Error("Unauthorized");
     } catch (e) {

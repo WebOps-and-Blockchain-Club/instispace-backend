@@ -61,7 +61,7 @@ class MyQueryResolver {
     }
   }
 
-  @Mutation(() => Boolean, {
+  @Mutation(() => MyQuery, {
     description: "edit Query, Restrictions:{user who created}",
   })
   @Authorized()
@@ -85,19 +85,23 @@ class MyQueryResolver {
             user.role
           ))
       ) {
-        if (images)
+        if (images) {
           editMyQuerysInput.photo = (
             await addAttachments([...images], true)
           ).join(" AND ");
-        if (attachments)
+          myQuery.photo = editMyQuerysInput.photo;
+        }
+        if (attachments) {
           editMyQuerysInput.attachments = (
             await addAttachments([...attachments], false)
           ).join(" AND ");
-
-        const { affected } = await MyQuery.update(myQueryId, {
-          ...editMyQuerysInput,
-        });
-        return affected === 1;
+          myQuery.attachments = editMyQuerysInput.attachments;
+        }
+        if (editMyQuerysInput.title) myQuery.title = editMyQuerysInput.title;
+        if (editMyQuerysInput.content)
+          myQuery.content = editMyQuerysInput.content;
+        const queryUpdated = myQuery.save();
+        return queryUpdated;
       } else {
         throw new Error("Unauthorized");
       }

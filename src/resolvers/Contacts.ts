@@ -74,7 +74,7 @@ class ContactResolver {
     }
   }
 
-  @Mutation(() => Boolean, {
+  @Mutation(() => Contact, {
     description:
       "Mutation to update Hostel-Contact, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}",
   })
@@ -105,7 +105,7 @@ class ContactResolver {
           contact.hostel = hostel;
         }
         const contactUpdated = await contact.save();
-        return !!contactUpdated;
+        return contactUpdated;
       }
       throw new Error("Unauthorized");
     } catch (e) {
