@@ -52,8 +52,13 @@ class editEventInput {
   @Field({ nullable: true })
   location: string;
 
-  tags?: Tag[]
-  photo?: string;
+  tags?: Tag[];
+
+  @Field((_type) => [String], {
+    nullable: true,
+    description: "Events's Image URLs",
+  })
+  imageUrls?: string[];
 }
 
 export { createEventInput, editEventInput };
