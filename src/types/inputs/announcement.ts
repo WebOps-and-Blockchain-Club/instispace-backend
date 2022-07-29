@@ -28,7 +28,11 @@ class EditAnnouncementInput {
   @Field({ nullable: true, description: "Announcement's Endtime" })
   endTime?: string;
 
-  images?: string;
+  @Field((_type) => [String], {
+    nullable: true,
+    description: "Announcement's Image URLs",
+  })
+  imageUrls?: string[];
 
   @Field(() => [String], { nullable: true, description: "Hostels' Ids" })
   hostelIds?: string[];

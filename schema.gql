@@ -238,6 +238,9 @@ input EditAnnouncementInput {
   """Hostels' Ids"""
   hostelIds: [String!]
 
+  """Announcement's Image URLs"""
+  imageUrls: [String!]
+
   """Announcement's Title"""
   title: String
 }
@@ -276,6 +279,9 @@ enum EditDelPermission {
 input EditItemInput {
   """LDAP User's Phone number"""
   contact: String
+
+  """Announcement's Image URLs"""
+  imageUrls: [String!]
 
   """Item's Location"""
   location: String
@@ -979,6 +985,9 @@ input createQuerysInput {
 
 input editEventInput {
   content: String
+
+  """Events's Image URLs"""
+  imageUrls: [String!]
   linkName: String
   linkToAction: String
   location: String
@@ -990,6 +999,9 @@ input editEventInput {
 input editNetopsInput {
   content: String
   endTime: String
+
+  """Announcement's Image URLs"""
+  imageUrls: [String!]
   linkName: String
   linkToAction: String
   tagIds: [String!]!
@@ -998,6 +1010,9 @@ input editNetopsInput {
 
 input editQuerysInput {
   content: String
+
+  """Announcement's Image URLs"""
+  imageUrls: [String!]
   title: String
 }
 

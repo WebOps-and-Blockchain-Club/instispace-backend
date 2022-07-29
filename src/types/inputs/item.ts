@@ -38,6 +38,10 @@ class EditItemInput {
   @Field({ nullable: true, description: "LDAP User's Phone number" })
   contact?: string;
 
-  images?: string;
+  @Field((_type) => [String], {
+    nullable: true,
+    description: "Announcement's Image URLs",
+  })
+  imageUrls: string[];
 }
 export { ItemInput, EditItemInput };

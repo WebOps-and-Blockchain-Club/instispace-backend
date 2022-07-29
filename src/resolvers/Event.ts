@@ -145,8 +145,14 @@ class EventResolver {
             user.role
           ))
       ) {
-        if (images)
-          event.photo = (await addAttachments([...images], true)).join(" AND ");
+        let imageDataStr = images
+          ? await addAttachments([...images], true)
+          : [];
+        let imageUrlStr = [
+          ...imageDataStr,
+          ...(editEventInput.imageUrls ?? []),
+        ].join(" AND ");
+        if (imageUrlStr) event.photo = imageUrlStr;
 
         if (editEventInput.tagIds) {
           let tags: Tag[] = [];

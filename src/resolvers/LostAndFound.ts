@@ -180,12 +180,14 @@ class LostAndFoundResolver {
 
       if (item) {
         //stroring the image
-        if (images) {
-          editItemInput.images = (await addAttachments([...images], true)).join(
-            " AND "
-          );
-          item.images = editItemInput.images;
-        }
+        let imageDataStr = images
+          ? await addAttachments([...images], true)
+          : [];
+        let imageUrlStr = [
+          ...imageDataStr,
+          ...(editItemInput.imageUrls ?? []),
+        ].join(" AND ");
+        if (imageUrlStr) item.images = imageUrlStr;
 
         //storing the contact information
         if (!editItemInput.contact) {

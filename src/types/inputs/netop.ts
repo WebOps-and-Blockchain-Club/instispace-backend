@@ -44,7 +44,12 @@ class editNetopsInput {
   @Field({ nullable: true })
   linkToAction: string;
 
-  photo?: string;
+  @Field((_type) => [String], {
+    nullable: true,
+    description: "Announcement's Image URLs",
+  })
+  imageUrls: string[];
+
   attachments?: string;
 }
 

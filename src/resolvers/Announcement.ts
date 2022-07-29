@@ -208,12 +208,15 @@ class AnnouncementResolver {
             user.role
           ))
       ) {
-        if (images) {
-          announcementInput.images = (
-            await addAttachments([...images], true)
-          ).join(" AND ");
-          announcement.images = announcementInput.images;
-        }
+        let imageDataStr = images
+          ? await addAttachments([...images], true)
+          : [];
+        let imageUrlStr = [
+          ...imageDataStr,
+          ...(announcementInput.imageUrls ?? []),
+        ].join(" AND ");
+        if (imageUrlStr) announcement.images = imageUrlStr;
+
         if (announcementInput.title)
           announcement.title = announcementInput.title;
         if (announcementInput.description)

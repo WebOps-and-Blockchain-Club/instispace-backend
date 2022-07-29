@@ -152,10 +152,15 @@ class NetopResolver {
       });
 
       if (netop && user.id === netop?.createdBy.id) {
-        if (images)
-          editNetopsInput.photo = (
-            await addAttachments([...images], true)
-          ).join(" AND ");
+        let imageDataStr = images
+          ? await addAttachments([...images], true)
+          : [];
+        let imageUrlStr = [
+          ...imageDataStr,
+          ...(editNetopsInput.imageUrls ?? []),
+        ].join(" AND ");
+        if (imageUrlStr) netop.photo = imageUrlStr;
+
         if (attachments)
           editNetopsInput.attachments = (
             await addAttachments([...attachments], false)

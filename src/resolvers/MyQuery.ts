@@ -85,12 +85,15 @@ class MyQueryResolver {
             user.role
           ))
       ) {
-        if (images) {
-          editMyQuerysInput.photo = (
-            await addAttachments([...images], true)
-          ).join(" AND ");
-          myQuery.photo = editMyQuerysInput.photo;
-        }
+        let imageDataStr = images
+          ? await addAttachments([...images], true)
+          : [];
+        let imageUrlStr = [
+          ...imageDataStr,
+          ...(editMyQuerysInput.imageUrls ?? []),
+        ].join(" AND ");
+        if (imageUrlStr) myQuery.photo = imageUrlStr;
+
         if (attachments) {
           editMyQuerysInput.attachments = (
             await addAttachments([...attachments], false)

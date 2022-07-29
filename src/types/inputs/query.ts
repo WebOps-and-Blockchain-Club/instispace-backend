@@ -20,7 +20,12 @@ class editQuerysInput {
   @Field({ nullable: true })
   content: string;
 
-  photo?: string;
+  @Field((_type) => [String], {
+    nullable: true,
+    description: "Announcement's Image URLs",
+  })
+  imageUrls: string[];
+
   attachments?: string;
 }
 
