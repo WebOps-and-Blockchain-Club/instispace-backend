@@ -159,7 +159,7 @@ class NetopResolver {
           ...imageDataStr,
           ...(editNetopsInput.imageUrls ?? []),
         ].join(" AND ");
-        if (imageUrlStr) netop.photo = imageUrlStr;
+        netop.photo = imageUrlStr;
 
         if (attachments)
           editNetopsInput.attachments = (

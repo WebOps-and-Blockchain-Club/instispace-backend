@@ -92,7 +92,7 @@ class MyQueryResolver {
           ...imageDataStr,
           ...(editMyQuerysInput.imageUrls ?? []),
         ].join(" AND ");
-        if (imageUrlStr) myQuery.photo = imageUrlStr;
+        myQuery.photo = imageUrlStr;
 
         if (attachments) {
           editMyQuerysInput.attachments = (

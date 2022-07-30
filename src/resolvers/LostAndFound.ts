@@ -187,7 +187,7 @@ class LostAndFoundResolver {
           ...imageDataStr,
           ...(editItemInput.imageUrls ?? []),
         ].join(" AND ");
-        if (imageUrlStr) item.images = imageUrlStr;
+        item.images = imageUrlStr;
 
         //storing the contact information
         if (!editItemInput.contact) {

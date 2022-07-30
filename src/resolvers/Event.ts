@@ -152,7 +152,7 @@ class EventResolver {
           ...imageDataStr,
           ...(editEventInput.imageUrls ?? []),
         ].join(" AND ");
-        if (imageUrlStr) event.photo = imageUrlStr;
+        event.photo = imageUrlStr;
 
         if (editEventInput.tagIds) {
           let tags: Tag[] = [];

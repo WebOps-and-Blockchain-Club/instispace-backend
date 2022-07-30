@@ -215,7 +215,7 @@ class AnnouncementResolver {
           ...imageDataStr,
           ...(announcementInput.imageUrls ?? []),
         ].join(" AND ");
-        if (imageUrlStr) announcement.images = imageUrlStr;
+        announcement.images = imageUrlStr;
 
         if (announcementInput.title)
           announcement.title = announcementInput.title;
