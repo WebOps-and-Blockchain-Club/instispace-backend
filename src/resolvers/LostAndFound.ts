@@ -234,7 +234,7 @@ class LostAndFoundResolver {
         relations: ["user"],
       });
       if (item && user.id === item.user.id)
-        permissionList.push(EditDelPermission.EDIT, EditDelPermission.DELETE);
+        permissionList.push(EditDelPermission.EDIT, EditDelPermission.RESOLVE);
       return permissionList;
     } catch (e) {
       throw new Error(`message : ${e}`);
