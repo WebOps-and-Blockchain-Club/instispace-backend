@@ -67,9 +67,7 @@ class AnnouncementResolver {
       }
       announcement.hostels = hostels;
 
-      const announcementCreated = await announcement.save();
-
-      if (!!announcementCreated) {
+      if (!!announcement) {
         iUsers.map((u) => {
           const message = {
             to: u.fcmToken,
@@ -89,9 +87,8 @@ class AnnouncementResolver {
             }
           });
         });
-        return true;
       }
-
+      const announcementCreated = await announcement.save();
       return announcementCreated;
     } catch (e) {
       throw new Error(`message : ${e}`);
