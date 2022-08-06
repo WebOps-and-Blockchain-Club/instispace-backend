@@ -32,6 +32,7 @@ export enum UserPermission {
   GET_ALL_ANNOUNCEMENTS = "GET_ALL_ANNOUNCEMENTS",
   VIEW_FEEDBACK = "VIEW_FEEDBACK",
   UPDATE_ROLE = "UPDATE_ROLE",
+  HOSTEL_ADMIN = "HOSTEL_ADMIN",
 }
 
 export enum EditDelPermission {

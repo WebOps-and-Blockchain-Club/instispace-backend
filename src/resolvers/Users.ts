@@ -814,6 +814,7 @@ class UsersResolver {
       }
       if (role === UserRole.HOSTEL_SEC)
         permissionList.push(
+          UserPermission.HOSTEL_ADMIN,
           UserPermission.CREATE_AMENITY,
           UserPermission.CREATE_ANNOUNCEMENT,
           UserPermission.CREATE_CONTACT,
@@ -833,6 +834,7 @@ class UsersResolver {
         );
       if (role === UserRole.HAS)
         permissionList.push(
+          UserPermission.HOSTEL_ADMIN,
           UserPermission.CREATE_ACCOUNT,
           UserPermission.CREATE_AMENITY,
           UserPermission.CREATE_ANNOUNCEMENT,
@@ -848,6 +850,7 @@ class UsersResolver {
         );
       if (role === UserRole.ADMIN)
         permissionList.push(
+          UserPermission.HOSTEL_ADMIN,
           UserPermission.CREATE_ACCOUNT,
           UserPermission.CREATE_AMENITY,
           UserPermission.CREATE_ANNOUNCEMENT,
