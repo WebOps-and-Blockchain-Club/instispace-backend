@@ -41,6 +41,7 @@ export enum EditDelPermission {
   COMMENT = "COMMENT",
   REPORT = "REPORT",
   RESOLVE = "RESOLVE",
+  RESOLVE_ITEM = "RESOLVE_ITEM",
 }
 
 export enum Category {
