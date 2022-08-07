@@ -37,7 +37,6 @@ import {
   homeOutput,
   LDAPUser,
   LoginOutput,
-  SearchLDAPUserOutput,
   searchUsersOutput,
 } from "../types/objects/users";
 import MyContext from "../utils/context";
@@ -84,7 +83,7 @@ class UsersResolver {
           }
 
           //Check the user credentials in development database
-          ldapUser = await UsersDev.findOne({ where: { roll, pass } });
+          ldapUser = await UsersDev.findOne({ where: { roll: roll.toLowerCase(), pass } });
           if (!ldapUser) throw new Error("Invalid Credentials");
         } else {
           //Check with LDAP
@@ -120,6 +119,7 @@ class UsersResolver {
             user.fcmToken = fcmToken;
           }
           await user.save();
+	  console.log("print token");
           console.log(user.fcmToken);
           const token = jwt.sign(user.id, process.env.JWT_SECRET!);
           return {
@@ -411,24 +411,17 @@ class UsersResolver {
     return { usersList: usersList, total };
   }
 
-  @Query(() => SearchLDAPUserOutput, { nullable: true })
+  @Query(() => [LDAPUser], { nullable: true })
   @Authorized()
   async searchLDAPUser(
-    @Arg("skip") skip: number,
-    @Arg("take") take: number,
     @Arg("search") search: string
   ) {
     try {
-      let users: any[] = (await ldapClient.search(
-        search,
-        skip + take
-      )) as any[];
-      const total = users.length;
-      users = users.slice(skip, skip + take);
+      let users: any[] = (await ldapClient.search(search, 50)) as any[];
       const list = users.map(
         (user) => new LDAPUser(user.displayName, user.uid)
       );
-      return { list, total };
+      return list;
     } catch (e) {
       throw new Error(`message: ${e}`);
     }
