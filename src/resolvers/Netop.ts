@@ -94,7 +94,6 @@ class NetopResolver {
           const u = await User.findOneOrFail({
             where: { fcmToken: ft },
           });
-          console.log("Bahar", u.roll, u.notifyEvent, u.notifyNetop);
           if (u.notifyNetop !== Notification.NONE && u.id != user.id)
             iUsers.push(u);
         })
@@ -103,8 +102,6 @@ class NetopResolver {
         iUsers.map((u) => {
           u.fcmToken &&
             u.fcmToken.split(" AND ").map(async (ft) => {
-              console.log("inside netop create", u.name, ft);
-
               const message = {
                 to: ft,
                 notification: {
@@ -128,7 +125,6 @@ class NetopResolver {
 
       return netop;
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -159,12 +155,14 @@ class NetopResolver {
           ...imageDataStr,
           ...(editNetopsInput.imageUrls ?? []),
         ].join(" AND ");
-        netop.photo = imageUrlStr;
+        netop.photo = imageUrlStr === "" ? undefined : imageUrlStr;
 
-        if (attachments)
+        if (attachments) {
           editNetopsInput.attachments = (
             await addAttachments([...attachments], false)
           ).join(" AND ");
+          netop.attachments = editNetopsInput.attachments;
+        }
 
         if (editNetopsInput.tagIds) {
           let tags: Tag[] = [];
@@ -212,7 +210,6 @@ class NetopResolver {
         return affected === 1;
       } else throw Error("Unauthorized");
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -241,7 +238,6 @@ class NetopResolver {
         throw new Error("Invalid netop id");
       }
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -270,7 +266,6 @@ class NetopResolver {
         throw new Error("Invalid netop id");
       }
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -312,7 +307,6 @@ class NetopResolver {
             mailList.push(user.roll);
           }
         });
-        console.log(mailList);
         await mail({
           email: mailList.join(", "),
           subject: "Report",
@@ -346,7 +340,6 @@ class NetopResolver {
       }
       return false;
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -409,7 +402,6 @@ class NetopResolver {
       }
       throw new Error("Post not found");
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -527,7 +519,6 @@ class NetopResolver {
         return netop;
       else return null;
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -626,7 +617,6 @@ class NetopResolver {
 
       return { netopList: finalList, total };
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }

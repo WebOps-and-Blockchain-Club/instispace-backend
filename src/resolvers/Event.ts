@@ -118,7 +118,6 @@ class EventResolver {
       }
       return event;
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -152,7 +151,7 @@ class EventResolver {
           ...imageDataStr,
           ...(editEventInput.imageUrls ?? []),
         ].join(" AND ");
-        event.photo = imageUrlStr;
+        event.photo = imageUrlStr === "" ? undefined : imageUrlStr;
 
         if (editEventInput.tagIds) {
           let tags: Tag[] = [];
@@ -204,7 +203,6 @@ class EventResolver {
         return affected === 1;
       } else throw Error("Unauthorized");
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -230,7 +228,6 @@ class EventResolver {
         throw new Error("Invalid event id");
       }
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -256,7 +253,6 @@ class EventResolver {
         throw new Error("Invalid event id");
       }
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -279,7 +275,6 @@ class EventResolver {
         return event;
       else return null;
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }

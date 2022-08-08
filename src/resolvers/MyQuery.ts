@@ -56,7 +56,6 @@ class MyQueryResolver {
 
       return myQuery;
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -92,7 +91,7 @@ class MyQueryResolver {
           ...imageDataStr,
           ...(editMyQuerysInput.imageUrls ?? []),
         ].join(" AND ");
-        myQuery.photo = imageUrlStr;
+        myQuery.photo = imageUrlStr === "" ? undefined : imageUrlStr;
 
         if (attachments) {
           editMyQuerysInput.attachments = (
@@ -133,7 +132,6 @@ class MyQueryResolver {
       }
       return false;
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -164,7 +162,6 @@ class MyQueryResolver {
         throw new Error("Invalid myQuery id");
       }
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -205,7 +202,6 @@ class MyQueryResolver {
             mailList.push(user.roll);
           }
         });
-        console.log(mailList);
         await mail({
           email: mailList.join(", "),
           subject: "Report",
@@ -239,7 +235,6 @@ class MyQueryResolver {
       }
       return false;
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -301,7 +296,6 @@ class MyQueryResolver {
       }
       throw new Error("Post not found");
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -404,7 +398,6 @@ class MyQueryResolver {
       });
       return myQuery;
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -471,7 +464,6 @@ class MyQueryResolver {
 
       return { queryList: finalList, total };
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }

@@ -187,7 +187,7 @@ class LostAndFoundResolver {
           ...imageDataStr,
           ...(editItemInput.imageUrls ?? []),
         ].join(" AND ");
-        item.images = imageUrlStr;
+        item.images = imageUrlStr === "" ? undefined : imageUrlStr;
 
         //storing the contact information
         if (!editItemInput.contact) {

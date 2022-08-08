@@ -34,7 +34,7 @@ class Event extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  photo: string;
+  photo?: string;
 
   @Column({ type: Boolean, default: false })
   @Field((_type) => Boolean, {

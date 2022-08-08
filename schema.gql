@@ -273,6 +273,7 @@ enum EditDelPermission {
   EDIT
   REPORT
   RESOLVE
+  RESOLVE_ITEM
 }
 
 """Input for editing items"""
@@ -793,7 +794,7 @@ type Query {
 
   """Query to fetch ldap Users, Restrictions : {anyone who is authorized}"""
   getUsers(LastUserId: String!, search: String, take: Float!): getUsersOutput!
-  searchLDAPUser(search: String!, skip: Float!, take: Float!): SearchLDAPUserOutput
+  searchLDAPUser(search: String!): [LDAPUser!]
   searchQueries(OrderByLikes: Boolean, lastEventId: String!, search: String!, take: Float!): getQueryOutput!
   searchUser(LastUserId: String!, search: String, take: Float!): searchUserOutput
 }
@@ -814,11 +815,6 @@ enum ReportStatus {
   REPORTED
   REPORT_ACCEPTED
   REPORT_REJECTED
-}
-
-type SearchLDAPUserOutput {
-  list: [LDAPUser!]
-  total: Float!
 }
 
 """Tag Entity, Users will follow these tags"""
@@ -942,6 +938,7 @@ enum UserPermission {
   GET_ANNOUNCEMENTS
   GET_CONTACTS
   GET_REPORTS
+  HOSTEL_ADMIN
   UPDATE_ROLE
   VIEW_FEEDBACK
 }
