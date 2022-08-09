@@ -6,6 +6,8 @@ import addAttachments from "../utils/uploads";
 @Resolver()
 class ImageResolver {
   @Mutation(() => getImageOutput)
+  // Type Stuff, auth temporarily deprocated
+  // @Authorised()
   async imageUpload(
     @Arg("Image", () => [GraphQLUpload], { nullable: true }) imageData: Upload[]
   ) {

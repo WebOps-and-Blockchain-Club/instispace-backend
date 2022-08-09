@@ -29,6 +29,10 @@ const main = async () => {
   const server = new ApolloServer({
     schema,
     context: async ({ req }: { req: any }) => {
+      if (req.headers.apikey !== process.env.API_KEY) {
+        throw new Error("Provide the Correct API-key!");
+      }
+
       let user;
       if (req.headers.authorization) {
         try {
