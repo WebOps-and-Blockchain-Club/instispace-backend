@@ -889,7 +889,7 @@ class UsersResolver {
         where: { id: id },
       });
       if (user?.role == UserRole.USER || user?.role == UserRole.MODERATOR)
-        return getDepartment(user!.roll);
+        return getDepartment(user!.roll.slice(0, 2));
       return "Null";
     } catch (e) {
       throw new Error(`message : ${e}`);
