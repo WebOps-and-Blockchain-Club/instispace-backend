@@ -12,6 +12,8 @@ import {
   adminPassword,
   autoGenPass,
   emailExpresion,
+  getDepartment,
+  getprogramme,
   salt,
   UserPermission,
   UserRole,
@@ -83,7 +85,9 @@ class UsersResolver {
           }
 
           //Check the user credentials in development database
-          ldapUser = await UsersDev.findOne({ where: { roll: roll.toLowerCase(), pass } });
+          ldapUser = await UsersDev.findOne({
+            where: { roll: roll.toLowerCase(), pass },
+          });
           if (!ldapUser) throw new Error("Invalid Credentials");
         } else {
           //Check with LDAP
@@ -119,7 +123,7 @@ class UsersResolver {
             user.fcmToken = fcmToken;
           }
           await user.save();
-	  console.log("print token");
+          console.log("print token");
           console.log(user.fcmToken);
           const token = jwt.sign(user.id, process.env.JWT_SECRET!);
           return {
@@ -413,9 +417,7 @@ class UsersResolver {
 
   @Query(() => [LDAPUser], { nullable: true })
   @Authorized()
-  async searchLDAPUser(
-    @Arg("search") search: string
-  ) {
+  async searchLDAPUser(@Arg("search") search: string) {
     try {
       let users: any[] = (await ldapClient.search(search, 50)) as any[];
       const list = users.map(
@@ -859,6 +861,36 @@ class UsersResolver {
           UserPermission.CREATE_EVENT
         );
       return permissionList;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver()
+  async program(@Root() { id, program }: User) {
+    try {
+      if (program) return program;
+      const user = await User.findOne({
+        where: { id: id },
+      });
+      if (user?.role == UserRole.USER || user?.role == UserRole.MODERATOR)
+        return getprogramme(user!.roll);
+      return "Null";
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @FieldResolver()
+  async department(@Root() { id, department }: User) {
+    try {
+      if (department) return department;
+      const user = await User.findOne({
+        where: { id: id },
+      });
+      if (user?.role == UserRole.USER || user?.role == UserRole.MODERATOR)
+        return getDepartment(user!.roll);
+      return "Null";
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

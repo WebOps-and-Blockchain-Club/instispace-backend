@@ -166,6 +166,12 @@ class User extends BaseEntity {
 
   @Field(() => [UserPermission], { nullable: true })
   permissions: UserPermission[];
+
+  @Field()
+  program: string;
+
+  @Field()
+  department: string;
 }
 
 export default User;

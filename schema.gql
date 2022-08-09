@@ -565,6 +565,7 @@ type Mutation {
 
   """edit network and opportunity, Restrictions:{user who created}"""
   editNetop(Attachments: [Upload!], EditNetopsData: editNetopsInput!, Image: [Upload!], NetopId: String!): Netop!
+  imageUpload(Image: [Upload!]): getImageOutput!
 
   """Mutation to login, Restrictions : {none}"""
   login(LoginInputs: LoginInput!, fcmToken: String!): LoginOutput!
@@ -861,6 +862,7 @@ type User {
   announcements: [Announcement!]!
   complaints: [Complaint!]
   complaintsUpvoted: [Complaint!]
+  department: String!
   fcmToken: String!
 
   """feedbacks of the user"""
@@ -896,6 +898,7 @@ type User {
   notifyNetop: Notification!
   notifyNetopComment: Boolean!
   permissions: [UserPermission!]
+  program: String!
 
   """User's role"""
   role: UserRole!
@@ -1033,6 +1036,11 @@ type getComplaintsOutput {
 type getEventOutput {
   list: [Event!]
   total: Float!
+}
+
+"""Output Type for image upload"""
+type getImageOutput {
+  imageUrls: [String!]
 }
 
 """Output type for getItems query"""

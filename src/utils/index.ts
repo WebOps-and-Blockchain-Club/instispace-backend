@@ -167,3 +167,54 @@ export const getDepartment = (code: string) => {
       return "Null";
   }
 };
+
+export const getprogramme = (s: string) => {
+  let roll_number = s.toUpperCase();
+  let prog = roll_number[4];
+  let branch = roll_number.slice(0, 2);
+
+  switch (prog) {
+    case "B":
+      if (
+        branch == "ED" ||
+        branch == "BS" ||
+        branch == "BE" ||
+        branch == "PH"
+      ) {
+        return "Dual Degree";
+      } else {
+        return "B.Tech";
+      }
+    case "D":
+      return "Ph.D";
+
+    case "C":
+      return "MSc";
+
+    case "S":
+      return "MS";
+
+    case "W":
+      return "EMBA";
+
+    case "A":
+      return "MBA";
+
+    case "M":
+      return "M.Tech";
+
+    case "F":
+      return "FN";
+
+    case "Z":
+      return "ES";
+
+    case "V":
+      return "VLM";
+
+    case "H":
+      return "MA";
+    default:
+      return "Null";
+  }
+};
