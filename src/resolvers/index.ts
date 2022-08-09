@@ -13,6 +13,7 @@ import FeedbackResolver from "./Feedback";
 import AmenitiesResolver from "./Amenities";
 import ContactResolver from "./Contacts";
 import ImageResolver from "./Image";
+import MessMenuResolver from "./MessMenu";
 
 export default [
   UsersResolver,
@@ -30,4 +31,5 @@ export default [
   AmenitiesResolver,
   ContactResolver,
   ImageResolver,
+  MessMenuResolver,
 ] as const;

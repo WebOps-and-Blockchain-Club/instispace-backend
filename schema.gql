@@ -762,6 +762,7 @@ type Query {
   Query to fetch personal profile, Restrictions : {anyone who is authoried}
   """
   getMe: User!
+  getMessMenu: String!
 
   """get an myQuery by id Query"""
   getMyQuery(MyQueryId: String!): MyQuery!

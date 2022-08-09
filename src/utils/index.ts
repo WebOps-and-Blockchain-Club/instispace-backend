@@ -81,6 +81,8 @@ export const smail = "@smail.iitm.ac.in";
 export const sheetLink =
   "https://docs.google.com/spreadsheets/d/1ECJ1V1KoJB7W3jNyrOD_F-46tKl_ZNPGRPNqMqZkNsA/edit?usp=sharing";
 
+export const messMenu =
+  "https://drive.google.com/drive/folders/1woTIJzE_AT5mJZgGCVJ_qiCGv03JlZqk?usp=sharing";
 export var salt = bcryptjs.genSaltSync(Number(process.env.ITERATIONS!));
 
 export function autoGenPass(length: number) {
