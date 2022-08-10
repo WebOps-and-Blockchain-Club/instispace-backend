@@ -157,7 +157,7 @@ class AnnouncementResolver {
         }
       }
       const d = new Date();
-      announcementsList.filter(
+      announcementsList = announcementsList.filter(
         (n) =>
           new Date(n.endTime).getTime() > d.getTime() && n.isHidden === false
       );
