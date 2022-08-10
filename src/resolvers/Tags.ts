@@ -22,11 +22,13 @@ class TagsResolver {
   @Authorized([UserRole.ADMIN, UserRole.SECRETORY, UserRole.HAS])
   async createTag(@Arg("TagInput") { title, category }: TagInput) {
     try {
-      const tag = new Tag();
-      tag.title = title;
-      tag.category = category;
-      await tag.save();
-      return !!tag;
+      const existingTag = await Tag.findOne({ where: { title } });
+      if (existingTag) throw new Error(`Tag already exists`);
+      const newTag = new Tag();
+      newTag.title = title;
+      newTag.category = category;
+      await newTag.save();
+      return !!newTag;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
