@@ -137,7 +137,11 @@ export const getDepartment = (code: string) => {
       return "Aerospace Engineering";
     case "AM":
       return "Applied Mechanics";
-    case "BE" || "BS" || "BT":
+    case "BE":
+      return "Biotechnology";
+    case "BS":
+      return "Biotechnology";
+    case "BT":
       return "Biotechnology";
     case "CH":
       return "Chemical Engineering";
@@ -161,7 +165,9 @@ export const getDepartment = (code: string) => {
       return "Mechanical Engineering";
     case "MM":
       return "Metallurgical and Materials Engineering";
-    case "OE" || "NA":
+    case "OE":
+      return "Ocean Engineering";
+    case "NA":
       return "Ocean Engineering";
     case "PH":
       return "Physics";
