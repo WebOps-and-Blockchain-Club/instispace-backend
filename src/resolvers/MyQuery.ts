@@ -32,23 +32,23 @@ class MyQueryResolver {
   async createMyQuery(
     @Arg("createQuerysInput") createMyQuerysInput: createQuerysInput,
     @Ctx() { user }: MyContext,
-    @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[],
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
   ): Promise<MyQuery> {
     try {
-      if (images)
-        createMyQuerysInput.photo = (
-          await addAttachments([...images], true)
-        ).join(" AND ");
-
       if (attachments)
         createMyQuerysInput.attachments = (
           await addAttachments([...attachments], false)
         ).join(" AND ");
 
+      let imageUrls;
+      if (createMyQuerysInput.imageUrls) {
+        imageUrls = createMyQuerysInput.imageUrls?.join(" AND ");
+      }
+
       const myQuery = await MyQuery.create({
         ...createMyQuerysInput,
+        photo: imageUrls === "" ? null : imageUrls,
         createdBy: user,
         isHidden: false,
         likeCount: 0,
@@ -68,7 +68,6 @@ class MyQueryResolver {
     @Arg("EditMyQuerysData") editMyQuerysInput: editQuerysInput,
     @Arg("MyQueryId") myQueryId: string,
     @Ctx() { user }: MyContext,
-    @Arg("Image", () => [GraphQLUpload], { nullable: true }) images?: Upload[],
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
   ) {
@@ -84,14 +83,10 @@ class MyQueryResolver {
             user.role
           ))
       ) {
-        let imageDataStr = images
-          ? await addAttachments([...images], true)
-          : [];
-        let imageUrlStr = [
-          ...imageDataStr,
-          ...(editMyQuerysInput.imageUrls ?? []),
-        ].join(" AND ");
-        myQuery.photo = imageUrlStr === "" ? undefined : imageUrlStr;
+        let imageUrlStr = [...(editMyQuerysInput.imageUrls ?? [])].join(
+          " AND "
+        );
+        myQuery.photo = imageUrlStr === "" ? null : imageUrlStr;
 
         if (attachments) {
           editMyQuerysInput.attachments = (

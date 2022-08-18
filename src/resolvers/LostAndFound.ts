@@ -14,8 +14,6 @@ import { Category, EditDelPermission, miliSecPerMonth } from "../utils/index";
 import User from "../entities/User";
 import MyContext from "../utils/context";
 import { ILike, In } from "typeorm";
-import { GraphQLUpload, Upload } from "graphql-upload";
-import addAttachments from "../utils/uploads";
 import getItemsOutput from "../types/objects/items";
 import fcm from "../utils/fcmTokens";
 
@@ -28,8 +26,7 @@ class LostAndFoundResolver {
   @Authorized()
   async createItem(
     @Ctx() { user }: MyContext,
-    @Arg("ItemInput") itemInput: ItemInput,
-    @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
+    @Arg("ItemInput") itemInput: ItemInput
   ) {
     try {
       //creating the item
@@ -39,9 +36,9 @@ class LostAndFoundResolver {
       item.location = itemInput.location;
 
       //stroring image from "image" to itemInput.image and added it to item.image
-      if (images) {
-        itemInput.images = (await addAttachments(images, true)).join(" AND ");
-        item.images = itemInput.images;
+      if (itemInput.imageUrls) {
+        let imageUrls = itemInput.imageUrls.join(" AND ");
+        item.images = imageUrls === "" ? null : imageUrls;
       }
 
       //storing the contact information
@@ -172,22 +169,15 @@ class LostAndFoundResolver {
   async editItems(
     @Arg("ItemId") id: string,
     @Ctx() { user }: MyContext,
-    @Arg("EditItemInput") editItemInput: EditItemInput,
-    @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
+    @Arg("EditItemInput") editItemInput: EditItemInput
   ) {
     try {
       let item = await Item.findOne(id);
 
       if (item) {
         //stroring the image
-        let imageDataStr = images
-          ? await addAttachments([...images], true)
-          : [];
-        let imageUrlStr = [
-          ...imageDataStr,
-          ...(editItemInput.imageUrls ?? []),
-        ].join(" AND ");
-        item.images = imageUrlStr === "" ? undefined : imageUrlStr;
+        let imageUrlStr = [...(editItemInput.imageUrls ?? [])].join(" AND ");
+        item.images = imageUrlStr === "" ? null : imageUrlStr;
 
         //storing the contact information
         if (!editItemInput.contact) {

@@ -34,9 +34,9 @@ class MyQuery extends BaseEntity {
   @Field()
   content: string;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  photo?: string;
+  @Column({ type: "text", nullable: true })
+  @Field((_type) => String, { nullable: true })
+  photo?: string | null;
 
   @Column({ nullable: true })
   @Field({ nullable: true })

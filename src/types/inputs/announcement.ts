@@ -11,7 +11,11 @@ class CreateAnnouncementInput {
   @Field({ description: "Announcement's Endtime" })
   endTime: string;
 
-  images?: string;
+  @Field((_type) => [String], {
+    nullable: true,
+    description: "Announcement's Images",
+  })
+  imageUrls?: string[];
 
   @Field(() => [String], { description: "Hostels' Ids" })
   hostelIds: string[];

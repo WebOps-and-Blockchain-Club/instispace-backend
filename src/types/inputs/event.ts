@@ -24,8 +24,13 @@ class createEventInput {
   @Field()
   location: string;
 
-  tags?: Tag[]
-  photo?: string;
+  @Field((_type) => [String], {
+    nullable: true,
+    description: "Announcement's Images",
+  })
+  imageUrls?: string[];
+
+  tags?: Tag[];
   attachments?: string;
 }
 

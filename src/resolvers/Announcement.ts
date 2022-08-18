@@ -17,8 +17,6 @@ import {
 } from "type-graphql";
 import MyContext from "../utils/context";
 import { EditDelPermission, UserRole } from "../utils";
-import addAttachments from "../utils/uploads";
-import { GraphQLUpload, Upload } from "graphql-upload";
 import { getAnnouncementsOutput } from "../types/objects/announcements";
 import fcm from "../utils/fcmTokens";
 import { ILike } from "typeorm";
@@ -38,8 +36,7 @@ class AnnouncementResolver {
   async createAnnouncement(
     @Ctx() { user }: MyContext,
     @Arg("AnnouncementInput")
-    announcementInput: CreateAnnouncementInput,
-    @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
+    announcementInput: CreateAnnouncementInput
   ) {
     try {
       let hostels: Hostel[] = [];
@@ -59,11 +56,9 @@ class AnnouncementResolver {
       announcement.description = announcementInput.description;
       announcement.user = user;
       announcement.endTime = new Date(announcementInput.endTime);
-      if (images) {
-        announcementInput.images = (
-          await addAttachments([...images], true)
-        ).join(" AND ");
-        announcement.images = announcementInput.images;
+      if (announcementInput.imageUrls) {
+        let imageUrls = announcementInput.imageUrls.join(" AND ");
+        announcement.images = imageUrls === "" ? null : imageUrls;
       }
       announcement.hostels = hostels;
 
@@ -190,8 +185,7 @@ class AnnouncementResolver {
     @Ctx() { user }: MyContext,
     @Arg("AnnouncementId") id: string,
     @Arg("UpdateAnnouncementInput")
-    announcementInput: EditAnnouncementInput,
-    @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
+    announcementInput: EditAnnouncementInput
   ) {
     try {
       const announcement = await Announcement.findOne({
@@ -205,14 +199,10 @@ class AnnouncementResolver {
             user.role
           ))
       ) {
-        let imageDataStr = images
-          ? await addAttachments([...images], true)
-          : [];
-        let imageUrlStr = [
-          ...imageDataStr,
-          ...(announcementInput.imageUrls ?? []),
-        ].join(" AND ");
-        announcement.images = imageUrlStr === "" ? undefined : imageUrlStr;
+        let imageUrlStr = [...(announcementInput.imageUrls ?? [])].join(
+          " AND "
+        );
+        announcement.images = imageUrlStr === "" ? null : imageUrlStr;
 
         if (announcementInput.title)
           announcement.title = announcementInput.title;

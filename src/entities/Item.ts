@@ -35,9 +35,9 @@ class Item extends BaseEntity {
   @Field({ description: "Time at which item is lost or found" })
   time: Date;
 
-  @Column({ nullable: true })
-  @Field({ description: "Item's Images", nullable: true })
-  images?: string;
+  @Column({ type: "text", nullable: true })
+  @Field((_type) => String, { description: "Item's Images", nullable: true })
+  images?: string | null;
 
   @CreateDateColumn({ type: "timestamptz" })
   @Field(() => Date)

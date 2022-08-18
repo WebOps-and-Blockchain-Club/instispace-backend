@@ -8,7 +8,12 @@ class createQuerysInput {
   @Field()
   content: string;
 
-  photo?: string;
+  @Field((_type) => [String], {
+    nullable: true,
+    description: "Announcement's Images",
+  })
+  imageUrls?: string[];
+
   attachments?: string;
 }
 

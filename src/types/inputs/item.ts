@@ -6,7 +6,11 @@ class ItemInput {
   @Field({ description: "Item's Title" })
   name: string;
 
-  images?: string;
+  @Field((_type) => [String], {
+    nullable: true,
+    description: "Announcement's Images",
+  })
+  imageUrls?: string[];
 
   @Field({ nullable: true, description: "LDAP User's Phone number" })
   contact?: string;

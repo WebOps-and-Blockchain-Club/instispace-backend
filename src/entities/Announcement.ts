@@ -32,9 +32,12 @@ class Announcement extends BaseEntity {
   })
   description: string;
 
-  @Column({ nullable: true })
-  @Field({ description: "Image description for announcement", nullable: true })
-  images?: string;
+  @Column({ type: "text", nullable: true })
+  @Field((_type) => String, {
+    description: "Image description for announcement",
+    nullable: true,
+  })
+  images?: string | null;
 
   @CreateDateColumn({ type: "timestamptz" })
   @Field(() => Date)

@@ -39,7 +39,6 @@ class NetopResolver {
   async createNetop(
     @Arg("NewNetopData") createNetopsInput: createNetopsInput,
     @Ctx() { user }: MyContext,
-    @Arg("Image", () => [GraphQLUpload], { nullable: true }) images?: Upload[],
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
   ): Promise<Netop> {
@@ -60,17 +59,18 @@ class NetopResolver {
       if (tags.length !== createNetopsInput.tags.length)
         throw new Error("Invalid tagIds");
 
-      if (images)
-        createNetopsInput.photo = (
-          await addAttachments([...images], true)
-        ).join(" AND ");
       if (attachments)
         createNetopsInput.attachments = (
           await addAttachments([...attachments], false)
         ).join(" AND ");
 
+      let imageUrls;
+      if (createNetopsInput.imageUrls) {
+        imageUrls = createNetopsInput.imageUrls?.join(" AND ");
+      }
       const netop = await Netop.create({
         ...createNetopsInput,
+        photo: imageUrls === "" ? null : imageUrls,
         createdBy: user,
         endTime: new Date(createNetopsInput.endTime),
         likeCount: 0,
@@ -138,7 +138,6 @@ class NetopResolver {
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext,
     @Arg("EditNetopsData") editNetopsInput: editNetopsInput,
-    @Arg("Image", () => [GraphQLUpload], { nullable: true }) images?: [Upload],
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
   ) {
@@ -148,14 +147,8 @@ class NetopResolver {
       });
 
       if (netop && user.id === netop?.createdBy.id) {
-        let imageDataStr = images
-          ? await addAttachments([...images], true)
-          : [];
-        let imageUrlStr = [
-          ...imageDataStr,
-          ...(editNetopsInput.imageUrls ?? []),
-        ].join(" AND ");
-        netop.photo = imageUrlStr === "" ? undefined : imageUrlStr;
+        let imageUrlStr = [...(editNetopsInput.imageUrls ?? [])].join(" AND ");
+        netop.photo = imageUrlStr === "" ? null : imageUrlStr;
 
         if (attachments) {
           editNetopsInput.attachments = (

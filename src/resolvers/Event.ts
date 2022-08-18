@@ -11,9 +11,7 @@ import {
 import MyContext from "../utils/context";
 import { fileringConditions } from "../types/inputs/netop";
 import Tag from "../entities/Tag";
-import { GraphQLUpload, Upload } from "graphql-upload";
 import { EditDelPermission, UserRole } from "../utils";
-import addAttachments from "../utils/uploads";
 import User from "../entities/User";
 import Event from "../entities/Event";
 import { createEventInput, editEventInput } from "../types/inputs/event";
@@ -37,8 +35,7 @@ class EventResolver {
   )
   async createEvent(
     @Arg("NewEventData") createEventInput: createEventInput,
-    @Ctx() { user }: MyContext,
-    @Arg("Image", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
+    @Ctx() { user }: MyContext
   ): Promise<Event> {
     try {
       var tags: Tag[] = [];
@@ -58,15 +55,16 @@ class EventResolver {
         throw new Error("Invalid tagIds");
       createEventInput.tags = tags;
 
-      if (images)
-        createEventInput.photo = (await addAttachments([...images], true)).join(
-          " AND "
-        );
+      let imageUrls;
+      if (createEventInput.imageUrls) {
+        imageUrls = createEventInput.imageUrls?.join(" AND ");
+      }
 
       const event = await Event.create({
         ...createEventInput,
         createdBy: user,
         time: new Date(createEventInput.time),
+        photo: imageUrls === "" ? null : imageUrls,
         tags,
       }).save();
 
@@ -129,8 +127,7 @@ class EventResolver {
   async editEvent(
     @Arg("EventId") eventId: string,
     @Ctx() { user }: MyContext,
-    @Arg("EditEventData") editEventInput: editEventInput,
-    @Arg("Image", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
+    @Arg("EditEventData") editEventInput: editEventInput
   ) {
     try {
       const event = await Event.findOne(eventId, {
@@ -144,14 +141,8 @@ class EventResolver {
             user.role
           ))
       ) {
-        let imageDataStr = images
-          ? await addAttachments([...images], true)
-          : [];
-        let imageUrlStr = [
-          ...imageDataStr,
-          ...(editEventInput.imageUrls ?? []),
-        ].join(" AND ");
-        event.photo = imageUrlStr === "" ? undefined : imageUrlStr;
+        let imageUrlStr = [...(editEventInput.imageUrls ?? [])].join(" AND ");
+        event.photo = imageUrlStr === "" ? null : imageUrlStr;
 
         if (editEventInput.tagIds) {
           let tags: Tag[] = [];
