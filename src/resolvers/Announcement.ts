@@ -31,7 +31,7 @@ class AnnouncementResolver {
     UserRole.HAS,
     UserRole.HOSTEL_SEC,
     UserRole.ADMIN,
-    UserRole.SECRETORY,
+    UserRole.SECRETARY,
   ])
   async createAnnouncement(
     @Ctx() { user }: MyContext,
@@ -179,7 +179,7 @@ class AnnouncementResolver {
     UserRole.ADMIN,
     UserRole.HAS,
     UserRole.HOSTEL_SEC,
-    UserRole.SECRETORY,
+    UserRole.SECRETARY,
   ])
   async editAnnouncement(
     @Ctx() { user }: MyContext,
@@ -195,7 +195,7 @@ class AnnouncementResolver {
       if (
         announcement &&
         (announcement.user.id === user.id ||
-          [UserRole.ADMIN, UserRole.SECRETORY, UserRole.HAS].includes(
+          [UserRole.ADMIN, UserRole.SECRETARY, UserRole.HAS].includes(
             user.role
           ))
       ) {
@@ -237,7 +237,7 @@ class AnnouncementResolver {
     UserRole.ADMIN,
     UserRole.HAS,
     UserRole.HOSTEL_SEC,
-    UserRole.SECRETORY,
+    UserRole.SECRETARY,
   ])
   async deleteAnnouncement(
     @Ctx() { user }: MyContext,
@@ -251,7 +251,7 @@ class AnnouncementResolver {
       if (
         announcement &&
         (announcement.user.id === user.id ||
-          [UserRole.ADMIN, UserRole.SECRETORY, UserRole.HAS].includes(
+          [UserRole.ADMIN, UserRole.SECRETARY, UserRole.HAS].includes(
             user.role
           ))
       ) {
@@ -305,7 +305,7 @@ class AnnouncementResolver {
       });
       if (
         announcement &&
-        ([UserRole.ADMIN, UserRole.SECRETORY, UserRole.HAS].includes(
+        ([UserRole.ADMIN, UserRole.SECRETARY, UserRole.HAS].includes(
           user.role
         ) ||
           user.id === announcement.user.id)

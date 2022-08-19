@@ -405,7 +405,7 @@ class NetopResolver {
     UserRole.ADMIN,
     UserRole.LEADS,
     UserRole.HAS,
-    UserRole.SECRETORY,
+    UserRole.SECRETARY,
     UserRole.HOSTEL_SEC,
     UserRole.MODERATOR,
   ])
@@ -452,7 +452,7 @@ class NetopResolver {
     UserRole.ADMIN,
     UserRole.LEADS,
     UserRole.HAS,
-    UserRole.SECRETORY,
+    UserRole.SECRETARY,
     UserRole.HOSTEL_SEC,
     UserRole.MODERATOR,
   ])
@@ -715,7 +715,7 @@ class NetopResolver {
           UserRole.ADMIN,
           UserRole.LEADS,
           UserRole.HAS,
-          UserRole.SECRETORY,
+          UserRole.SECRETARY,
           UserRole.HOSTEL_SEC,
           UserRole.MODERATOR,
         ].includes(user.role)

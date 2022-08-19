@@ -186,7 +186,7 @@ class UsersResolver {
     description:
       "Mutation to create a Super-User account, Restrictions : {Admin}",
   })
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETORY])
+  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETARY])
   async createAccount(
     @Ctx() { user }: MyContext,
     @Arg("CreateAccountInput") createAccountInput: CreateAccountInput,
@@ -200,7 +200,7 @@ class UsersResolver {
           : autoGenPass(8);
 
       if (
-        [UserRole.SECRETORY, UserRole.HAS].includes(createAccountInput.role) &&
+        [UserRole.SECRETARY, UserRole.HAS].includes(createAccountInput.role) &&
         user.role !== UserRole.ADMIN
       ) {
         throw new Error("Invalid Role");
@@ -437,7 +437,7 @@ class UsersResolver {
     UserRole.LEADS,
     UserRole.HAS,
     UserRole.HOSTEL_SEC,
-    UserRole.SECRETORY,
+    UserRole.SECRETARY,
   ])
   async updateSuperUser(
     @Ctx() { user }: MyContext,
@@ -463,7 +463,7 @@ class UsersResolver {
     UserRole.LEADS,
     UserRole.HAS,
     UserRole.HOSTEL_SEC,
-    UserRole.SECRETORY,
+    UserRole.SECRETARY,
   ])
   async updateRole(@Arg("ModeratorInput") { roll }: ModeratorInput) {
     try {
@@ -634,7 +634,7 @@ class UsersResolver {
         role == UserRole.HAS ||
         role == UserRole.HOSTEL_SEC ||
         role == UserRole.LEADS ||
-        role == UserRole.SECRETORY
+        role == UserRole.SECRETARY
       ) {
         const user = await User.findOneOrFail(id, {
           relations: ["networkingAndOpportunities", "event", "announcements"],
@@ -817,7 +817,7 @@ class UsersResolver {
           UserPermission.UPDATE_ROLE,
           UserPermission.CREATE_EVENT
         );
-      if (role === UserRole.SECRETORY)
+      if (role === UserRole.SECRETARY)
         permissionList.push(
           UserPermission.CREATE_ACCOUNT,
           UserPermission.CREATE_ANNOUNCEMENT,

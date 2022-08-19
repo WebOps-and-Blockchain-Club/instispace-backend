@@ -19,7 +19,7 @@ class TagsResolver {
   @Mutation(() => Boolean, {
     description: "Mutation to Create Tags, Restrictions : {Admin}",
   })
-  @Authorized([UserRole.ADMIN, UserRole.SECRETORY, UserRole.HAS])
+  @Authorized([UserRole.ADMIN, UserRole.SECRETARY, UserRole.HAS])
   async createTag(@Arg("TagInput") { title, category }: TagInput) {
     try {
       const existingTag = await Tag.findOne({ where: { title } });

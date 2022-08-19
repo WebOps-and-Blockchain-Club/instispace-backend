@@ -28,7 +28,7 @@ class EventResolver {
   @Authorized(
     UserRole.ADMIN,
     UserRole.LEADS,
-    UserRole.SECRETORY,
+    UserRole.SECRETARY,
     UserRole.HAS,
     UserRole.MODERATOR,
     UserRole.HOSTEL_SEC
@@ -137,7 +137,7 @@ class EventResolver {
       if (
         event &&
         (user.id === event?.createdBy.id ||
-          [UserRole.ADMIN, UserRole.SECRETORY, UserRole.HAS].includes(
+          [UserRole.ADMIN, UserRole.SECRETARY, UserRole.HAS].includes(
             user.role
           ))
       ) {
@@ -175,7 +175,7 @@ class EventResolver {
 
   @Mutation(() => Boolean, {
     description:
-      "Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETORY, HAS}",
+      "Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETARY, HAS}",
   })
   @Authorized()
   async deleteEvent(
@@ -188,7 +188,7 @@ class EventResolver {
       });
       if (
         event.createdBy.id === user.id ||
-        [UserRole.ADMIN, UserRole.SECRETORY, UserRole.HAS].includes(user.role)
+        [UserRole.ADMIN, UserRole.SECRETARY, UserRole.HAS].includes(user.role)
       ) {
         const { affected } = await Event.update(eventId, { isHidden: true });
         return affected === 1;
@@ -427,7 +427,7 @@ class EventResolver {
       });
       if (
         event &&
-        ([UserRole.ADMIN, UserRole.SECRETORY, UserRole.HAS].includes(
+        ([UserRole.ADMIN, UserRole.SECRETARY, UserRole.HAS].includes(
           user.role
         ) ||
           user.id === event.createdBy.id)

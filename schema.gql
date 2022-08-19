@@ -179,6 +179,9 @@ input CreateAnnouncementInput {
   """Hostels' Ids"""
   hostelIds: [String!]!
 
+  """Announcement's Images"""
+  imageUrls: [String!]
+
   """Announcement's Title"""
   title: String!
 }
@@ -418,6 +421,9 @@ input ItemInput {
   """LDAP User's Phone number"""
   contact: String
 
+  """Announcement's Images"""
+  imageUrls: [String!]
+
   """Item's Location"""
   location: String!
 
@@ -477,7 +483,7 @@ type Mutation {
   """
   Mutation to create Announcements, Restrictions : {Admin, Hostel Secretary, and Hostel Affair Secretary}
   """
-  createAnnouncement(AnnouncementInput: CreateAnnouncementInput!, Images: [Upload!]): Announcement!
+  createAnnouncement(AnnouncementInput: CreateAnnouncementInput!): Announcement!
 
   """comment on network and opportunity, Restrictions:{any authorized user}"""
   createCommentNetop(Images: [Upload!], NetopId: String!, content: String!): Comment!
@@ -489,7 +495,7 @@ type Mutation {
   createComplaint(CreateComplaintInput: ComplaintInput!, Images: [Upload!]): Boolean!
 
   """Mutation to create an event"""
-  createEvent(Image: [Upload!], NewEventData: createEventInput!): Event!
+  createEvent(NewEventData: createEventInput!): Event!
 
   """
   Mutation to create Hostels, Restrictions : {Admin, Hostel Secretory and Hostel Affair Secretory}
@@ -504,13 +510,13 @@ type Mutation {
   """
   Mutation to create the Item, anyone who is authorised and have either Lost an Item or have Found it can access
   """
-  createItem(Images: [Upload!], ItemInput: ItemInput!): Item!
+  createItem(ItemInput: ItemInput!): Item!
 
   """create Query, Restrictions:{any authorized user}"""
-  createMyQuery(Attachments: [Upload!], Images: [Upload!], createQuerysInput: createQuerysInput!): MyQuery!
+  createMyQuery(Attachments: [Upload!], createQuerysInput: createQuerysInput!): MyQuery!
 
   """create network and opportunity, Restrictions:{any authorized user}"""
-  createNetop(Attachments: [Upload!], Image: [Upload!], NewNetopData: createNetopsInput!): Netop!
+  createNetop(Attachments: [Upload!], NewNetopData: createNetopsInput!): Netop!
 
   """Mutation deprecated"""
   createSec(CreateSecInput: CreateSecInput!, HostelId: String!): Boolean!
@@ -529,7 +535,7 @@ type Mutation {
   deleteAnnouncement(AnnouncementId: String!): Boolean!
 
   """
-  Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETORY, HAS}
+  Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETARY, HAS}
   """
   deleteEvent(EventId: String!): Boolean!
 
@@ -547,24 +553,24 @@ type Mutation {
   """
   Mutataion to update Announcement, Restrictions : {Admin, Hostel Affair Secretory, Hostel Secretory}
   """
-  editAnnouncement(AnnouncementId: String!, Images: [Upload!], UpdateAnnouncementInput: EditAnnouncementInput!): Announcement!
+  editAnnouncement(AnnouncementId: String!, UpdateAnnouncementInput: EditAnnouncementInput!): Announcement!
 
   """Mutation to edit Complaint, Restrictions : {anyone who is Authorised}"""
   editComplaint(ComplaintId: String!, EditComplaintInput: EditComplaintInput!, Images: [Upload!]): Boolean!
 
   """Edit the event by id"""
-  editEvent(EditEventData: editEventInput!, EventId: String!, Image: [Upload!]): Event!
+  editEvent(EditEventData: editEventInput!, EventId: String!): Event!
 
   """
   Mutation : Mutation to edit the item, accessible to user who created that item
   """
-  editItems(EditItemInput: EditItemInput!, Images: [Upload!], ItemId: String!): Item!
+  editItems(EditItemInput: EditItemInput!, ItemId: String!): Item!
 
   """edit Query, Restrictions:{user who created}"""
-  editMyQuery(Attachments: [Upload!], EditMyQuerysData: editQuerysInput!, Image: [Upload!], MyQueryId: String!): MyQuery!
+  editMyQuery(Attachments: [Upload!], EditMyQuerysData: editQuerysInput!, MyQueryId: String!): MyQuery!
 
   """edit network and opportunity, Restrictions:{user who created}"""
-  editNetop(Attachments: [Upload!], EditNetopsData: editNetopsInput!, Image: [Upload!], NetopId: String!): Netop!
+  editNetop(Attachments: [Upload!], EditNetopsData: editNetopsInput!, NetopId: String!): Netop!
   imageUpload(Image: [Upload!]): getImageOutput!
 
   """Mutation to login, Restrictions : {none}"""
@@ -954,12 +960,15 @@ enum UserRole {
   HOSTEL_SEC
   LEADS
   MODERATOR
-  SECRETORY
+  SECRETARY
   USER
 }
 
 input createEventInput {
   content: String!
+
+  """Announcement's Images"""
+  imageUrls: [String!]
   linkName: String
   linkToAction: String
   location: String!
@@ -972,6 +981,9 @@ input createEventInput {
 input createNetopsInput {
   content: String!
   endTime: String!
+
+  """Announcement's Images"""
+  imageUrls: [String!]
   linkName: String
   linkToAction: String
   tags: [String!]!
@@ -981,6 +993,9 @@ input createNetopsInput {
 """user"""
 input createQuerysInput {
   content: String!
+
+  """Announcement's Images"""
+  imageUrls: [String!]
   title: String!
 }
 

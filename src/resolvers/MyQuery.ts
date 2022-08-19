@@ -299,7 +299,7 @@ class MyQueryResolver {
   @Mutation(() => Boolean)
   @Authorized([
     UserRole.ADMIN,
-    UserRole.SECRETORY,
+    UserRole.SECRETARY,
     UserRole.HAS,
     UserRole.HOSTEL_SEC,
   ])
@@ -342,7 +342,7 @@ class MyQueryResolver {
   @Mutation(() => Boolean)
   @Authorized([
     UserRole.ADMIN,
-    UserRole.SECRETORY,
+    UserRole.SECRETARY,
     UserRole.HAS,
     UserRole.HOSTEL_SEC,
   ])
@@ -591,7 +591,7 @@ class MyQueryResolver {
       if (
         [
           UserRole.ADMIN,
-          UserRole.SECRETORY,
+          UserRole.SECRETARY,
           UserRole.HAS,
           UserRole.HOSTEL_SEC,
         ].includes(user.role)

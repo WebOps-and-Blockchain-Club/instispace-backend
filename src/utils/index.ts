@@ -7,7 +7,7 @@ export enum UserRole {
   MODERATOR = "MODERATOR",
   USER = "USER",
   HOSTEL_SEC = "HOSTEL_SEC",
-  SECRETORY = "SECRETORY",
+  SECRETARY = "SECRETARY",
   HAS = "HAS",
 }
 

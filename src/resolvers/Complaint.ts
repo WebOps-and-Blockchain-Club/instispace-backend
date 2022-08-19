@@ -186,7 +186,7 @@ class ComplaintResolver {
     description:
       "Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}",
   })
-  @Authorized([UserRole.HAS, UserRole.HOSTEL_SEC, UserRole.SECRETORY])
+  @Authorized([UserRole.HAS, UserRole.HOSTEL_SEC, UserRole.SECRETARY])
   async resolveComplaint(
     @Arg("DeleteComplaintInput") complaintInput: DeleteComplaintInput,
     @Arg("ComplaintId") complaintId: string,
@@ -202,7 +202,7 @@ class ComplaintResolver {
         (complaint?.category === ComplaintCategory.HOSTEL_COMPLAINTS &&
           user.role === UserRole.HOSTEL_SEC) ||
         (complaint?.category === ComplaintCategory.GENERAL_COMPLAINTS &&
-          user.role === UserRole.SECRETORY) ||
+          user.role === UserRole.SECRETARY) ||
         user.role === UserRole.HAS
       ) {
         if (images) {

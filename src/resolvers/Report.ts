@@ -17,7 +17,7 @@ import fcm from "../utils/fcmTokens";
 @Resolver(Report)
 class ReportResolver {
   @Mutation(() => Boolean)
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETORY])
+  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETARY])
   async resolveReport(
     @Arg("id") id: string,
     @Arg("status") status: ReportStatus
@@ -99,7 +99,7 @@ class ReportResolver {
   }
 
   @Query(() => [Report], { nullable: true })
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETORY])
+  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETARY])
   async getReports() {
     let reports = await Report.find({
       order: { createdAt: "DESC" },
