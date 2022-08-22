@@ -14,6 +14,7 @@ import AmenitiesResolver from "./Amenities";
 import ContactResolver from "./Contacts";
 import ImageResolver from "./Image";
 import MessMenuResolver from "./MessMenu";
+import LocationsResolver from "./Locations";
 
 export default [
   UsersResolver,
@@ -31,5 +32,6 @@ export default [
   AmenitiesResolver,
   ContactResolver,
   ImageResolver,
+  LocationsResolver,
   MessMenuResolver,
 ] as const;

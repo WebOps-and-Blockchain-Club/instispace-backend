@@ -763,6 +763,7 @@ type Query {
   Query to fetch all the unresolved items, filter by time of creation, Restrictions : {anyone who is authorised}
   """
   getItems(ItemsFilter: [Category!]!, LastItemId: String!, search: String, take: Float!): getItemsOutput!
+  getLocations: [String!]!
 
   """
   Query to fetch personal profile, Restrictions : {anyone who is authoried}
