@@ -70,19 +70,6 @@ export enum ReportStatus {
 export const emailExpresion =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-export const adminEmail = "myhostel@gmail.com";
-
-export const adminPassword = "123456";
-
-export const accountPassword = "123456";
-
-export const smail = "@smail.iitm.ac.in";
-
-export const sheetLink =
-  "https://docs.google.com/spreadsheets/d/1ECJ1V1KoJB7W3jNyrOD_F-46tKl_ZNPGRPNqMqZkNsA/edit?usp=sharing";
-
-export const messMenu =
-  "https://drive.google.com/drive/folders/1woTIJzE_AT5mJZgGCVJ_qiCGv03JlZqk?usp=sharing";
 export var salt = bcryptjs.genSaltSync(Number(process.env.ITERATIONS!));
 
 export function autoGenPass(length: number) {
@@ -95,40 +82,6 @@ export function autoGenPass(length: number) {
   }
   return result;
 }
-
-//miliseconds per month = 2629800000
-export const miliSecPerMonth = 2629800000;
-
-export const usersDevList = [
-  {
-    roll: "MM19B035",
-    pass: "123456",
-  },
-  {
-    roll: "BS20B039",
-    pass: "123456",
-  },
-  {
-    roll: "CH20B010",
-    pass: "123456",
-  },
-  {
-    roll: "CH20B014",
-    pass: "123456",
-  },
-  {
-    roll: "ED20B014",
-    pass: "123456",
-  },
-  {
-    roll: "EE20B114",
-    pass: "123456",
-  },
-  {
-    roll: "EE20B129",
-    pass: "123456",
-  },
-];
 
 export const getDepartment = (code: string) => {
   let deptCode = code.toUpperCase();

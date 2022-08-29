@@ -20,7 +20,7 @@ import Netop from "../entities/Netop";
 import Comment from "../entities/Common/Comment";
 import { GraphQLUpload, Upload } from "graphql-upload";
 import getNetopOutput from "../types/objects/netop";
-import { EditDelPermission, smail, UserRole } from "../utils";
+import { EditDelPermission, UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
@@ -28,6 +28,7 @@ import fcm from "../utils/fcmTokens";
 import { Notification } from "../utils/index";
 import { ILike, In } from "typeorm";
 import { mail } from "../utils/mail";
+import { smail } from "../utils/config.json";
 
 @Resolver(Netop)
 class NetopResolver {

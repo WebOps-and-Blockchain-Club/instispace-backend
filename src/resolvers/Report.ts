@@ -15,6 +15,7 @@ import { ReportStatus, UserRole } from "../utils/index";
 import fcm from "../utils/fcmTokens";
 
 @Resolver(Report)
+// Report options
 class ReportResolver {
   @Mutation(() => Boolean)
   @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETARY])

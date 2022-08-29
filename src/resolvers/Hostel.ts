@@ -9,11 +9,12 @@ import {
   Root,
 } from "type-graphql";
 import User from "../entities/User";
-import { accountPassword, autoGenPass, salt, UserRole } from "../utils/index";
+import { autoGenPass, salt, UserRole } from "../utils/index";
 import bcrypt from "bcryptjs";
 import { CreateSecInput, CreateHostelInput } from "../types/inputs/hostel";
 import HostelContact from "../entities/Contact";
 import Amenity from "../entities/Amenity";
+import { accountPassword } from "../utils/config.json";
 
 @Resolver((_type) => Hostel)
 class HostelResolver {

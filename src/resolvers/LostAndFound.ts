@@ -10,12 +10,13 @@ import {
   Root,
 } from "type-graphql";
 import Item from "../entities/Item";
-import { Category, EditDelPermission, miliSecPerMonth } from "../utils/index";
+import { Category, EditDelPermission } from "../utils/index";
 import User from "../entities/User";
 import MyContext from "../utils/context";
 import { ILike, In } from "typeorm";
 import getItemsOutput from "../types/objects/items";
 import fcm from "../utils/fcmTokens";
+import { miliSecPerMonth } from "../utils/config.json";
 
 @Resolver((_type) => Item)
 class LostAndFoundResolver {

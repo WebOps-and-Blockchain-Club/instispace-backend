@@ -1,7 +1,8 @@
-import { Query, Resolver } from "type-graphql";
+import { messMenu, academicCallender } from "../utils/config.json";
+import { Authorized, Query, Resolver } from "type-graphql";
 
 @Resolver()
-class LocationsResolver {
+class UtilsResolver {
   @Query(() => [String])
   async getLocations() {
     return [
@@ -82,6 +83,18 @@ class LocationsResolver {
       "Delhi Avenue",
     ];
   }
+
+  @Query(() => String)
+  @Authorized()
+  async getMessMenu() {
+    return messMenu;
+  }
+
+  @Query(() => String)
+  @Authorized()
+  async getAcademicCallender() {
+    return academicCallender;
+  }
 }
 
-export default LocationsResolver;
+export default UtilsResolver;

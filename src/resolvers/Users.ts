@@ -7,9 +7,6 @@ import {
   UpdateSuperUserInput,
 } from "../types/inputs/users";
 import {
-  accountPassword,
-  adminEmail,
-  adminPassword,
   autoGenPass,
   emailExpresion,
   getDepartment,
@@ -17,7 +14,6 @@ import {
   salt,
   UserPermission,
   UserRole,
-  usersDevList,
 } from "../utils";
 import {
   Arg,
@@ -58,6 +54,12 @@ import Netop from "../entities/Netop";
 import Event from "../entities/Event";
 import Announcement from "../entities/Announcement";
 import ldapClient from "../utils/ldap";
+import {
+  adminEmail,
+  adminPassword,
+  accountPassword,
+  usersDevList,
+} from "../utils/config.json";
 
 @Resolver((_type) => User)
 class UsersResolver {

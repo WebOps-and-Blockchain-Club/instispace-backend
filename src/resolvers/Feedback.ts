@@ -10,10 +10,11 @@ import {
   Root,
 } from "type-graphql";
 import MyContext from "../utils/context";
-import { sheetLink, UserRole } from "../utils";
+import { UserRole } from "../utils";
 import User from "../entities/User";
 import AddFeedbackInput from "../types/inputs/feedback";
 import { writeSheet } from "../utils/googleSheets";
+import { sheetLink } from "../utils/config.json";
 
 @Resolver((_type) => Feedback)
 class FeedbackResolver {

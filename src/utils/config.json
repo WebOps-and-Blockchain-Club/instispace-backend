@@ -1,0 +1,40 @@
+{
+    "adminEmail": "myhostel@gmail.com",
+    "adminPassword": "123456",
+    "accountPassword": "123456",
+    "smail": "@smail.iitm.ac.in",
+    "sheetLink": "https://docs.google.com/spreadsheets/d/1ECJ1V1KoJB7W3jNyrOD_F-46tKl_ZNPGRPNqMqZkNsA/edit?usp=sharing",
+    "messMenu": "https://drive.google.com/drive/folders/1woTIJzE_AT5mJZgGCVJ_qiCGv03JlZqk?usp=sharing",
+    "miliSecPerMonth": 2629800000,
+    "academicCallender": "https://drive.google.com/drive/folders/1yUqg4e7sM4Ce4zPIO3p4v49FsWefdf1f?usp=sharing",
+    "usersDevList": [
+        {
+            "roll": "MM19B035",
+            "pass": "123456"
+        },
+        {
+            "roll": "BS20B039",
+            "pass": "123456"
+        },
+        {
+            "roll": "CH20B010",
+            "pass": "123456"
+        },
+        {
+            "roll": "CH20B014",
+            "pass": "123456"
+        },
+        {
+            "roll": "ED20B014",
+            "pass": "123456"
+        },
+        {
+            "roll": "EE20B114",
+            "pass": "123456"
+        },
+        {
+            "roll": "EE20B129",
+            "pass": "123456"
+        }
+    ]
+}

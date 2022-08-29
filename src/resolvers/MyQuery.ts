@@ -15,13 +15,14 @@ import MyQuery from "../entities/MyQuery";
 import Comment from "../entities/Common/Comment";
 import { GraphQLUpload, Upload } from "graphql-upload";
 import getMyQueryOutput from "../types/objects/query";
-import { EditDelPermission, smail, UserRole } from "../utils";
+import { EditDelPermission, UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
 import fcm from "../utils/fcmTokens";
 import { ILike, In } from "typeorm";
 import { mail } from "../utils/mail";
+import { smail } from "../utils/config.json";
 
 @Resolver(MyQuery)
 class MyQueryResolver {
