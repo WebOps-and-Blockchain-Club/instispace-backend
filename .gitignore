@@ -3,3 +3,4 @@ dist
 .env
 public
 bin.txt
+src/utils/keys.json
