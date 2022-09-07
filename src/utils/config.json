@@ -1,40 +1,42 @@
 {
-    "adminEmail": "myhostel@gmail.com",
-    "adminPassword": "123456",
-    "accountPassword": "123456",
-    "smail": "@smail.iitm.ac.in",
-    "sheetLink": "https://docs.google.com/spreadsheets/d/1ECJ1V1KoJB7W3jNyrOD_F-46tKl_ZNPGRPNqMqZkNsA/edit?usp=sharing",
-    "messMenu": "https://drive.google.com/drive/folders/1woTIJzE_AT5mJZgGCVJ_qiCGv03JlZqk?usp=sharing",
-    "miliSecPerMonth": 2629800000,
-    "academicCallender": "https://drive.google.com/drive/folders/1yUqg4e7sM4Ce4zPIO3p4v49FsWefdf1f?usp=sharing",
-    "usersDevList": [
-        {
-            "roll": "MM19B035",
-            "pass": "123456"
-        },
-        {
-            "roll": "BS20B039",
-            "pass": "123456"
-        },
-        {
-            "roll": "CH20B010",
-            "pass": "123456"
-        },
-        {
-            "roll": "CH20B014",
-            "pass": "123456"
-        },
-        {
-            "roll": "ED20B014",
-            "pass": "123456"
-        },
-        {
-            "roll": "EE20B114",
-            "pass": "123456"
-        },
-        {
-            "roll": "EE20B129",
-            "pass": "123456"
-        }
-    ]
+  "adminEmail": "instispace_cfi@smail.iitm.ac.in",
+  "adminPassword": "123456",
+  "accountPassword": "123456",
+  "smail": "@smail.iitm.ac.in",
+  "miliSecPerMonth": 2629800000,
+  "sheetLink": "https://docs.google.com/spreadsheets/d/1ECJ1V1KoJB7W3jNyrOD_F-46tKl_ZNPGRPNqMqZkNsA/edit?usp=sharing",
+  "messMenu": "https://drive.google.com/drive/folders/1woTIJzE_AT5mJZgGCVJ_qiCGv03JlZqk?usp=sharing",
+  "academicCallender": "https://drive.google.com/drive/folders/1yUqg4e7sM4Ce4zPIO3p4v49FsWefdf1f?usp=sharing",
+  "usersDevList": [
+    {
+      "displayName": "Janith M S",
+      "roll": "mm19b035",
+      "pass": "123456"
+    },
+    {
+      "displayName": "Yatharath",
+      "roll": "bs20b039",
+      "pass": "123456"
+    },
+    {
+      "displayName": "Gudipudi Rasagnya",
+      "roll": "mm21b025",
+      "pass": "123456"
+    },
+    {
+      "displayName": "Ganesh",
+      "roll": "me20b070",
+      "pass": "123456"
+    },
+    {
+      "displayName": "Harsh Sunil Trivedi",
+      "roll": "me21b072",
+      "pass": "123456"
+    },
+    {
+      "displayName": "Jayanth K",
+      "roll": "ae20b030",
+      "pass": "123456"
+    }
+  ]
 }
