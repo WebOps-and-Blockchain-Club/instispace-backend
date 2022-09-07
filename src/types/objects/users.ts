@@ -92,10 +92,14 @@ class LDAPUser {
   @Field()
   department: string;
 
+  @Field()
+  photo: string;
+
   constructor(name: string, roll: string) {
     this.name = name;
     this.roll = roll;
     this.department = getDepartment(roll?.slice(0, 2));
+    this.photo = `https://instispace.iitm.ac.in/photos/byroll.php?roll=${roll.toUpperCase()}`;
   }
 }
 

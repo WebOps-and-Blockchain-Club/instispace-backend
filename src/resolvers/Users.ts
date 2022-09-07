@@ -421,10 +421,11 @@ class UsersResolver {
   @Authorized()
   async searchLDAPUser(@Arg("search") search: string) {
     try {
-      let users: any[] = (await ldapClient.search(search, 50)) as any[];
-      const list = users.map(
-        (user) => new LDAPUser(user.displayName, user.uid)
-      );
+      let users: any[] = (await ldapClient.search(search, 250)) as any[];
+      const list = users
+        .slice(0, 250)
+        .map((user) => new LDAPUser(user.displayName, user.uid))
+        .sort((a, b) => (a.roll > b.roll ? -1 : a.roll < b.roll ? 1 : 0));
       return list;
     } catch (e) {
       throw new Error(`message: ${e}`);
@@ -896,6 +897,13 @@ class UsersResolver {
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
+  }
+
+  @FieldResolver(() => String)
+  async photo(@Root() { roll, role }: User) {
+    return role === UserRole.USER || role === UserRole.MODERATOR
+      ? `https://instispace.iitm.ac.in/photos/byroll.php?roll=${roll.toUpperCase()}`
+      : "";
   }
 }
 
