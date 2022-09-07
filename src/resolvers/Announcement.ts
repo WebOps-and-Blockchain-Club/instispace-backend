@@ -114,7 +114,7 @@ class AnnouncementResolver {
     @Arg("LastAnnouncementId") lastAnnouncementId: string,
     @Arg("take") take: number,
     @Ctx() { user }: MyContext,
-    @Arg("HostelId") hostelId?: string,
+    @Arg("HostelId", { nullable: true }) hostelId?: string,
     @Arg("search", { nullable: true }) search?: string
   ) {
     try {
