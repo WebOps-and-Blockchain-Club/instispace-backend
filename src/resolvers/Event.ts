@@ -9,7 +9,7 @@ import {
   Root,
 } from "type-graphql";
 import MyContext from "../utils/context";
-import { fileringConditions } from "../types/inputs/netop";
+import { FilteringConditions, OrderInput } from "../types/inputs/netop";
 import Tag from "../entities/Tag";
 import { EditDelPermission, UserRole } from "../utils";
 import User from "../entities/User";
@@ -18,7 +18,6 @@ import { createEventInput, editEventInput } from "../types/inputs/event";
 import getEventOutput from "../types/objects/event";
 import fcm from "../utils/fcmTokens";
 import { Notification } from "../utils/index";
-import { ILike } from "typeorm";
 
 @Resolver(Event)
 class EventResolver {
@@ -279,81 +278,75 @@ class EventResolver {
     @Ctx() { user }: MyContext,
     @Arg("lastEventId") lastEventId: string,
     @Arg("take") take: number,
-    @Arg("FileringCondition", { nullable: true })
-    fileringConditions?: fileringConditions,
-    @Arg("OrderByLikes", () => Boolean, { nullable: true })
-    orderByLikes?: Boolean,
-    @Arg("search", { nullable: true }) search?: string
+    @Arg("Filters", { nullable: true })
+    filteringConditions?: FilteringConditions,
+    @Arg("Sort", { nullable: true })
+    orderInput?: OrderInput
   ) {
     try {
-      var eventList: Event[] = [];
+      let eventList = await Event.find({
+        where: { isHidden: false },
+        relations: ["tags", "likedBy", "staredBy"],
+        order: { createdAt: "DESC" },
+      });
 
-      if (search) {
-        await Promise.all(
-          ["title"].map(async (field: string) => {
-            const filter = { [field]: ILike(`%${search}%`), isHidden: false };
-            const eventF = await Event.find({
-              where: filter,
-              relations: ["tags", "likedBy", "staredBy"],
-              order: { createdAt: "DESC" },
-            });
-            eventF.forEach((event) => {
-              eventList.push(event);
-            });
-          })
-        );
-      } else {
-        eventList = await Event.find({
-          where: { isHidden: false },
-          relations: ["tags", "likedBy", "staredBy"],
-          order: { createdAt: "DESC" },
-        });
+      // filters based on input filter conditions
+      if (filteringConditions) {
+        if (filteringConditions.search) {
+          eventList = eventList.filter((event) =>
+            JSON.stringify(event)
+              .toLowerCase()
+              .includes(filteringConditions.search?.toLowerCase()!)
+          );
+        }
+
+        if (filteringConditions.isStared) {
+          eventList = eventList.filter(
+            (n) => n.staredBy.filter((u) => u.id === user.id).length
+          );
+        }
+
+        if (filteringConditions.tags && filteringConditions.tags.length) {
+          eventList = eventList.filter(
+            (n) =>
+              n.tags.filter((tag) => filteringConditions.tags.includes(tag.id))
+                .length
+          );
+        }
       }
 
-      const d = new Date();
-      d.setHours(d.getHours() - 2); //Filter the events after the 2 hours time of completion
-      if (fileringConditions && fileringConditions.isStared) {
-        eventList = eventList.filter((n) => {
-          return fileringConditions.tags && fileringConditions.tags.length
-            ? n.staredBy.filter((u) => u.id === user.id).length &&
-                new Date(n.time).getTime() > d.getTime() &&
-                n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
-                  .length
-            : n.staredBy.filter((u) => u.id === user.id).length &&
-                new Date(n.time).getTime() > d.getTime();
-        });
-      } else if (
-        fileringConditions &&
-        fileringConditions.tags &&
-        fileringConditions.tags.length
-      ) {
-        eventList = eventList.filter(
-          (n) =>
-            new Date(n.time).getTime() > d.getTime() &&
-            n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
-              .length
-        );
-      } else {
-        eventList = eventList.filter(
-          (n) => new Date(n.time).getTime() > d.getTime()
-        );
+      // sorts based on input sort conditions
+      if (orderInput) {
+        if (orderInput.byLikes == true) {
+          eventList.sort((a, b) =>
+            a.likedBy.length > b.likedBy.length
+              ? -1
+              : a.likedBy.length < b.likedBy.length
+              ? 1
+              : 0
+          );
+        } else if (orderInput.byLikes == false) {
+          eventList.sort((a, b) =>
+            a.likedBy.length < b.likedBy.length
+              ? -1
+              : a.likedBy.length > b.likedBy.length
+              ? 1
+              : 0
+          );
+        }
+
+        if (orderInput.stared) {
+          eventList.sort((a, b) =>
+            a.isStared === false && b.isStared === true
+              ? 1
+              : a.isStared === false && b.isStared === false
+              ? 0
+              : -1
+          );
+        }
       }
 
       const total = eventList.length;
-
-      if (orderByLikes) {
-        eventList.sort((a, b) =>
-          a.likedBy.length > b.likedBy.length
-            ? -1
-            : a.likedBy.length < b.likedBy.length
-            ? 1
-            : 0
-        );
-      } else {
-        eventList.sort((a, b) =>
-          a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
-        );
-      }
 
       var finalList;
 
@@ -383,10 +376,10 @@ class EventResolver {
   })
   async tags(@Root() { id, tags }: Event) {
     if (tags) return tags;
-    const netop = await Event.findOne(id, {
+    const event = await Event.findOne(id, {
       relations: ["tags"],
     });
-    return netop?.tags;
+    return event?.tags;
   }
 
   @FieldResolver(() => Boolean, {

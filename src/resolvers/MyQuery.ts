@@ -23,6 +23,12 @@ import fcm from "../utils/fcmTokens";
 import { ILike, In } from "typeorm";
 import { mail } from "../utils/mail";
 import { smail } from "../utils/config.json";
+import Reason from "../entities/Common/Reason";
+import {
+  FilteringConditions,
+  OrderInput,
+  ReportPostInput,
+} from "../types/inputs/netop";
 
 @Resolver(MyQuery)
 class MyQueryResolver {
@@ -169,19 +175,39 @@ class MyQueryResolver {
   async reportMyQuery(
     @Arg("MyQueryId") myQueryId: string,
     @Ctx() { user }: MyContext,
-    @Arg("description") description: string
+    @Arg("ReportMyQueryInput") reportPostInput: ReportPostInput
   ) {
     try {
       const myQuery = await MyQuery.findOneOrFail(myQueryId, {
         relations: ["reports", "createdBy"],
       });
+
+      let hideStatus: Boolean = false;
+
+      let rReason = await Reason.findOne({ id: reportPostInput.description });
+
+      if (rReason) {
+        reportPostInput.description = rReason.reason;
+        if (
+          myQuery.reports.filter(
+            (r) => r.description === reportPostInput.description
+          ).length +
+            1 >=
+          rReason.count
+        )
+          hideStatus = true;
+      }
+
       const report = await Report.create({
         query: myQuery,
-        description,
+        description: reportPostInput.description,
         createdBy: user,
       }).save();
 
-      const { affected } = await MyQuery.update(myQueryId, { isHidden: true });
+      if (!myQuery.isHidden && hideStatus) {
+        myQuery.isHidden = true;
+        await myQuery.save();
+      }
 
       if (process.env.NODE_ENV !== "development") {
         const superUsersList = await User.find({
@@ -205,7 +231,7 @@ class MyQueryResolver {
         });
       }
 
-      if (!!report && affected) {
+      if (!!report && !!myQuery) {
         const creator = myQuery.createdBy;
 
         creator.fcmToken.split(" AND ").map((ft) => {
@@ -296,93 +322,6 @@ class MyQueryResolver {
     }
   }
 
-  /*
-  @Mutation(() => Boolean)
-  @Authorized([
-    UserRole.ADMIN,
-    UserRole.SECRETARY,
-    UserRole.HAS,
-    UserRole.HOSTEL_SEC,
-  ])
-  async removeMyQuery(
-    @Arg("MyQueryId") myQueryId: string,
-    @Arg("ReportId") reportId: string
-  ) {
-    let { affected } = await MyQuery.update(myQueryId, { isHidden: true });
-    let { affected: a2 } = await Report.update(reportId, { isResolved: true });
-
-    if (affected === 1 && a2 === 1) {
-      let myQuery = await MyQuery.findOneOrFail(myQueryId);
-
-      const creator = myQuery.createdBy;
-
-      creator.fcmToken.split(" AND ").map((ft) => {
-        const message = {
-          to: ft,
-          notification: {
-            title: `Hi ${creator.roll}`,
-            body: "your query got reported",
-          },
-        };
-
-        fcm.send(message, (err: any, response: any) => {
-          if (err) {
-            console.log("Something has gone wrong!" + err);
-            console.log("Respponse:! " + response);
-          } else {
-            // showToast("Successfully sent with response");
-            console.log("Successfully sent with response: ", response);
-          }
-        });
-      });
-      return true;
-    }
-    return false;
-  }
-
-  @Mutation(() => Boolean)
-  @Authorized([
-    UserRole.ADMIN,
-    UserRole.SECRETARY,
-    UserRole.HAS,
-    UserRole.HOSTEL_SEC,
-  ])
-  async resolveMyQuery(
-    @Arg("MyQueryId") myQueryId: string,
-    @Arg("ReportId") reportId: string
-  ) {
-    let { affected } = await MyQuery.update(myQueryId, { isHidden: false });
-    let { affected: a2 } = await Report.update(reportId, { isResolved: true });
-    if (affected === 1 && a2 === 1) {
-      let myQuery = await MyQuery.findOneOrFail(myQueryId);
-
-      const creator = myQuery.createdBy;
-
-      creator.fcmToken.split(" AND ").map((ft) => {
-        const message = {
-          to: ft,
-          notification: {
-            title: `Hi ${creator.roll}`,
-            body: "your query got resolved and now its displayed",
-          },
-        };
-
-        fcm.send(message, (err: any, response: any) => {
-          if (err) {
-            console.log("Something has gone wrong!" + err);
-            console.log("Respponse:! " + response);
-          } else {
-            // showToast("Successfully sent with response");
-            console.log("Successfully sent with response: ", response);
-          }
-        });
-      });
-      return true;
-    }
-    return false;
-  }
-*/
-
   @Query(() => MyQuery, {
     description: "get an myQuery by id Query",
   })
@@ -405,49 +344,73 @@ class MyQueryResolver {
   async getMyQuerys(
     @Arg("take") take: number,
     @Arg("lastEventId") lastEventId: string,
-    @Arg("OrderByLikes", () => Boolean, { nullable: true })
-    orderByLikes?: Boolean,
-    @Arg("search", { nullable: true }) search?: string
+    @Ctx() { user }: MyContext,
+    @Arg("Sort", { nullable: true })
+    orderInput?: OrderInput,
+    @Arg("Filters", { nullable: true })
+    filteringConditions?: FilteringConditions
   ) {
     try {
-      var myQueryList: MyQuery[] = [];
-      if (search) {
-        await Promise.all(
-          ["title"].map(async (field: string) => {
-            const filter = { [field]: ILike(`%${search}%`), isHidden: false };
-            const queryF = await MyQuery.find({
-              where: filter,
-              relations: ["likedBy"],
-              order: { createdAt: "DESC" },
-            });
-            queryF.forEach((query) => {
-              myQueryList.push(query);
-            });
-          })
-        );
-      } else {
-        myQueryList = await MyQuery.find({
-          where: { isHidden: false },
-          relations: ["likedBy"],
-          order: { createdAt: "DESC" },
-        });
+      let myQueryList = await MyQuery.find({
+        where: { isHidden: false },
+        relations: ["likedBy", "reports"],
+        order: { createdAt: "DESC" },
+      });
+
+      myQueryList = myQueryList.filter(
+        (n) => !n.reports.filter((qr) => qr.createdBy.id === user.id).length
+      );
+
+      if (filteringConditions) {
+        if (filteringConditions.search) {
+          myQueryList = myQueryList.filter((myQuery) =>
+            JSON.stringify(myQuery)
+              .toLowerCase()
+              .includes(filteringConditions.search?.toLowerCase()!)
+          );
+        }
+      }
+
+      // sorts based on input sort conditions
+      if (orderInput) {
+        if (orderInput.byLikes == true) {
+          myQueryList.sort((a, b) =>
+            a.likedBy.length > b.likedBy.length
+              ? -1
+              : a.likedBy.length < b.likedBy.length
+              ? 1
+              : 0
+          );
+        } else if (orderInput.byLikes == false) {
+          myQueryList.sort((a, b) =>
+            a.likedBy.length < b.likedBy.length
+              ? -1
+              : a.likedBy.length > b.likedBy.length
+              ? 1
+              : 0
+          );
+        }
+
+        if (orderInput.byComments === true) {
+          myQueryList.sort((a, b) =>
+            a.comments.length > b.comments.length
+              ? -1
+              : a.likedBy.length < b.likedBy.length
+              ? 1
+              : 0
+          );
+        } else if (orderInput.byComments === false) {
+          myQueryList.sort((a, b) =>
+            a.comments.length < b.comments.length
+              ? -1
+              : a.likedBy.length > b.likedBy.length
+              ? 1
+              : 0
+          );
+        }
       }
 
       const total = myQueryList.length;
-
-      if (orderByLikes) {
-        myQueryList.sort((a, b) =>
-          a.likedBy.length > b.likedBy.length
-            ? -1
-            : a.likedBy.length < b.likedBy.length
-            ? 1
-            : 0
-        );
-      } else {
-        myQueryList.sort((a, b) =>
-          a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
-        );
-      }
 
       var finalList;
 
@@ -534,6 +497,20 @@ class MyQueryResolver {
     const myQuery = await MyQuery.findOne(id, { relations: ["likedBy"] });
     const like_count = myQuery?.likedBy.length;
     return like_count;
+  }
+
+  @FieldResolver(() => Number)
+  async reportCount(@Root() { id, reports }: MyQuery) {
+    try {
+      if (reports) return reports.length;
+      const netop = await MyQuery.findOne({
+        where: id,
+        relations: ["reports"],
+      });
+      return netop?.reports.length;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
   }
 
   @FieldResolver(() => Boolean, {

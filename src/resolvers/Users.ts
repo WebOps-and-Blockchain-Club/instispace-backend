@@ -43,7 +43,7 @@ import { In, ILike } from "typeorm";
 import Hostel from "../entities/Hostel";
 import Item from "../entities/Item";
 import NetopResolver from "./Netop";
-import { fileringConditions } from "../types/inputs/netop";
+import { FilteringConditions } from "../types/inputs/netop";
 import AnnouncementResolver from "./Announcement";
 import EventResolver from "./Event";
 import { Notification } from "../utils/index";
@@ -719,7 +719,7 @@ class UsersResolver {
         let netops;
         let events;
         if (tagIds && tagIds.length) {
-          const filters: fileringConditions = {
+          const filters: FilteringConditions = {
             tags: tagIds,
             isStared: false,
           };
@@ -802,12 +802,16 @@ class UsersResolver {
         UserPermission.GET_CONTACTS,
       ];
       if (role === UserRole.MODERATOR) {
-        permissionList.push(UserPermission.CREATE_EVENT);
+        permissionList.push(
+          UserPermission.CREATE_EVENT,
+          UserPermission.CREATE_REPORT_REASON
+        );
       }
       if (role === UserRole.LEADS) {
         permissionList.push(
           UserPermission.CREATE_EVENT,
-          UserPermission.UPDATE_ROLE
+          UserPermission.UPDATE_ROLE,
+          UserPermission.CREATE_REPORT_REASON
         );
       }
       if (role === UserRole.HOSTEL_SEC)
@@ -828,7 +832,8 @@ class UsersResolver {
           UserPermission.GET_ALL_ANNOUNCEMENTS,
           UserPermission.GET_REPORTS,
           UserPermission.UPDATE_ROLE,
-          UserPermission.CREATE_EVENT
+          UserPermission.CREATE_EVENT,
+          UserPermission.CREATE_REPORT_REASON
         );
       if (role === UserRole.HAS)
         permissionList.push(
@@ -844,7 +849,8 @@ class UsersResolver {
           UserPermission.GET_ALL_CONTACTS,
           UserPermission.GET_REPORTS,
           UserPermission.UPDATE_ROLE,
-          UserPermission.CREATE_EVENT
+          UserPermission.CREATE_EVENT,
+          UserPermission.CREATE_REPORT_REASON
         );
       if (role === UserRole.ADMIN)
         permissionList.push(
@@ -861,7 +867,8 @@ class UsersResolver {
           UserPermission.GET_REPORTS,
           UserPermission.VIEW_FEEDBACK,
           UserPermission.UPDATE_ROLE,
-          UserPermission.CREATE_EVENT
+          UserPermission.CREATE_EVENT,
+          UserPermission.CREATE_REPORT_REASON
         );
       return permissionList;
     } catch (e) {

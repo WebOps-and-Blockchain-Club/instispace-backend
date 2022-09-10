@@ -13,6 +13,8 @@ import Netop from "../entities/Netop";
 import MyQuery from "../entities/MyQuery";
 import { ReportStatus, UserRole } from "../utils/index";
 import fcm from "../utils/fcmTokens";
+import Reason from "../entities/Common/Reason";
+import ReasonInput from "../types/inputs/report";
 
 @Resolver(Report)
 // Report options
@@ -96,6 +98,32 @@ class ReportResolver {
       } else throw new Error("Not Accepted");
     } catch (e) {
       throw new Error(e.message);
+    }
+  }
+
+  @Mutation(() => Reason)
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.HAS,
+    UserRole.SECRETARY,
+    UserRole.MODERATOR,
+    UserRole.LEADS,
+  ])
+  async createReportReason(@Arg("ReportData") reasonInput: ReasonInput) {
+    try {
+      const reportCreated = await Reason.create({ ...reasonInput }).save();
+      return reportCreated;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @Query(() => [Reason])
+  async getReportReasons() {
+    try {
+      return await Reason.find();
+    } catch (e) {
+      throw new Error(`message : ${e}`);
     }
   }
 

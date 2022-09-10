@@ -99,6 +99,12 @@ class Netop extends BaseEntity {
   @JoinTable()
   likedBy: User[];
 
+  @Field(() => Number, {
+    nullable: true,
+    description: "Number of reports for a Netop",
+  })
+  reportCount: number;
+
   @Field(() => [EditDelPermission], { nullable: true })
   permissions: EditDelPermission[];
 }

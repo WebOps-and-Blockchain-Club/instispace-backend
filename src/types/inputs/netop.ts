@@ -1,7 +1,7 @@
 import { Field, InputType } from "type-graphql";
 
 @InputType({ description: "user" })
-class createNetopsInput {
+class CreateNetopsInput {
   @Field()
   title: string;
 
@@ -30,7 +30,7 @@ class createNetopsInput {
 }
 
 @InputType()
-class editNetopsInput {
+class EditNetopsInput {
   @Field({ nullable: true })
   title: string;
 
@@ -59,7 +59,19 @@ class editNetopsInput {
 }
 
 @InputType()
-class fileringConditions {
+class ReportPostInput {
+  @Field((_type) => [String])
+  reasonIds: string[];
+
+  @Field()
+  description: string;
+}
+
+@InputType()
+class FilteringConditions {
+  @Field({ nullable: true })
+  search?: string;
+
   @Field(() => [String], { nullable: true })
   tags: string[];
 
@@ -67,4 +79,22 @@ class fileringConditions {
   isStared: boolean;
 }
 
-export { createNetopsInput, editNetopsInput, fileringConditions };
+@InputType()
+class OrderInput {
+  @Field({ nullable: true })
+  byLikes: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  stared: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  byComments: boolean;
+}
+
+export {
+  CreateNetopsInput,
+  EditNetopsInput,
+  FilteringConditions,
+  ReportPostInput,
+  OrderInput,
+};

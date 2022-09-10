@@ -11,9 +11,11 @@ import {
 
 import MyContext from "../utils/context";
 import {
-  createNetopsInput,
-  editNetopsInput,
-  fileringConditions,
+  CreateNetopsInput,
+  EditNetopsInput,
+  FilteringConditions,
+  OrderInput,
+  ReportPostInput,
 } from "../types/inputs/netop";
 import Tag from "../entities/Tag";
 import Netop from "../entities/Netop";
@@ -26,9 +28,10 @@ import addAttachments from "../utils/uploads";
 import User from "../entities/User";
 import fcm from "../utils/fcmTokens";
 import { Notification } from "../utils/index";
-import { ILike, In } from "typeorm";
+import { In } from "typeorm";
 import { mail } from "../utils/mail";
 import { smail } from "../utils/config.json";
+import Reason from "../entities/Common/Reason";
 
 @Resolver(Netop)
 class NetopResolver {
@@ -38,7 +41,7 @@ class NetopResolver {
   })
   @Authorized()
   async createNetop(
-    @Arg("NewNetopData") createNetopsInput: createNetopsInput,
+    @Arg("NewNetopData") createNetopsInput: CreateNetopsInput,
     @Ctx() { user }: MyContext,
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
@@ -138,7 +141,7 @@ class NetopResolver {
   async editNetop(
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext,
-    @Arg("EditNetopsData") editNetopsInput: editNetopsInput,
+    @Arg("EditNetopsData") editNetopsInput: EditNetopsInput,
     @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
     attachments?: Upload[]
   ) {
@@ -271,20 +274,40 @@ class NetopResolver {
   @Authorized()
   async reportNetop(
     @Arg("NetopId") netopId: string,
-    @Ctx() { user }: MyContext,
-    @Arg("description") description: string
+    @Arg("ReportPostInput") reportPostInput: ReportPostInput,
+    @Ctx() { user }: MyContext
   ) {
     try {
       let netop = await Netop.findOneOrFail(netopId, {
         relations: ["reports", "createdBy"],
       });
+
+      let hideStatus: Boolean = false;
+
+      let rReason = await Reason.findOne({ id: reportPostInput.description });
+
+      if (rReason) {
+        reportPostInput.description = rReason.reason;
+        if (
+          netop.reports.filter(
+            (r) => r.description === reportPostInput.description
+          ).length +
+            1 >=
+          rReason.count
+        )
+          hideStatus = true;
+      }
+
       const report = await Report.create({
         netop,
-        description,
+        description: reportPostInput.description,
         createdBy: user,
       }).save();
 
-      const { affected } = await Netop.update(netop.id, { isHidden: true });
+      if (!netop.isHidden && hideStatus) {
+        netop.isHidden = true;
+        await netop.save();
+      }
 
       if (process.env.NODE_ENV !== "development") {
         const superUsersList = await User.find({
@@ -310,7 +333,7 @@ class NetopResolver {
 
       const creator = netop.createdBy;
 
-      if (!!report && affected) {
+      if (!!report && !!netop) {
         creator.fcmToken.split(" AND ").map((ft) => {
           const message = {
             to: ft,
@@ -400,102 +423,6 @@ class NetopResolver {
     }
   }
 
-  /*
-  @Mutation(() => Boolean)
-  @Authorized([
-    UserRole.ADMIN,
-    UserRole.LEADS,
-    UserRole.HAS,
-    UserRole.SECRETARY,
-    UserRole.HOSTEL_SEC,
-    UserRole.MODERATOR,
-  ])
-  async removeNetop(
-    @Arg("NetopId") netopId: string,
-    @Arg("ReportId") reportId: string
-  ) {
-    let { affected } = await Netop.update(netopId, {
-      isHidden: true,
-    });
-    let { affected: a2 } = await Report.update(reportId, { isResolved: true });
-
-    if (affected === 1 && a2 === 1) {
-      let netop = await Netop.findOneOrFail(netopId);
-
-      const creator = netop.createdBy;
-
-      creator.fcmToken.split(" AND ").map((ft) => {
-        const message = {
-          to: ft,
-          notification: {
-            title: `Hi ${creator.name}`,
-            body: "your netop got resolved and now its displayed",
-          },
-        };
-
-        fcm.send(message, (err: any, response: any) => {
-          if (err) {
-            console.log("Something has gone wrong!" + err);
-            console.log("Respponse:! " + response);
-          } else {
-            // showToast("Successfully sent with response");
-            console.log("Successfully sent with response: ", response);
-          }
-        });
-      });
-      return true;
-    }
-    return false;
-  }
-
-  @Mutation(() => Boolean)
-  @Authorized([
-    UserRole.ADMIN,
-    UserRole.LEADS,
-    UserRole.HAS,
-    UserRole.SECRETARY,
-    UserRole.HOSTEL_SEC,
-    UserRole.MODERATOR,
-  ])
-  async resolveNetop(
-    @Arg("NetopId") netopId: string,
-    @Arg("ReportId") reportId: string
-  ) {
-    let { affected } = await Netop.update(netopId, {
-      isHidden: false,
-    });
-    let { affected: a2 } = await Report.update(reportId, { isResolved: true });
-
-    if (affected === 1 && a2 === 1) {
-      let netop = await Netop.findOneOrFail(netopId);
-
-      const creator = netop.createdBy;
-
-      creator.fcmToken.split(" AND ").map((ft) => {
-        const message = {
-          to: ft,
-          notification: {
-            title: `Hi ${creator.roll}`,
-            body: "your netop got reported",
-          },
-        };
-
-        fcm.send(message, (err: any, response: any) => {
-          if (err) {
-            console.log("Something has gone wrong!" + err);
-            console.log("Respponse:! " + response);
-          } else {
-            // showToast("Successfully sent with response");
-            console.log("Successfully sent with response: ", response);
-          }
-        });
-      });
-      return true;
-    }
-    return false;
-  }
-*/
-
   @Query(() => Netop, {
     description: "get an netop by id network and opportunity",
   })
@@ -518,87 +445,110 @@ class NetopResolver {
   }
 
   @Query(() => getNetopOutput, {
-    description: "get a list of netops by filer and order conditions",
+    description: "get a list of netops by filter and order conditions",
   })
   @Authorized()
   async getNetops(
     @Ctx() { user }: MyContext,
     @Arg("LastNetopId") lastNetopId: string,
     @Arg("take") take: number,
-    @Arg("FileringCondition", { nullable: true })
-    fileringConditions?: fileringConditions,
-    @Arg("OrderByLikes", () => Boolean, { nullable: true })
-    orderByLikes?: Boolean,
-    @Arg("search", { nullable: true }) search?: string
+    @Arg("Filters", { nullable: true })
+    filteringConditions?: FilteringConditions,
+    @Arg("Sort", { nullable: true })
+    orderInput?: OrderInput
   ) {
     try {
-      let netopList: Netop[] = [];
-
-      if (search) {
-        await Promise.all(
-          ["title"].map(async (field: string) => {
-            const filter = { [field]: ILike(`%${search}%`), isHidden: false };
-            const netopF = await Netop.find({
-              where: filter,
-              relations: ["tags", "likedBy", "staredBy", "reports"],
-              order: { createdAt: "DESC" },
-            });
-            netopF.forEach((netop) => {
-              netopList.push(netop);
-            });
-          })
-        );
-      } else {
-        netopList = await Netop.find({
-          where: { isHidden: false },
-          relations: ["tags", "likedBy", "staredBy", "reports"],
-          order: { createdAt: "DESC" },
-        });
-      }
+      let netopList = await Netop.find({
+        where: { isHidden: false },
+        relations: ["tags", "likedBy", "staredBy", "reports"],
+        order: { createdAt: "DESC" },
+      });
 
       const d = new Date();
-      if (fileringConditions && fileringConditions.isStared) {
-        netopList = netopList.filter((n) => {
-          return fileringConditions.tags && fileringConditions.tags.length
-            ? n.staredBy.filter((u) => u.id === user.id).length &&
-                new Date(n.endTime).getTime() > d.getTime() &&
-                n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
-                  .length
-            : n.staredBy.filter((u) => u.id === user.id).length &&
-                new Date(n.endTime).getTime() > d.getTime();
-        });
-      } else if (
-        fileringConditions &&
-        fileringConditions.tags &&
-        fileringConditions.tags.length
-      ) {
-        netopList = netopList.filter(
-          (n) =>
-            new Date(n.endTime).getTime() > d.getTime() &&
-            n.tags.filter((tag) => fileringConditions.tags.includes(tag.id))
-              .length
-        );
-      } else {
-        netopList = netopList.filter(
-          (n) => new Date(n.endTime).getTime() > d.getTime()
-        );
+
+      // default filters (endtime should not exceed, user shouldn't see his reported posts) and sort (later posts first)
+      netopList = netopList.filter(
+        (n) =>
+          new Date(n.endTime).getTime() > d.getTime() &&
+          !n.reports.filter((nr) => nr.createdBy.id === user.id).length
+      );
+
+      // filters based on input filter conditions
+      if (filteringConditions) {
+        if (filteringConditions.search) {
+          netopList = netopList.filter((netop) =>
+            JSON.stringify(netop)
+              .toLowerCase()
+              .includes(filteringConditions.search?.toLowerCase()!)
+          );
+        }
+
+        if (filteringConditions.isStared) {
+          netopList = netopList.filter(
+            (n) => n.staredBy.filter((u) => u.id === user.id).length
+          );
+        }
+
+        if (filteringConditions.tags && filteringConditions.tags.length) {
+          netopList = netopList.filter(
+            (n) =>
+              n.tags.filter((tag) => filteringConditions.tags.includes(tag.id))
+                .length
+          );
+        }
       }
 
+      // sorts based on input sort conditions
+      if (orderInput) {
+        if (orderInput.byLikes == true) {
+          netopList.sort((a, b) =>
+            a.likedBy.length > b.likedBy.length
+              ? -1
+              : a.likedBy.length < b.likedBy.length
+              ? 1
+              : 0
+          );
+        } else if (orderInput.byLikes == false) {
+          netopList.sort((a, b) =>
+            a.likedBy.length < b.likedBy.length
+              ? -1
+              : a.likedBy.length > b.likedBy.length
+              ? 1
+              : 0
+          );
+        }
+
+        if (orderInput.stared) {
+          netopList.sort((a, b) =>
+            a.isStared === false && b.isStared === true
+              ? 1
+              : a.isStared === false && b.isStared === false
+              ? 0
+              : -1
+          );
+        }
+
+        if (orderInput.byComments === true) {
+          netopList.sort((a, b) =>
+            a.comments.length > b.comments.length
+              ? -1
+              : a.likedBy.length < b.likedBy.length
+              ? 1
+              : 0
+          );
+        } else if (orderInput.byComments === false) {
+          netopList.sort((a, b) =>
+            a.comments.length < b.comments.length
+              ? -1
+              : a.likedBy.length > b.likedBy.length
+              ? 1
+              : 0
+          );
+        }
+      }
+
+      // pagination
       let total = netopList.length;
-
-      if (orderByLikes) {
-        netopList.sort((a, b) =>
-          a.likedBy.length > b.likedBy.length
-            ? -1
-            : a.likedBy.length < b.likedBy.length
-            ? 1
-            : 0
-        );
-      } else {
-        netopList.sort((a, b) =>
-          a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
-        );
-      }
 
       var finalList;
 
@@ -681,6 +631,17 @@ class NetopResolver {
   async isReported(@Root() { id }: Netop) {
     const netop = await Netop.findOneOrFail(id, { relations: ["reports"] });
     return netop.reports.length && true;
+  }
+
+  @FieldResolver(() => Number)
+  async reportCount(@Root() { id, reports }: Netop) {
+    try {
+      if (reports) return reports.length;
+      const netop = await Netop.findOne({ where: id, relations: ["reports"] });
+      return netop?.reports.length;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
   }
 
   @FieldResolver(() => User)

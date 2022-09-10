@@ -51,6 +51,12 @@ class MyQuery extends BaseEntity {
   @Field(() => Number, { description: "number of likes" })
   likeCount: number;
 
+  @Field(() => Number, {
+    nullable: true,
+    description: "Number of reports for a Netop",
+  })
+  reportCount: number;
+
   @OneToMany(() => Comment, (comment) => comment.query, { nullable: true })
   comments: Comment[];
 

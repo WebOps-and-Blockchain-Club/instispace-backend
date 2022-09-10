@@ -203,6 +203,19 @@ input CreateHostelInput {
   name: String!
 }
 
+"""user"""
+input CreateNetopsInput {
+  content: String!
+  endTime: String!
+
+  """Announcement's Images"""
+  imageUrls: [String!]
+  linkName: String
+  linkToAction: String
+  tags: [String!]!
+  title: String!
+}
+
 """Input for createSec Mutation"""
 input CreateSecInput {
   """Hostel Secretory Email"""
@@ -297,6 +310,18 @@ input EditItemInput {
   time: String
 }
 
+input EditNetopsInput {
+  content: String
+  endTime: String
+
+  """Announcement's Image URLs"""
+  imageUrls: [String!]
+  linkName: String
+  linkToAction: String
+  tagIds: [String!]!
+  title: String
+}
+
 type Event {
   content: String!
   createdAt: DateTime!
@@ -350,6 +375,12 @@ type Feedback {
 
   """User who added this feedback"""
   user: User!
+}
+
+input FilteringConditions {
+  isStared: Boolean
+  search: String
+  tags: [String!]
 }
 
 """Input for Query get User"""
@@ -437,6 +468,7 @@ input ItemInput {
 type LDAPUser {
   department: String!
   name: String!
+  photo: String!
   roll: String!
 }
 
@@ -516,7 +548,8 @@ type Mutation {
   createMyQuery(Attachments: [Upload!], createQuerysInput: createQuerysInput!): MyQuery!
 
   """create network and opportunity, Restrictions:{any authorized user}"""
-  createNetop(Attachments: [Upload!], NewNetopData: createNetopsInput!): Netop!
+  createNetop(Attachments: [Upload!], NewNetopData: CreateNetopsInput!): Netop!
+  createReportReason(ReportData: ReasonInput!): Reason!
 
   """Mutation deprecated"""
   createSec(CreateSecInput: CreateSecInput!, HostelId: String!): Boolean!
@@ -570,7 +603,7 @@ type Mutation {
   editMyQuery(Attachments: [Upload!], EditMyQuerysData: editQuerysInput!, MyQueryId: String!): MyQuery!
 
   """edit network and opportunity, Restrictions:{user who created}"""
-  editNetop(Attachments: [Upload!], EditNetopsData: editNetopsInput!, NetopId: String!): Netop!
+  editNetop(Attachments: [Upload!], EditNetopsData: EditNetopsInput!, NetopId: String!): Netop!
   imageUpload(Image: [Upload!]): getImageOutput!
 
   """Mutation to login, Restrictions : {none}"""
@@ -578,10 +611,10 @@ type Mutation {
   logout(fcmToken: String!): Boolean!
 
   """report Query, Restrictions:{any authorized user}"""
-  reportMyQuery(MyQueryId: String!, description: String!): Boolean!
+  reportMyQuery(MyQueryId: String!, ReportMyQueryInput: ReportPostInput!): Boolean!
 
   """report network and opportunity, Restrictions:{any authorized user}"""
-  reportNetop(NetopId: String!, description: String!): Boolean!
+  reportNetop(NetopId: String!, ReportPostInput: ReportPostInput!): Boolean!
 
   """
   Mutation to resolve a complaint, resolver should add proofs of resolution, Restrictions : {Hostel_Secretory, HAS and Secretories}
@@ -669,6 +702,9 @@ type MyQuery {
   permissions: [EditDelPermission!]
   photo: String
 
+  """Number of reports for a Netop"""
+  reportCount: Float
+
   """get list of reports"""
   reports: [Comment!]
   title: String!
@@ -708,6 +744,9 @@ type Netop {
   permissions: [EditDelPermission!]
   photo: String
 
+  """Number of reports for a Netop"""
+  reportCount: Float
+
   """get list of reports"""
   reports: [Report!]
 
@@ -722,7 +761,15 @@ enum Notification {
   NONE
 }
 
+input OrderInput {
+  byComments: Boolean
+  byLikes: Boolean
+  stared: Boolean
+}
+
 type Query {
+  getAcademicCallender: String!
+
   """Query to fetch all feedbacks, Restrictions: {Admins}"""
   getAllFeedbacks(LastAnnouncementId: String!, take: Float!): [Feedback!]!
 
@@ -733,7 +780,7 @@ type Query {
   """
   Query to fetch announcements of a particular hostel, Restrictions : { anyone who is authorised } 
   """
-  getAnnouncements(HostelId: String!, LastAnnouncementId: String!, search: String, take: Float!): getAnnouncementsOutput!
+  getAnnouncements(HostelId: String, LastAnnouncementId: String!, search: String, take: Float!): getAnnouncementsOutput!
 
   """
   Query to return the tag categories, Restrictions : {anyone who is authorized}
@@ -754,7 +801,7 @@ type Query {
   """
   Get the list of event details with filters, Restrictions:{ AUTHORIZED USER }
   """
-  getEvents(FileringCondition: fileringConditions, OrderByLikes: Boolean, lastEventId: String!, search: String, take: Float!): getEventOutput!
+  getEvents(Filters: FilteringConditions, Sort: OrderInput, lastEventId: String!, take: Float!): getEventOutput!
 
   """query to fetch hostels, Restrictions : {anyone who is authorized}"""
   getHostels: [Hostel!]!
@@ -762,7 +809,7 @@ type Query {
   """
   Query to fetch all the unresolved items, filter by time of creation, Restrictions : {anyone who is authorised}
   """
-  getItems(ItemsFilter: [Category!]!, LastItemId: String!, search: String, take: Float!): getItemsOutput!
+  getItems(Filters: FilteringConditions, ItemsFilter: [Category!]!, LastItemId: String!, take: Float!): getItemsOutput!
   getLocations: [String!]!
 
   """
@@ -775,13 +822,14 @@ type Query {
   getMyQuery(MyQueryId: String!): MyQuery!
 
   """get a list of myQuerys by filer and order conditions"""
-  getMyQuerys(OrderByLikes: Boolean, lastEventId: String!, search: String, take: Float!): getQueryOutput!
+  getMyQuerys(Filters: FilteringConditions, Sort: OrderInput, lastEventId: String!, take: Float!): getQueryOutput!
 
   """get an netop by id network and opportunity"""
   getNetop(NetopId: String!): Netop!
 
-  """get a list of netops by filer and order conditions"""
-  getNetops(FileringCondition: fileringConditions, LastNetopId: String!, OrderByLikes: Boolean, search: String, take: Float!): getNetopOutput!
+  """get a list of netops by filter and order conditions"""
+  getNetops(Filters: FilteringConditions, LastNetopId: String!, Sort: OrderInput, take: Float!): getNetopOutput!
+  getReportReasons: [Reason!]!
   getReports: [Report!]
 
   """Query to return the spread-sheet link, Restrictions: {ADMIN}"""
@@ -808,6 +856,24 @@ type Query {
   searchUser(LastUserId: String!, search: String, take: Float!): searchUserOutput
 }
 
+type Reason {
+  """Reports severity count"""
+  count: Float
+  id: String!
+
+  """Reason for the post bieng reported"""
+  reason: String!
+}
+
+"""Input-Type for Create-Report-Reason Mutation"""
+input ReasonInput {
+  """Count Limit"""
+  count: Float
+
+  """Reason for the post bieng reported"""
+  reason: String!
+}
+
 type Report {
   createdAt: DateTime!
   createdBy: User!
@@ -818,6 +884,11 @@ type Report {
 
   """Visiblity state of reports"""
   status: ReportStatus!
+}
+
+input ReportPostInput {
+  description: String!
+  reasonIds: [String!]!
 }
 
 enum ReportStatus {
@@ -906,6 +977,7 @@ type User {
   notifyNetop: Notification!
   notifyNetopComment: Boolean!
   permissions: [UserPermission!]
+  photo: String!
   program: String!
 
   """User's role"""
@@ -941,6 +1013,7 @@ enum UserPermission {
   CREATE_ITEM
   CREATE_NETOP
   CREATE_QUERY
+  CREATE_REPORT_REASON
   CREATE_TAG
   GET_ALL_AMENITIES
   GET_ALL_ANNOUNCEMENTS
@@ -979,19 +1052,6 @@ input createEventInput {
 }
 
 """user"""
-input createNetopsInput {
-  content: String!
-  endTime: String!
-
-  """Announcement's Images"""
-  imageUrls: [String!]
-  linkName: String
-  linkToAction: String
-  tags: [String!]!
-  title: String!
-}
-
-"""user"""
 input createQuerysInput {
   content: String!
 
@@ -1013,29 +1073,12 @@ input editEventInput {
   title: String
 }
 
-input editNetopsInput {
-  content: String
-  endTime: String
-
-  """Announcement's Image URLs"""
-  imageUrls: [String!]
-  linkName: String
-  linkToAction: String
-  tagIds: [String!]!
-  title: String
-}
-
 input editQuerysInput {
   content: String
 
   """Announcement's Image URLs"""
   imageUrls: [String!]
   title: String
-}
-
-input fileringConditions {
-  isStared: Boolean
-  tags: [String!]
 }
 
 """Output Type for getAnnouncements query"""

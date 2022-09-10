@@ -13,10 +13,11 @@ import Item from "../entities/Item";
 import { Category, EditDelPermission } from "../utils/index";
 import User from "../entities/User";
 import MyContext from "../utils/context";
-import { ILike, In } from "typeorm";
 import getItemsOutput from "../types/objects/items";
 import fcm from "../utils/fcmTokens";
 import { miliSecPerMonth } from "../utils/config.json";
+import { FilteringConditions } from "../types/inputs/netop";
+import { In } from "typeorm";
 
 @Resolver((_type) => Item)
 class LostAndFoundResolver {
@@ -96,43 +97,31 @@ class LostAndFoundResolver {
     @Arg("ItemsFilter", () => [Category]) categories: [Category],
     @Arg("LastItemId") lastItemId: string,
     @Arg("take") take: number,
-    @Arg("search", { nullable: true }) search?: string
+    @Arg("Filters", { nullable: true })
+    filteringConditions?: FilteringConditions
   ) {
     try {
-      let itemsList: Item[] = [];
-      if (search) {
-        await Promise.all(
-          ["name", "location"].map(async (field: string) => {
-            const filter = {
-              [field]: ILike(`%${search}%`),
-              isResolved: false,
-              category: In(categories),
-            };
-            const itemF = await Item.find({
-              where: filter,
-              order: { createdAt: "DESC" },
-            });
-            itemF.forEach((item) => {
-              itemsList.push(item);
-            });
-          })
-        );
-        let uniqueItems: Item[] = [];
-        itemsList.forEach((item) => {
-          if (!uniqueItems.includes(item)) uniqueItems.push(item);
-        });
-        itemsList = uniqueItems;
-      } else {
-        itemsList = await Item.find({
-          where: { category: In(categories), isResolved: false },
-          order: { createdAt: "DESC" },
-        });
-      }
+      let itemsList = await Item.find({
+        where: { category: In(categories), isResolved: false },
+        order: { createdAt: "DESC" },
+      });
+
       itemsList = itemsList.filter(
         (item) =>
           new Date(Date.now()).getTime() - new Date(item.createdAt).getTime() <
           miliSecPerMonth
       );
+
+      if (filteringConditions) {
+        if (filteringConditions.search) {
+          itemsList = itemsList.filter((item) =>
+            JSON.stringify(item)
+              .toLowerCase()
+              .includes(filteringConditions.search?.toLowerCase()!)
+          );
+        }
+      }
+
       const total = itemsList.length;
       if (lastItemId) {
         const index = itemsList.map((n) => n.id).indexOf(lastItemId);

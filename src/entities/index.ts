@@ -13,6 +13,7 @@ import Event from "./Event";
 import HostelContact from "./Contact";
 import Amenity from "./Amenity";
 import Feedback from "./Feedback";
+import Reason from "./Common/Reason";
 
 export default [
   User,
@@ -30,4 +31,5 @@ export default [
   HostelContact,
   Amenity,
   Feedback,
+  Reason,
 ];
