@@ -60,9 +60,6 @@ class EditNetopsInput {
 
 @InputType()
 class ReportPostInput {
-  @Field((_type) => [String])
-  reasonIds: string[];
-
   @Field()
   description: string;
 }

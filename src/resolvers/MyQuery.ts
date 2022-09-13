@@ -184,10 +184,11 @@ class MyQueryResolver {
 
       let hideStatus: Boolean = false;
 
-      let rReason = await Reason.findOne({ id: reportPostInput.description });
+      let rReason = await Reason.findOne({
+        reason: reportPostInput.description,
+      });
 
       if (rReason) {
-        reportPostInput.description = rReason.reason;
         if (
           myQuery.reports.filter(
             (r) => r.description === reportPostInput.description
