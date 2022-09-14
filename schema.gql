@@ -888,7 +888,6 @@ type Report {
 
 input ReportPostInput {
   description: String!
-  reasonIds: [String!]!
 }
 
 enum ReportStatus {

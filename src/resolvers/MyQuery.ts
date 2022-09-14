@@ -354,7 +354,7 @@ class MyQueryResolver {
     try {
       let myQueryList = await MyQuery.find({
         where: { isHidden: false },
-        relations: ["likedBy", "reports"],
+        relations: ["likedBy", "reports", "reports.createdBy"],
         order: { createdAt: "DESC" },
       });
 

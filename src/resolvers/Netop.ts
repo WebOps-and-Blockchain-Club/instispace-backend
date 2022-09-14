@@ -461,7 +461,14 @@ class NetopResolver {
     try {
       let netopList = await Netop.find({
         where: { isHidden: false },
-        relations: ["tags", "likedBy", "staredBy", "reports"],
+        relations: [
+          "tags",
+          "likedBy",
+          "comments",
+          "staredBy",
+          "reports",
+          "reports.createdBy",
+        ],
         order: { createdAt: "DESC" },
       });
 
@@ -520,13 +527,15 @@ class NetopResolver {
         }
 
         if (orderInput.stared) {
-          netopList.sort((a, b) =>
-            a.isStared === false && b.isStared === true
+          netopList.sort((a, b) => {
+            return a.staredBy.filter((u) => u.id === user.id).length >
+              b.staredBy.filter((u) => u.id === user.id).length
+              ? -1
+              : a.staredBy.filter((u) => u.id === user.id).length <
+                b.staredBy.filter((u) => u.id === user.id).length
               ? 1
-              : a.isStared === false && b.isStared === false
-              ? 0
-              : -1
-          );
+              : 0;
+          });
         }
 
         if (orderInput.byComments === true) {

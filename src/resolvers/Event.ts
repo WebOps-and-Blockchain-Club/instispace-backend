@@ -336,13 +336,15 @@ class EventResolver {
         }
 
         if (orderInput.stared) {
-          eventList.sort((a, b) =>
-            a.isStared === false && b.isStared === true
+          eventList.sort((a, b) => {
+            return a.staredBy.filter((u) => u.id === user.id).length >
+              b.staredBy.filter((u) => u.id === user.id).length
+              ? -1
+              : a.staredBy.filter((u) => u.id === user.id).length <
+                b.staredBy.filter((u) => u.id === user.id).length
               ? 1
-              : a.isStared === false && b.isStared === false
-              ? 0
-              : -1
-          );
+              : 0;
+          });
         }
       }
 
