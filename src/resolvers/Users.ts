@@ -139,7 +139,7 @@ class UsersResolver {
       //For admins and leads
       else {
         if (process.env.NODE_ENV === "development") {
-          const admins = await User.find({ where: { roll } });
+          const admins = await User.find({ where: { role: UserRole.ADMIN } });
 
           if (admins.length === 0) {
             const admin = new User();
@@ -425,7 +425,7 @@ class UsersResolver {
       const list = users
         .slice(0, 250)
         .map((user) => new LDAPUser(user.displayName, user.uid))
-        .sort((a, b) => (a.roll > b.roll ? -1 : a.roll < b.roll ? 1 : 0));
+        .sort((a, b) => (a.roll > b.roll ? 1 : a.roll < b.roll ? -1 : 0));
       return list;
     } catch (e) {
       throw new Error(`message: ${e}`);
