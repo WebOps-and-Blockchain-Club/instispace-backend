@@ -1,4 +1,4 @@
-import { Field, ObjectType } from "type-graphql";
+import { Field, ObjectType, registerEnumType } from "type-graphql";
 import {
   BaseEntity,
   Column,
@@ -14,7 +14,9 @@ import User from "./User";
 import Comment from "./Common/Comment";
 import Tag from "./Tag";
 import Report from "./Common/Report";
-import { EditDelPermission } from "../utils";
+import { EditDelPermission, PostStatus } from "../utils";
+
+registerEnumType(PostStatus, { name: "PostStatus" });
 
 @Entity("Netop")
 @ObjectType("Netop", { description: "networking and opportunity" })
@@ -48,6 +50,12 @@ class Netop extends BaseEntity {
     description: "Visiblity state of netop",
   })
   isHidden: boolean;
+
+  @Column("enum", { enum: PostStatus, default: PostStatus.POSTED })
+  @Field((_type) => PostStatus, {
+    description: "Visiblity state of reports",
+  })
+  status: PostStatus;
 
   @Column({ type: "timestamptz" })
   @Field(() => Date)

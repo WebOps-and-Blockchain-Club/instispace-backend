@@ -1,4 +1,4 @@
-import { Field, ObjectType, registerEnumType } from "type-graphql";
+import { Field, ObjectType } from "type-graphql";
 import {
   BaseEntity,
   Column,
@@ -10,9 +10,6 @@ import {
 import Netop from "../Netop";
 import Query from "../MyQuery";
 import User from "../User";
-import { ReportStatus } from "../../utils";
-
-registerEnumType(ReportStatus, { name: "ReportStatus" });
 
 @Entity("Report")
 @ObjectType("Report")
@@ -22,11 +19,17 @@ class Report extends BaseEntity {
   id: string;
 
   @Field(() => Netop, { nullable: true })
-  @ManyToOne(() => Netop, (netop) => netop.reports, { nullable: true })
+  @ManyToOne(() => Netop, (netop) => netop.reports, {
+    nullable: true,
+    cascade: true,
+  })
   netop: Netop;
 
   @Field(() => Query, { nullable: true })
-  @ManyToOne(() => Query, (Query) => Query.reports, { nullable: true })
+  @ManyToOne(() => Query, (Query) => Query.reports, {
+    nullable: true,
+    cascade: true,
+  })
   query: Query;
 
   @Field(() => User)
@@ -36,12 +39,6 @@ class Report extends BaseEntity {
   @Column()
   @Field()
   description: string;
-
-  @Column("enum", { enum: ReportStatus, default: ReportStatus.REPORTED })
-  @Field((_type) => ReportStatus, {
-    description: "Visiblity state of reports",
-  })
-  status: ReportStatus;
 
   @CreateDateColumn({ type: "timestamptz" })
   @Field(() => Date)

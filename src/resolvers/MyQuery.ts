@@ -15,14 +15,12 @@ import MyQuery from "../entities/MyQuery";
 import Comment from "../entities/Common/Comment";
 import { GraphQLUpload, Upload } from "graphql-upload";
 import getMyQueryOutput from "../types/objects/query";
-import { EditDelPermission, UserRole } from "../utils";
+import { EditDelPermission, PostStatus, UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
 import fcm from "../utils/fcmTokens";
 import { ILike, In } from "typeorm";
-import { mail } from "../utils/mail";
-import { smail } from "../utils/config.json";
 import Reason from "../entities/Common/Reason";
 import {
   FilteringConditions,
@@ -182,81 +180,54 @@ class MyQueryResolver {
         relations: ["reports", "createdBy"],
       });
 
-      let hideStatus: Boolean = false;
-
       let rReason = await Reason.findOne({
         reason: reportPostInput.description,
       });
 
       if (rReason) {
-        if (
-          myQuery.reports.filter(
-            (r) => r.description === reportPostInput.description
-          ).length +
-            1 >=
-          rReason.count
+        myQuery.status = [PostStatus.POSTED, PostStatus.REPORTED].includes(
+          myQuery.status
         )
-          hideStatus = true;
+          ? myQuery.reports.filter(
+              (r) => r.description === reportPostInput.description
+            ).length +
+              1 >=
+            rReason.count
+            ? PostStatus.IN_REVIEW
+            : PostStatus.REPORTED
+          : myQuery.status;
       }
 
+      const myQueryUpdated = await myQuery.save();
+
       const report = await Report.create({
-        query: myQuery,
+        query: myQueryUpdated,
         description: reportPostInput.description,
         createdBy: user,
       }).save();
+      
+      return !!report && !!myQueryUpdated;
+    } catch (e) {
+      throw new Error(e.message);
+    }
+  }
 
-      if (!myQuery.isHidden && hideStatus) {
-        myQuery.isHidden = true;
-        await myQuery.save();
-      }
-
-      if (process.env.NODE_ENV !== "development") {
-        const superUsersList = await User.find({
-          where: {
-            role: In([UserRole.ADMIN, UserRole.LEADS, UserRole.MODERATOR]),
-          },
-        });
-        let mailList: String[] = [];
-        superUsersList.forEach((user) => {
-          if (user.role === UserRole.MODERATOR) {
-            const email = user.roll.concat(smail);
-            mailList.push(email);
-          } else {
-            mailList.push(user.roll);
-          }
-        });
-        await mail({
-          email: mailList.join(", "),
-          subject: "Report",
-          htmlContent: "Query you made, got reported!",
-        });
-      }
-
-      if (!!report && !!myQuery) {
-        const creator = myQuery.createdBy;
-
-        creator.fcmToken.split(" AND ").map((ft) => {
-          const message = {
-            to: ft,
-            notification: {
-              title: `Hi ${creator.roll}`,
-              body: "your query got reported",
-            },
-          };
-
-          fcm.send(message, (err: any, response: any) => {
-            if (err) {
-              console.log("Something has gone wrong!" + err);
-              console.log("Respponse:! " + response);
-            } else {
-              // showToast("Successfully sent with response");
-              console.log("Successfully sent with response: ", response);
-            }
-          });
-        });
-        return true;
-      }
-      return false;
+  @Mutation(() => Boolean)
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.HAS,
+    UserRole.SECRETARY,
+    UserRole.MODERATOR,
+  ])
+  async resolveMyQueryReport(
+    @Arg("id") id: string,
+    @Arg("status") status: PostStatus
+  ) {
+    try {
+      const { affected } = await MyQuery.update(id, {
+        status,
+      });
+      return affected === 1;
     } catch (e) {
       throw new Error(e.message);
     }
@@ -353,7 +324,14 @@ class MyQueryResolver {
   ) {
     try {
       let myQueryList = await MyQuery.find({
-        where: { isHidden: false },
+        where: {
+          isHidden: false,
+          status: In([
+            PostStatus.POSTED,
+            PostStatus.REPORTED,
+            PostStatus.REPORT_REJECTED,
+          ]),
+        },
         relations: ["likedBy", "reports", "reports.createdBy"],
         order: { createdAt: "DESC" },
       });
@@ -532,7 +510,7 @@ class MyQueryResolver {
     return myQuery?.createdBy;
   }
 
-  @FieldResolver(() => [Comment], {
+  @FieldResolver(() => [Report], {
     nullable: true,
     description: "get list of reports",
   })

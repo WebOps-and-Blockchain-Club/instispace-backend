@@ -11,104 +11,16 @@ import {
 import Report from "../entities/Common/Report";
 import Netop from "../entities/Netop";
 import MyQuery from "../entities/MyQuery";
-import { ReportStatus, UserRole } from "../utils/index";
-import fcm from "../utils/fcmTokens";
+import { UserRole } from "../utils/index";
+// import fcm from "../utils/fcmTokens";
 import Reason from "../entities/Common/Reason";
 import ReasonInput from "../types/inputs/report";
+import { GetReportsOutput } from "../types/objects/report";
 
 @Resolver(Report)
-// Report options
 class ReportResolver {
-  @Mutation(() => Boolean)
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETARY])
-  async resolveReport(
-    @Arg("id") id: string,
-    @Arg("status") status: ReportStatus
-  ) {
-    try {
-      const report = await Report.findOneOrFail(id, {
-        relations: ["netop", "query", "netop.createdBy", "query.createdBy"],
-      });
-      if (report.netop) {
-        const { affected } = await Netop.update(report.netop.id, {
-          isHidden: status === ReportStatus.REPORT_ACCEPTED ? true : false,
-        });
-        if (affected !== 1) throw new Error("Update failed");
-
-        let { affected: reportAffected } = await Report.update(id, { status });
-        if (reportAffected !== 1) throw new Error("Update failed");
-
-        const creator = report.netop.createdBy;
-        creator.fcmToken.split(" AND ").map((ft) => {
-          const message = {
-            to: ft,
-            notification: {
-              title: `Hi ${creator.roll}`,
-              body:
-                status === ReportStatus.REPORT_REJECTED
-                  ? "your netop got resolved and now its displayed"
-                  : "your netop got reported",
-            },
-          };
-
-          fcm.send(message, (err: any, response: any) => {
-            if (err) {
-              console.log("Something has gone wrong!" + err);
-              console.log("Respponse:! " + response);
-            } else {
-              // showToast("Successfully sent with response");
-              console.log("Successfully sent with response: ", response);
-            }
-          });
-        });
-        return affected === 1 && reportAffected === 1;
-      } else if (report.query) {
-        const { affected } = await Netop.update(report.query.id, {
-          isHidden: status === ReportStatus.REPORT_ACCEPTED ? true : false,
-        });
-        if (affected !== 1) throw new Error("Update failed");
-
-        let { affected: reportAffected } = await Report.update(id, { status });
-        if (reportAffected !== 1) throw new Error("Update failed");
-
-        const creator = report.query.createdBy;
-        creator.fcmToken.split(" AND ").map((ft) => {
-          const message = {
-            to: ft,
-            notification: {
-              title: `Hi ${creator.roll}`,
-              body:
-                status === ReportStatus.REPORT_REJECTED
-                  ? "your query got resolved and now its displayed"
-                  : "your query got reported",
-            },
-          };
-
-          fcm.send(message, (err: any, response: any) => {
-            if (err) {
-              console.log("Something has gone wrong!" + err);
-              console.log("Respponse:! " + response);
-            } else {
-              // showToast("Successfully sent with response");
-              console.log("Successfully sent with response: ", response);
-            }
-          });
-        });
-        return affected === 1 && reportAffected === 1;
-      } else throw new Error("Not Accepted");
-    } catch (e) {
-      throw new Error(e.message);
-    }
-  }
-
   @Mutation(() => Reason)
-  @Authorized([
-    UserRole.ADMIN,
-    UserRole.HAS,
-    UserRole.SECRETARY,
-    UserRole.MODERATOR,
-    UserRole.LEADS,
-  ])
+  @Authorized([UserRole.ADMIN])
   async createReportReason(@Arg("ReportData") reasonInput: ReasonInput) {
     try {
       const reportCreated = await Reason.create({ ...reasonInput }).save();
@@ -127,13 +39,46 @@ class ReportResolver {
     }
   }
 
-  @Query(() => [Report], { nullable: true })
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETARY])
+  @Query(() => GetReportsOutput, { nullable: true })
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.HAS,
+    UserRole.SECRETARY,
+    UserRole.MODERATOR,
+  ])
   async getReports() {
-    let reports = await Report.find({
-      order: { createdAt: "DESC" },
-    });
-    return reports;
+    try {
+      let netops = await Netop.find({
+        order: { createdAt: "DESC" },
+        relations: ["reports"],
+      });
+      let queries = await MyQuery.find({
+        order: { createdAt: "DESC" },
+        relations: ["reports"],
+      });
+
+      netops = netops.filter((n) => n.reports.length !== 0);
+      queries = queries.filter((n) => n.reports.length !== 0);
+
+      netops.sort((a, b) =>
+        a.reports.slice(-1)[0].createdAt > b.reports.slice(-1)[0].createdAt
+          ? -1
+          : a.reports.slice(-1)[0].createdAt < b.reports.slice(-1)[0].createdAt
+          ? 1
+          : 0
+      );
+      queries.sort((a, b) =>
+        a.reports.slice(-1)[0].createdAt > b.reports.slice(-1)[0].createdAt
+          ? -1
+          : a.reports.slice(-1)[0].createdAt < b.reports.slice(-1)[0].createdAt
+          ? 1
+          : 0
+      );
+
+      return { netops, queries };
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   @FieldResolver(() => User)

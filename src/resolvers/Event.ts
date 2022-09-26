@@ -290,6 +290,14 @@ class EventResolver {
         order: { createdAt: "DESC" },
       });
 
+      const d = new Date();
+      d.setHours(d.getHours() - 2); //Filter the events after the 2 hours time of completion
+
+      // default filters (endtime should not exceed)
+      eventList = eventList.filter(
+        (n) => new Date(n.time).getTime() > d.getTime()
+      );
+
       // filters based on input filter conditions
       if (filteringConditions) {
         if (filteringConditions.search) {

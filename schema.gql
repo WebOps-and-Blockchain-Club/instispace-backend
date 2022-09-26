@@ -383,6 +383,11 @@ input FilteringConditions {
   tags: [String!]
 }
 
+type GetReportsOutput {
+  netops: [Netop!]
+  queries: [MyQuery!]
+}
+
 """Input for Query get User"""
 input GetUserInput {
   """User's Id"""
@@ -625,7 +630,8 @@ type Mutation {
   Mutation to resolve the item, User who finds his lost entity will update, Restriction : {anyone who is authorised}
   """
   resolveItem(ItemId: String!): Boolean!
-  resolveReport(id: String!, status: String!): Boolean!
+  resolveMyQueryReport(id: String!, status: String!): Boolean!
+  resolveNetopReport(id: String!, status: String!): Boolean!
 
   """ILike or Unlike the event, Restrictions:{ AUTHORIZED USER }"""
   toggleLikeEvent(EventId: String!): Boolean!
@@ -706,7 +712,10 @@ type MyQuery {
   reportCount: Float
 
   """get list of reports"""
-  reports: [Comment!]
+  reports: [Report!]
+
+  """Visiblity state of reports"""
+  status: PostStatus!
   title: String!
 }
 
@@ -750,6 +759,9 @@ type Netop {
   """get list of reports"""
   reports: [Report!]
 
+  """Visiblity state of reports"""
+  status: PostStatus!
+
   """get all the tags associated"""
   tags: [Tag!]
   title: String!
@@ -765,6 +777,14 @@ input OrderInput {
   byComments: Boolean
   byLikes: Boolean
   stared: Boolean
+}
+
+enum PostStatus {
+  IN_REVIEW
+  POSTED
+  REPORTED
+  REPORT_ACCEPTED
+  REPORT_REJECTED
 }
 
 type Query {
@@ -830,7 +850,7 @@ type Query {
   """get a list of netops by filter and order conditions"""
   getNetops(Filters: FilteringConditions, LastNetopId: String!, Sort: OrderInput, take: Float!): getNetopOutput!
   getReportReasons: [Reason!]!
-  getReports: [Report!]
+  getReports: GetReportsOutput
 
   """Query to return the spread-sheet link, Restrictions: {ADMIN}"""
   getSheetLink: String!
@@ -881,19 +901,10 @@ type Report {
   id: String!
   netop: Netop
   query: MyQuery
-
-  """Visiblity state of reports"""
-  status: ReportStatus!
 }
 
 input ReportPostInput {
   description: String!
-}
-
-enum ReportStatus {
-  REPORTED
-  REPORT_ACCEPTED
-  REPORT_REJECTED
 }
 
 """Tag Entity, Users will follow these tags"""

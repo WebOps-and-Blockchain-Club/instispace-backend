@@ -13,7 +13,7 @@ import {
 import User from "./User";
 import Comment from "./Common/Comment";
 import Report from "./Common/Report";
-import { EditDelPermission } from "../utils";
+import { EditDelPermission, PostStatus } from "../utils";
 
 @Entity("MyQuery")
 @ObjectType("MyQuery", { description: "querys" })
@@ -47,6 +47,12 @@ class MyQuery extends BaseEntity {
     description: "Visiblity state of query",
   })
   isHidden: boolean;
+
+  @Column("enum", { enum: PostStatus, default: PostStatus.POSTED })
+  @Field((_type) => PostStatus, {
+    description: "Visiblity state of reports",
+  })
+  status: PostStatus;
 
   @Field(() => Number, { description: "number of likes" })
   likeCount: number;

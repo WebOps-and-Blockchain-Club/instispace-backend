@@ -22,16 +22,14 @@ import Netop from "../entities/Netop";
 import Comment from "../entities/Common/Comment";
 import { GraphQLUpload, Upload } from "graphql-upload";
 import getNetopOutput from "../types/objects/netop";
-import { EditDelPermission, UserRole } from "../utils";
+import { EditDelPermission, PostStatus, UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
 import fcm from "../utils/fcmTokens";
 import { Notification } from "../utils/index";
-import { In } from "typeorm";
-import { mail } from "../utils/mail";
-import { smail } from "../utils/config.json";
 import Reason from "../entities/Common/Reason";
+import { In } from "typeorm";
 
 @Resolver(Netop)
 class NetopResolver {
@@ -282,81 +280,54 @@ class NetopResolver {
         relations: ["reports", "createdBy"],
       });
 
-      let hideStatus: Boolean = false;
-
       let rReason = await Reason.findOne({
         reason: reportPostInput.description,
       });
 
       if (rReason) {
-        if (
-          netop.reports.filter(
-            (r) => r.description === reportPostInput.description
-          ).length +
-            1 >=
-          rReason.count
+        netop.status = [PostStatus.POSTED, PostStatus.REPORTED].includes(
+          netop.status
         )
-          hideStatus = true;
+          ? netop.reports.filter(
+              (r) => r.description === reportPostInput.description
+            ).length +
+              1 >=
+            rReason.count
+            ? PostStatus.IN_REVIEW
+            : PostStatus.REPORTED
+          : netop.status;
       }
 
+      const netopUpdated = await netop.save();
+
       const report = await Report.create({
-        netop,
         description: reportPostInput.description,
+	netop: netopUpdated,
         createdBy: user,
       }).save();
 
-      if (!netop.isHidden && hideStatus) {
-        netop.isHidden = true;
-        await netop.save();
-      }
+      return !!report && !!netopUpdated;
+    } catch (e) {
+      throw new Error(e.message);
+    }
+  }
 
-      if (process.env.NODE_ENV !== "development") {
-        const superUsersList = await User.find({
-          where: {
-            role: In([UserRole.ADMIN, UserRole.LEADS, UserRole.MODERATOR]),
-          },
-        });
-        let mailList: String[] = [];
-        superUsersList.forEach((user) => {
-          if (user.role === UserRole.MODERATOR) {
-            const email = user.roll.concat(smail);
-            mailList.push(email);
-          } else {
-            mailList.push(user.roll);
-          }
-        });
-        await mail({
-          email: mailList.join(", "),
-          subject: "Report",
-          htmlContent: "Your post has been reported!",
-        });
-      }
-
-      const creator = netop.createdBy;
-
-      if (!!report && !!netop) {
-        creator.fcmToken.split(" AND ").map((ft) => {
-          const message = {
-            to: ft,
-            notification: {
-              title: `Hi ${creator.name}`,
-              body: "your netop got reported",
-            },
-          };
-
-          fcm.send(message, (err: any, response: any) => {
-            if (err) {
-              console.log("Something has gone wrong!" + err);
-              console.log("Respponse:! " + response);
-            } else {
-              // showToast("Successfully sent with response");
-              console.log("Successfully sent with response: ", response);
-            }
-          });
-        });
-        return true;
-      }
-      return false;
+  @Mutation(() => Boolean)
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.HAS,
+    UserRole.SECRETARY,
+    UserRole.MODERATOR,
+  ])
+  async resolveNetopReport(
+    @Arg("id") id: string,
+    @Arg("status") status: PostStatus
+  ) {
+    try {
+      const { affected } = await Netop.update(id, {
+        status,
+      });
+      return affected === 1;
     } catch (e) {
       throw new Error(e.message);
     }
@@ -460,7 +431,14 @@ class NetopResolver {
   ) {
     try {
       let netopList = await Netop.find({
-        where: { isHidden: false },
+        where: {
+          isHidden: false,
+          status: In([
+            PostStatus.POSTED,
+            PostStatus.REPORTED,
+            PostStatus.REPORT_REJECTED,
+          ]),
+        },
         relations: [
           "tags",
           "likedBy",
@@ -478,7 +456,7 @@ class NetopResolver {
       netopList = netopList.filter(
         (n) =>
           new Date(n.endTime).getTime() > d.getTime() &&
-          !n.reports.filter((nr) => nr.createdBy.id === user.id).length
+          n.reports.filter((nr) => nr.createdBy.id === user.id).length === 0
       );
 
       // filters based on input filter conditions
@@ -685,10 +663,8 @@ class NetopResolver {
       if (
         [
           UserRole.ADMIN,
-          UserRole.LEADS,
           UserRole.HAS,
           UserRole.SECRETARY,
-          UserRole.HOSTEL_SEC,
           UserRole.MODERATOR,
         ].includes(user.role)
       )

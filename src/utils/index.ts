@@ -68,6 +68,14 @@ export enum ReportStatus {
   REPORT_REJECTED = "REPORT_REJECTED",
 }
 
+export enum PostStatus {
+  POSTED = "POSTED",
+  REPORTED = "REPORTED",
+  IN_REVIEW = "IN_REVIEW",
+  REPORT_ACCEPTED = "REPORT_ACCEPTED",
+  REPORT_REJECTED = "REPORT_REJECTED",
+}
+
 export const emailExpresion =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
