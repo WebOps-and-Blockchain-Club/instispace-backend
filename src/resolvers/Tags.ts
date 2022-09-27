@@ -6,13 +6,15 @@ import {
   Arg,
   FieldResolver,
   Root,
+  Ctx,
 } from "type-graphql";
 import TagInput from "../types/inputs/tags";
 import Tag from "../entities/Tag";
 import User from "../entities/User";
-import { UserRole } from "../utils";
+import { PostStatus, UserRole } from "../utils";
 import Netop from "../entities/Netop";
 import Event from "../entities/Event";
+import MyContext from "../utils/context";
 
 @Resolver((_type) => Tag)
 class TagsResolver {
@@ -80,43 +82,55 @@ class TagsResolver {
     }
   }
 
-  @FieldResolver(() => [Netop])
-  async netops(@Root() { id, netops }: Tag) {
-    if (netops) {
-      const d = new Date();
-      if (netops) {
-        const ns = netops.filter(
-          (n) => !n.isHidden && new Date(n.endTime).getTime() > d.getTime()
-        );
-        return ns;
-      }
-      return null;
-    }
-    const tag = await Tag.findOne(id, { relations: ["netops"] });
+  @FieldResolver(() => [Netop], { nullable: true })
+  async netops(@Root() { id, netops }: Tag, @Ctx() { user }: MyContext) {
     const d = new Date();
+    if (netops) {
+      const ns = netops.filter(
+        (n) =>
+          !n.isHidden &&
+          new Date(n.endTime).getTime() > d.getTime() &&
+          n.reports.filter((nr) => nr.createdBy.id === user.id).length === 0 &&
+          [
+            PostStatus.POSTED,
+            PostStatus.REPORTED,
+            PostStatus.REPORT_REJECTED,
+          ].includes(n.status)
+      );
+      return ns;
+    }
+
+    const tag = await Tag.findOne(id, { relations: ["netops", "netops.reports"] });
     if (tag?.netops) {
       const ns = tag.netops.filter(
-        (n) => !n.isHidden && new Date(n.endTime).getTime() > d.getTime()
+        (n) =>
+          !n.isHidden &&
+          new Date(n.endTime).getTime() > d.getTime() &&
+          n.reports.filter((nr) => nr.createdBy.id === user.id).length === 0 &&
+          [
+            PostStatus.POSTED,
+            PostStatus.REPORTED,
+            PostStatus.REPORT_REJECTED,
+          ].includes(n.status)
       );
       return ns;
     }
     return null;
   }
 
-  @FieldResolver(() => [Event])
+  @FieldResolver(() => [Event], { nullable: true })
   async events(@Root() { id, event }: Tag) {
-    if (event) {
-      const d = new Date();
-      if (event) {
-        const ns = event.filter(
-          (n) => !n.isHidden && new Date(n.time).getTime() > d.getTime()
-        );
-        return ns;
-      }
-      return null;
-    }
-    const tag = await Tag.findOne(id, { relations: ["event"] });
     const d = new Date();
+    d.setHours(d.getHours() - 2); //Filter the events after the 2 hours time of completion
+
+    if (event) {
+      const ns = event.filter(
+        (n) => !n.isHidden && new Date(n.time).getTime() > d.getTime()
+      );
+      return ns;
+    }
+
+    const tag = await Tag.findOne(id, { relations: ["event"] });
     if (tag?.event) {
       const ns = tag.event.filter(
         (n) => !n.isHidden && new Date(n.time).getTime() > d.getTime()

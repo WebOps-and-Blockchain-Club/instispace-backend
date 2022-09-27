@@ -11,6 +11,7 @@ import {
   emailExpresion,
   getDepartment,
   getprogramme,
+  PostStatus,
   salt,
   UserPermission,
   UserRole,
@@ -50,8 +51,6 @@ import { Notification } from "../utils/index";
 import Feedback from "../entities/Feedback";
 import { mail } from "../utils/mail";
 import fcm from "../utils/fcmTokens";
-import Netop from "../entities/Netop";
-import Event from "../entities/Event";
 import Announcement from "../entities/Announcement";
 import ldapClient from "../utils/ldap";
 import {
@@ -640,66 +639,62 @@ class UsersResolver {
         role == UserRole.SECRETARY
       ) {
         const user = await User.findOneOrFail(id, {
-          relations: ["networkingAndOpportunities", "event", "announcements"],
-        });
+          relations: [
+            "networkingAndOpportunities",
+            "networkingAndOpportunities.reports",
+            "event",
+            "announcements",
+          ],
+	});
 
         let netops = user.networkingAndOpportunities;
         let announcements = user.announcements;
         let events = user.event;
 
-        let nList: Netop[] = [];
-        const eList: Event[] = [];
-        const aList: Announcement[] = [];
+        let d = new Date();
 
-        await Promise.all(
-          netops.map(async (netop) => {
-            netop = await Netop.findOneOrFail(netop.id);
-            let d = new Date();
-            if (
-              !netop.isHidden &&
-              new Date(netop.endTime).getTime() > d.getTime()
-            )
-              nList.push(netop);
-          })
+        netops = netops.filter(
+          (netop) =>
+            !netop.isHidden &&
+            new Date(netop.endTime).getTime() > d.getTime() &&
+            netop.reports.filter((nr) => nr.createdBy.id === user.id).length ===
+              0 &&
+            [
+              PostStatus.POSTED,
+              PostStatus.REPORTED,
+              PostStatus.REPORT_REJECTED,
+            ].includes(netop.status)
         );
 
-        await Promise.all(
-          events.map(async (event) => {
-            event = await Event.findOneOrFail(event.id);
-            let d = new Date();
-            if (!event.isHidden && new Date(event.time).getDate() > d.getDate())
-              eList.push(event);
-          })
+        const d2 = d;
+        d2.setHours(d.getHours() - 2); //Filter the events after the 2 hours time of completion
+        events = events.filter(
+          (event) =>
+            !event.isHidden && new Date(event.time).getTime() > d.getTime()
         );
 
-        await Promise.all(
-          announcements.map(async (announcement) => {
-            announcement = await Announcement.findOneOrFail(announcement.id);
-            let d = new Date();
-            if (
-              !announcement.isHidden &&
-              new Date(announcement.endTime).getTime() > d.getTime()
-            )
-              aList.push(announcement);
-          })
+        announcements = announcements.filter(
+          (announcement) =>
+            !announcement.isHidden &&
+            new Date(announcement.endTime).getTime() > d.getTime()
         );
 
-        aList
+        announcements
           .sort((a, b) =>
             a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
           )
           .splice(5);
-        nList.sort((a, b) =>
+        netops.sort((a, b) =>
           a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
         );
-        eList.sort((a, b) =>
+        events.sort((a, b) =>
           a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
         );
 
         return {
-          announcements: aList,
-          netops: nList,
-          events: eList,
+          announcements,
+          netops,
+          events,
         };
       } else {
         const user = await User.findOneOrFail({

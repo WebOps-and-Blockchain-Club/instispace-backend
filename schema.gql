@@ -911,11 +911,11 @@ input ReportPostInput {
 type Tag {
   """Tag's Category"""
   category: String!
-  events: [Event!]!
+  events: [Event!]
 
   """Unique uuid generated for each Tag"""
   id: String!
-  netops: [Netop!]!
+  netops: [Netop!]
 
   """Tag's Title"""
   title: String!
