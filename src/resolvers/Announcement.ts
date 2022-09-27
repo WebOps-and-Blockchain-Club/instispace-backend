@@ -142,8 +142,8 @@ class AnnouncementResolver {
 
       // search
       if (filteringConditions?.search) {
-        announcementsList = announcementsList.filter((netop) =>
-          JSON.stringify(netop)
+        announcementsList = announcementsList.filter((ann) =>
+          JSON.stringify(ann)
             .toLowerCase()
             .includes(filteringConditions?.search?.toLowerCase()!)
         );
