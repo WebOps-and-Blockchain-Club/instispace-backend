@@ -19,7 +19,7 @@ import MyContext from "../utils/context";
 import { EditDelPermission, UserRole } from "../utils";
 import { getAnnouncementsOutput } from "../types/objects/announcements";
 import fcm from "../utils/fcmTokens";
-import { ILike } from "typeorm";
+import { FilteringConditions } from "../types/inputs/netop";
 
 @Resolver((_type) => Announcement)
 class AnnouncementResolver {
@@ -115,47 +115,40 @@ class AnnouncementResolver {
     @Arg("take") take: number,
     @Ctx() { user }: MyContext,
     @Arg("HostelId", { nullable: true }) hostelId?: string,
-    @Arg("search", { nullable: true }) search?: string
+    @Arg("Filters", { nullable: true })
+    filteringConditions?: FilteringConditions
   ) {
     try {
       if ([UserRole.MODERATOR, UserRole.USER].includes(user.role) && !hostelId)
         throw new Error("Invalid Hostel Input");
 
-      let announcementsList: Announcement[] = [];
-      if (search) {
-        await Promise.all(
-          ["title"].map(async (field: string) => {
-            const filter = { [field]: ILike(`%${search}%`) };
-            const announcementF = await Announcement.find({
-              where: filter,
-              order: { createdAt: "DESC" },
-            });
-            announcementF.forEach((ann) => {
-              announcementsList.push(ann);
-            });
-          })
-        );
-      } else {
-        if (hostelId) {
-          let hostel = await Hostel.findOne({
-            where: { id: hostelId },
-            relations: ["announcements"],
-          });
-          announcementsList = hostel!.announcements!;
-          announcementsList.sort((a, b) =>
-            a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
-          );
-        } else {
-          announcementsList = await Announcement.find({
-            order: { createdAt: "DESC" },
-          });
-        }
-      }
+      let announcementsList = await Announcement.find({
+        where: { isHidden: false },
+        relations: ["hostels"],
+        order: { createdAt: "DESC" },
+      });
+
+      // defalult filters(endTime and hostel)
       const d = new Date();
       announcementsList = announcementsList.filter(
         (n) =>
           new Date(n.endTime).getTime() > d.getTime() && n.isHidden === false
       );
+      if (hostelId) {
+        announcementsList = announcementsList.filter(
+          (ann) => ann.hostels.filter((hostel) => hostel.id == hostelId).length
+        );
+      }
+
+      // search
+      if (filteringConditions?.search) {
+        announcementsList = announcementsList.filter((netop) =>
+          JSON.stringify(netop)
+            .toLowerCase()
+            .includes(filteringConditions?.search?.toLowerCase()!)
+        );
+      }
+
       const total = announcementsList.length;
       if (lastAnnouncementId) {
         const index = announcementsList
