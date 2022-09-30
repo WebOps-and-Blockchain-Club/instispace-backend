@@ -507,6 +507,9 @@ input ModeratorInput {
 type Mutation {
   """Mutation to add a feedback, Restrictions: {anyone who is authorized}"""
   addFeedback(AddFeedback: AddFeedbackInput!): Boolean!
+  addHostels: Boolean!
+  addReasons: Boolean!
+  addTags: Boolean!
   changeNotificationSettings(notifyEvent: Notification, notifyNetop: Notification, toggleNotifyFound: Boolean!, toggleNotifyMyQuery: Boolean!): Boolean!
 
   """Mutation to create a Super-User account, Restrictions : {Admin}"""
@@ -663,6 +666,7 @@ type Mutation {
   Mutation to update Hostel-Amenity, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
   """
   updateAmenity(AmenityId: String!, UpdateAmenityInput: EditAmenityInput!): Amenity!
+  updateFCMToken(fcmToken: String!): Boolean!
 
   """
   Mutation to update Hostel-Contact, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}
@@ -800,7 +804,7 @@ type Query {
   """
   Query to fetch announcements of a particular hostel, Restrictions : { anyone who is authorised } 
   """
-  getAnnouncements(HostelId: String, LastAnnouncementId: String!, search: String, take: Float!): getAnnouncementsOutput!
+  getAnnouncements(Filters: FilteringConditions, HostelId: String, LastAnnouncementId: String!, take: Float!): getAnnouncementsOutput!
 
   """
   Query to return the tag categories, Restrictions : {anyone who is authorized}

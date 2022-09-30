@@ -183,6 +183,25 @@ class UsersResolver {
     }
   }
 
+  @Mutation(() => Boolean)
+  @Authorized()
+  async updateFCMToken(
+    @Ctx() { user }: MyContext,
+    @Arg("fcmToken") fcmToken: string
+  ) {
+    try {
+      let fcmTokens: string[] = user.fcmToken.split(" AND ");
+      fcmTokens = fcmTokens.concat([fcmToken]);
+      const uniqueFcmTokens = [...new Set(fcmTokens)];
+      const { affected } = await User.update(user.id, {
+        fcmToken: uniqueFcmTokens.join(" AND "),
+      });
+      return affected === 1;
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
   @Mutation(() => Boolean, {
     description:
       "Mutation to create a Super-User account, Restrictions : {Admin}",
