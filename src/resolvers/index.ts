@@ -12,7 +12,6 @@ import EventResolver from "./Event";
 import FeedbackResolver from "./Feedback";
 import AmenitiesResolver from "./Amenities";
 import ContactResolver from "./Contacts";
-import ImageResolver from "./Image";
 import UtilsResolver from "./Utils";
 
 export default [
@@ -30,6 +29,5 @@ export default [
   FeedbackResolver,
   AmenitiesResolver,
   ContactResolver,
-  ImageResolver,
   UtilsResolver,
 ] as const;
