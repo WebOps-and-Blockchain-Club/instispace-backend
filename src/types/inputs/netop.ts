@@ -26,7 +26,11 @@ class CreateNetopsInput {
   })
   imageUrls?: string[];
 
-  attachments?: string;
+  @Field((_type) => [String], {
+    nullable: true,
+    description: "Attachments for a Post",
+  })
+  attachmentUrls?: string[];
 }
 
 @InputType()
@@ -55,7 +59,11 @@ class EditNetopsInput {
   })
   imageUrls: string[];
 
-  attachments?: string;
+  @Field((_type) => [String], {
+    nullable: true,
+    description: "Announcement's Image URLs",
+  })
+  attachmentUrls: string[];
 }
 
 @InputType()

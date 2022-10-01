@@ -14,7 +14,11 @@ class createQuerysInput {
   })
   imageUrls?: string[];
 
-  attachments?: string;
+  @Field((_type) => [String], {
+    nullable: true,
+    description: "Announcement's Images",
+  })
+  attachmentUrls?: string[];
 }
 
 @InputType()
@@ -31,7 +35,11 @@ class editQuerysInput {
   })
   imageUrls: string[];
 
-  attachments?: string;
+  @Field((_type) => [String], {
+    nullable: true,
+    description: "Announcement's Image URLs",
+  })
+  attachmentUrls?: string;
 }
 
 export { createQuerysInput, editQuerysInput };

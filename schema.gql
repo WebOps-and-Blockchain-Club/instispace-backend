@@ -138,7 +138,7 @@ type Contact {
   contact: String!
 
   """relation which stores the contact-hostel"""
-  hostel: Hostel!
+  hostel: Hostel
 
   """Auto generated uuid"""
   id: String!
@@ -205,6 +205,8 @@ input CreateHostelInput {
 
 """user"""
 input CreateNetopsInput {
+  """Attachments for a Post"""
+  attachmentUrls: [String!]
   content: String!
   endTime: String!
 
@@ -311,6 +313,8 @@ input EditItemInput {
 }
 
 input EditNetopsInput {
+  """Announcement's Image URLs"""
+  attachmentUrls: [String!]
   content: String
   endTime: String
 
@@ -507,9 +511,6 @@ input ModeratorInput {
 type Mutation {
   """Mutation to add a feedback, Restrictions: {anyone who is authorized}"""
   addFeedback(AddFeedback: AddFeedbackInput!): Boolean!
-  addHostels: Boolean!
-  addReasons: Boolean!
-  addTags: Boolean!
   changeNotificationSettings(notifyEvent: Notification, notifyNetop: Notification, toggleNotifyFound: Boolean!, toggleNotifyMyQuery: Boolean!): Boolean!
 
   """Mutation to create a Super-User account, Restrictions : {Admin}"""
@@ -553,10 +554,10 @@ type Mutation {
   createItem(ItemInput: ItemInput!): Item!
 
   """create Query, Restrictions:{any authorized user}"""
-  createMyQuery(Attachments: [Upload!], createQuerysInput: createQuerysInput!): MyQuery!
+  createMyQuery(createQuerysInput: createQuerysInput!): MyQuery!
 
   """create network and opportunity, Restrictions:{any authorized user}"""
-  createNetop(Attachments: [Upload!], NewNetopData: CreateNetopsInput!): Netop!
+  createNetop(NewNetopData: CreateNetopsInput!): Netop!
   createReportReason(ReportData: ReasonInput!): Reason!
 
   """Mutation deprecated"""
@@ -608,11 +609,10 @@ type Mutation {
   editItems(EditItemInput: EditItemInput!, ItemId: String!): Item!
 
   """edit Query, Restrictions:{user who created}"""
-  editMyQuery(Attachments: [Upload!], EditMyQuerysData: editQuerysInput!, MyQueryId: String!): MyQuery!
+  editMyQuery(EditMyQuerysData: editQuerysInput!, MyQueryId: String!): MyQuery!
 
   """edit network and opportunity, Restrictions:{user who created}"""
-  editNetop(Attachments: [Upload!], EditNetopsData: EditNetopsInput!, NetopId: String!): Netop!
-  imageUpload(Image: [Upload!]): getImageOutput!
+  editNetop(EditNetopsData: EditNetopsInput!, NetopId: String!): Netop!
 
   """Mutation to login, Restrictions : {none}"""
   login(LoginInputs: LoginInput!, fcmToken: String!): LoginOutput!
@@ -1067,6 +1067,8 @@ input createEventInput {
 
 """user"""
 input createQuerysInput {
+  """Announcement's Images"""
+  attachmentUrls: [String!]
   content: String!
 
   """Announcement's Images"""
@@ -1088,6 +1090,8 @@ input editEventInput {
 }
 
 input editQuerysInput {
+  """Announcement's Image URLs"""
+  attachmentUrls: [String!]
   content: String
 
   """Announcement's Image URLs"""
@@ -1110,11 +1114,6 @@ type getComplaintsOutput {
 type getEventOutput {
   list: [Event!]
   total: Float!
-}
-
-"""Output Type for image upload"""
-type getImageOutput {
-  imageUrls: [String!]
 }
 
 """Output type for getItems query"""

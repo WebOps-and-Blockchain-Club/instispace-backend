@@ -36,15 +36,12 @@ class MyQueryResolver {
   @Authorized()
   async createMyQuery(
     @Arg("createQuerysInput") createMyQuerysInput: createQuerysInput,
-    @Ctx() { user }: MyContext,
-    @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
-    attachments?: Upload[]
+    @Ctx() { user }: MyContext
   ): Promise<MyQuery> {
     try {
-      if (attachments)
-        createMyQuerysInput.attachments = (
-          await addAttachments([...attachments], false)
-        ).join(" AND ");
+      let attachmentUrls;
+      if (createMyQuerysInput.attachmentUrls)
+        attachmentUrls = createMyQuerysInput.attachmentUrls.join(" AND ");
 
       let imageUrls;
       if (createMyQuerysInput.imageUrls) {
@@ -54,6 +51,7 @@ class MyQueryResolver {
       const myQuery = await MyQuery.create({
         ...createMyQuerysInput,
         photo: imageUrls === "" ? null : imageUrls,
+        attachments: attachmentUrls === "" ? null : attachmentUrls,
         createdBy: user,
         isHidden: false,
         likeCount: 0,
@@ -72,9 +70,7 @@ class MyQueryResolver {
   async editMyQuery(
     @Arg("EditMyQuerysData") editMyQuerysInput: editQuerysInput,
     @Arg("MyQueryId") myQueryId: string,
-    @Ctx() { user }: MyContext,
-    @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
-    attachments?: Upload[]
+    @Ctx() { user }: MyContext
   ) {
     try {
       const myQuery = await MyQuery.findOne(myQueryId, {
@@ -93,12 +89,11 @@ class MyQueryResolver {
         );
         myQuery.photo = imageUrlStr === "" ? null : imageUrlStr;
 
-        if (attachments) {
-          editMyQuerysInput.attachments = (
-            await addAttachments([...attachments], false)
-          ).join(" AND ");
-          myQuery.attachments = editMyQuerysInput.attachments;
-        }
+        let attachmentUrlStr = [
+          ...(editMyQuerysInput.attachmentUrls ?? []),
+        ].join(" AND ");
+        myQuery.attachments = attachmentUrlStr === "" ? null : attachmentUrlStr;
+
         if (editMyQuerysInput.title) myQuery.title = editMyQuerysInput.title;
         if (editMyQuerysInput.content)
           myQuery.content = editMyQuerysInput.content;
@@ -205,7 +200,7 @@ class MyQueryResolver {
         description: reportPostInput.description,
         createdBy: user,
       }).save();
-      
+
       return !!report && !!myQueryUpdated;
     } catch (e) {
       throw new Error(e.message);

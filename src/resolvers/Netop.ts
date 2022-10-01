@@ -20,7 +20,6 @@ import {
 import Tag from "../entities/Tag";
 import Netop from "../entities/Netop";
 import Comment from "../entities/Common/Comment";
-import { GraphQLUpload, Upload } from "graphql-upload";
 import getNetopOutput from "../types/objects/netop";
 import { EditDelPermission, PostStatus, UserRole } from "../utils";
 import Report from "../entities/Common/Report";
@@ -30,6 +29,7 @@ import fcm from "../utils/fcmTokens";
 import { Notification } from "../utils/index";
 import Reason from "../entities/Common/Reason";
 import { In } from "typeorm";
+import { GraphQLUpload, Upload } from "graphql-upload";
 
 @Resolver(Netop)
 class NetopResolver {
@@ -40,9 +40,7 @@ class NetopResolver {
   @Authorized()
   async createNetop(
     @Arg("NewNetopData") createNetopsInput: CreateNetopsInput,
-    @Ctx() { user }: MyContext,
-    @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
-    attachments?: Upload[]
+    @Ctx() { user }: MyContext
   ): Promise<Netop> {
     try {
       var tags: Tag[] = [];
@@ -61,18 +59,18 @@ class NetopResolver {
       if (tags.length !== createNetopsInput.tags.length)
         throw new Error("Invalid tagIds");
 
-      if (attachments)
-        createNetopsInput.attachments = (
-          await addAttachments([...attachments], false)
-        ).join(" AND ");
+      let attachmentUrls;
+      if (createNetopsInput.attachmentUrls)
+        attachmentUrls = createNetopsInput.attachmentUrls.join(" AND ");
 
       let imageUrls;
-      if (createNetopsInput.imageUrls) {
-        imageUrls = createNetopsInput.imageUrls?.join(" AND ");
-      }
+      if (createNetopsInput.imageUrls)
+        imageUrls = createNetopsInput.imageUrls.join(" AND ");
+
       const netop = await Netop.create({
         ...createNetopsInput,
         photo: imageUrls === "" ? null : imageUrls,
+        attachments: attachmentUrls === "" ? null : attachmentUrls,
         createdBy: user,
         endTime: new Date(createNetopsInput.endTime),
         likeCount: 0,
@@ -139,9 +137,7 @@ class NetopResolver {
   async editNetop(
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext,
-    @Arg("EditNetopsData") editNetopsInput: EditNetopsInput,
-    @Arg("Attachments", () => [GraphQLUpload], { nullable: true })
-    attachments?: Upload[]
+    @Arg("EditNetopsData") editNetopsInput: EditNetopsInput
   ) {
     try {
       const netop = await Netop.findOne(netopId, {
@@ -152,12 +148,10 @@ class NetopResolver {
         let imageUrlStr = [...(editNetopsInput.imageUrls ?? [])].join(" AND ");
         netop.photo = imageUrlStr === "" ? null : imageUrlStr;
 
-        if (attachments) {
-          editNetopsInput.attachments = (
-            await addAttachments([...attachments], false)
-          ).join(" AND ");
-          netop.attachments = editNetopsInput.attachments;
-        }
+        let attachmentUrlStr = [...(editNetopsInput.attachmentUrls ?? [])].join(
+          " AND "
+        );
+        netop.attachments = attachmentUrlStr === "" ? null : attachmentUrlStr;
 
         if (editNetopsInput.tagIds) {
           let tags: Tag[] = [];
@@ -302,7 +296,7 @@ class NetopResolver {
 
       const report = await Report.create({
         description: reportPostInput.description,
-	netop: netopUpdated,
+        netop: netopUpdated,
         createdBy: user,
       }).save();
 
