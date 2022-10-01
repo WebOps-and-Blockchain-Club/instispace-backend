@@ -107,7 +107,6 @@ class ComplaintResolver {
 
       return { complaintsList: complaintsLists, total };
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }
@@ -177,7 +176,6 @@ class ComplaintResolver {
         throw new Error("Invalid complaint id");
       }
     } catch (e) {
-      console.log(e.message);
       throw new Error(e.message);
     }
   }

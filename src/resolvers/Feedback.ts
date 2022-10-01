@@ -28,7 +28,7 @@ class FeedbackResolver {
     @Arg("AddFeedback") feedbackInput: AddFeedbackInput
   ) {
     const feedback = await Feedback.create({ ...feedbackInput, user }).save();
-    writeSheet(
+    const appended = writeSheet(
       user.roll,
       user.name,
       feedbackInput.rating1,
@@ -38,7 +38,7 @@ class FeedbackResolver {
       feedbackInput.ans2,
       feedbackInput.ans3
     );
-    return !!feedback;
+    return !!feedback && appended;
   }
 
   @Query(() => String, {

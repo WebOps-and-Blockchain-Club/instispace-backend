@@ -98,10 +98,8 @@ class UsersResolver {
         }
 
         /************ Check the user details ************/
-        console.log(roll);
         const user = await User.findOne({ roll: roll.toLowerCase() });
         //If user doesn't exists
-        console.log(user);
         if (!user) {
           const newUser = new User();
           newUser.roll = roll.toLowerCase();
@@ -125,8 +123,6 @@ class UsersResolver {
             user.fcmToken = fcmToken;
           }
           await user.save();
-          console.log("print token");
-          console.log(user.fcmToken);
           const token = jwt.sign(user.id, process.env.JWT_SECRET!);
           return {
             isNewUser: user.isNewUser,
@@ -249,7 +245,6 @@ class UsersResolver {
       newUser.isNewUser = true;
       newUser.password = bcrypt.hashSync(password, salt);
       await newUser.save();
-      console.log(password);
       //this password is going to be emailed to the Super-User
       if (process.env.NODE_ENV !== "development")
         await mail({
@@ -266,7 +261,6 @@ class UsersResolver {
   @Mutation(() => Boolean)
   @Authorized()
   async logout(@Ctx() { user }: MyContext, @Arg("fcmToken") fcmToken: string) {
-    console.log("inside logout for", user.name, user.fcmToken, fcmToken);
     const u = await User.findOneOrFail(user.id);
     let fcmTokenArr = u.fcmToken.split(" AND ");
     const index = fcmTokenArr.indexOf(fcmToken);
@@ -275,7 +269,6 @@ class UsersResolver {
     if (index > -1) {
       fcmTokenArr.splice(index, 1);
       let newFcmTokenArr = fcmTokenArr;
-      console.log(newFcmTokenArr);
       newFcmToken =
         newFcmTokenArr.length > 1
           ? newFcmTokenArr.join(" AND ")

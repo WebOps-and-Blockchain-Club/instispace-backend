@@ -26,7 +26,7 @@ export const mail = async ({
   subject: string;
   htmlContent: string;
 }) => {
-    console.log(email)
+  console.log(email);
   const sendMail = async () => {
     try {
       const accessToken = await oAuth2Client.getAccessToken();
@@ -56,7 +56,5 @@ export const mail = async ({
       return error;
     }
   };
-  sendMail()
-    .then((result) => console.log("Email sent...", result))
-    .catch((error) => console.log(error.message));
+  sendMail();
 };

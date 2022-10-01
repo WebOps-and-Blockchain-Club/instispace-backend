@@ -85,26 +85,26 @@ class LDAPClient {
 
             let users: any[] = [];
 
-            res.on("searchRequest", (searchRequest) => {
-              console.log("searchRequest: ", searchRequest.messageID);
-            });
+            // res.on("searchRequest", (searchRequest) => {
+            //   console.log("searchRequest: ", searchRequest.messageID);
+            // });
 
             res.on("searchEntry", (entry) => {
-              console.log("entry: " + JSON.stringify(entry.object));
+              // console.log("entry: " + JSON.stringify(entry.object));
               users.push(entry.object);
             });
 
-            res.on("searchReference", (referral) => {
-              console.log("referral: " + referral.uris.join());
-            });
+            // res.on("searchReference", (referral) => {
+            //   console.log("referral: " + referral.uris.join());
+            // });
 
             res.on("error", (err) => {
-              console.error("error: " + err.message);
+              // console.error("error: " + err.message);
               return reject(err);
             });
 
-            res.on("end", (result) => {
-              console.log("status: " + result?.status);
+            res.on("end", (_result) => {
+              // console.log("status: " + result?.status);
               return resolve(users);
             });
           }

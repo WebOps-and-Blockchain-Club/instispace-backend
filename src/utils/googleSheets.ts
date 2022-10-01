@@ -31,8 +31,8 @@ export const writeSheet = async (
 
   try {
     const response = (await sheets.spreadsheets.values.append(request)).data;
-    console.log(JSON.stringify(response, null, 2));
+    return JSON.stringify(response, null, 2);
   } catch (err) {
-    console.error(err);
+    throw new Error(err);
   }
 };

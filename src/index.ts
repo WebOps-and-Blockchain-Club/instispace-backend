@@ -43,7 +43,7 @@ const main = async () => {
           );
           user = await User.findOne({ id: decoded });
         } catch (e) {
-          console.log(`message ${e}`);
+          throw new Error(`message ${e}`);
         }
       }
       return { user: user };
