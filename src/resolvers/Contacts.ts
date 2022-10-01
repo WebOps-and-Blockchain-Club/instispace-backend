@@ -21,7 +21,12 @@ class ContactResolver {
     description:
       "Mutation to create Hostel-Contact, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}",
   })
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.HAS,
+    UserRole.SECRETARY,
+    UserRole.HOSTEL_SEC,
+  ])
   async createHostelContact(
     @Ctx() { user }: MyContext,
     @Arg("CreateContactInput") contactInput: CreateContactInput,
@@ -34,7 +39,7 @@ class ContactResolver {
 
       if (
         user.hostel === hostel ||
-        [UserRole.HAS, UserRole.ADMIN].includes(user.role)
+        [UserRole.HAS, UserRole.SECRETARY, UserRole.ADMIN].includes(user.role)
       ) {
         //creating the contact
         const contact = new HostelContact();
@@ -64,9 +69,10 @@ class ContactResolver {
           where: { id: hostelId },
           relations: ["contacts"],
         });
-        contacts = hostel!.contacts;
+        contacts = contacts.concat(hostel?.contacts ?? []);
       } else {
-        contacts = await Contact.find();
+        const _contacts = await Contact.find();
+        contacts = contacts.concat(_contacts ?? []);
       }
       return contacts;
     } catch (e) {
@@ -78,7 +84,12 @@ class ContactResolver {
     description:
       "Mutation to update Hostel-Contact, Restrictions : {Admins, Hostel-Secretories(who belong the hostel), HAS}",
   })
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.SECRETARY,
+    UserRole.HAS,
+    UserRole.HOSTEL_SEC,
+  ])
   async updateHostelContact(
     @Arg("ContactId") contactId: string,
     @Ctx() { user }: MyContext,
@@ -94,7 +105,7 @@ class ContactResolver {
 
       if (
         user.hostel === contact.hostel ||
-        [UserRole.HAS, UserRole.ADMIN].includes(user.role)
+        [UserRole.HAS, UserRole.SECRETARY, UserRole.ADMIN].includes(user.role)
       ) {
         if (contactInput.type) contact.type = contactInput.type;
         if (contactInput.name) contact.name = contactInput.name;
@@ -129,7 +140,7 @@ class ContactResolver {
       if (!hostelContact) throw new Error("Invalid Contact");
       if (
         user.hostel === hostelContact?.hostel ||
-        [UserRole.HAS, UserRole.ADMIN].includes(user.role)
+        [UserRole.HAS, UserRole.SECRETARY, UserRole.ADMIN].includes(user.role)
       ) {
         const hostelContactDeleted = await hostelContact.remove();
         return !!hostelContactDeleted;
@@ -140,7 +151,7 @@ class ContactResolver {
     }
   }
 
-  @FieldResolver(() => Hostel)
+  @FieldResolver(() => Hostel, { nullable: true })
   async hostel(@Root() { id, hostel }: Contact) {
     try {
       if (hostel) return hostel;
@@ -167,7 +178,9 @@ class ContactResolver {
       });
       if (
         contact &&
-        ([UserRole.ADMIN, UserRole.HAS].includes(user.role) ||
+        ([UserRole.ADMIN, UserRole.SECRETARY, UserRole.HAS].includes(
+          user.role
+        ) ||
           user.hostel === contact.hostel)
       )
         permissionList.push(EditDelPermission.EDIT, EditDelPermission.DELETE);

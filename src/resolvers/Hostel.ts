@@ -58,7 +58,7 @@ class HostelResolver {
     description:
       "Mutation to create Hostels, Restrictions : {Admin, Hostel Secretory and Hostel Affair Secretory}",
   })
-  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.HOSTEL_SEC])
+  @Authorized([UserRole.ADMIN, UserRole.HAS])
   async createHostel(@Arg("CreateHostelInput") { name }: CreateHostelInput) {
     try {
       const hostel = new Hostel();

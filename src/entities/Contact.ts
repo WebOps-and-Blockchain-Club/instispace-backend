@@ -34,6 +34,7 @@ class HostelContact extends BaseEntity {
 
   @ManyToOne((_type) => Hostel, (hostel) => hostel.contacts, { cascade: true })
   @Field((_type) => Hostel, {
+    nullable: true,
     description: "relation which stores the contact-hostel",
   })
   hostel: Hostel;

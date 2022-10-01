@@ -59,6 +59,7 @@ import {
   accountPassword,
   usersDevList,
 } from "../utils/config.json";
+import { ValidationError } from "apollo-server";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -220,10 +221,12 @@ class UsersResolver {
           : autoGenPass(8);
 
       if (
-        [UserRole.SECRETARY, UserRole.HAS].includes(createAccountInput.role) &&
-        user.role !== UserRole.ADMIN
+        ([UserRole.SECRETARY, UserRole.HAS].includes(createAccountInput.role) &&
+          user.role !== UserRole.ADMIN) ||
+        (createAccountInput.role === UserRole.HOSTEL_SEC &&
+          user.role === UserRole.SECRETARY)
       ) {
-        throw new Error("Invalid Role");
+        throw new ValidationError("Invalid Role");
       }
       //Creating the User
       const newUser = new User();
@@ -234,6 +237,14 @@ class UsersResolver {
         if (!hostel) throw new Error("Invalid Hostel");
         newUser.hostel = hostel;
       }
+
+      // Validate input for [UserRole.HOSTEL_SEC]
+      if (
+        createAccountInput.role === UserRole.HOSTEL_SEC &&
+        newUser.hostel === null
+      )
+        throw new ValidationError("Invalid Input");
+
       newUser.roll = createAccountInput.roll.toLowerCase();
       newUser.isNewUser = true;
       newUser.password = bcrypt.hashSync(password, salt);
@@ -479,20 +490,14 @@ class UsersResolver {
     description:
       "Mutation to change role of an ldap User to Moderator, Restrictions : {Admins and Leads}",
   })
-  @Authorized([
-    UserRole.ADMIN,
-    UserRole.LEADS,
-    UserRole.HAS,
-    UserRole.HOSTEL_SEC,
-    UserRole.SECRETARY,
-  ])
+  @Authorized([UserRole.ADMIN, UserRole.HAS, UserRole.SECRETARY])
   async updateRole(@Arg("ModeratorInput") { roll }: ModeratorInput) {
     try {
       const user = await User.findOne({ where: { roll } });
       if (!user) throw new Error("User doesn't exist");
       if (user.role !== UserRole.USER) throw new Error("Invalid Role");
       user.role = UserRole.MODERATOR;
-      await user.save();
+      const updatedUser = await user.save();
 
       if (!!user) {
         user.fcmToken.split(" AND ").map((ft) => {
@@ -515,7 +520,7 @@ class UsersResolver {
           });
         });
       }
-      return !!user;
+      return !!updatedUser;
     } catch (e) {
       throw new Error(`message: ${e}`);
     }
@@ -664,7 +669,7 @@ class UsersResolver {
             "event",
             "announcements",
           ],
-	});
+        });
 
         let netops = user.networkingAndOpportunities;
         let announcements = user.announcements;
@@ -816,17 +821,10 @@ class UsersResolver {
         UserPermission.GET_CONTACTS,
       ];
       if (role === UserRole.MODERATOR) {
-        permissionList.push(
-          UserPermission.CREATE_EVENT,
-          UserPermission.CREATE_REPORT_REASON
-        );
+        permissionList.push(UserPermission.GET_REPORTS);
       }
       if (role === UserRole.LEADS) {
-        permissionList.push(
-          UserPermission.CREATE_EVENT,
-          UserPermission.UPDATE_ROLE,
-          UserPermission.CREATE_REPORT_REASON
-        );
+        permissionList.push(UserPermission.CREATE_EVENT);
       }
       if (role === UserRole.HOSTEL_SEC)
         permissionList.push(
@@ -834,20 +832,21 @@ class UsersResolver {
           UserPermission.CREATE_AMENITY,
           UserPermission.CREATE_ANNOUNCEMENT,
           UserPermission.CREATE_CONTACT,
-          UserPermission.CREATE_HOSTEL,
           UserPermission.UPDATE_ROLE,
           UserPermission.CREATE_EVENT
         );
       if (role === UserRole.SECRETARY)
         permissionList.push(
+          UserPermission.HOSTEL_ADMIN,
           UserPermission.CREATE_ACCOUNT,
           UserPermission.CREATE_ANNOUNCEMENT,
+          UserPermission.CREATE_CONTACT,
           UserPermission.CREATE_TAG,
           UserPermission.GET_ALL_ANNOUNCEMENTS,
+          UserPermission.GET_ALL_CONTACTS,
           UserPermission.GET_REPORTS,
           UserPermission.UPDATE_ROLE,
-          UserPermission.CREATE_EVENT,
-          UserPermission.CREATE_REPORT_REASON
+          UserPermission.CREATE_EVENT
         );
       if (role === UserRole.HAS)
         permissionList.push(
@@ -863,8 +862,7 @@ class UsersResolver {
           UserPermission.GET_ALL_CONTACTS,
           UserPermission.GET_REPORTS,
           UserPermission.UPDATE_ROLE,
-          UserPermission.CREATE_EVENT,
-          UserPermission.CREATE_REPORT_REASON
+          UserPermission.CREATE_EVENT
         );
       if (role === UserRole.ADMIN)
         permissionList.push(

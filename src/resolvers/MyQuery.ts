@@ -550,7 +550,7 @@ class MyQueryResolver {
           UserRole.ADMIN,
           UserRole.SECRETARY,
           UserRole.HAS,
-          UserRole.HOSTEL_SEC,
+          UserRole.MODERATOR,
         ].includes(user.role)
       )
         permissionList.push(EditDelPermission.RESOLVE);

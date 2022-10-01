@@ -26,11 +26,10 @@ class EventResolver {
   })
   @Authorized(
     UserRole.ADMIN,
-    UserRole.LEADS,
     UserRole.SECRETARY,
     UserRole.HAS,
-    UserRole.MODERATOR,
-    UserRole.HOSTEL_SEC
+    UserRole.HOSTEL_SEC,
+    UserRole.LEADS
   )
   async createEvent(
     @Arg("NewEventData") createEventInput: createEventInput,
