@@ -516,9 +516,14 @@ class NetopResolver {
     description: "get list of comments",
   })
   async comments(@Root() { id, comments }: Netop) {
-    if (comments) return comments;
+    if (comments)
+      return comments.sort((a, b) =>
+        a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0
+      );
+
     const netop = await Netop.findOne(id, {
       relations: ["comments"],
+      order: { createdAt: "ASC" },
     });
     return netop?.comments;
   }
@@ -599,13 +604,11 @@ class NetopResolver {
   ) {
     try {
       if (permissions) return permissions;
-      const permissionList: EditDelPermission[] = [
-        EditDelPermission.COMMENT,
-        EditDelPermission.REPORT,
-      ];
+      const permissionList: EditDelPermission[] = [EditDelPermission.COMMENT];
       const netop = await Netop.findOne(id, { relations: ["createdBy"] });
       if (user.id === netop?.createdBy.id)
         permissionList.push(EditDelPermission.EDIT, EditDelPermission.DELETE);
+      else permissionList.push(EditDelPermission.REPORT);
       if (
         [
           UserRole.ADMIN,

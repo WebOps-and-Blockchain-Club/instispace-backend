@@ -245,13 +245,15 @@ class UsersResolver {
       newUser.isNewUser = true;
       newUser.password = bcrypt.hashSync(password, salt);
       await newUser.save();
-      //this password is going to be emailed to the Super-User
+
+      // Sending Creadentials for Super User's
       if (process.env.NODE_ENV !== "development")
-        await mail({
-          email: `${newUser.roll}`,
-          subject: "Super-User login credentials",
-          htmlContent: `You now have access to new Super-User account, role: ${newUser.role}, password: ${password}`,
-        });
+        MailService.sendAccountCreationMail(
+          newUser.role,
+          newUser.roll,
+          password
+        );
+
       return !!newUser;
     } catch (e) {
       throw new Error(`message : ${e}`);
@@ -499,6 +501,7 @@ class UsersResolver {
             click_action: "FLUTTER_NOTIFICATION_CLICK",
             title: "Role Updated",
             body: "Congratulations! You have been appointed as a Moderator.",
+	    route: "NONE",
           },
         });
       }
@@ -694,7 +697,7 @@ class UsersResolver {
           a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
         );
         events.sort((a, b) =>
-          a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+          a.time > b.time ? -1 : a.time < b.time ? 1 : 0
         );
 
         return {
@@ -806,7 +809,10 @@ class UsersResolver {
         permissionList.push(UserPermission.GET_REPORTS);
       }
       if (role === UserRole.LEADS) {
-        permissionList.push(UserPermission.CREATE_EVENT);
+        permissionList.push(
+          UserPermission.CREATE_EVENT,
+          UserPermission.CREATE_TAG
+        );
       }
       if (role === UserRole.HOSTEL_SEC)
         permissionList.push(

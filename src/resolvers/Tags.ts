@@ -21,7 +21,12 @@ class TagsResolver {
   @Mutation(() => Boolean, {
     description: "Mutation to Create Tags, Restrictions : {Admin}",
   })
-  @Authorized([UserRole.ADMIN, UserRole.SECRETARY, UserRole.HAS])
+  @Authorized([
+    UserRole.ADMIN,
+    UserRole.SECRETARY,
+    UserRole.HAS,
+    UserRole.LEADS,
+  ])
   async createTag(@Arg("TagInput") { title, category }: TagInput) {
     try {
       const existingTag = await Tag.findOne({ where: { title } });
@@ -100,7 +105,7 @@ class TagsResolver {
       return ns;
     }
 
-    const tag = await Tag.findOne(id, { relations: ["netops", "netops.reports"] });
+    const tag = await Tag.findOne(id, { relations: ["netops", "netops.reports", "netops.reports.createdBy"] });
     if (tag?.netops) {
       const ns = tag.netops.filter(
         (n) =>

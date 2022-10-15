@@ -77,7 +77,7 @@ class HostelResolver {
   @Authorized()
   async getHostels() {
     try {
-      return await Hostel.find();
+      return await Hostel.find({ order: { name: "ASC" } });
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

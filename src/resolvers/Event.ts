@@ -242,11 +242,11 @@ class EventResolver {
       let eventList = await Event.find({
         where: { isHidden: false },
         relations: ["tags", "likedBy", "staredBy"],
-        order: { createdAt: "DESC" },
+        order: { time: "ASC" },
       });
 
       const d = new Date();
-      d.setHours(d.getHours() - 2); //Filter the events after the 2 hours time of completion
+      d.setHours(d.getHours() - 5); //Filter the events after the 2 hours time of completion
 
       // default filters (endtime should not exceed)
       eventList = eventList.filter(
@@ -385,10 +385,7 @@ class EventResolver {
       });
       if (
         event &&
-        ([UserRole.ADMIN, UserRole.SECRETARY, UserRole.HAS].includes(
-          user.role
-        ) ||
-          user.id === event.createdBy.id)
+        ([UserRole.ADMIN].includes(user.role) || user.id === event.createdBy.id)
       )
         permissionList.push(EditDelPermission.EDIT, EditDelPermission.DELETE);
       return permissionList;

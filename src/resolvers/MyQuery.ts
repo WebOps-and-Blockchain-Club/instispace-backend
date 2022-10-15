@@ -455,9 +455,13 @@ class MyQueryResolver {
     description: "get list of comments",
   })
   async comments(@Root() { id, comments }: MyQuery) {
-    if (comments) return comments;
+    if (comments)
+      return comments.sort((a, b) =>
+        a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0
+      );
     const myQuery = await MyQuery.findOne(id, {
       relations: ["comments"],
+      order: { createdAt: "ASC" },
     });
     return myQuery?.comments;
   }
@@ -530,13 +534,11 @@ class MyQueryResolver {
   ) {
     try {
       if (permissions) return permissions;
-      const permissionList: EditDelPermission[] = [
-        EditDelPermission.COMMENT,
-        EditDelPermission.REPORT,
-      ];
+      const permissionList: EditDelPermission[] = [EditDelPermission.COMMENT];
       const query = await MyQuery.findOne(id, { relations: ["createdBy"] });
       if (user.id === query?.createdBy.id)
         permissionList.push(EditDelPermission.EDIT, EditDelPermission.DELETE);
+      else permissionList.push(EditDelPermission.REPORT);
       if (
         [
           UserRole.ADMIN,
