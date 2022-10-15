@@ -38,7 +38,7 @@ class FeedbackResolver {
       feedbackInput.ans2,
       feedbackInput.ans3
     );
-    return !!feedback && appended;
+    return !!feedback && !!appended;
   }
 
   @Query(() => String, {
