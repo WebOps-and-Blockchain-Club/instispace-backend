@@ -117,6 +117,8 @@ export const getDepartment = (code: string) => {
       return "Electrical Engineering";
     case "ED":
       return "Engineering Design";
+    case "EP":
+      return "Physics";
     case "HS":
       return "Humanities and Social Sciences";
     case "MS":
