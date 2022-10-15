@@ -22,6 +22,7 @@ class LDAPClient {
     if (process.env.NODE_ENV === "production" && this.ldapClient === null)
       this.ldapClient = ldap.createClient({
         url: "ldap://ldap.iitm.ac.in:389",
+	reconnect: true,
       });
   }
 
@@ -65,20 +66,30 @@ class LDAPClient {
   }
 
   // Search user in LDAP
-  search(searchStr: string, sizeLimit?: number | undefined) {
+  search(searchStr: string, _sizeLimit?: number | undefined) {
     this.connect();
     const client = this.ldapClient;
     return new Promise((resolve, reject) => {
       client!.bind(rootdn, LDAP_ADMIN_PASSWORD, function (err) {
         if (err) return reject(err);
 
+
+        let filterStr: string = "";
+        searchStr
+          .split(" ")
+          .map(
+            (_str) =>
+              (filterStr = `${filterStr}(|(uid=*${_str}*)(displayName=*${_str}*))`)
+          );
+
+
         client!.search(
           `ou=student,${maindn}`,
           {
-            filter: `(&(|(uid=*${searchStr}*)(displayName=*${searchStr}*))(!(uid=*exp*)))`,
+            filter: `(&${filterStr}(!(uid=*exp*))(!(uid=*cancel*)))`,
             scope: "sub",
             paged: true,
-            sizeLimit: sizeLimit,
+            sizeLimit: 0,
           },
           (err, res) => {
             if (err) return reject(err);
