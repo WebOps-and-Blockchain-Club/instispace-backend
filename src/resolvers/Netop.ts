@@ -25,8 +25,7 @@ import { EditDelPermission, PostStatus, UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
-import fcm from "../utils/fcmTokens";
-import { Notification } from "../utils/index";
+import NotificationService from "../services/notification";
 import Reason from "../entities/Common/Reason";
 import { In } from "typeorm";
 import { GraphQLUpload, Upload } from "graphql-upload";
@@ -76,52 +75,9 @@ class NetopResolver {
         likeCount: 0,
         tags,
       }).save();
-
-      const users = await User.find({
-        where: { notifyNetop: Notification.FORALL },
-      });
-      if (users) iUsers = iUsers.concat(users);
-
-      let iUsersIds = iUsers.map((u) => u.fcmToken);
-
-      const iUsersSet = new Set<string>(iUsersIds);
-      iUsersIds = Array.from(iUsersSet);
-
-      iUsers = [];
-
-      await Promise.all(
-        iUsersIds.map(async (ft) => {
-          const u = await User.findOneOrFail({
-            where: { fcmToken: ft },
-          });
-          if (u.notifyNetop !== Notification.NONE && u.id != user.id)
-            iUsers.push(u);
-        })
-      );
-      if (!!netop) {
-        iUsers.map((u) => {
-          u.fcmToken &&
-            u.fcmToken.split(" AND ").map(async (ft) => {
-              const message = {
-                to: ft,
-                notification: {
-                  title: `Hi ${u?.name}`,
-                  body: "you may interested for netop",
-                },
-              };
-
-              fcm.send(message, (err: any, response: any) => {
-                if (err) {
-                  console.log("Something has gone wrong!" + err);
-                  console.log("Respponse:! " + response);
-                } else {
-                  // showToast("Successfully sent with response");
-                  console.log("Successfully sent with response: ", response);
-                }
-              });
-            });
-        });
-      }
+      
+      // Send Notification
+      NotificationService.notifyNewNetop(netop);
 
       return netop;
     } catch (e) {
@@ -300,6 +256,18 @@ class NetopResolver {
         createdBy: user,
       }).save();
 
+      // Send Notification
+      NotificationService.notifyReportNetop(
+        user,
+        netopUpdated.title,
+        report.description
+      );
+      if (netopUpdated.status === PostStatus.IN_REVIEW)
+        NotificationService.notifyReportModerator(
+          netopUpdated.title,
+          report.description
+        );
+
       return !!report && !!netopUpdated;
     } catch (e) {
       throw new Error(e.message);
@@ -358,28 +326,12 @@ class NetopResolver {
 
         const creator = netop.createdBy;
 
-        if (!!comment && creator.notifyNetopComment) {
-          creator.fcmToken &&
-            creator.fcmToken.split(" AND ").map((ft) => {
-              const message = {
-                to: ft,
-                notification: {
-                  title: `Hi ${creator.name}`,
-                  body: "your netop got commented",
-                },
-              };
-
-              fcm.send(message, (err: any, response: any) => {
-                if (err) {
-                  console.log("Something has gone wrong!" + err);
-                  console.log("Respponse:! " + response);
-                } else {
-                  // showToast("Successfully sent with response");
-                  console.log("Successfully sent with response: ", response);
-                }
-              });
-            });
-        }
+	// Send Notification
+        NotificationService.notifyNewCommentNetop(
+          creator,
+          netop.title,
+          comment.content
+        );
 
         return comment;
       }

@@ -14,7 +14,7 @@ import { Category, EditDelPermission } from "../utils/index";
 import User from "../entities/User";
 import MyContext from "../utils/context";
 import getItemsOutput from "../types/objects/items";
-import fcm from "../utils/fcmTokens";
+import NotificationService from "../services/notification";
 import { miliSecPerMonth } from "../utils/config.json";
 import { FilteringConditions } from "../types/inputs/netop";
 import { In } from "typeorm";
@@ -51,38 +51,14 @@ class LostAndFoundResolver {
       item.contact = itemInput.contact;
       item.category = itemInput.category;
       item.user = user;
+      const updatedItem = await item.save();
 
-      await item.save();
-
-      if (item.category == Category.FOUND) {
-        const iUsers = await User.find({ where: { notifyFound: true } });
-
-        iUsers.map(async (u) => {
-          u.fcmToken &&
-            u.fcmToken.split(" AND ").map(() => {
-              if (u.notifyFound) {
-                const message = {
-                  to: u.fcmToken,
-                  notification: {
-                    title: `Hi ${u?.name}`,
-                    body: "We found something",
-                  },
-                };
-
-                fcm.send(message, (err: any, response: any) => {
-                  if (err) {
-                    console.log("Something has gone wrong!" + err);
-                    console.log("Respponse:! " + response);
-                  } else {
-                    // showToast("Successfully sent with response");
-                    console.log("Successfully sent with response: ", response);
-                  }
-                });
-              }
-            });
-        });
+      // Send Notification
+      if (updatedItem.category == Category.FOUND) {
+        NotificationService.notifyFound(updatedItem);
       }
-      return item;
+
+      return updatedItem;
     } catch (e) {
       throw new Error(`message : ${e}`);
     }

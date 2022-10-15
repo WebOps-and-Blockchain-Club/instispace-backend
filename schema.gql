@@ -988,6 +988,7 @@ type User {
   notifyEvent: Notification!
   notifyFound: Boolean!
   notifyMyQuery: Boolean!
+  notifyMyQueryComment: Boolean!
   notifyNetop: Notification!
   notifyNetopComment: Boolean!
   permissions: [UserPermission!]

@@ -16,8 +16,7 @@ import User from "../entities/User";
 import Event from "../entities/Event";
 import { createEventInput, editEventInput } from "../types/inputs/event";
 import getEventOutput from "../types/objects/event";
-import fcm from "../utils/fcmTokens";
-import { Notification } from "../utils/index";
+import NotificationService from "../services/notification";
 
 @Resolver(Event)
 class EventResolver {
@@ -66,52 +65,9 @@ class EventResolver {
         tags,
       }).save();
 
-      const users1 = await User.find({
-        where: { notifyEvent: Notification.FORALL },
-      });
-      if (users1) iUsers = iUsers.concat(users1);
+      // Send Notification
+      NotificationService.notifyNewEvent(event);
 
-      let iUsersIds = iUsers.map((u) => u.fcmToken);
-
-      const iUsersSet = new Set<string>(iUsersIds);
-      iUsersIds = Array.from(iUsersSet);
-
-      iUsers = [];
-
-      await Promise.all(
-        iUsersIds.map(async (ft) => {
-          const u = await User.findOneOrFail({
-            where: { fcmToken: ft },
-          });
-          if (u.notifyEvent !== Notification.NONE && u.id != user.id)
-            iUsers.push(u);
-        })
-      );
-
-      if (!!event) {
-        iUsers.map((u) => {
-          u.fcmToken &&
-            u.fcmToken.split(" AND ").map(async (ft) => {
-              const message = {
-                to: ft,
-                notification: {
-                  title: `Hi ${u.name}`,
-                  body: "you may interested in this event",
-                },
-              };
-
-              fcm.send(message, (err: any, response: any) => {
-                if (err) {
-                  console.log("Something has gone wrong!" + err);
-                  console.log("Respponse:! " + response);
-                } else {
-                  // showToast("Successfully sent with response");
-                  console.log("Successfully sent with response: ", response);
-                }
-              });
-            });
-        });
-      }
       return event;
     } catch (e) {
       throw new Error(e.message);

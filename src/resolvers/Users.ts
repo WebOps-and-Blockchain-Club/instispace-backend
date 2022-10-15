@@ -49,8 +49,8 @@ import AnnouncementResolver from "./Announcement";
 import EventResolver from "./Event";
 import { Notification } from "../utils/index";
 import Feedback from "../entities/Feedback";
-import { mail } from "../utils/mail";
-import fcm from "../utils/fcmTokens";
+import firebaseClient from "../services/firebase";
+import MailService from "../services/mail";
 import Announcement from "../entities/Announcement";
 import ldapClient from "../utils/ldap";
 import {
@@ -492,25 +492,14 @@ class UsersResolver {
       user.role = UserRole.MODERATOR;
       const updatedUser = await user.save();
 
-      if (!!user) {
-        user.fcmToken.split(" AND ").map((ft) => {
-          const message = {
-            to: ft,
-            notification: {
-              title: `Hi ${user.name}`,
-              body: `Your role changed to ${user.role}`,
-            },
-          };
-
-          fcm.send(message, (err: any, response: any) => {
-            if (err) {
-              console.log("Something has gone wrong!" + err);
-              console.log("Respponse:! " + response);
-            } else {
-              // showToast("Successfully sent with response");
-              console.log("Successfully sent with response: ", response);
-            }
-          });
+      // Send Notification
+      if (!!updatedUser) {
+        firebaseClient.sendMessage(updatedUser.fcmToken.split(" AND "), {
+          data: {
+            click_action: "FLUTTER_NOTIFICATION_CLICK",
+            title: "Role Updated",
+            body: "Congratulations! You have been appointed as a Moderator.",
+          },
         });
       }
       return !!updatedUser;

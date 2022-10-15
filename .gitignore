@@ -4,3 +4,4 @@ dist
 public
 bin.txt
 src/utils/keys.json
+src/services/serviceAccountKey.json

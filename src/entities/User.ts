@@ -70,6 +70,10 @@ class User extends BaseEntity {
   @Field(() => Boolean)
   notifyNetopComment: boolean;
 
+  @Column("boolean", { default: true })
+  @Field(() => Boolean)
+  notifyMyQueryComment: boolean;
+
   // networking and opportunity
   @OneToMany(() => Netop, (netop) => netop.createdBy)
   networkingAndOpportunities: Netop[];

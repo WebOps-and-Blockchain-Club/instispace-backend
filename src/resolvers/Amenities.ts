@@ -13,6 +13,7 @@ import {
   Root,
 } from "type-graphql";
 import Hostel from "../entities/Hostel";
+import NotificationService from "../services/notification";
 
 @Resolver(() => Amenity)
 class AmenitiesResolver {
@@ -41,7 +42,11 @@ class AmenitiesResolver {
         amenity.description = amenityInput.description;
         amenity.hostel = hostel;
         const createdAmenity = await amenity.save();
-        return createdAmenity;
+
+        // Send Notification
+        NotificationService.notifyNewAmenities(id, createdAmenity.name);
+	
+	return createdAmenity;
       }
       throw new Error("Unauthorized");
     } catch (e) {

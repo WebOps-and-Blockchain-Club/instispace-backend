@@ -19,7 +19,7 @@ import { EditDelPermission, PostStatus, UserRole } from "../utils";
 import Report from "../entities/Common/Report";
 import addAttachments from "../utils/uploads";
 import User from "../entities/User";
-import fcm from "../utils/fcmTokens";
+import NotificationService from "../services/notification";
 import { ILike, In } from "typeorm";
 import Reason from "../entities/Common/Reason";
 import {
@@ -56,6 +56,9 @@ class MyQueryResolver {
         isHidden: false,
         likeCount: 0,
       }).save();
+
+      // Send Notification
+      NotificationService.notifyNewQuery(myQuery);
 
       return myQuery;
     } catch (e) {
@@ -201,6 +204,18 @@ class MyQueryResolver {
         createdBy: user,
       }).save();
 
+      // Send Notification
+      NotificationService.notifyReportQuery(
+        myQueryUpdated.createdBy,
+        myQueryUpdated.title,
+        report.description
+      );
+      if (myQueryUpdated.status === PostStatus.IN_REVIEW)
+        NotificationService.notifyReportModerator(
+          myQueryUpdated.title,
+          report.description
+        );
+
       return !!report && !!myQueryUpdated;
     } catch (e) {
       throw new Error(e.message);
@@ -256,30 +271,12 @@ class MyQueryResolver {
           images: photos,
         }).save();
 
-        const creator = await User.findOneOrFail(myQuery.createdBy.id);
-
-        if (!!comment && creator.notifyMyQuery) {
-          creator.fcmToken &&
-            creator.fcmToken.split(" AND ").map(async (ft) => {
-              const message = {
-                to: ft,
-                notification: {
-                  title: `Hi ${creator.name}`,
-                  body: "your query got responsed",
-                },
-              };
-
-              await fcm.send(message, (err: any, response: any) => {
-                if (err) {
-                  console.log("Something has gone wrong!" + err);
-                  console.log("Respponse:! " + response);
-                } else {
-                  // showToast("Successfully sent with response");
-                  console.log("Successfully sent with response: ", response);
-                }
-              });
-            });
-        }
+        // Send Notification
+        NotificationService.notifyNewCommentQuery(
+          myQuery.createdBy,
+          myQuery.title,
+          comment.content
+        );
 
         return comment;
       }

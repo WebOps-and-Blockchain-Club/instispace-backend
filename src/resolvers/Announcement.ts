@@ -18,7 +18,7 @@ import {
 import MyContext from "../utils/context";
 import { EditDelPermission, UserRole } from "../utils";
 import { getAnnouncementsOutput } from "../types/objects/announcements";
-import fcm from "../utils/fcmTokens";
+import NotificationService from "../services/notification";
 import { FilteringConditions } from "../types/inputs/netop";
 
 @Resolver((_type) => Announcement)
@@ -61,29 +61,15 @@ class AnnouncementResolver {
         announcement.images = imageUrls === "" ? null : imageUrls;
       }
       announcement.hostels = hostels;
-
-      if (!!announcement) {
-        iUsers.map((u) => {
-          const message = {
-            to: u.fcmToken,
-            notification: {
-              title: `announcement`,
-              body: "your hostel's new announcement",
-            },
-          };
-
-          fcm.send(message, (err: any, response: any) => {
-            if (err) {
-              console.log("Something has gone wrong!" + err);
-              console.log("Respponse:! " + response);
-            } else {
-              // showToast("Successfully sent with response");
-              console.log("Successfully sent with response: ", response);
-            }
-          });
-        });
-      }
       const announcementCreated = await announcement.save();
+
+      // Send Notification
+      NotificationService.notifyNewAnnouncement(
+        announcementInput.hostelIds,
+        announcementCreated.title,
+        announcementCreated.description
+      );
+
       return announcementCreated;
     } catch (e) {
       throw new Error(`message : ${e}`);
