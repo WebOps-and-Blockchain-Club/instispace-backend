@@ -15,6 +15,7 @@ import { PostStatus, UserRole } from "../utils";
 import Netop from "../entities/Netop";
 import Event from "../entities/Event";
 import MyContext from "../utils/context";
+import { ILike } from "typeorm";
 
 @Resolver((_type) => Tag)
 class TagsResolver {
@@ -29,7 +30,7 @@ class TagsResolver {
   ])
   async createTag(@Arg("TagInput") { title, category }: TagInput) {
     try {
-      const existingTag = await Tag.findOne({ where: { title } });
+      const existingTag = await Tag.findOne({ where: { title: ILike(title) } });
       if (existingTag) throw new Error(`Tag already exists`);
       const newTag = new Tag();
       newTag.title = title;
@@ -105,7 +106,9 @@ class TagsResolver {
       return ns;
     }
 
-    const tag = await Tag.findOne(id, { relations: ["netops", "netops.reports", "netops.reports.createdBy"] });
+    const tag = await Tag.findOne(id, {
+      relations: ["netops", "netops.reports", "netops.reports.createdBy"],
+    });
     if (tag?.netops) {
       const ns = tag.netops.filter(
         (n) =>
