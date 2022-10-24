@@ -16,6 +16,7 @@ import {
   FilteringConditions,
   OrderInput,
   ReportPostInput,
+  CommentInput,
 } from "../types/inputs/netop";
 import Tag from "../entities/Tag";
 import Netop from "../entities/Netop";
@@ -23,12 +24,10 @@ import Comment from "../entities/Common/Comment";
 import getNetopOutput from "../types/objects/netop";
 import { EditDelPermission, PostStatus, UserRole } from "../utils";
 import Report from "../entities/Common/Report";
-import addAttachments from "../utils/uploads";
 import User from "../entities/User";
 import NotificationService from "../services/notification";
 import Reason from "../entities/Common/Reason";
 import { In } from "typeorm";
-import { GraphQLUpload, Upload } from "graphql-upload";
 
 @Resolver(Netop)
 class NetopResolver {
@@ -303,25 +302,22 @@ class NetopResolver {
   async createCommentNetop(
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext,
-    @Arg("content") content: string,
-    @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
+    @Arg("CommentData") commentInput: CommentInput,
   ) {
     try {
       const netop = await Netop.findOne(netopId, {
         relations: ["comments", "createdBy"],
       });
       if (netop) {
-        let photos;
-
-        if (images) {
-          photos = (await addAttachments([...images], true)).join(" AND ");
-        }
+        let imageUrls;
+        if (commentInput.imageUrls)
+          imageUrls = commentInput.imageUrls.join(" AND ");
 
         const comment = await Comment.create({
-          content,
+          content: commentInput.content,
           netop,
           createdBy: user,
-          images: photos,
+          images: imageUrls === "" ? null : imageUrls,
         }).save();
 
         const creator = netop.createdBy;

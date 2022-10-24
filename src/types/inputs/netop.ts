@@ -96,10 +96,23 @@ class OrderInput {
   byComments: boolean;
 }
 
+@InputType()
+class CommentInput {
+  @Field()
+  content: string;
+
+  @Field((_type) => [String], {
+    nullable: true,
+    description: "comment's Image URLs",
+  })
+  imageUrls: string[];
+}
+
 export {
   CreateNetopsInput,
   EditNetopsInput,
   FilteringConditions,
   ReportPostInput,
   OrderInput,
+  CommentInput,
 };

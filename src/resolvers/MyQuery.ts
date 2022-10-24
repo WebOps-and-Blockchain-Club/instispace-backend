@@ -13,16 +13,15 @@ import MyContext from "../utils/context";
 import { createQuerysInput, editQuerysInput } from "../types/inputs/query";
 import MyQuery from "../entities/MyQuery";
 import Comment from "../entities/Common/Comment";
-import { GraphQLUpload, Upload } from "graphql-upload";
 import getMyQueryOutput from "../types/objects/query";
 import { EditDelPermission, PostStatus, UserRole } from "../utils";
 import Report from "../entities/Common/Report";
-import addAttachments from "../utils/uploads";
 import User from "../entities/User";
 import NotificationService from "../services/notification";
 import { ILike, In } from "typeorm";
 import Reason from "../entities/Common/Reason";
 import {
+  CommentInput,
   FilteringConditions,
   OrderInput,
   ReportPostInput,
@@ -250,28 +249,25 @@ class MyQueryResolver {
   async createCommentQuery(
     @Arg("MyQueryId") myQueryId: string,
     @Ctx() { user }: MyContext,
-    @Arg("content") content: string,
-    @Arg("Images", () => [GraphQLUpload], { nullable: true }) images?: Upload[]
+    @Arg("CommentData") commentInput: CommentInput,
   ) {
     try {
       const myQuery = await MyQuery.findOne(myQueryId, {
         relations: ["comments", "createdBy"],
       });
       if (myQuery) {
-        let photos;
-
-        if (images) {
-          photos = (await addAttachments([...images], true)).join(" AND ");
-        }
+        let imageUrls;
+        if (commentInput.imageUrls)
+          imageUrls = commentInput.imageUrls.join(" AND ");
 
         const comment = await Comment.create({
-          content,
+          content: commentInput.content,
           query: myQuery,
           createdBy: user,
-          images: photos,
+          images: imageUrls === "" ? null : imageUrls,
         }).save();
 
-        // Send Notification
+	// Send Notification
         NotificationService.notifyNewCommentQuery(
           myQuery.createdBy,
           myQuery.title,

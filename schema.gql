@@ -73,6 +73,13 @@ type Comment {
   query: MyQuery!
 }
 
+input CommentInput {
+  content: String!
+
+  """comment's Image URLs"""
+  imageUrls: [String!]
+}
+
 type Complaint {
   """
   Category of a Complaint, describes whether the Complaint is a Mess/General/Hostel concern
@@ -527,10 +534,10 @@ type Mutation {
   createAnnouncement(AnnouncementInput: CreateAnnouncementInput!): Announcement!
 
   """comment on network and opportunity, Restrictions:{any authorized user}"""
-  createCommentNetop(Images: [Upload!], NetopId: String!, content: String!): Comment!
+  createCommentNetop(CommentData: CommentInput!, NetopId: String!): Comment!
 
   """comment on Query, Restrictions:{any authorized user}"""
-  createCommentQuery(Images: [Upload!], MyQueryId: String!, content: String!): Comment!
+  createCommentQuery(CommentData: CommentInput!, MyQueryId: String!): Comment!
 
   """Mutation to add Complaint, Restrictions : {anyone who is Authorised}"""
   createComplaint(CreateComplaintInput: ComplaintInput!, Images: [Upload!]): Boolean!

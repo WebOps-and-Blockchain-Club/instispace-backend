@@ -31,10 +31,10 @@ class Comment extends BaseEntity {
   @Field()
   content: string;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  images: string;
-  
+  @Column({ type: "text", nullable: true })
+  @Field((_type) => String, { nullable: true })
+  images?: string | null;
+
   @CreateDateColumn({ type: "timestamptz" })
   @Field(() => Date)
   createdAt: Date;
