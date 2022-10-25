@@ -832,7 +832,8 @@ class UsersResolver {
           UserPermission.GET_ALL_CONTACTS,
           UserPermission.GET_REPORTS,
           UserPermission.UPDATE_ROLE,
-          UserPermission.CREATE_EVENT
+          UserPermission.CREATE_EVENT,
+          UserPermission.VIEW_SUPER_USER_LIST
         );
       if (role === UserRole.HAS)
         permissionList.push(
@@ -848,7 +849,8 @@ class UsersResolver {
           UserPermission.GET_ALL_CONTACTS,
           UserPermission.GET_REPORTS,
           UserPermission.UPDATE_ROLE,
-          UserPermission.CREATE_EVENT
+          UserPermission.CREATE_EVENT,
+          UserPermission.VIEW_SUPER_USER_LIST
         );
       if (role === UserRole.ADMIN)
         permissionList.push(
@@ -867,7 +869,8 @@ class UsersResolver {
           UserPermission.UPDATE_ROLE,
           UserPermission.CREATE_EVENT,
           UserPermission.CREATE_REPORT_REASON,
-          UserPermission.CREATE_NOTIFICATION  
+          UserPermission.CREATE_NOTIFICATION,
+          UserPermission.VIEW_SUPER_USER_LIST
         );
       return permissionList;
     } catch (e) {
