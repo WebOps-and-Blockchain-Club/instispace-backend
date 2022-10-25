@@ -34,6 +34,7 @@ export enum UserPermission {
   VIEW_FEEDBACK = "VIEW_FEEDBACK",
   UPDATE_ROLE = "UPDATE_ROLE",
   HOSTEL_ADMIN = "HOSTEL_ADMIN",
+  CREATE_NOTIFICATION = "CREATE_NOTIFICATION",
 }
 
 export enum EditDelPermission {

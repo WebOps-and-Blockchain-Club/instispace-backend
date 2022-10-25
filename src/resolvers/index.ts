@@ -13,6 +13,7 @@ import FeedbackResolver from "./Feedback";
 import AmenitiesResolver from "./Amenities";
 import ContactResolver from "./Contacts";
 import UtilsResolver from "./Utils";
+import CustomNotifResolver from "./Notification";
 
 export default [
   UsersResolver,
@@ -30,4 +31,5 @@ export default [
   AmenitiesResolver,
   ContactResolver,
   UtilsResolver,
+  CustomNotifResolver,
 ] as const;

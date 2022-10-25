@@ -501,7 +501,7 @@ class UsersResolver {
             click_action: "FLUTTER_NOTIFICATION_CLICK",
             title: "Role Updated",
             body: "Congratulations! You have been appointed as a Moderator.",
-	    route: "NONE",
+            route: "NONE",
           },
         });
       }
@@ -696,9 +696,7 @@ class UsersResolver {
         netops.sort((a, b) =>
           a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
         );
-        events.sort((a, b) =>
-          a.time > b.time ? -1 : a.time < b.time ? 1 : 0
-        );
+        events.sort((a, b) => (a.time > b.time ? -1 : a.time < b.time ? 1 : 0));
 
         return {
           announcements,
@@ -868,7 +866,8 @@ class UsersResolver {
           UserPermission.VIEW_FEEDBACK,
           UserPermission.UPDATE_ROLE,
           UserPermission.CREATE_EVENT,
-          UserPermission.CREATE_REPORT_REASON
+          UserPermission.CREATE_REPORT_REASON,
+          UserPermission.CREATE_NOTIFICATION  
         );
       return permissionList;
     } catch (e) {

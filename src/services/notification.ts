@@ -7,6 +7,7 @@ import Item from "../entities/Item";
 import { Notification, UserRole } from "../utils";
 import { In } from "typeorm";
 import firebaseClient from "./firebase";
+import NotificationInput from "../types/inputs/notification";
 
 class NotificationService {
   private firebase = firebaseClient;
@@ -268,7 +269,37 @@ class NotificationService {
       },
     });
   }
+
+  async customNotif(notificationData: NotificationInput) {
+    let filter: any = {
+      isNewUser: false,
+      role: In(notificationData.roles),
+    };
+    if (notificationData.rolls && notificationData.rolls.length !== 0) {
+      filter = { ...filter, roll: In(notificationData.rolls) };
+    }
+
+    let users = await User.find({
+      where: filter,
+    });
+
+    let tokens: string[] = [];
+    users.map(
+      (_user) => (tokens = tokens.concat(_user.fcmToken.split(" AND ")))
+    );
+    tokens = tokens.filter((_t) => _t !== "" && _t !== null);
+    if (tokens.length === 0) return;
+
+    this.firebase.sendMessage(tokens, {
+      data: {
+        click_action: "FLUTTER_NOTIFICATION_CLICK",
+        title: notificationData.title,
+        body: notificationData.body,
+        route: "NONE",
+        image: notificationData.imageUrl,
+      },
+    });
+  }
 }
 
 export default new NotificationService();
-

@@ -565,6 +565,7 @@ type Mutation {
 
   """create network and opportunity, Restrictions:{any authorized user}"""
   createNetop(NewNetopData: CreateNetopsInput!): Netop!
+  createNotification(NotificationData: NotificationInput!): Boolean!
   createReportReason(ReportData: ReasonInput!): Reason!
 
   """Mutation deprecated"""
@@ -782,6 +783,24 @@ enum Notification {
   FOLLOWED_TAGS
   FORALL
   NONE
+}
+
+"""Input-Type for Create Notification Mutaion"""
+input NotificationInput {
+  """Body of Notification"""
+  body: String!
+
+  """Images for Notification"""
+  imageUrl: String
+
+  """Roles to be notified"""
+  roles: [String!]!
+
+  """Roll no.s"""
+  rolls: [String!]
+
+  """Title of Notification"""
+  title: String!
 }
 
 input OrderInput {
@@ -1034,6 +1053,7 @@ enum UserPermission {
   CREATE_HOSTEL
   CREATE_ITEM
   CREATE_NETOP
+  CREATE_NOTIFICATION
   CREATE_QUERY
   CREATE_REPORT_REASON
   CREATE_TAG
