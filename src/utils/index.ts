@@ -34,6 +34,7 @@ export enum UserPermission {
   VIEW_FEEDBACK = "VIEW_FEEDBACK",
   UPDATE_ROLE = "UPDATE_ROLE",
   HOSTEL_ADMIN = "HOSTEL_ADMIN",
+  VIEW_SUPER_USER_LIST = "VIEW_SUPER_USER_LIST",
 }
 
 export enum EditDelPermission {
