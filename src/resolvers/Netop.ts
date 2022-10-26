@@ -74,7 +74,7 @@ class NetopResolver {
         likeCount: 0,
         tags,
       }).save();
-      
+
       // Send Notification
       NotificationService.notifyNewNetop(netop);
 
@@ -302,7 +302,7 @@ class NetopResolver {
   async createCommentNetop(
     @Arg("NetopId") netopId: string,
     @Ctx() { user }: MyContext,
-    @Arg("CommentData") commentInput: CommentInput,
+    @Arg("CommentData") commentInput: CommentInput
   ) {
     try {
       const netop = await Netop.findOne(netopId, {
@@ -322,7 +322,7 @@ class NetopResolver {
 
         const creator = netop.createdBy;
 
-	// Send Notification
+        // Send Notification
         NotificationService.notifyNewCommentNetop(
           creator,
           netop.title,
@@ -332,6 +332,42 @@ class NetopResolver {
         return comment;
       }
       throw new Error("Post not found");
+    } catch (e) {
+      throw new Error(e.message);
+    }
+  }
+
+  @Mutation(() => Boolean, {
+    description:
+      "Delete the comment by id, Restrictions:{CREATED USER,POST OWNER, ADMIN, MODERATOR, SECRETARY}",
+  })
+  @Authorized()
+  async deleteCommentNetop(
+    @Arg("NetopId") netopId: string,
+    @Arg("CommentId") commentId: string,
+    @Ctx() { user }: MyContext
+  ) {
+    try {
+      const comment = await Comment.findOneOrFail(commentId, {
+        relations: ["createdBy", "netop"],
+      });
+
+      const netop = await Netop.findOneOrFail(netopId, {
+        relations: ["createdBy"],
+      });
+
+      if (
+        comment.createdBy.id === user.id ||
+        netop.createdBy.id === user.id ||
+        [UserRole.ADMIN, UserRole.SECRETARY, UserRole.MODERATOR].includes(
+          user.role
+        )
+      ) {
+        const { affected } = await Comment.update(commentId, {
+          isHidden: true,
+        });
+        return affected === 1;
+      } else throw Error("Unauthorized");
     } catch (e) {
       throw new Error(e.message);
     }
@@ -588,9 +624,11 @@ class NetopResolver {
 
   @FieldResolver(() => Number)
   async commentCount(@Root() { id, comments }: Netop) {
-    if (comments) return comments.length;
-    const netop = await Netop.findOneOrFail(id, { relations: ["comments"] });
-    return netop.comments.length;
+    if (comments) return comments.filter((comment) => !comment.isHidden).length;
+    const netops = await Netop.findOneOrFail(id, {
+      relations: ["comments"],
+    });
+    return netops.comments.filter((comment) => !comment.isHidden).length;
   }
 
   @FieldResolver(() => [EditDelPermission])

@@ -38,6 +38,12 @@ class Comment extends BaseEntity {
   @CreateDateColumn({ type: "timestamptz" })
   @Field(() => Date)
   createdAt: Date;
+
+  @Column({ type: Boolean, default: false })
+  @Field((_type) => Boolean, {
+    description: "Visiblity state of comment",
+  })
+  isHidden: boolean;
 }
 
 export default Comment;

@@ -249,7 +249,7 @@ class MyQueryResolver {
   async createCommentQuery(
     @Arg("MyQueryId") myQueryId: string,
     @Ctx() { user }: MyContext,
-    @Arg("CommentData") commentInput: CommentInput,
+    @Arg("CommentData") commentInput: CommentInput
   ) {
     try {
       const myQuery = await MyQuery.findOne(myQueryId, {
@@ -267,7 +267,7 @@ class MyQueryResolver {
           images: imageUrls === "" ? null : imageUrls,
         }).save();
 
-	// Send Notification
+        // Send Notification
         NotificationService.notifyNewCommentQuery(
           myQuery.createdBy,
           myQuery.title,
@@ -277,6 +277,42 @@ class MyQueryResolver {
         return comment;
       }
       throw new Error("Post not found");
+    } catch (e) {
+      throw new Error(e.message);
+    }
+  }
+
+  @Mutation(() => Boolean, {
+    description:
+      "Delete the comment by id, Restrictions:{CREATED USER,POST OWNER, ADMIN, MODERATOR, SECRETARY}",
+  })
+  @Authorized()
+  async deleteCommentQuery(
+    @Arg("MyQueryId") myQueryId: string,
+    @Arg("CommentId") commentId: string,
+    @Ctx() { user }: MyContext
+  ) {
+    try {
+      const comment = await Comment.findOneOrFail(commentId, {
+        relations: ["createdBy", "query"],
+      });
+
+      const query = await MyQuery.findOneOrFail(myQueryId, {
+        relations: ["createdBy"],
+      });
+
+      if (
+        comment.createdBy.id === user.id ||
+        query.createdBy.id === user.id ||
+        [UserRole.ADMIN, UserRole.SECRETARY, UserRole.MODERATOR].includes(
+          user.role
+        )
+      ) {
+        const { affected } = await Comment.update(commentId, {
+          isHidden: true,
+        });
+        return affected === 1;
+      } else throw Error("Unauthorized");
     } catch (e) {
       throw new Error(e.message);
     }
@@ -516,11 +552,11 @@ class MyQueryResolver {
 
   @FieldResolver(() => Number)
   async commentCount(@Root() { id, comments }: MyQuery) {
-    if (comments) return comments.length;
+    if (comments) return comments.filter((comment) => !comment.isHidden).length;
     const myQuerys = await MyQuery.findOneOrFail(id, {
       relations: ["comments"],
     });
-    return myQuerys.comments.length;
+    return myQuerys.comments.filter((comment) => !comment.isHidden).length;
   }
 
   @FieldResolver(() => [EditDelPermission])
