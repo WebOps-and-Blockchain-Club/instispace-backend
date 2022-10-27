@@ -46,7 +46,11 @@ class QuestionResolver {
 
       let question = await Question.findOne({
         where: { id: id },
-        relations: ["submissions", "submissions.submittedBy"],
+        relations: [
+          "submissions",
+          "submissions.submittedBy",
+          "submissions.group",
+        ],
       });
       return question!.submissions.filter(
         (s) => s.group.id === userN!.group.id
