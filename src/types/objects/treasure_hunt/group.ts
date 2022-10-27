@@ -1,6 +1,6 @@
-import Group from "../../../entities/Tresure Hunt/Group";
+import Group from "../../../entities/tresure_hunt/Group";
 import { Field, ObjectType } from "type-graphql";
-import Question from "../../../entities/Tresure Hunt/Question";
+import Question from "../../../entities/tresure_hunt/Question";
 
 @ObjectType()
 class GetGroupOutput {

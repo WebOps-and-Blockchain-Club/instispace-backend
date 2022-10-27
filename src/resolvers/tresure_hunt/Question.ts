@@ -1,4 +1,4 @@
-import Question from "../../entities/Tresure Hunt/Question";
+import Question from "../../entities/tresure_hunt/Question";
 import { UserRole } from "../../utils";
 import {
   Arg,
@@ -9,9 +9,9 @@ import {
   Resolver,
   Root,
 } from "type-graphql";
-import { CreateQuestionInput } from "../../types/inputs/Treasure Hunt/question";
+import { CreateQuestionInput } from "../../types/inputs/treasure_hunt/question";
 import MyContext from "../../utils/context";
-import Submission from "../../entities/Tresure Hunt/Submission";
+import Submission from "../../entities/tresure_hunt/Submission";
 
 @Resolver(() => Question)
 class QuestionResolver {

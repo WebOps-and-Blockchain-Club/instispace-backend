@@ -22,8 +22,8 @@ import Query from "./MyQuery";
 import Complaint from "./Complaint";
 import { Notification } from "../utils/index";
 import Feedback from "./Feedback";
-import Group from "./Tresure Hunt/Group";
-import Submission from "./Tresure Hunt/Submission";
+import Group from "./tresure_hunt/Group";
+import Submission from "./tresure_hunt/Submission";
 
 @Entity("User")
 @ObjectType("User", { description: "User Entity" })

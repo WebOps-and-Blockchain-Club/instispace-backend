@@ -14,9 +14,9 @@ import HostelContact from "./Contact";
 import Amenity from "./Amenity";
 import Feedback from "./Feedback";
 import Reason from "./Common/Reason";
-import Group from "./Tresure Hunt/Group";
-import Submission from "./Tresure Hunt/Submission";
-import Question from "./Tresure Hunt/Question";
+import Group from "./tresure_hunt/Group";
+import Submission from "./tresure_hunt/Submission";
+import Question from "./tresure_hunt/Question";
 
 export default [
   User,

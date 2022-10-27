@@ -1,4 +1,4 @@
-import { CreateGroupInput } from "../../types/inputs/Treasure Hunt/group";
+import { CreateGroupInput } from "../../types/inputs/treasure_hunt/group";
 import {
   Arg,
   Authorized,
@@ -11,9 +11,9 @@ import {
 } from "type-graphql";
 import { autoGenPass, shuffle } from "../../utils";
 import MyContext from "../../utils/context";
-import Group from "../../entities/Tresure Hunt/Group";
-import Question from "../../entities/Tresure Hunt/Question";
-import GetGroupOutput from "../../types/objects/Treasure Hunt/group";
+import Group from "../../entities/tresure_hunt/Group";
+import Question from "../../entities/tresure_hunt/Question";
+import GetGroupOutput from "../../types/objects/treasure_hunt/group";
 import User from "../../entities/User";
 
 @Resolver(() => Group)
