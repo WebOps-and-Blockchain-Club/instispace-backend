@@ -14,6 +14,9 @@ import AmenitiesResolver from "./Amenities";
 import ContactResolver from "./Contacts";
 import UtilsResolver from "./Utils";
 import CustomNotifResolver from "./Notification";
+import SubmissionResolver from "./Tresure Hunt/Submission";
+import QuestionResolver from "./Tresure Hunt/Question";
+import GroupResolver from "./Tresure Hunt/Group";
 
 export default [
   UsersResolver,
@@ -32,4 +35,7 @@ export default [
   ContactResolver,
   UtilsResolver,
   CustomNotifResolver,
+  SubmissionResolver,
+  QuestionResolver,
+  GroupResolver,
 ] as const;

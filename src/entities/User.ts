@@ -22,6 +22,8 @@ import Query from "./MyQuery";
 import Complaint from "./Complaint";
 import { Notification } from "../utils/index";
 import Feedback from "./Feedback";
+import Group from "./Tresure Hunt/Group";
+import Submission from "./Tresure Hunt/Submission";
 
 @Entity("User")
 @ObjectType("User", { description: "User Entity" })
@@ -167,6 +169,22 @@ class User extends BaseEntity {
     description: "feedbacks of the user",
   })
   feedbacks?: Feedback[];
+
+  @ManyToOne((_type) => Group, (group) => group.users, { nullable: true })
+  @Field((_type) => Group, {
+    nullable: true,
+    description: "Group of Treasure Hunt of User",
+  })
+  group: Group;
+
+  @OneToMany((_type) => Submission, (submissions) => submissions.submittedBy, {
+    nullable: true,
+  })
+  @Field((_type) => [Submission], {
+    nullable: true,
+    description: "Submission of Tresure Hunt",
+  })
+  submissions: Submission[];
 
   @Field(() => [UserPermission], { nullable: true })
   permissions: UserPermission[];
