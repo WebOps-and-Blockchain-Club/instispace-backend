@@ -60,6 +60,7 @@ import {
   usersDevList,
 } from "../utils/config.json";
 import { ValidationError } from "apollo-server";
+import Config from "../entities/tresure_hunt/Config";
 
 @Resolver((_type) => User)
 class UsersResolver {
@@ -803,6 +804,17 @@ class UsersResolver {
         UserPermission.GET_ANNOUNCEMENTS,
         UserPermission.GET_CONTACTS,
       ];
+
+      // Treasure Hunt
+      const constraints = await Config.find();
+      const d = new Date();
+      if (
+        d.getTime() > constraints[0].startTime.getTime() &&
+        d.getTime() < constraints[0].endTime.getTime()
+      ) {
+        permissionList.push(UserPermission.TREASURE_HUNT);
+      }
+
       if (role === UserRole.MODERATOR) {
         permissionList.push(UserPermission.GET_REPORTS);
       }

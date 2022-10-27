@@ -5,6 +5,7 @@ import { CreateSubmissionInput } from "../../types/inputs/treasure_hunt/submissi
 import Question from "../../entities/tresure_hunt/Question";
 import MyContext from "../../utils/context";
 import User from "../../entities/User";
+import Config from "../../entities/tresure_hunt/Config";
 
 @Resolver(() => Submission)
 class SubmissionResolver {
@@ -16,18 +17,29 @@ class SubmissionResolver {
     @Arg("QuestionId") questionId: string
   ) {
     try {
+      // contraints
+      const constraints = await Config.find();
+
+      const d = new Date();
+      if (
+        d.getTime() > constraints[0].endTime.getTime() ||
+        d.getTime() < constraints[0].startTime.getTime()
+      ) {
+        throw new Error("Invalid Time");
+      }
+
       // finding the question
       const question = await Question.findOne({ where: { id: questionId } });
 
       // assigning group
       const userN = await User.findOne({
         where: { id: user.id },
-        relations: ["group"],
+        relations: ["group", "group.users"],
       });
       const group = userN!.group;
       if (!group) throw new Error("Unregistered");
 
-      if (group!.users.length < 4) {
+      if (group!.users.length < constraints[0].minMembers) {
         throw new Error("Insufficient Members");
       }
 

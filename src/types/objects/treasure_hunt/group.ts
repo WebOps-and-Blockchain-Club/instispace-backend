@@ -9,6 +9,12 @@ class GetGroupOutput {
 
   @Field(() => [Question], { nullable: true })
   questions: Question[];
+
+  @Field(() => Date)
+  startTime: Date;
+
+  @Field(() => Date)
+  endTime: Date;
 }
 
 export default GetGroupOutput;

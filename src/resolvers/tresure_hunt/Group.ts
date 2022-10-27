@@ -15,6 +15,7 @@ import Group from "../../entities/tresure_hunt/Group";
 import Question from "../../entities/tresure_hunt/Question";
 import GetGroupOutput from "../../types/objects/treasure_hunt/group";
 import User from "../../entities/User";
+import Config from "../../entities/tresure_hunt/Config";
 
 @Resolver(() => Group)
 class GroupResolver {
@@ -48,21 +49,22 @@ class GroupResolver {
 
   @Mutation(() => Boolean)
   @Authorized()
-  async joinGroup(
-    @Ctx() { user }: MyContext,
-    @Arg("GroupId") groupId: string,
-    @Arg("GroupCode") code: string
-  ) {
+  async joinGroup(@Ctx() { user }: MyContext, @Arg("GroupCode") code: string) {
     try {
+      // contraints
+      const constraints = await Config.find();
+
+      // joining group
       const group = await Group.findOne({
-        where: { id: groupId },
+        where: { code: code },
         relations: ["users"],
       });
-      if (group!.code !== code) throw new Error("Invalid Group Code");
-      if (group!.users.length > 8) throw new Error("Memeber Limit Exceeded");
+      if (group!.users.length > constraints[0].maxMembers)
+        throw new Error("Memeber Limit Exceeded");
       if (group!.users.filter((u) => u.id === user.id).length)
         throw new Error("Already a Member");
       group!.users = group!.users.concat(user);
+
       const groupEdited = await group!.save();
       return !!groupEdited;
     } catch (e) {
@@ -79,8 +81,11 @@ class GroupResolver {
         relations: ["group"],
       });
 
+      // constraints
+      const constraints = await Config.find();
+
       const group = userN!.group;
-      if (!group) throw new Error("User not Registered");
+      if (!group) return null;
 
       let questionIds = group.order;
       let questions: Question[] = [];
@@ -90,7 +95,12 @@ class GroupResolver {
           questions = questions.concat(question!);
         })
       );
-      return { group: group, questions: questions };
+      return {
+        group: group,
+        questions: questions,
+        startTime: constraints[0].startTime,
+        endTime: constraints[1].endTime,
+      };
     } catch (e) {
       throw new Error(e.message);
     }

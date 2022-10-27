@@ -20,7 +20,7 @@ class Group extends BaseEntity {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ unique: true })
   @Field()
   code: string;
 

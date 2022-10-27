@@ -12,6 +12,7 @@ import {
 import { CreateQuestionInput } from "../../types/inputs/treasure_hunt/question";
 import MyContext from "../../utils/context";
 import Submission from "../../entities/tresure_hunt/Submission";
+import User from "src/entities/User";
 
 @Resolver(() => Question)
 class QuestionResolver {
@@ -35,19 +36,21 @@ class QuestionResolver {
     }
   }
 
-  @FieldResolver(() => [Submission])
-  async submissions(
-    @Ctx() { user }: MyContext,
-    @Root() { id, submissions }: Question
-  ) {
+  @FieldResolver(() => Submission)
+  async submission(@Ctx() { user }: MyContext, @Root() { id }: Question) {
     try {
-      if (submissions)
-        return submissions.filter((s) => s.group.id === user.group.id);
+      let userN = await User.findOne({
+        where: { id: user.id },
+        relations: ["group"],
+      });
+
       let question = await Question.findOne({
         where: { id: id },
-        relations: ["submissions", "submissions.submitedBy"],
+        relations: ["submissions", "submissions.submittedBy"],
       });
-      return question!.submissions.filter((s) => s.group.id === user.group.id);
+      return question!.submissions.filter(
+        (s) => s.group.id === userN!.group.id
+      )[0];
     } catch (e) {
       throw new Error(e.message);
     }
