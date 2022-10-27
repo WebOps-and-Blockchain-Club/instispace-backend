@@ -12,7 +12,7 @@ import {
 import { CreateQuestionInput } from "../../types/inputs/treasure_hunt/question";
 import MyContext from "../../utils/context";
 import Submission from "../../entities/tresure_hunt/Submission";
-import User from "src/entities/User";
+import User from "../../entities/User";
 
 @Resolver(() => Question)
 class QuestionResolver {
