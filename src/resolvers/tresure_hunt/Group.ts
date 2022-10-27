@@ -72,6 +72,31 @@ class GroupResolver {
     }
   }
 
+  @Mutation(() => Boolean)
+  @Authorized()
+  async joinGroup(@Ctx() { user }: MyContext, @Arg("GroupCode") code: string) {
+    try {
+      // contraints
+      const constraints = await Config.find();
+
+      // joining group
+      const group = await Group.findOne({
+        where: { code: code },
+        relations: ["users"],
+      });
+      if (group!.users.length > constraints[0].maxMembers)
+        throw new Error("Memeber Limit Exceeded");
+      if (group!.users.filter((u) => u.id === user.id).length)
+        throw new Error("Already a Member");
+      group!.users = group!.users.concat(user);
+
+      const groupEdited = await group!.save();
+      return !!groupEdited;
+    } catch (e) {
+      throw new Error(e.message);
+    }
+  }
+
   @Query(() => GetGroupOutput, { nullable: true })
   @Authorized()
   async getGroup(@Ctx() { user }: MyContext) {
@@ -99,7 +124,7 @@ class GroupResolver {
         group: group,
         questions: questions,
         startTime: constraints[0].startTime,
-        endTime: constraints[1].endTime,
+        endTime: constraints[0].endTime,
       };
     } catch (e) {
       throw new Error(e.message);
