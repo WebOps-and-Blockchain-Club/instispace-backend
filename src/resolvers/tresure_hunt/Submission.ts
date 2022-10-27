@@ -1,7 +1,7 @@
 import Submission from "../../entities/tresure_hunt/Submission";
 import { UserRole } from "../../utils";
 import { Arg, Authorized, Ctx, Mutation, Resolver } from "type-graphql";
-import { CreateSubmissionInput } from "../../types/inputs/treasure_hunt/Submission";
+import { CreateSubmissionInput } from "../../types/inputs/treasure_hunt/submission";
 import Question from "../../entities/tresure_hunt/Question";
 import MyContext from "../../utils/context";
 import User from "../../entities/User";
