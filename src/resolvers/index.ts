@@ -14,9 +14,9 @@ import AmenitiesResolver from "./Amenities";
 import ContactResolver from "./Contacts";
 import UtilsResolver from "./Utils";
 import CustomNotifResolver from "./Notification";
-import SubmissionResolver from "./Tresure Hunt/Submission";
-import QuestionResolver from "./Tresure Hunt/Question";
-import GroupResolver from "./Tresure Hunt/Group";
+import SubmissionResolver from "./tresure_hunt/Submission";
+import QuestionResolver from "./tresure_hunt/Question";
+import GroupResolver from "./tresure_hunt/Group";
 
 export default [
   UsersResolver,
