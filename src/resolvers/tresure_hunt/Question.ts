@@ -36,7 +36,7 @@ class QuestionResolver {
     }
   }
 
-  @FieldResolver(() => Submission)
+  @FieldResolver(() => Submission, { nullable: true })
   async submission(@Ctx() { user }: MyContext, @Root() { id }: Question) {
     try {
       let userN = await User.findOne({

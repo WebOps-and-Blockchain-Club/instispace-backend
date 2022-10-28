@@ -1,5 +1,5 @@
 import Submission from "../../entities/tresure_hunt/Submission";
-import { Arg, Ctx, Mutation, Resolver } from "type-graphql";
+import { Arg, Ctx, Mutation, Resolver, Authorized } from "type-graphql";
 import { CreateSubmissionInput } from "../../types/inputs/treasure_hunt/submission";
 import Question from "../../entities/tresure_hunt/Question";
 import MyContext from "../../utils/context";
@@ -9,6 +9,7 @@ import Config from "../../entities/tresure_hunt/Config";
 @Resolver(() => Submission)
 class SubmissionResolver {
   @Mutation(() => Submission)
+  @Authorized()
   async addSubmission(
     @Ctx() { user }: MyContext,
     @Arg("SubmissionData") submissionInput: CreateSubmissionInput,
