@@ -117,15 +117,15 @@ class GroupResolver {
       let questions: Question[] | null = null;
       const d = new Date();
       if (
-        d.getTime() > new Date(startTime!.value).getTime() &&
-        d.getTime() < new Date(startTime!.value).getTime() &&
-        group.users.length > parseInt(minMembers!.value)
+        d.getTime() >= new Date(startTime!.value).getTime() &&
+        d.getTime() <= new Date(endTime!.value).getTime() &&
+        group.users.length >= parseInt(minMembers!.value)
       ) {
         let questionIds = group.order;
         const questionsN = await Question.find();
         questions = [];
-        for (let id in questionIds) {
-          questions.push(questionsN.filter((q) => q.id === id)[0]);
+        for (let i in questionIds) {
+          questions.push(questionsN.filter((q) => q.id === questionIds[i])[0]);
         }
       }
 
