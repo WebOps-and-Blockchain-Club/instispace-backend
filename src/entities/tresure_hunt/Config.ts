@@ -3,26 +3,16 @@ import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 @ObjectType()
-class Group extends BaseEntity {
+class Config extends BaseEntity {
   @Field()
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: "float" })
-  @Field(() => Number)
-  minMembers: number;
+  @Column({ unique: true })
+  key: string;
 
-  @Column({ type: "float" })
-  @Field(() => Number)
-  maxMembers: number;
-
-  @Column({ type: "timestamptz" })
-  @Field(() => Date)
-  startTime: Date;
-
-  @Column({ type: "timestamptz" })
-  @Field(() => Date)
-  endTime: Date;
+  @Column()
+  value: string;
 }
 
-export default Group;
+export default Config;

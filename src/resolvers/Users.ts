@@ -806,11 +806,12 @@ class UsersResolver {
       ];
 
       // Treasure Hunt
-      const constraints = await Config.find();
+      const startTime = await Config.findOne({ where: { key: "startTime" } });
+      const endTime = await Config.findOne({ where: { key: "endTime" } });
       const d = new Date();
       if (
-        d.getTime() > constraints[0].startTime.getTime() &&
-        d.getTime() < constraints[0].endTime.getTime()
+        d.getTime() > new Date(startTime!.value).getTime() &&
+        d.getTime() < new Date(endTime!.value).getTime()
       ) {
         permissionList.push(UserPermission.TREASURE_HUNT);
       }

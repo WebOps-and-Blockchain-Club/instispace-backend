@@ -412,10 +412,10 @@ input FilteringConditions {
 }
 
 type GetGroupOutput {
-  endTime: DateTime!
+  endTime: String!
   group: Group!
   questions: [Question!]
-  startTime: DateTime!
+  startTime: String!
 }
 
 type GetReportsOutput {
@@ -666,6 +666,7 @@ type Mutation {
   """edit network and opportunity, Restrictions:{user who created}"""
   editNetop(EditNetopsData: EditNetopsInput!, NetopId: String!): Netop!
   joinGroup(GroupCode: String!): Boolean!
+  leaveGroup: Boolean!
 
   """Mutation to login, Restrictions : {none}"""
   login(LoginInputs: LoginInput!, fcmToken: String!): LoginOutput!

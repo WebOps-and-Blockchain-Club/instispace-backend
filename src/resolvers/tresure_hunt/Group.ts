@@ -49,17 +49,38 @@ class GroupResolver {
 
   @Mutation(() => Boolean)
   @Authorized()
+  async leaveGroup(@Ctx() { user }: MyContext) {
+    try {
+      // find user to access group
+      const userN = await User.findOne({
+        where: { id: user.id },
+        relations: ["group", "group.users"],
+      });
+
+      // leaving group
+      const group = userN!.group;
+      group.users = group.users.filter((u) => u.id !== user.id);
+
+      const groupEdited = await group!.save();
+      return !!groupEdited;
+    } catch (e) {
+      throw new Error(e.message);
+    }
+  }
+
+  @Mutation(() => Boolean)
+  @Authorized()
   async joinGroup(@Ctx() { user }: MyContext, @Arg("GroupCode") code: string) {
     try {
       // contraints
-      const constraints = await Config.find();
+      const maxMembers = await Config.findOne({ where: { key: "maxMembers" } });
 
       // joining group
       const group = await Group.findOne({
         where: { code: code },
         relations: ["users"],
       });
-      if (group!.users.length > constraints[0].maxMembers)
+      if (group!.users.length > parseInt(maxMembers!.value))
         throw new Error("Memeber Limit Exceeded");
       if (group!.users.filter((u) => u.id === user.id).length)
         throw new Error("Already a Member");
@@ -81,8 +102,9 @@ class GroupResolver {
         relations: ["group"],
       });
 
-      // constraints
-      const constraints = await Config.find();
+      //constraints
+      const startTime = await Config.findOne({ where: { key: "startTime" } });
+      const endTime = await Config.findOne({ where: { key: "endTime" } });
 
       const group = userN!.group;
       if (!group) return null;
@@ -98,8 +120,8 @@ class GroupResolver {
       return {
         group: group,
         questions: questions,
-        startTime: constraints[0].startTime,
-        endTime: constraints[0].endTime,
+        startTime: startTime!.value,
+        endTime: endTime!.value,
       };
     } catch (e) {
       throw new Error(e.message);

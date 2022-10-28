@@ -1,6 +1,5 @@
 import Submission from "../../entities/tresure_hunt/Submission";
-import { UserRole } from "../../utils";
-import { Arg, Authorized, Ctx, Mutation, Resolver } from "type-graphql";
+import { Arg, Ctx, Mutation, Resolver } from "type-graphql";
 import { CreateSubmissionInput } from "../../types/inputs/treasure_hunt/submission";
 import Question from "../../entities/tresure_hunt/Question";
 import MyContext from "../../utils/context";
@@ -10,7 +9,6 @@ import Config from "../../entities/tresure_hunt/Config";
 @Resolver(() => Submission)
 class SubmissionResolver {
   @Mutation(() => Submission)
-  @Authorized([UserRole.ADMIN])
   async addSubmission(
     @Ctx() { user }: MyContext,
     @Arg("SubmissionData") submissionInput: CreateSubmissionInput,
@@ -18,12 +16,14 @@ class SubmissionResolver {
   ) {
     try {
       // contraints
-      const constraints = await Config.find();
+      const startTime = await Config.findOne({ where: { key: "startTime" } });
+      const endTime = await Config.findOne({ where: { key: "endTime" } });
+      const minMembers = await Config.findOne({ where: { key: "minMembers" } });
 
       const d = new Date();
       if (
-        d.getTime() > constraints[0].endTime.getTime() ||
-        d.getTime() < constraints[0].startTime.getTime()
+        d.getTime() > new Date(startTime!.value).getTime() ||
+        d.getTime() < new Date(endTime!.value).getTime()
       ) {
         throw new Error("Invalid Time");
       }
@@ -39,7 +39,7 @@ class SubmissionResolver {
       const group = userN!.group;
       if (!group) throw new Error("Unregistered");
 
-      if (group!.users.length < constraints[0].minMembers) {
+      if (group!.users.length < parseInt(minMembers!.value)) {
         throw new Error("Insufficient Members");
       }
 
