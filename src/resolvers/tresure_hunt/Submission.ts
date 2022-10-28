@@ -23,8 +23,8 @@ class SubmissionResolver {
 
       const d = new Date();
       if (
-        d.getTime() > new Date(startTime!.value).getTime() ||
-        d.getTime() < new Date(endTime!.value).getTime()
+        d.getTime() < new Date(startTime!.value).getTime() ||
+        d.getTime() > new Date(endTime!.value).getTime()
       ) {
         throw new Error("Invalid Time");
       }
