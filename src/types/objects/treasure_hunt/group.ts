@@ -15,6 +15,12 @@ class GetGroupOutput {
 
   @Field()
   endTime: string;
+
+  @Field(() => Number)
+  minMembers: number;
+
+  @Field(() => Number)
+  maxMembers: number;
 }
 
 export default GetGroupOutput;

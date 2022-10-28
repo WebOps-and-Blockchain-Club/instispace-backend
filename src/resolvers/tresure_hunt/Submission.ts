@@ -1,5 +1,5 @@
 import Submission from "../../entities/tresure_hunt/Submission";
-import { Arg, Ctx, Mutation, Resolver, Authorized } from "type-graphql";
+import { Arg, Authorized, Ctx, Mutation, Resolver } from "type-graphql";
 import { CreateSubmissionInput } from "../../types/inputs/treasure_hunt/submission";
 import Question from "../../entities/tresure_hunt/Question";
 import MyContext from "../../utils/context";
@@ -29,9 +29,6 @@ class SubmissionResolver {
         throw new Error("Invalid Time");
       }
 
-      // finding the question
-      const question = await Question.findOne({ where: { id: questionId } });
-
       // assigning group
       const userN = await User.findOne({
         where: { id: user.id },
@@ -39,6 +36,15 @@ class SubmissionResolver {
       });
       const group = userN!.group;
       if (!group) throw new Error("Unregistered");
+
+      // finding the question
+      const question = await Question.findOne({
+        where: { id: questionId },
+        relations: ["submissions", "submissions.group"],
+      });
+      if (question?.submissions.filter((s) => s.group.id === group.id).length) {
+        throw new Error("Already answered");
+      }
 
       if (group!.users.length < parseInt(minMembers!.value)) {
         throw new Error("Insufficient Members");

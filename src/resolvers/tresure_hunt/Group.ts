@@ -38,6 +38,7 @@ class GroupResolver {
       group.name = name;
       group.users = [user];
       group.order = questionIds;
+      group.createdBy = user;
 
       // saving and returning
       const groupCreated = await group.save();
@@ -80,11 +81,13 @@ class GroupResolver {
         where: { code: code },
         relations: ["users"],
       });
-      if (group!.users.length > parseInt(maxMembers!.value))
+      if (!group) throw new Error("Invalid Group Code");
+
+      if (group.users.length > parseInt(maxMembers!.value))
         throw new Error("Memeber Limit Exceeded");
-      if (group!.users.filter((u) => u.id === user.id).length)
+      if (group.users.filter((u) => u.id === user.id).length)
         throw new Error("Already a Member");
-      group!.users = group!.users.concat(user);
+      group.users = group!.users.concat(user);
 
       const groupEdited = await group!.save();
       return !!groupEdited;
@@ -99,29 +102,40 @@ class GroupResolver {
     try {
       const userN = await User.findOne({
         where: { id: user.id },
-        relations: ["group"],
+        relations: ["group", "group.users"],
       });
 
       //constraints
       const startTime = await Config.findOne({ where: { key: "startTime" } });
       const endTime = await Config.findOne({ where: { key: "endTime" } });
+      const minMembers = await Config.findOne({ where: { key: "minMembers" } });
+      const maxMembers = await Config.findOne({ where: { key: "maxMembers" } });
 
       const group = userN!.group;
       if (!group) return null;
 
-      let questionIds = group.order;
-      let questions: Question[] = [];
-      await Promise.all(
-        questionIds.map(async (id) => {
-          const question = await Question.findOne({ where: { id: id } });
-          questions = questions.concat(question!);
-        })
-      );
+      let questions: Question[] | null = null;
+      const d = new Date();
+      if (
+        d.getTime() > new Date(startTime!.value).getTime() &&
+        d.getTime() < new Date(startTime!.value).getTime() &&
+        group.users.length > parseInt(minMembers!.value)
+      ) {
+        let questionIds = group.order;
+        const questionsN = await Question.find();
+        questions = [];
+        for (let id in questionIds) {
+          questions.push(questionsN.filter((q) => q.id === id)[0]);
+        }
+      }
+
       return {
         group: group,
         questions: questions,
         startTime: startTime!.value,
         endTime: endTime!.value,
+        minMembers: parseInt(minMembers!.value),
+        maxMembers: parseInt(maxMembers!.value),
       };
     } catch (e) {
       throw new Error(e.message);
@@ -137,6 +151,20 @@ class GroupResolver {
         relations: ["users"],
       });
       return group!.users;
+    } catch (e) {
+      throw new Error(e.message);
+    }
+  }
+
+  @FieldResolver(() => User)
+  async createdBy(@Root() { id, createdBy }: Group) {
+    try {
+      if (createdBy) return createdBy;
+      const group = await Group.findOne({
+        where: { id: id },
+        relations: ["createdBy"],
+      });
+      return group!.createdBy;
     } catch (e) {
       throw new Error(e.message);
     }

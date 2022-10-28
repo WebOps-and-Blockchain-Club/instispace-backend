@@ -414,6 +414,8 @@ input FilteringConditions {
 type GetGroupOutput {
   endTime: String!
   group: Group!
+  maxMembers: Float!
+  minMembers: Float!
   questions: [Question!]
   startTime: String!
 }
@@ -434,6 +436,7 @@ input GetUserInput {
 
 type Group {
   code: String!
+  createdBy: User!
   id: String!
   name: String!
   users: [User!]!
@@ -957,7 +960,7 @@ type Question {
   description: String!
   id: String!
   images: String
-  submission: Submission!
+  submission: Submission
 }
 
 type Reason {
@@ -1052,6 +1055,9 @@ type User {
 
   """Group of Treasure Hunt of User"""
   group: Group
+
+  """Group Created By Treasure Hunt User"""
+  groupCreated: Group
 
   """User's Hostel amd its details"""
   hostel: Hostel
