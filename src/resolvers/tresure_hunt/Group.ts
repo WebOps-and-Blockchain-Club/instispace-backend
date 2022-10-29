@@ -38,7 +38,7 @@ class GroupResolver {
       group.name = name;
       group.users = [user];
       group.order = questionIds;
-      group.createdBy = user;
+      group.createdBy = user.id;
 
       // saving and returning
       const groupCreated = await group.save();
@@ -61,6 +61,13 @@ class GroupResolver {
       // leaving group
       const group = userN!.group;
       group.users = group.users.filter((u) => u.id !== user.id);
+
+      if (group.createdBy === user.id && group.users.length === 0) {
+        const { affected } = await Group.delete({ id: group.id });
+        return affected === 1;
+      } else if (group.createdBy === user.id) {
+        throw new Error("Admin not allowed to leave group");
+      }
 
       const groupEdited = await group!.save();
       return !!groupEdited;
@@ -155,7 +162,7 @@ class GroupResolver {
       throw new Error(e.message);
     }
   }
-
+/*
   @FieldResolver(() => User)
   async createdBy(@Root() { id, createdBy }: Group) {
     try {
@@ -168,7 +175,7 @@ class GroupResolver {
     } catch (e) {
       throw new Error(e.message);
     }
-  }
+  }*/
 }
 
 export default GroupResolver;

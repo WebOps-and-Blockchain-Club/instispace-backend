@@ -4,7 +4,7 @@ import {
   Column,
   Entity,
   OneToMany,
-  OneToOne,
+ // OneToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import User from "../User";
@@ -31,8 +31,9 @@ class Group extends BaseEntity {
   @OneToMany((_type) => User, (users) => users.group)
   users: User[];
 
-  @OneToOne((_type) => User, (createdBy) => createdBy.groupCreated)
-  createdBy: User;
+  @Column()
+  @Field()
+  createdBy: string;
 
   @OneToMany((_type) => Submission, (submission) => submission.group, {
     nullable: true,

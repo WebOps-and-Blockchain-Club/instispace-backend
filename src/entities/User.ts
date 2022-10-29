@@ -9,7 +9,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinTable,
-  OneToOne,
+//  OneToOne,
 } from "typeorm";
 import Netop from "./Netop";
 import Event from "./Event";
@@ -177,7 +177,7 @@ class User extends BaseEntity {
     description: "Group of Treasure Hunt of User",
   })
   group: Group;
-
+/*
   @OneToOne((_type) => Group, (groupCreated) => groupCreated.createdBy, {
     nullable: true,
   })
@@ -186,7 +186,7 @@ class User extends BaseEntity {
     description: "Group Created By Treasure Hunt User",
   })
   groupCreated: Group;
-
+*/
   @OneToMany((_type) => Submission, (submissions) => submissions.submittedBy, {
     nullable: true,
   })
