@@ -806,8 +806,8 @@ class UsersResolver {
 
       // Treasure Hunt
       if (
-        roll[0] == "2" &&
-        roll[1] == "2" &&
+        roll[2] == "2" &&
+        roll[3] == "2" &&
         new Date().getTime() > new Date("2022-11-20 10:30:00+00").getTime()
       ) {
         permissionList.push(UserPermission.TREASURE_HUNT);
