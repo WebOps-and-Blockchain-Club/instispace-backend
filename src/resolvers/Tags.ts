@@ -74,7 +74,7 @@ class TagsResolver {
   })
   @Authorized()
   async getCategories() {
-    const categories = ["Sports", "Culture", "Academics", "Technical"];
+    const categories = ["Sports", "Cultural", "Academics", "Technical"];
     return categories;
   }
 
