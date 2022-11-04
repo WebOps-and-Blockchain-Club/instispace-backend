@@ -111,6 +111,19 @@ class LostAndFoundResolver {
     }
   }
 
+  @Query(() => Item, { description: "Get Lost/Found Item by id" })
+  @Authorized()
+  async getItem(@Arg("ItemId") itemId: string) {
+    try {
+      const item = await Item.findOne({
+        where: { id: itemId, isHidden: false },
+      });
+      return item;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
   @Mutation(() => Boolean, {
     description:
       "Mutation to resolve the item, User who finds his lost entity will update, Restriction : {anyone who is authorised}",
