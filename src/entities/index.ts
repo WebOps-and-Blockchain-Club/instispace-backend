@@ -14,6 +14,10 @@ import HostelContact from "./Contact";
 import Amenity from "./Amenity";
 import Feedback from "./Feedback";
 import Reason from "./Common/Reason";
+import Group from "./tresure_hunt/Group";
+import Submission from "./tresure_hunt/Submission";
+import Question from "./tresure_hunt/Question";
+import Config from "./tresure_hunt/Config";
 
 export default [
   User,
@@ -31,5 +35,9 @@ export default [
   HostelContact,
   Amenity,
   Feedback,
+  Group,
+  Submission,
+  Question,
+  Config,
   Reason,
 ];

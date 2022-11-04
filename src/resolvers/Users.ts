@@ -790,7 +790,7 @@ class UsersResolver {
   }
 
   @FieldResolver(() => [UserPermission])
-  async permissions(@Root() { role, permissions }: User) {
+  async permissions(@Root() { roll, role, permissions }: User) {
     try {
       if (permissions && permissions.length) return permissions;
 
@@ -803,6 +803,16 @@ class UsersResolver {
         UserPermission.GET_ANNOUNCEMENTS,
         UserPermission.GET_CONTACTS,
       ];
+
+      // Treasure Hunt
+      if (
+        roll[2] == "2" &&
+        roll[3] == "2" &&
+        new Date().getTime() > new Date("2022-11-20 10:30:00+00").getTime()
+      ) {
+        permissionList.push(UserPermission.TREASURE_HUNT);
+      }
+
       if (role === UserRole.MODERATOR) {
         permissionList.push(UserPermission.GET_REPORTS);
       }

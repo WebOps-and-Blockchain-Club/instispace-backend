@@ -69,6 +69,9 @@ type Comment {
   createdBy: User!
   id: String!
   images: String
+
+  """Visiblity state of comment"""
+  isHidden: Boolean!
   netop: Netop!
   query: MyQuery!
 }
@@ -204,6 +207,10 @@ input CreateContactInput {
   type: String!
 }
 
+input CreateGroupInput {
+  name: String!
+}
+
 """Input for Hostel"""
 input CreateHostelInput {
   """Hostel's name"""
@@ -225,10 +232,20 @@ input CreateNetopsInput {
   title: String!
 }
 
+input CreateQuestionInput {
+  description: String!
+  imageUrls: [String!]
+}
+
 """Input for createSec Mutation"""
 input CreateSecInput {
   """Hostel Secretory Email"""
   roll: String!
+}
+
+input CreateSubmissionInput {
+  description: String!
+  imageUrls: [String!]
 }
 
 """
@@ -394,6 +411,15 @@ input FilteringConditions {
   tags: [String!]
 }
 
+type GetGroupOutput {
+  endTime: String!
+  group: Group!
+  maxMembers: Float!
+  minMembers: Float!
+  questions: [Question!]
+  startTime: String!
+}
+
 type GetReportsOutput {
   netops: [Netop!]
   queries: [MyQuery!]
@@ -406,6 +432,14 @@ input GetUserInput {
 
   """User's Roll Number"""
   roll: String
+}
+
+type Group {
+  code: String!
+  createdBy: User!
+  id: String!
+  name: String!
+  users: [User!]!
 }
 
 """Hostel entity"""
@@ -518,6 +552,7 @@ input ModeratorInput {
 type Mutation {
   """Mutation to add a feedback, Restrictions: {anyone who is authorized}"""
   addFeedback(AddFeedback: AddFeedbackInput!): Boolean!
+  addSubmission(QuestionId: String!, SubmissionData: CreateSubmissionInput!): Submission!
   changeNotificationSettings(notifyEvent: Notification, notifyNetop: Notification, toggleNotifyFound: Boolean!, toggleNotifyMyQuery: Boolean!): Boolean!
 
   """Mutation to create a Super-User account, Restrictions : {Admin}"""
@@ -544,6 +579,7 @@ type Mutation {
 
   """Mutation to create an event"""
   createEvent(NewEventData: createEventInput!): Event!
+  createGroup(GroupData: CreateGroupInput!): Group!
 
   """
   Mutation to create Hostels, Restrictions : {Admin, Hostel Secretory and Hostel Affair Secretory}
@@ -566,6 +602,7 @@ type Mutation {
   """create network and opportunity, Restrictions:{any authorized user}"""
   createNetop(NewNetopData: CreateNetopsInput!): Netop!
   createNotification(NotificationData: NotificationInput!): Boolean!
+  createQuestion(QuestionData: CreateQuestionInput!): Question!
   createReportReason(ReportData: ReasonInput!): Reason!
 
   """Mutation deprecated"""
@@ -583,6 +620,16 @@ type Mutation {
   hide Announcement Mutation, Restrictions : {Admin, Hostel Affair Secretory and Hostel secretory }
   """
   deleteAnnouncement(AnnouncementId: String!): Boolean!
+
+  """
+  Delete the comment by id, Restrictions:{CREATED USER,POST OWNER, ADMIN, MODERATOR, SECRETARY}
+  """
+  deleteCommentNetop(CommentId: String!, NetopId: String!): Boolean!
+
+  """
+  Delete the comment by id, Restrictions:{CREATED USER,POST OWNER, ADMIN, MODERATOR, SECRETARY}
+  """
+  deleteCommentQuery(CommentId: String!, MyQueryId: String!): Boolean!
 
   """
   Delete the event by id, Restrictions:{CREATED USER, ADMIN, SECRETARY, HAS}
@@ -621,6 +668,8 @@ type Mutation {
 
   """edit network and opportunity, Restrictions:{user who created}"""
   editNetop(EditNetopsData: EditNetopsInput!, NetopId: String!): Netop!
+  joinGroup(GroupCode: String!): Boolean!
+  leaveGroup: Boolean!
 
   """Mutation to login, Restrictions : {none}"""
   login(LoginInputs: LoginInput!, fcmToken: String!): LoginOutput!
@@ -852,6 +901,7 @@ type Query {
   Get the list of event details with filters, Restrictions:{ AUTHORIZED USER }
   """
   getEvents(Filters: FilteringConditions, Sort: OrderInput, lastEventId: String!, take: Float!): getEventOutput!
+  getGroup: GetGroupOutput
 
   """query to fetch hostels, Restrictions : {anyone who is authorized}"""
   getHostels: [Hostel!]!
@@ -906,6 +956,13 @@ type Query {
   searchUser(LastUserId: String!, search: String, take: Float!): searchUserOutput
 }
 
+type Question {
+  description: String!
+  id: String!
+  images: String
+  submission: Submission
+}
+
 type Reason {
   """Reports severity count"""
   count: Float
@@ -935,6 +992,14 @@ type Report {
 
 input ReportPostInput {
   description: String!
+}
+
+type Submission {
+  createdAt: DateTime!
+  description: String!
+  id: String!
+  images: String
+  submittedBy: User!
 }
 
 """Tag Entity, Users will follow these tags"""
@@ -988,6 +1053,12 @@ type User {
   feedbacks: [Feedback!]
   getHome: homeOutput
 
+  """Group of Treasure Hunt of User"""
+  group: Group
+
+  """Group Created By Treasure Hunt User"""
+  groupCreated: Group
+
   """User's Hostel amd its details"""
   hostel: Hostel
 
@@ -1026,6 +1097,9 @@ type User {
 
   """Users Email(for Admin)/Roll-Number(for ldpap User)"""
   roll: String!
+
+  """Submission of Tresure Hunt"""
+  submissions: [Submission!]
 }
 
 """Input for Update-User Mutation"""
@@ -1065,8 +1139,10 @@ enum UserPermission {
   GET_CONTACTS
   GET_REPORTS
   HOSTEL_ADMIN
+  TREASURE_HUNT
   UPDATE_ROLE
   VIEW_FEEDBACK
+  VIEW_SUPER_USER_LIST
 }
 
 enum UserRole {

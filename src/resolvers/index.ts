@@ -14,6 +14,10 @@ import AmenitiesResolver from "./Amenities";
 import ContactResolver from "./Contacts";
 import UtilsResolver from "./Utils";
 import CustomNotifResolver from "./Notification";
+import SubmissionResolver from "./tresure_hunt/Submission";
+import QuestionResolver from "./tresure_hunt/Question";
+import GroupResolver from "./tresure_hunt/Group";
+import Config from "../entities/tresure_hunt/Config";
 
 export default [
   UsersResolver,
@@ -32,4 +36,8 @@ export default [
   ContactResolver,
   UtilsResolver,
   CustomNotifResolver,
+  SubmissionResolver,
+  QuestionResolver,
+  GroupResolver,
+  Config,
 ] as const;

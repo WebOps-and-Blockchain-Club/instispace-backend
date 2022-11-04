@@ -9,6 +9,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinTable,
+//  OneToOne,
 } from "typeorm";
 import Netop from "./Netop";
 import Event from "./Event";
@@ -22,6 +23,8 @@ import Query from "./MyQuery";
 import Complaint from "./Complaint";
 import { Notification } from "../utils/index";
 import Feedback from "./Feedback";
+import Group from "./tresure_hunt/Group";
+import Submission from "./tresure_hunt/Submission";
 
 @Entity("User")
 @ObjectType("User", { description: "User Entity" })
@@ -167,6 +170,31 @@ class User extends BaseEntity {
     description: "feedbacks of the user",
   })
   feedbacks?: Feedback[];
+
+  @ManyToOne((_type) => Group, (group) => group.users, { nullable: true })
+  @Field((_type) => Group, {
+    nullable: true,
+    description: "Group of Treasure Hunt of User",
+  })
+  group: Group;
+/*
+  @OneToOne((_type) => Group, (groupCreated) => groupCreated.createdBy, {
+    nullable: true,
+  })
+  @Field((_type) => Group, {
+    nullable: true,
+    description: "Group Created By Treasure Hunt User",
+  })
+  groupCreated: Group;
+*/
+  @OneToMany((_type) => Submission, (submissions) => submissions.submittedBy, {
+    nullable: true,
+  })
+  @Field((_type) => [Submission], {
+    nullable: true,
+    description: "Submission of Tresure Hunt",
+  })
+  submissions: Submission[];
 
   @Field(() => [UserPermission], { nullable: true })
   permissions: UserPermission[];
