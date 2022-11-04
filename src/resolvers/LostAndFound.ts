@@ -116,7 +116,7 @@ class LostAndFoundResolver {
   async getItem(@Arg("ItemId") itemId: string) {
     try {
       const item = await Item.findOne({
-        where: { id: itemId, isHidden: false },
+        where: { id: itemId, isResolved: false },
       });
       return item;
     } catch (e) {
