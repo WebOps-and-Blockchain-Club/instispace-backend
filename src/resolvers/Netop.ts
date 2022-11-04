@@ -257,8 +257,7 @@ class NetopResolver {
 
       // Send Notification
       NotificationService.notifyReportNetop(
-        user,
-        netopUpdated.title,
+        netopUpdated,
         report.description
       );
       if (netopUpdated.status === PostStatus.IN_REVIEW)
@@ -320,12 +319,9 @@ class NetopResolver {
           images: imageUrls === "" ? null : imageUrls,
         }).save();
 
-        const creator = netop.createdBy;
-
         // Send Notification
         NotificationService.notifyNewCommentNetop(
-          creator,
-          netop.title,
+          netop,
           comment.content
         );
 

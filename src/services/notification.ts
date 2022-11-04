@@ -43,7 +43,7 @@ class NotificationService {
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: event.title,
         body: event.content,
-        route: "EVENT",
+        route: `event/${event.id}` ,
       },
     });
   }
@@ -79,37 +79,38 @@ class NotificationService {
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: netop.title,
         body: netop.content,
-        route: "NETOP",
+        route: `netop/${netop.id}`,
       },
     });
   }
 
-  async notifyNewCommentNetop(user: User, title: string, description: string) {
-    let tokens = user.fcmToken.split(" AND ");
+  async notifyNewCommentNetop(netop: Netop, description: string) {
+    let tokens = netop.createdBy.fcmToken.split(" AND ");
     tokens = tokens.filter((_t) => _t !== "" && _t !== null);
 
-    if (user.notifyNetopComment && tokens.length !== 0) {
+    if (netop.createdBy.notifyNetopComment && tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
           click_action: "FLUTTER_NOTIFICATION_CLICK",
-          title: `${title} got commented`,
+          title: `${netop.title} got commented`,
           body: description,
-          route: "NETOP",
+          route: `netop/${netop.id}`,
         },
       });
     }
   }
 
-  async notifyReportNetop(user: User, title: string, report: string) {
-    let tokens = user.fcmToken.split(" AND ");
+  async notifyReportNetop(netop: Netop, report: string) {
+    let tokens = netop.createdBy.fcmToken.split(" AND ");
     tokens = tokens.filter((_t) => _t !== "" && _t !== null);
 
-    if (user.notifyMyQueryComment && tokens.length !== 0) {
+    if (netop.createdBy.notifyMyQueryComment && tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
           click_action: "FLUTTER_NOTIFICATION_CLICK",
-          title: `${title} got reported`,
+          title: `${netop.title} got reported`,
           body: report,
+	  route: `netop/${netop.id}`,
         },
       });
     }
@@ -135,37 +136,38 @@ class NotificationService {
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: query.title,
         body: query.content,
-        route: "QUERY",
+        route: `query/${query.id}`,
       },
     });
   }
 
-  async notifyNewCommentQuery(user: User, title: string, description: string) {
-    let tokens = user.fcmToken.split(" AND ");
+  async notifyNewCommentQuery(query: MyQuery, description: string) {
+    let tokens = query.createdBy.fcmToken.split(" AND ");
     tokens = tokens.filter((_t) => _t !== "" && _t !== null);
 
-    if (user.notifyMyQueryComment && tokens.length !== 0) {
+    if (query.createdBy.notifyMyQueryComment && tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
           click_action: "FLUTTER_NOTIFICATION_CLICK",
-          title: `${title} got commented`,
+          title: `${query.title} got commented`,
           body: description,
-          route: "QUERY",
+          route: `query/${query.id}`,
         },
       });
     }
   }
 
-  async notifyReportQuery(user: User, title: string, report: string) {
-    let tokens = user.fcmToken.split(" AND ");
+  async notifyReportQuery(query: MyQuery, report: string) {
+    let tokens = query.createdBy.fcmToken.split(" AND ");
     tokens = tokens.filter((_t) => _t !== "" && _t !== null);
 
-    if (user.notifyMyQueryComment && tokens.length !== 0) {
+    if (query.createdBy.notifyMyQueryComment && tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
           click_action: "FLUTTER_NOTIFICATION_CLICK",
-          title: `${title} got reported`,
+          title: `${query.title} got reported`,
           body: report,
+	  route: `query/${query.id}`,
         },
       });
     }
@@ -191,6 +193,7 @@ class NotificationService {
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: `${title} got reported`,
         body: report,
+	route: "admin-reports",
       },
     });
   }
@@ -216,7 +219,7 @@ class NotificationService {
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: `FOUND ${item.name}`,
         body: `At ${item.location}`,
-        route: "LnF",
+        route: `lostnfound/${item.id}`,
       },
     });
   }
@@ -245,7 +248,7 @@ class NotificationService {
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: `New Announcement: ${title}`,
         body: description,
-        route: "HOSTEL",
+        route: "hostel",
       },
     });
   }
@@ -265,7 +268,7 @@ class NotificationService {
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: "Hostel Update!",
         body: `New amenity: ${title}`,
-        route: "HOSTEL",
+        route: "hostel",
       },
     });
   }
@@ -292,6 +295,7 @@ class NotificationService {
 
     this.firebase.sendMessage(tokens, {
       data: {
+	id: `${Math.floor(Math.random() * (100))}`,
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: notificationData.title,
         body: notificationData.body,

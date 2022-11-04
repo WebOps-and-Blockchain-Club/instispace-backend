@@ -205,8 +205,7 @@ class MyQueryResolver {
 
       // Send Notification
       NotificationService.notifyReportQuery(
-        myQueryUpdated.createdBy,
-        myQueryUpdated.title,
+        myQueryUpdated,
         report.description
       );
       if (myQueryUpdated.status === PostStatus.IN_REVIEW)
@@ -269,8 +268,7 @@ class MyQueryResolver {
 
         // Send Notification
         NotificationService.notifyNewCommentQuery(
-          myQuery.createdBy,
-          myQuery.title,
+          myQuery,
           comment.content
         );
 
