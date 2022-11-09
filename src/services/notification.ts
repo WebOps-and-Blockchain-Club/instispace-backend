@@ -43,7 +43,8 @@ class NotificationService {
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: event.title,
         body: event.content,
-        route: `event/${event.id}` ,
+	image: event.photo?.split(" AND ")[0] ?? "",
+        route: `event/${event.id}`,
       },
     });
   }
@@ -79,6 +80,7 @@ class NotificationService {
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: netop.title,
         body: netop.content,
+	image: netop.photo?.split(" AND ")[0] ?? "",
         route: `netop/${netop.id}`,
       },
     });
@@ -219,6 +221,7 @@ class NotificationService {
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: `FOUND ${item.name}`,
         body: `At ${item.location}`,
+	image: item.images?.split(" AND ")[0] ?? "",
         route: `lostnfound/${item.id}`,
       },
     });
