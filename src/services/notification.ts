@@ -40,10 +40,11 @@ class NotificationService {
 
     this.firebase.sendMessage(tokens, {
       data: {
+        id: `${Math.floor(Math.random() * 100)}`,
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: event.title,
         body: event.content,
-	image: event.photo?.split(" AND ")[0] ?? "",
+        image: event.photo?.split(" AND ")[0] ?? "",
         route: `event/${event.id}`,
       },
     });
@@ -77,10 +78,11 @@ class NotificationService {
 
     this.firebase.sendMessage(tokens, {
       data: {
+        id: `${Math.floor(Math.random() * 100)}`,
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: netop.title,
         body: netop.content,
-	image: netop.photo?.split(" AND ")[0] ?? "",
+        image: netop.photo?.split(" AND ")[0] ?? "",
         route: `netop/${netop.id}`,
       },
     });
@@ -93,6 +95,7 @@ class NotificationService {
     if (netop.createdBy.notifyNetopComment && tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
+          id: `${Math.floor(Math.random() * 100)}`,
           click_action: "FLUTTER_NOTIFICATION_CLICK",
           title: `${netop.title} got commented`,
           body: description,
@@ -109,10 +112,11 @@ class NotificationService {
     if (netop.createdBy.notifyMyQueryComment && tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
+          id: `${Math.floor(Math.random() * 100)}`,
           click_action: "FLUTTER_NOTIFICATION_CLICK",
           title: `${netop.title} got reported`,
           body: report,
-	  route: `netop/${netop.id}`,
+          route: `netop/${netop.id}`,
         },
       });
     }
@@ -135,6 +139,7 @@ class NotificationService {
 
     this.firebase.sendMessage(tokens, {
       data: {
+        id: `${Math.floor(Math.random() * 100)}`,
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: query.title,
         body: query.content,
@@ -150,6 +155,7 @@ class NotificationService {
     if (query.createdBy.notifyMyQueryComment && tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
+          id: `${Math.floor(Math.random() * 100)}`,
           click_action: "FLUTTER_NOTIFICATION_CLICK",
           title: `${query.title} got commented`,
           body: description,
@@ -166,10 +172,11 @@ class NotificationService {
     if (query.createdBy.notifyMyQueryComment && tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
+          id: `${Math.floor(Math.random() * 100)}`,
           click_action: "FLUTTER_NOTIFICATION_CLICK",
           title: `${query.title} got reported`,
           body: report,
-	  route: `query/${query.id}`,
+          route: `query/${query.id}`,
         },
       });
     }
@@ -192,10 +199,11 @@ class NotificationService {
 
     this.firebase.sendMessage(tokens, {
       data: {
+        id: `${Math.floor(Math.random() * 100)}`,
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: `${title} got reported`,
         body: report,
-	route: "admin-reports",
+        route: "admin-reports",
       },
     });
   }
@@ -218,10 +226,11 @@ class NotificationService {
 
     this.firebase.sendMessage(tokens, {
       data: {
+        id: `${Math.floor(Math.random() * 100)}`,
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: `FOUND ${item.name}`,
         body: `At ${item.location}`,
-	image: item.images?.split(" AND ")[0] ?? "",
+        image: item.images?.split(" AND ")[0] ?? "",
         route: `lostnfound/${item.id}`,
       },
     });
@@ -248,6 +257,7 @@ class NotificationService {
 
     this.firebase.sendMessage(tokens, {
       data: {
+        id: `${Math.floor(Math.random() * 100)}`,
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: `New Announcement: ${title}`,
         body: description,
@@ -268,6 +278,7 @@ class NotificationService {
 
     this.firebase.sendMessage(tokens, {
       data: {
+        id: `${Math.floor(Math.random() * 100)}`,
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: "Hostel Update!",
         body: `New amenity: ${title}`,
@@ -298,7 +309,7 @@ class NotificationService {
 
     this.firebase.sendMessage(tokens, {
       data: {
-	id: `${Math.floor(Math.random() * (100))}`,
+        id: `${Math.floor(Math.random() * 100)}`,
         click_action: "FLUTTER_NOTIFICATION_CLICK",
         title: notificationData.title,
         body: notificationData.body,
