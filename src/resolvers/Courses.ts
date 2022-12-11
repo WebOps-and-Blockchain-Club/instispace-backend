@@ -53,9 +53,9 @@ class CoursesResolver {
       throw new Error(`message : ${e}`);
     }
   }
-  @Query(() => [String], {
+  @Query(() => [Course], {
     description:
-      "Query to return a list of all the possible courses names or codes according to value provided (for dynamic search)",
+      "Query to return a list of all courses that match the value provided (for dynamic search)",
   })
   async searchCourses(
     @Arg("Filter")
@@ -63,16 +63,14 @@ class CoursesResolver {
   ) {
     try {
       let courseList = await Course.find();
-      if (search.length >= 3) {
+      if (search.length > 2) {
         courseList = courseList.filter((course) =>
           JSON.stringify(course).toLowerCase().includes(search.toLowerCase()!)
         );
-        if (parseInt(search[2]))
-          return courseList.map((course) => course.courseCode);
-        else return courseList.map((course) => course.courseName);
+        return courseList;
       }
 
-      throw new Error("Enter a search of atleast three characters");
+      throw new Error("Enter a string of atleast three characters");
     } catch (e) {
       throw new Error(e.message);
     }
