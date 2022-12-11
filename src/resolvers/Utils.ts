@@ -1,6 +1,9 @@
 import { messMenu, academicCallender } from "../utils/config.json";
 import { Authorized, Query, Resolver } from "type-graphql";
 
+
+
+
 @Resolver()
 class UtilsResolver {
   @Query(() => [String])
@@ -95,6 +98,8 @@ class UtilsResolver {
   async getAcademicCallender() {
     return academicCallender;
   }
+
+  
 }
 
 export default UtilsResolver;

@@ -18,6 +18,7 @@ import Group from "./tresure_hunt/Group";
 import Submission from "./tresure_hunt/Submission";
 import Question from "./tresure_hunt/Question";
 import Config from "./tresure_hunt/Config";
+import Course from "./Course";
 
 export default [
   User,
@@ -40,4 +41,5 @@ export default [
   Question,
   Config,
   Reason,
+  Course
 ];
