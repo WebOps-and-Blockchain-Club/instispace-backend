@@ -18,6 +18,7 @@ import SubmissionResolver from "./tresure_hunt/Submission";
 import QuestionResolver from "./tresure_hunt/Question";
 import GroupResolver from "./tresure_hunt/Group";
 import Config from "../entities/tresure_hunt/Config";
+import CoursesResolver from "./Courses";
 
 export default [
   UsersResolver,
@@ -40,4 +41,5 @@ export default [
   QuestionResolver,
   GroupResolver,
   Config,
+  CoursesResolver
 ] as const;
