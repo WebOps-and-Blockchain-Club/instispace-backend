@@ -35,42 +35,25 @@ class CoursesResolver {
     }
     return "Courses added";
   }
-  @Query(() => Course, {
-    description:
-      "Query to return course information according to the provided course code or name",
-  })
-  async getCourse(
-    @Arg("Filter")
-    search: string
-  ) {
-    try {
-      let courseList = await Course.find();
-      courseList = courseList.filter((course) =>
-        JSON.stringify(course).toLowerCase().includes(search.toLowerCase()!)
-      );
-      return courseList[0];
-    } catch (e) {
-      throw new Error(`message : ${e}`);
-    }
-  }
+
   @Query(() => [Course], {
     description:
-      "Query to return a list of all courses that match the value provided (for dynamic search)",
+      "Query to return a list of all courses that match the value provided",
   })
-  async searchCourses(
-    @Arg("Filter")
-    search: string
+  async getCourses(
+    @Arg("Filter", { nullable: true })
+    search?: string
   ) {
     try {
       let courseList = await Course.find();
-      if (search.length > 2) {
-        courseList = courseList.filter((course) =>
-          JSON.stringify(course).toLowerCase().includes(search.toLowerCase()!)
+      if (search) {
+        courseList = courseList.filter(({ courseCode, courseName }) =>
+          JSON.stringify({ courseCode, courseName })
+            .toLowerCase()
+            .includes(search.trim().toLowerCase())
         );
-        return courseList;
       }
-
-      throw new Error("Enter a string of atleast three characters");
+      return courseList;
     } catch (e) {
       throw new Error(e.message);
     }
