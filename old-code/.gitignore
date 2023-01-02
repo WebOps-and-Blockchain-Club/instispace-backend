@@ -1,0 +1,7 @@
+node_modules
+dist
+.env
+public
+bin.txt
+src/utils/keys.json
+src/services/serviceAccountKey.json

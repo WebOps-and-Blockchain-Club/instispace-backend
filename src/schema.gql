@@ -1,0 +1,25 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  id: String!
+  name: String
+  ldapName: String
+  roll: String!
+  mobile: String
+  isNewUser: Boolean!
+}
+
+type Query {
+  getUsers: [User!]!
+}
+
+type Mutation {
+  createUser(user: CreateUserInput!): User!
+}
+
+input CreateUserInput {
+  name: String!
+  roll: String!
+}

@@ -161,6 +161,22 @@ type Contact {
   type: String!
 }
 
+type Course {
+  additionalSlots: [String!]!
+
+  """code related to the course"""
+  courseCode: String!
+
+  """name of the course"""
+  courseName: String!
+
+  """Auto generated uuid"""
+  id: String!
+
+  """list of all the slots the course is available in"""
+  slots: [String!]!
+}
+
 """Input For Create Account Mutation"""
 input CreateAccountInput {
   """Super-User's role"""
@@ -436,7 +452,7 @@ input GetUserInput {
 
 type Group {
   code: String!
-  createdBy: User!
+  createdBy: String!
   id: String!
   name: String!
   users: [User!]!
@@ -576,6 +592,7 @@ type Mutation {
 
   """Mutation to add Complaint, Restrictions : {anyone who is Authorised}"""
   createComplaint(CreateComplaintInput: ComplaintInput!, Images: [Upload!]): Boolean!
+  createCourses: String!
 
   """Mutation to create an event"""
   createEvent(NewEventData: createEventInput!): Event!
@@ -894,6 +911,9 @@ type Query {
   """Query to return contact information, Restrictions: {Admins, HAS}"""
   getContact(HostelId: String!): [Contact!]!
 
+  """Query to return a list of all courses that match the value provided"""
+  getCourses(Filter: String): [Course!]!
+
   """Get the event details by id, Restrictions:{ AUTHORIZED USER }"""
   getEvent(EventId: String!): Event!
 
@@ -905,6 +925,9 @@ type Query {
 
   """query to fetch hostels, Restrictions : {anyone who is authorized}"""
   getHostels: [Hostel!]!
+
+  """Get Lost/Found Item by id"""
+  getItem(ItemId: String!): Item!
 
   """
   Query to fetch all the unresolved items, filter by time of creation, Restrictions : {anyone who is authorised}
@@ -1055,9 +1078,6 @@ type User {
 
   """Group of Treasure Hunt of User"""
   group: Group
-
-  """Group Created By Treasure Hunt User"""
-  groupCreated: Group
 
   """User's Hostel amd its details"""
   hostel: Hostel
