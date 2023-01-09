@@ -2,6 +2,13 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Tag {
+  id: String!
+  title: String!
+  category: String!
+  users: [User!]
+}
+
 type User {
   id: String!
   name: String
@@ -9,17 +16,27 @@ type User {
   roll: String!
   mobile: String
   isNewUser: Boolean!
+  interests: [Tag!]
 }
 
 type Query {
   getUsers: [User!]!
+  getTags: [Tag!]!
+  getTag(TagId: String!): Tag!
+  getCategories: [String!]!
 }
 
 type Mutation {
   createUser(user: CreateUserInput!): User!
+  createTag(CreateTagInput: CreateTagInput!): Tag!
 }
 
 input CreateUserInput {
   name: String!
   roll: String!
+}
+
+input CreateTagInput {
+  title: String!
+  category: String!
 }

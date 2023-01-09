@@ -1,11 +1,18 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Entity, Column, PrimaryGeneratedColumn, Generated } from 'typeorm';
+import Tag from 'src/tag/tag.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  Generated,
+  ManyToMany,
+} from 'typeorm';
 
 @ObjectType()
 @Entity()
 export class User {
   @Field()
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Field({ nullable: true })
@@ -30,4 +37,7 @@ export class User {
   @Field()
   @Column({ type: Boolean, default: false })
   isNewUser: Boolean;
+
+  @ManyToMany((type) => Tag, (interests) => interests.users, { nullable: true })
+  interests: Tag[];
 }
