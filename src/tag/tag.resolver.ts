@@ -27,7 +27,7 @@ export class TagResolver {
   @Query(() => Tag)
   async getTag(@Args('TagId') tagId: string) {
     try {
-      return await this.tagService.getOne(tagId, ['']);
+      return await this.tagService.getOne(tagId, null);
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
