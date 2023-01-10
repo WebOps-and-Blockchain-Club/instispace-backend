@@ -6,6 +6,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { join } from 'path';
 import { UserModule } from './user/user.module';
 import { typeOrmModuleOptions } from './data-source';
+import { PostParentModule } from './Post/postParent.module';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { typeOrmModuleOptions } from './data-source';
     }),
     TypeOrmModule.forRoot(typeOrmModuleOptions),
     UserModule,
+    PostParentModule,
   ],
 })
-export class AppModule {
-}
+export class AppModule {}
