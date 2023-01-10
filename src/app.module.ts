@@ -7,6 +7,7 @@ import { join } from 'path';
 import { UserModule } from './user/user.module';
 import { TagModule } from './tag/tag.module';
 import { typeOrmModuleOptions } from './data-source';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { typeOrmModuleOptions } from './data-source';
       playground: false,
     }),
     TypeOrmModule.forRoot(typeOrmModuleOptions),
+    AuthModule,
     UserModule,
     TagModule,
   ],

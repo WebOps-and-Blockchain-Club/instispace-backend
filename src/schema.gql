@@ -19,7 +19,12 @@ type User {
   interests: [Tag!]
 }
 
+type LoginOutput {
+  accessToken: String!
+}
+
 type Query {
+  getMe: User
   getUsers: [User!]!
   getTags: [Tag!]!
   getTag(TagId: String!): Tag!
@@ -27,8 +32,14 @@ type Query {
 }
 
 type Mutation {
+  login(loginInput: LoginInput!): LoginOutput!
   createUser(user: CreateUserInput!): User!
   createTag(CreateTagInput: CreateTagInput!): Tag!
+}
+
+input LoginInput {
+  roll: String!
+  pass: String!
 }
 
 input CreateUserInput {

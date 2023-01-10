@@ -8,3 +8,12 @@ export class CreateUserInput {
     @Field()
     roll: string;
 }
+
+@InputType()
+export class LoginInput {
+    @Field()
+    roll: string;
+
+    @Field()
+    pass: string;
+}
