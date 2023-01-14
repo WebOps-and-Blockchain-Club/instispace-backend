@@ -31,4 +31,7 @@ export class CreatePostInput {
 
     @Field({ nullable: true })
     Photo: string;
+
+    @Field({})
+    createdByUser:string;
 }

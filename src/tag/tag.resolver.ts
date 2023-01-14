@@ -1,0 +1,64 @@
+import {
+  Args,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
+import { User } from '../user/user.entity';
+import { Tag } from './tag.entity';
+import { TagService } from './tag.service';
+import { CreateTagInput } from './types/tag.input';
+
+@Resolver(() => Tag)
+export class TagResolver {
+  constructor(private readonly tagService: TagService) {}
+
+  @Query(() => [Tag])
+  async getTags() {
+    try {
+      return await this.tagService.getAll();
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @Query(() => Tag)
+  async getTag(@Args('TagId') tagId: string) {
+    try {
+      return await this.tagService.getOne(tagId, null);
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
+  @Query(() => [String])
+  async getCategories() {
+    const categories = ['Sports', 'Cultural', 'Academics', 'Technical'];
+    return categories;
+  }
+
+  @Mutation(() => Tag)
+  async createTag(@Args('CreateTagInput') createTagInput: CreateTagInput) {
+    try {
+      return await this.tagService.create(
+        createTagInput.title,
+        createTagInput.category,
+      );
+    } catch (e) {
+      throw new Error(`message: ${e}`);
+    }
+  }
+
+  @ResolveField(() => [User])
+  async users(@Parent() { id, users }: Tag) {
+    try {
+      if (users) return users;
+      const tag = await this.tagService.getOne(id, ['users']);
+      return tag?.users;
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+}

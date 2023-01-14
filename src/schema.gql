@@ -2,15 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type User {
-  id: String!
-  name: String
-  ldapName: String
-  roll: String!
-  mobile: String
-  isNewUser: Boolean!
-}
-
 type Report {
   id: String!
   description: String!
@@ -46,10 +37,46 @@ type Post {
   """Visiblity state of announcements"""
   isHidden: Boolean!
   location: String
+
+  """Total Number of likes for event"""
+  likeCount: Float
+
+  """Event starred boolean"""
+  isSaved: Boolean
   linkName: String
   Link: String
   postComments: [Comments!]
   postReports: [Report!]
+  createdBy: User!
+  likedBy: [User!]
+}
+
+type Tag {
+  id: String!
+  title: String!
+  category: String!
+  users: [User!]
+}
+
+type User {
+  id: String!
+  name: String
+  ldapName: String
+  roll: String!
+  mobile: String
+  isNewUser: Boolean!
+  post: [Post!]
+  interests: [Tag!]
+  likedPost: [Post!]
+}
+
+type LoginOutput {
+  accessToken: String!
+}
+
+type getPostOutput {
+  list: [Post!]
+  total: Float!
 }
 
 type ReportReason {
@@ -63,8 +90,12 @@ type ReportReason {
 }
 
 type Query {
+  getMe: User
   getUsers: [User!]!
-  FindAllposts: [Post!]!
+  getTags: [Tag!]!
+  getTag(TagId: String!): Tag!
+  getCategories: [String!]!
+  FindAllposts(lastEventId: String!, take: Float!, filteringCondition: FilteringConditions!): getPostOutput!
   Findpost(Postid: String!): Post!
   getAllComments: [Comments!]!
   getComments(id: String!): Comments!
@@ -74,11 +105,20 @@ type Query {
   reportreason(id: String!): ReportReason!
 }
 
+input FilteringConditions {
+  search: String
+  tags: [String!]
+  isStared: Boolean
+}
+
 type Mutation {
+  login(loginInput: LoginInput!): LoginOutput!
   createUser(user: CreateUserInput!): User!
+  createTag(CreateTagInput: CreateTagInput!): Tag!
   CreatePost(postInput: CreatePostInput!): Post!
-  updatePost(updatePostInput: UpdatePostInput!): Post!
+  updatePost(updatePostInput: UpdatePostInput!, id: String!): Post!
   removePost(id: String!): Post!
+  toggleLike(postId: String!, UserId: String!): Post!
   createComment(createCommentInput: CreateCommentInput!): Comments!
   updateComment(updateCommentInput: UpdateCommentInput!, id: String!): Comments!
   removeComment(id: String!): Comments!
@@ -90,9 +130,19 @@ type Mutation {
   removeReportreason(id: String!): ReportReason!
 }
 
+input LoginInput {
+  roll: String!
+  pass: String!
+}
+
 input CreateUserInput {
   name: String!
   roll: String!
+}
+
+input CreateTagInput {
+  title: String!
+  category: String!
 }
 
 input CreatePostInput {
@@ -104,10 +154,10 @@ input CreatePostInput {
   category: String!
   location: String
   Photo: String
+  createdByUser: String!
 }
 
 input UpdatePostInput {
-  postId: String!
   title: String!
   content: String!
   linkName: String
@@ -141,8 +191,7 @@ input CreateReportInput {
 
 input UpdateReportInput {
   description: String!
-  id: String!
-  reportId: String!
+  id: String
 }
 
 input CreateReportreasonInput {
