@@ -59,5 +59,9 @@ export class UserResolver {
      return newUser.likedPost;
   }
 
-  
+  @ResolveField(()=>[Post],{nullable:true})
+  async savedPost(@Parent()user:User){
+     let newUser=await this.userService.getOneById(user.id,['savedPost']);
+     return newUser.savedPost;
+  }
 }
