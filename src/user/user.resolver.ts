@@ -10,6 +10,7 @@ import {
 import { CurrentUser } from '../auth/current_user';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import Tag from '../tag/tag.entity';
+import { PermissionInput } from './permission/type/permission.input';
 import { CreateUserInput, LoginInput } from './type/user.input';
 import { LoginOutput } from './type/user.object';
 import { User } from './user.entity';
@@ -17,10 +18,10 @@ import { UserService } from './user.service';
 
 @Resolver(() => User)
 export class UserResolver {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Mutation(() => LoginOutput)
-  async login(@Args("loginInput") loginInput: LoginInput) {
+  async login(@Args('loginInput') loginInput: LoginInput) {
     return this.userService.login(loginInput);
   }
 
@@ -36,9 +37,18 @@ export class UserResolver {
   }
 
   @Mutation(() => User)
-  async createUser(@Args('user') user: CreateUserInput) {
-    console.log(user);
-    return await this.userService.create(user.roll, user.name);
+  async createUser(
+    @CurrentUser() currUser: User,
+    @Args('user') user: CreateUserInput,
+    @Args('permission') permissionInput: PermissionInput,
+  ) {
+    return await this.userService.create(
+      currUser,
+      user.roll,
+      permissionInput,
+      user.role,
+      user.name,
+    );
   }
 
   @ResolveField(() => [Tag], { nullable: true })
@@ -50,5 +60,19 @@ export class UserResolver {
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
+  }
+
+  @ResolveField(() => User)
+  async createdBy(@Parent() { id, createdBy }: User) {
+    if (createdBy) return createdBy;
+    const user = await this.userService.getOneById(id, null);
+    return await this.userService.getParent(user);
+  }
+
+  @ResolveField(() => [User])
+  async accountsCreated(@Parent() { id, accountsCreated }: User) {
+    if (accountsCreated) return accountsCreated;
+    const user = await this.userService.getOneById(id, null);
+    return await this.userService.getChildren(user);
   }
 }

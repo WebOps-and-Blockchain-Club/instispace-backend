@@ -9,6 +9,24 @@ type Tag {
   users: [User!]
 }
 
+type Permission {
+  id: String!
+  account: [UserRole!]!
+  livePosts: [String!]!
+  unlivePosts: [String!]!
+  users: [User!]
+}
+
+enum UserRole {
+  ADMIN
+  DEV_TEAM
+  LEADS
+  MODERATOR
+  USER
+  HOSTEL_SEC
+  SECRETARY
+}
+
 type User {
   id: String!
   name: String
@@ -16,7 +34,13 @@ type User {
   roll: String!
   mobile: String
   isNewUser: Boolean!
+  permission: Permission!
+
+  """User's role"""
+  role: UserRole!
+  createdBy: User
   interests: [Tag!]
+  accountsCreated: [User!]!
 }
 
 type LoginOutput {
@@ -33,7 +57,7 @@ type Query {
 
 type Mutation {
   login(loginInput: LoginInput!): LoginOutput!
-  createUser(user: CreateUserInput!): User!
+  createUser(user: CreateUserInput!, permission: PermissionInput!): User!
   createTag(CreateTagInput: CreateTagInput!): Tag!
 }
 
@@ -45,6 +69,13 @@ input LoginInput {
 input CreateUserInput {
   name: String!
   roll: String!
+  role: UserRole!
+}
+
+input PermissionInput {
+  account: [UserRole!]!
+  livePosts: [String!]!
+  unlivePosts: [String!]!
 }
 
 input CreateTagInput {

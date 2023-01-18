@@ -4,12 +4,18 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  Generated,
   ManyToMany,
+  ManyToOne,
+  Tree,
+  TreeChildren,
+  TreeParent,
 } from 'typeorm';
+import { UserRole } from './type/role.enum';
+import Permission from './permission/permission.entity';
 
 @ObjectType()
 @Entity()
+@Tree('materialized-path')
 export class User {
   @Field()
   @PrimaryGeneratedColumn('uuid')
@@ -40,4 +46,22 @@ export class User {
 
   @ManyToMany((type) => Tag, (interests) => interests.users, { nullable: true })
   interests: Tag[];
+
+  // remove null: true
+  @ManyToOne((type) => Permission, (permission) => permission.users, {
+    nullable: true,
+  })
+  @Field(() => Permission)
+  permission: Permission;
+
+  @Column('enum', { enum: UserRole, default: UserRole.USER })
+  @Field(() => UserRole, { description: "User's role" })
+  role: UserRole;
+
+  @TreeChildren()
+  accountsCreated: User[];
+
+  @TreeParent()
+  @Field({ nullable: true })
+  createdBy: User;
 }

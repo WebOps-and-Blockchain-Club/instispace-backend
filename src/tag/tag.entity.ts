@@ -1,16 +1,16 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import {
-  BaseEntity,
   Column,
   Entity,
   PrimaryGeneratedColumn,
   ManyToMany,
   JoinTable,
+  Tree,
 } from 'typeorm';
 import { User } from '../user/user.entity';
 
-@Entity('Tag')
-@ObjectType('Tag')
+@Entity()
+@ObjectType()
 export class Tag {
   @PrimaryGeneratedColumn('uuid')
   @Field()
