@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ArrayContainedBy, ArrayContains, Raw, Repository } from 'typeorm';
+import { Raw, Repository } from 'typeorm';
 import { Permission } from './permission.entity';
 import { PermissionInput } from './type/permission.input';
 

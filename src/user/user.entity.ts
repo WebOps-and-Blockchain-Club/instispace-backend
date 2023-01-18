@@ -47,7 +47,6 @@ export class User {
   @ManyToMany((type) => Tag, (interests) => interests.users, { nullable: true })
   interests: Tag[];
 
-  // remove null: true
   @ManyToOne((type) => Permission, (permission) => permission.users, {
     nullable: true,
   })
