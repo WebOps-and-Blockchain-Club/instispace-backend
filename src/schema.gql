@@ -27,6 +27,7 @@ scalar DateTime
 type Post {
   id: String!
   createdAt: DateTime!
+  updatedAt: DateTime!
   title: String
   content: String!
   category: String!
@@ -40,18 +41,18 @@ type Post {
   likeCount: Float
 
   """Event saved boolean"""
-  isSaved: Boolean
-  savedBy: [User!]
+  isSaved: Boolean!
   linkName: String
   Link: String
-  time: DateTime
+  endTime: DateTime
   postComments: [Comments!]
   postReports: [Report!]
   createdBy: User!
   likedBy: [User!]
+  savedBy: [User!]
 
   """Event is liked"""
-  isLiked: Boolean
+  isLiked: Boolean!
   tags: [Post!]!
 }
 
@@ -67,6 +68,24 @@ type Comments {
   createdBy: User!
 }
 
+type Permission {
+  id: String!
+  account: [UserRole!]!
+  livePosts: [String!]!
+  unlivePosts: [String!]!
+  users: [User!]
+}
+
+enum UserRole {
+  ADMIN
+  DEV_TEAM
+  LEADS
+  MODERATOR
+  USER
+  HOSTEL_SEC
+  SECRETARY
+}
+
 type User {
   id: String!
   name: String
@@ -77,9 +96,15 @@ type User {
   post: [Post!]
   comment: [Comments!]
   reports: [Report!]
+  permission: Permission!
+
+  """User's role"""
+  role: UserRole!
+  createdBy: User
   interests: [Tag!]
   likedPost: [Post!]
   savedPost: [Post!]
+  accountsCreated: [User!]!
 }
 
 type LoginOutput {
@@ -133,13 +158,13 @@ input OrderInput {
 
 type Mutation {
   login(loginInput: LoginInput!): LoginOutput!
-  createUser(user: CreateUserInput!): User!
+  createUser(user: CreateUserInput!, permission: PermissionInput!): User!
   createTag(CreateTagInput: CreateTagInput!): Tag!
   CreatePost(postInput: CreatePostInput!): Post!
   updatePost(updatePostInput: UpdatePostInput!, id: String!): Post!
   removePost(id: String!): Post!
   toggleLike(postId: String!): Post!
-  togglesave(postId: String!): Post!
+  toggleSave(postId: String!): Post!
   createComment(createCommentInput: CreateCommentInput!): Comments!
   updateComment(updateCommentInput: UpdateCommentInput!, id: String!): Comments!
   removeComment(id: String!): Comments!
@@ -158,6 +183,14 @@ input LoginInput {
 input CreateUserInput {
   name: String!
   roll: String!
+  role: UserRole!
+  pass: String!
+}
+
+input PermissionInput {
+  account: [UserRole!]!
+  livePosts: [String!]!
+  unlivePosts: [String!]!
 }
 
 input CreateTagInput {
@@ -168,7 +201,7 @@ input CreateTagInput {
 input CreatePostInput {
   title: String
   content: String!
-  time: String
+  endTime: DateTime
   linkName: String
   link: String
   tagIds: [String!]!
@@ -180,13 +213,13 @@ input CreatePostInput {
 
 input UpdatePostInput {
   title: String
-  content: String!
-  time: String
+  content: String
+  endTime: DateTime
   linkName: String
   link: String
-  tagIds: [String!]!
+  tagIds: [String!]
   isHidden: Boolean
-  category: String!
+  category: String
   location: String
   Photo: String
 }
