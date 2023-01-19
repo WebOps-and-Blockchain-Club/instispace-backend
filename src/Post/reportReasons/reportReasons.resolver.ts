@@ -5,13 +5,15 @@ import { ReportreasonsService } from './reportreasons.service';
 import { CreateReportreasonInput } from './type/create-reportReason.input';
 import { UpdateReportreasonInput } from './type/update-reportReason.input';
 
-
 @Resolver(() => ReportReason)
 export class ReportreasonsResolver {
   constructor(private readonly reportreasonsService: ReportreasonsService) {}
 
   @Mutation(() => ReportReason)
-  createReportreason(@Args('createReportreasonInput') createReportreasonInput: CreateReportreasonInput) {
+  createReportreason(
+    @Args('createReportreasonInput')
+    createReportreasonInput: CreateReportreasonInput,
+  ) {
     return this.reportreasonsService.create(createReportreasonInput);
   }
 
@@ -26,9 +28,16 @@ export class ReportreasonsResolver {
   }
 
   @Mutation(() => ReportReason)
- async updateReportreason(@Args('updateReportreasonInput') updateReportreasonInput: UpdateReportreasonInput,@Args('id') id:string) {
-    let reasonToUpdate=await this.reportreasonsService.findOne(id);
-    return this.reportreasonsService.update(updateReportreasonInput,reasonToUpdate);
+  async updateReportreason(
+    @Args('updateReportreasonInput')
+    updateReportreasonInput: UpdateReportreasonInput,
+    @Args('id') id: string,
+  ) {
+    let reasonToUpdate = await this.reportreasonsService.findOne(id);
+    return this.reportreasonsService.update(
+      updateReportreasonInput,
+      reasonToUpdate,
+    );
   }
 
   @Mutation(() => ReportReason)

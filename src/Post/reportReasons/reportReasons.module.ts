@@ -5,7 +5,7 @@ import { ReportReason } from './reportReasons.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([ReportReason])],
-  providers: [ReportreasonsResolver, ReportreasonsService]
+  imports: [TypeOrmModule.forFeature([ReportReason])],
+  providers: [ReportreasonsResolver, ReportreasonsService],
 })
 export class ReportreasonsModule {}
