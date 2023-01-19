@@ -11,6 +11,7 @@ import { Post } from 'src/Post/post.entity';
 import { CurrentUser } from '../auth/current_user';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import Tag from '../tag/tag.entity';
+import { PermissionInput } from './permission/type/permission.input';
 import { CreateUserInput, LoginInput } from './type/user.input';
 import { LoginOutput } from './type/user.object';
 import { User } from './user.entity';
@@ -18,16 +19,17 @@ import { UserService } from './user.service';
 
 @Resolver(() => User)
 export class UserResolver {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Mutation(() => LoginOutput)
-  async login(@Args("loginInput") loginInput: LoginInput) {
+  async login(@Args('loginInput') loginInput: LoginInput) {
     return this.userService.login(loginInput);
   }
 
   @Query(() => User, { nullable: true })
   @UseGuards(JwtAuthGuard)
   async getMe(@CurrentUser() user: User) {
+    console.log(user)
     return user;
   }
 
@@ -37,9 +39,19 @@ export class UserResolver {
   }
 
   @Mutation(() => User)
-  async createUser(@Args('user') user: CreateUserInput) {
-    console.log(user);
-    return await this.userService.create(user.roll, user.name);
+  async createUser(
+    @CurrentUser() currUser: User,
+    @Args('user') user: CreateUserInput,
+    @Args('permission') permissionInput: PermissionInput,
+  ) {
+    return await this.userService.create(
+      currUser,
+      user.roll,
+      permissionInput,
+      user.role,
+      user.name,
+      user.pass,
+    );
   }
 
   @ResolveField(() => [Tag], { nullable: true })
@@ -56,12 +68,26 @@ export class UserResolver {
   @ResolveField(()=>[Post],{nullable:true})
   async likedPost(@Parent()user:User){
      let newUser=await this.userService.getOneById(user.id,['likedPost']);
-     return newUser.likedPost;
+     return  newUser.likedPost;
   }
 
   @ResolveField(()=>[Post],{nullable:true})
   async savedPost(@Parent()user:User){
      let newUser=await this.userService.getOneById(user.id,['savedPost']);
      return newUser.savedPost;
+  }
+
+  @ResolveField(() => User)
+  async createdBy(@Parent() { id, createdBy }: User) {
+    if (createdBy) return createdBy;
+    const user = await this.userService.getOneById(id, null);
+    return await this.userService.getParent(user);
+  }
+
+  @ResolveField(() => [User])
+  async accountsCreated(@Parent() { id, accountsCreated }: User) {
+    if (accountsCreated) return accountsCreated;
+    const user = await this.userService.getOneById(id, null);
+    return await this.userService.getChildren(user);
   }
 }

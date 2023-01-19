@@ -9,10 +9,17 @@ import {
   PrimaryGeneratedColumn,
   ManyToMany,
   OneToMany,
+  ManyToOne,
+  Tree,
+  TreeChildren,
+  TreeParent,
 } from 'typeorm';
+import { UserRole } from './type/role.enum';
+import Permission from './permission/permission.entity';
 
 @ObjectType()
 @Entity()
+@Tree('materialized-path')
 export class User {
   @Field()
   @PrimaryGeneratedColumn('uuid')
@@ -62,4 +69,21 @@ export class User {
   @Field(()=>[Report],{nullable:true})
   reports:Report;
   
+
+  @ManyToOne((type) => Permission, (permission) => permission.users, {
+    nullable: true,
+  })
+  @Field(() => Permission)
+  permission: Permission;
+
+  @Column('enum', { enum: UserRole, default: UserRole.USER })
+  @Field(() => UserRole, { description: "User's role" })
+  role: UserRole;
+
+  @TreeChildren()
+  accountsCreated: User[];
+
+  @TreeParent()
+  @Field({ nullable: true })
+  createdBy: User;
 }
