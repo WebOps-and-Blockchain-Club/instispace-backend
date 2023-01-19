@@ -1,4 +1,4 @@
-import { Field, InputType } from "@nestjs/graphql";
+import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class FilteringConditions {
@@ -8,6 +8,15 @@ export class FilteringConditions {
   @Field(() => [String], { nullable: true })
   tags: string[];
 
-  @Field(() => Boolean, { nullable: true })
-  isStared: boolean;
+  @Field(() => Boolean, { defaultValue: false })
+  isSaved: boolean;
+
+  @Field(() => [String], { nullable: true })
+  categories: string[];
+
+  @Field(() => Boolean, { defaultValue: false })
+  isLiked: boolean;
+
+  @Field(() => Boolean, { defaultValue: false })
+  showOldPost: boolean;
 }

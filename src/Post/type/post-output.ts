@@ -1,8 +1,7 @@
+import { Field, ObjectType } from '@nestjs/graphql';
+import { Post } from '../post.entity';
 
-import { Field, ObjectType } from "@nestjs/graphql";
-import { Post } from "../post.entity";
-
-@ObjectType("getPostOutput")
+@ObjectType('getPostOutput')
 class getPostOutput {
   @Field(() => [Post], { nullable: true })
   list: Post[];

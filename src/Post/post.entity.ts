@@ -1,4 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import Tag from 'src/tag/tag.entity';
 import { User } from 'src/user/user.entity';
 import {
   Entity,
@@ -9,6 +10,7 @@ import {
   OneToMany,
   ManyToOne,
   JoinTable,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Comments } from './comments/comment.entity';
 import { Report } from './reports/report.entity';
@@ -24,8 +26,12 @@ export class Post {
   @Field(() => Date)
   createdAt: Date;
 
-  @Column()
-  @Field()
+  @UpdateDateColumn({ type: 'timestamptz' })
+  @Field(() => Date)
+  updatedAt: Date;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   title: string;
 
   @Column()
@@ -50,23 +56,17 @@ export class Post {
   @Field({ nullable: true })
   location: string;
 
-  @Column({ nullable: true })
   @Field(() => Number, {
     description: 'Total Number of likes for event',
     nullable: true,
   })
   likeCount: number;
 
-  @Column({ nullable: true })
   @Field(() => Boolean, {
-    description: 'Event starred boolean',
-    nullable: true,
+    description: 'Event saved boolean',
+    defaultValue: false,
   })
   isSaved: boolean;
-
-  @ManyToMany(() => User, (user) => user.savedEvent, { cascade: true })
-  @JoinTable()
-  savedBy: User[];
 
   @Field({ nullable: true })
   @Column({ nullable: true })
@@ -76,9 +76,9 @@ export class Post {
   @Column({ nullable: true })
   Link: string;
 
-  // @Column({ type: "timestamptz" })
-  // @Field(() => Date)
-  // time: Date;
+  @Column({ type: 'timestamptz', nullable: true })
+  @Field(() => Date, { nullable: true })
+  endTime: Date;
 
   @OneToMany(() => Comments, (comment) => comment.post)
   @Field(() => [Comments], { nullable: true })
@@ -95,7 +95,22 @@ export class Post {
   createdBy: User;
 
   @ManyToMany(() => User, (user) => user.likedPost)
-  @Field(()=>[User],{nullable:true})
+  @Field(() => [User], { nullable: true })
   @JoinTable()
   likedBy: User[];
+
+  @ManyToMany(() => User, (user) => user.savedPost, { cascade: true })
+  @Field(() => [User], { nullable: true })
+  @JoinTable()
+  savedBy: User[];
+
+  @ManyToMany(() => Tag, (tag) => tag.post, { cascade: true })
+  @JoinTable()
+  tags: Tag[];
+
+  @Field(() => Boolean, {
+    description: 'Event is liked',
+    defaultValue: false,
+  })
+  isLiked: boolean;
 }

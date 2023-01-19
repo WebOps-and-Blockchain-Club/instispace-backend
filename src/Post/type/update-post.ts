@@ -1,34 +1,37 @@
-import { Field, InputType } from "@nestjs/graphql";
+import { Field, InputType } from '@nestjs/graphql';
+import Tag from 'src/tag/tag.entity';
 
 @InputType()
 export class UpdatePostInput {
+  @Field({ nullable: true })
+  title: string;
 
-    @Field()
-    title: string;
-  
-    @Field()
-    content: string;
-  
-    // @Field({ nullable: true })
-    // time: string;
-  
-    @Field({ nullable: true })
-    linkName: string;
-  
-    @Field({ nullable: true })
-    link: string;
-   
+  @Field({ nullable: true })
+  content: string;
 
+  @Field({ nullable: true })
+  endTime: Date;
 
-    @Field({ nullable: true })
-    isHidden: boolean;
+  @Field({ nullable: true })
+  linkName: string;
 
-    @Field()
-    category: string;
+  @Field({ nullable: true })
+  link: string;
 
-    @Field({ nullable: true })
-    location: string;
+  @Field(() => [String], { nullable: true })
+  tagIds: string[];
 
-    @Field({ nullable: true })
-    Photo: string;
+  @Field({ nullable: true })
+  isHidden: boolean;
+
+  @Field({ nullable: true })
+  category: string;
+
+  @Field({ nullable: true })
+  location: string;
+
+  @Field({ nullable: true })
+  Photo: string;
+
+  tags?: Tag[];
 }
