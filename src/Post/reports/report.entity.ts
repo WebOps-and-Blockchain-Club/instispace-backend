@@ -1,12 +1,20 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from 'src/user/user.entity';
+
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Comments } from '../comments/comment.entity';
 import { Post } from '../post.entity';
 
-@Entity("Report")
+@Entity('Report')
 @ObjectType()
 export class Report {
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   @Field()
   id: string;
 
@@ -14,15 +22,19 @@ export class Report {
   @Field()
   description: string;
 
-  @CreateDateColumn({ type: "timestamptz" })
+  @CreateDateColumn({ type: 'timestamptz' })
   @Field(() => Date)
   createdAt: Date;
-  
-  @ManyToOne(()=>Post,post=>post.postReports)
-  @Field(()=>Post,{nullable:true})
+
+  @ManyToOne(() => Post, (post) => post.postReports)
+  @Field(() => Post, { nullable: true })
   post: Post;
 
-  @ManyToOne(()=>Comments,comment=>comment.commentReports)
-  @Field(()=>Comments,{nullable:true})
+  @ManyToOne(() => Comments, (comment) => comment.commentReports)
+  @Field(() => Comments, { nullable: true })
   comment: Comments;
+
+  @ManyToOne(() => User, (user) => user.reports)
+  @Field(() => User, { nullable: true })
+  createdBy: User;
 }
