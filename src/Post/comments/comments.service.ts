@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostService } from 'src/Post/post.service';
+import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
+import { Post } from '../post.entity';
 import { Comments } from './comment.entity';
 import { CreateCommentInput } from './type/create-comment.input';
 import { UpdateCommentInput } from './type/update-comment.input';
@@ -10,15 +12,18 @@ import { UpdateCommentInput } from './type/update-comment.input';
 export class CommentsService {
   constructor(
     @InjectRepository(Comments) private commentRepository: Repository<Comments>,
-    private postService: PostService,
   ) {}
 
-  async create(comment: CreateCommentInput): Promise<Comments> {
+  async create(
+    comment: CreateCommentInput,
+    user: User,
+    post: Post,
+  ): Promise<Comments> {
     try {
       const element = new Comments();
       element.content = comment.content;
-      const post = await this.postService.findOne(comment.postId);
       element.post = post!;
+      element.createdBy = user;
       return await this.commentRepository.save(element);
     } catch (e) {
       throw new Error(e.message);
@@ -26,21 +31,29 @@ export class CommentsService {
   }
 
   findAll() {
-    return this.commentRepository.find({ relations: ['commentReports'] });
+    return this.commentRepository.find({
+      relations: ['commentReports', 'post', 'createBy'],
+    });
   }
 
   findOne(id: string) {
     return this.commentRepository.findOne({
       where: { id: id },
-      relations: ['commentReports'],
+      relations: ['commentReports', 'post', 'createBy'],
     });
   }
 
-  async update(updateCommentInput: UpdateCommentInput ,commentToUpdate:Comments): Promise<Comments> {
+  async update(
+    updateCommentInput: UpdateCommentInput,
+    commentToUpdate: Comments,
+  ): Promise<Comments> {
     try {
-      commentToUpdate.content=updateCommentInput.content;
-      commentToUpdate.isHidden=updateCommentInput.isHidden;
-     return await this.commentRepository.save(commentToUpdate);
+      if (updateCommentInput.content)
+        commentToUpdate.content = updateCommentInput.content;
+
+      if ((commentToUpdate.isHidden = updateCommentInput.isHidden))
+        commentToUpdate.isHidden = updateCommentInput.isHidden;
+      return await this.commentRepository.save(commentToUpdate);
     } catch (e) {
       throw new Error(e.message);
     }
@@ -50,10 +63,10 @@ export class CommentsService {
     return this.commentRepository.delete(id);
   }
 
-  async getComment(id: string) {
+  async getComment(id: string, relation: [string]) {
     return this.commentRepository.findOne({
       where: { id: id },
-      relations: ['post'],
+      relations: relation,
     });
   }
 }

@@ -1,15 +1,15 @@
-import { InputType, Int, Field } from '@nestjs/graphql';
+import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
 export class CreateCommentInput {
   @Field()
-  content:string;
-  
+  content: string;
+
   @Field()
-  postId:string;
+  postId: string;
 
   @Field((_type) => Boolean, {
-    description: "Visiblity state of announcements",
+    description: 'Visiblity state of announcements',
   })
   isHidden: boolean;
 }

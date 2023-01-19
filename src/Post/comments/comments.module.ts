@@ -5,15 +5,12 @@ import { Comments } from './comment.entity';
 import { CommentsResolver } from './comments.resolver';
 import { CommentsService } from './comments.service';
 
-
 @Module({
-  imports: [TypeOrmModule.forFeature([Comments]),PostModule],
+  imports: [TypeOrmModule.forFeature([Comments]), PostModule],
   controllers: [],
-  providers: [CommentsResolver,CommentsService],
-  exports:[CommentsService]
+  providers: [CommentsResolver, CommentsService],
+  exports: [CommentsService],
 })
 export class CommentsModule {
-    constructor(){
-        console.log("Comments module")
-    }
+  constructor() {}
 }
