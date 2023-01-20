@@ -1,3 +1,4 @@
+import { UseGuards } from '@nestjs/common';
 import {
   Resolver,
   Query,
@@ -8,6 +9,7 @@ import {
   Parent,
 } from '@nestjs/graphql';
 import { CurrentUser } from 'src/auth/current_user';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { User } from 'src/user/user.entity';
 import { Post } from '../post.entity';
 import { Report } from './report.entity';
@@ -18,6 +20,7 @@ import { CreateReportInput } from './types/create-report.input';
 export class ReportsResolver {
   constructor(private readonly reportsService: ReportsService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Mutation(() => Report)
   async createReport(
     @Args('createReportInput') createReportInput: CreateReportInput,

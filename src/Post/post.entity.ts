@@ -14,6 +14,7 @@ import {
 } from 'typeorm';
 import { Comments } from './comments/comment.entity';
 import { Report } from './reports/report.entity';
+import { PostStatus } from './type/postStatus.enum';
 
 @ObjectType()
 @Entity('Post')
@@ -68,6 +69,12 @@ export class Post {
   })
   isSaved: boolean;
 
+  @Column('enum', { enum: PostStatus, default: PostStatus.POSTED })
+  @Field((_type) => PostStatus, {
+    description: 'Visiblity state of reports',
+  })
+  status: PostStatus;
+
   @Field({ nullable: true })
   @Column({ nullable: true })
   linkName: string;
@@ -113,4 +120,10 @@ export class Post {
     defaultValue: false,
   })
   isLiked: boolean;
+
+  @Field(() => Boolean)
+  isReported: Boolean;
+
+  @Field(() => Number)
+  reportCount: Number;
 }

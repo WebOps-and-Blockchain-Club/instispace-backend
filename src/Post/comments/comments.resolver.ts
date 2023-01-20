@@ -15,6 +15,8 @@ import { Post } from 'src/Post/post.entity';
 import { CurrentUser } from 'src/auth/current_user';
 import { User } from 'src/user/user.entity';
 import { PostService } from '../post.service';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Resolver(() => Comments)
 export class CommentsResolver {
@@ -23,6 +25,7 @@ export class CommentsResolver {
     private postService: PostService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Mutation(() => Comments)
   async createComment(
     @Args('createCommentInput') createCommentInput: CreateCommentInput,
@@ -74,5 +77,28 @@ export class CommentsResolver {
       'createdBy',
     ]);
     return newComment.createdBy;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ResolveField(() => Boolean)
+  async isReported(@Parent() comment: Comments, @CurrentUser() user: User) {
+    let newComment = await this.commentsService.getComment(comment.id, [
+      'commentReports',
+    ]);
+    if (newComment.commentReports.filter((r) => r.createdBy.id === user.id))
+      comment.isReported = true;
+    else comment.isReported = false;
+
+    return comment.isReported;
+  }
+
+  @ResolveField(() => Number)
+  async reportCount(@Parent() comment: Comments) {
+    let newComment = await this.commentsService.getComment(comment.id, [
+      'commentReports',
+    ]);
+    newComment.reportCount = comment.commentReports.length;
+
+    return newComment.reportCount;
   }
 }

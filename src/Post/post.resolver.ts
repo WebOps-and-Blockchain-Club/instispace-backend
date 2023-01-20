@@ -8,6 +8,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { AuthGuard } from '@nestjs/passport';
+import { userInfo } from 'os';
 import { CurrentUser } from 'src/auth/current_user';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { User } from 'src/user/user.entity';
@@ -23,18 +24,21 @@ import { UpdatePostInput } from './type/update-post';
 export class PostResolver {
   constructor(private readonly postService: PostService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Query(() => getPostOutput, { name: 'FindAllposts' })
   async findPost(
     @Args('lastEventId') lastEventId: string,
     @Args('take') take: number,
     @Args('filteringCondition') filteringConditions: FilteringConditions,
     @Args('orderInput') orderInput: OrderInput,
+    @CurrentUser() user: User,
   ) {
     return await this.postService.findAll(
       lastEventId,
       take,
       filteringConditions,
       orderInput,
+      user,
     );
   }
 
@@ -133,5 +137,23 @@ export class PostResolver {
       newPost.isLiked = true;
     else newPost.isLiked = false;
     return newPost.isLiked;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ResolveField(() => Boolean)
+  async isReported(@Parent() post: Post, @CurrentUser() user: User) {
+    let newPost = await this.postService.getPost(post.id);
+    if (newPost.postReports.filter((r) => r.createdBy.id === user.id).length)
+      newPost.isReported = true;
+    else newPost.isReported = false;
+
+    return newPost.isReported;
+  }
+
+  @ResolveField(() => Number)
+  async reportCount(@Parent() post: Post) {
+    let newPost = await this.postService.getPost(post.id);
+    newPost.reportCount = newPost.postReports.length;
+    return newPost.reportCount;
   }
 }

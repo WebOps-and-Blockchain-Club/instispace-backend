@@ -2,8 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
+import { Comments } from '../comments/comment.entity';
 import { CommentsService } from '../comments/comments.service';
+import { Post } from '../post.entity';
 import { PostService } from '../post.service';
+import { ReportReason } from '../reportReasons/reportReasons.entity';
+import { ReportreasonsService } from '../reportReasons/reportreasons.service';
+import { PostStatus } from '../type/postStatus.enum';
 import { Report } from './report.entity';
 import { CreateReportInput } from './types/create-report.input';
 
@@ -11,6 +16,11 @@ import { CreateReportInput } from './types/create-report.input';
 export class ReportsService {
   constructor(
     @InjectRepository(Report) private reportRepository: Repository<Report>,
+    @InjectRepository(ReportReason)
+    @InjectRepository(Post)
+    private postRepository: Repository<Post>,
+    @InjectRepository(Comments) private commentRepository: Repository<Comments>,
+    private reasonRepository: Repository<ReportReason>,
     private commentService: CommentsService,
     private postService: PostService,
   ) {}
@@ -25,12 +35,43 @@ export class ReportsService {
       report.description = createReportInput.description;
 
       const comment = await this.commentService.findOne(elementId);
-      report.comment = comment!;
-
       const post = await this.postService.findOne(elementId);
-      report.post = post;
+
+      let rReason = await this.reasonRepository.findOne({
+        where: { reason: createReportInput.description },
+      });
+      if (rReason && post) {
+        post.status = [PostStatus.POSTED, PostStatus.REPORTED].includes(
+          post.status,
+        )
+          ? post.postReports.filter(
+              (r) => r.description === createReportInput.description,
+            ).length +
+              1 >=
+            rReason.count
+            ? PostStatus.IN_REVIEW
+            : PostStatus.REPORTED
+          : post.status;
+        await this.postRepository.save(post);
+      }
+      if (rReason && comment) {
+        comment.status = [PostStatus.POSTED, PostStatus.REPORTED].includes(
+          comment.status,
+        )
+          ? comment.commentReports.filter(
+              (r) => r.description === createReportInput.description,
+            ).length +
+              1 >=
+            rReason.count
+            ? PostStatus.IN_REVIEW
+            : PostStatus.REPORTED
+          : comment.status;
+        await this.commentRepository.save(comment);
+      }
 
       report.createdBy = user;
+      report.post = post;
+      report.comment = comment;
 
       return await this.reportRepository.save(report);
     } catch (e) {

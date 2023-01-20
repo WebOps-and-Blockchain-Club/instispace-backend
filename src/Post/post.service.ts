@@ -4,10 +4,11 @@ import Tag from 'src/tag/tag.entity';
 import { TagService } from 'src/tag/tag.service';
 import { User } from 'src/user/user.entity';
 
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Post } from './post.entity';
 import { CreatePostInput } from './type/create-post.input';
 import { FilteringConditions } from './type/filtering-condition';
+import { PostStatus } from './type/postStatus.enum';
 import { OrderInput } from './type/sorting-conditions';
 import { UpdatePostInput } from './type/update-post';
 
@@ -22,10 +23,18 @@ export class PostService {
     take: number,
     filteringConditions: FilteringConditions,
     orderInput: OrderInput,
+    user: User,
   ) {
     try {
       let postList = await this.postRepository.find({
-        where: { isHidden: false },
+        where: {
+          isHidden: false,
+          status: In([
+            PostStatus.POSTED,
+            PostStatus.REPORTED,
+            PostStatus.REPORT_REJECTED,
+          ]),
+        },
         relations: [
           'postComments',
           'postReports',
@@ -78,6 +87,12 @@ export class PostService {
           return false;
         });
       }
+
+      postList = postList.filter(
+        (n) =>
+          n.postReports.filter((nr) => nr.createdBy.id === user.id).length ===
+          0,
+      );
 
       if (filteringConditions) {
         if (filteringConditions.search) {
@@ -249,8 +264,17 @@ export class PostService {
 
   async getPost(id: string) {
     return this.postRepository.findOne({
-      where: { id: id },
-      relations: ['createdBy', 'likedBy', 'tags', 'savedBy'],
+      where: {
+        id: id,
+      },
+      relations: [
+        'postComments',
+        'postReports',
+        'createdBy',
+        'likedBy',
+        'tags',
+        'savedBy',
+      ],
     });
   }
 

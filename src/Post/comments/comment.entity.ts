@@ -10,6 +10,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Report } from '../reports/report.entity';
+import { PostStatus } from '../type/postStatus.enum';
 
 @Entity('Comment')
 @ObjectType()
@@ -43,4 +44,16 @@ export class Comments {
   @ManyToOne(() => User, (user) => user.comment)
   @Field(() => User)
   createdBy: User;
+
+  @Column('enum', { enum: PostStatus, default: PostStatus.POSTED })
+  @Field((_type) => PostStatus, {
+    description: 'Visiblity state of reports',
+  })
+  status: PostStatus;
+
+  @Field(() => Boolean)
+  isReported: Boolean;
+
+  @Field(() => Number)
+  reportCount: Number;
 }
