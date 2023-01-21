@@ -166,8 +166,8 @@ type Query {
   getTags: [Tag!]!
   getTag(TagId: String!): Tag!
   getCategories: [String!]!
-  FindAllposts(lastEventId: String!, take: Float!, filteringCondition: FilteringConditions!, orderInput: OrderInput!): getPostOutput!
-  Findpost(Postid: String!): Post!
+  findPosts(lastEventId: String!, take: Float!, filteringCondition: FilteringConditions!, orderInput: OrderInput!): getPostOutput!
+  findOnePost(Postid: String!): Post!
   getAllComments: [Comments!]!
   getComments(id: String!): Comments!
   reportreasons: [ReportReason!]!
@@ -194,7 +194,7 @@ type Mutation {
   login(loginInput: LoginInput!): LoginOutput!
   createUser(user: CreateUserInput!, permission: PermissionInput!): User!
   createTag(CreateTagInput: CreateTagInput!): Tag!
-  CreatePost(postInput: CreatePostInput!): Post!
+  createPost(postInput: CreatePostInput!): Post!
   updatePost(updatePostInput: UpdatePostInput!, id: String!): Post!
   removePost(id: String!): Post!
   toggleLikePost(postId: String!): Post!
