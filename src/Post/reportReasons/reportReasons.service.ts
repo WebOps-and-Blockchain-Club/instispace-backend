@@ -21,6 +21,10 @@ export class ReportreasonsService {
     return this.ReasonRepository.find();
   }
 
+  findOneWithReason(reason: string) {
+    return this.ReasonRepository.findOne({ where: { reason: reason } });
+  }
+
   async findOne(id: string) {
     return await this.ReasonRepository.findOne({ where: { id: id } });
   }

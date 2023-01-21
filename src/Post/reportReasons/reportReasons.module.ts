@@ -8,6 +8,6 @@ import { ReportsService } from '../reports/reports.service';
 @Module({
   imports: [TypeOrmModule.forFeature([ReportReason])],
   providers: [ReportreasonsResolver, ReportreasonsService],
-  exports: [ReportsService],
+  exports: [ReportreasonsService],
 })
 export class ReportreasonsModule {}

@@ -8,8 +8,14 @@ import { CommentsModule } from '../comments/comments.module';
 import { ReportreasonsModule } from '../reportReasons/reportReasons.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Report]), PostModule, CommentsModule],
+  imports: [
+    TypeOrmModule.forFeature([Report]),
+    PostModule,
+    CommentsModule,
+    ReportreasonsModule,
+  ],
   providers: [ReportsResolver, ReportsService],
+  exports: [ReportsService],
 })
 export class ReportsModule {
   constructor() {}

@@ -16,13 +16,9 @@ import { CreateReportInput } from './types/create-report.input';
 export class ReportsService {
   constructor(
     @InjectRepository(Report) private reportRepository: Repository<Report>,
-    @InjectRepository(ReportReason)
-    @InjectRepository(Post)
-    private postRepository: Repository<Post>,
-    @InjectRepository(Comments) private commentRepository: Repository<Comments>,
-    private reasonRepository: Repository<ReportReason>,
     private commentService: CommentsService,
     private postService: PostService,
+    private reasonService: ReportreasonsService,
   ) {}
 
   async create(
@@ -34,12 +30,15 @@ export class ReportsService {
       const report = new Report();
       report.description = createReportInput.description;
 
-      const comment = await this.commentService.findOne(elementId);
+      const comment = await this.commentService.findOne(elementId, [
+        'commentReports',
+      ]);
       const post = await this.postService.findOne(elementId);
 
-      let rReason = await this.reasonRepository.findOne({
-        where: { reason: createReportInput.description },
-      });
+      let rReason = await this.reasonService.findOneWithReason(
+        createReportInput.description,
+      );
+
       if (rReason && post) {
         post.status = [PostStatus.POSTED, PostStatus.REPORTED].includes(
           post.status,
@@ -52,7 +51,7 @@ export class ReportsService {
             ? PostStatus.IN_REVIEW
             : PostStatus.REPORTED
           : post.status;
-        await this.postRepository.save(post);
+        await this.postService.save(post);
       }
       if (rReason && comment) {
         comment.status = [PostStatus.POSTED, PostStatus.REPORTED].includes(
@@ -66,7 +65,7 @@ export class ReportsService {
             ? PostStatus.IN_REVIEW
             : PostStatus.REPORTED
           : comment.status;
-        await this.commentRepository.save(comment);
+        await this.commentService.save(comment);
       }
 
       report.createdBy = user;
