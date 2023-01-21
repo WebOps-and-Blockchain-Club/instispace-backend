@@ -42,6 +42,9 @@ type Post {
 
   """Event saved boolean"""
   isSaved: Boolean!
+
+  """Visiblity state of reports"""
+  status: PostStatus!
   linkName: String
   Link: String
   endTime: DateTime
@@ -53,7 +56,20 @@ type Post {
 
   """Event is liked"""
   isLiked: Boolean!
+  isReported: Boolean!
+  reportCount: Float!
+  dislikeCount: Float!
+  isDisliked: Boolean!
+  dislikedBy: [User!]
   tags: [Post!]!
+}
+
+enum PostStatus {
+  POSTED
+  REPORTED
+  IN_REVIEW
+  REPORT_ACCEPTED
+  REPORT_REJECTED
 }
 
 type Comments {
@@ -66,6 +82,21 @@ type Comments {
   post: Post!
   commentReports: [Report!]
   createdBy: User!
+
+  """Visiblity state of reports"""
+  status: PostStatus!
+  isReported: Boolean!
+  reportCount: Float!
+  likedBy: [User!]
+
+  """Total Number of likes for event"""
+  likeCount: Float
+
+  """Event is liked"""
+  isLiked: Boolean!
+  dislikedBy: [User!]
+  dislikeCount: Float!
+  isDisliked: Boolean!
 }
 
 type Permission {
@@ -103,6 +134,9 @@ type User {
   createdBy: User
   interests: [Tag!]
   likedPost: [Post!]
+  dislikedPost: [Post!]
+  likedComment: [Comments!]
+  dislikedComment: [Comments!]
   savedPost: [Post!]
   accountsCreated: [User!]!
 }
@@ -136,10 +170,10 @@ type Query {
   Findpost(Postid: String!): Post!
   getAllComments: [Comments!]!
   getComments(id: String!): Comments!
-  reports: [Report!]!
-  getReport(id: String!): Report!
   reportreasons: [ReportReason!]!
   reportreason(id: String!): ReportReason!
+  reports: [Report!]!
+  getReport(id: String!): Report!
 }
 
 input FilteringConditions {
@@ -163,16 +197,19 @@ type Mutation {
   CreatePost(postInput: CreatePostInput!): Post!
   updatePost(updatePostInput: UpdatePostInput!, id: String!): Post!
   removePost(id: String!): Post!
-  toggleLike(postId: String!): Post!
-  toggleSave(postId: String!): Post!
+  toggleLikePost(postId: String!): Post!
+  toggleDislikePost(postId: String!): Post!
+  toggleSavePost(postId: String!): Post!
   createComment(createCommentInput: CreateCommentInput!): Comments!
   updateComment(updateCommentInput: UpdateCommentInput!, id: String!): Comments!
   removeComment(id: String!): Comments!
-  createReport(createReportInput: CreateReportInput!, postId: String!): Report!
-  removeReport(id: String!): Report!
+  toggleLikeComment(commentId: String!): Comments!
+  toggleDislikeComment(commentId: String!): Comments!
   createReportreason(createReportreasonInput: CreateReportreasonInput!): ReportReason!
   updateReportreason(updateReportreasonInput: UpdateReportreasonInput!, id: String!): ReportReason!
   removeReportreason(id: String!): ReportReason!
+  createReport(createReportInput: CreateReportInput!, postId: String!): Report!
+  removeReport(id: String!): Report!
 }
 
 input LoginInput {
@@ -240,10 +277,6 @@ input UpdateCommentInput {
   isHidden: Boolean
 }
 
-input CreateReportInput {
-  description: String!
-}
-
 input CreateReportreasonInput {
   """Reason for the post bieng reported"""
   reason: String!
@@ -258,4 +291,8 @@ input UpdateReportreasonInput {
 
   """Reports severity count"""
   count: Float
+}
+
+input CreateReportInput {
+  description: String!
 }
