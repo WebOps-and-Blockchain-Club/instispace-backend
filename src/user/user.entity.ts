@@ -72,11 +72,11 @@ export class User {
 
   @OneToMany(() => Comments, (comment) => comment.createdBy, { nullable: true })
   @Field(() => [Comments], { nullable: true })
-  comment: Comments;
+  comment: Comments[];
 
   @OneToMany(() => Report, (report) => report.createdBy, { nullable: true })
   @Field(() => [Report], { nullable: true })
-  reports: Report;
+  reports: Report[];
 
   @ManyToOne((type) => Permission, (permission) => permission.users, {
     nullable: true,

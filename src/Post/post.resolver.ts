@@ -25,8 +25,8 @@ export class PostResolver {
   constructor(private readonly postService: PostService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Query(() => findoneOutput, { name: 'FindAllposts' })
-  async findPost(
+  @Query(() => findoneOutput)
+  async findPosts(
     @Args('lastEventId') lastEventId: string,
     @Args('take') take: number,
     @Args('filteringCondition') filteringConditions: FilteringConditions,
@@ -42,13 +42,13 @@ export class PostResolver {
     );
   }
 
-  @Query(() => Post, { name: 'Findpost' })
+  @Query(() => Post)
   async findOnePost(@Args('Postid') postId: string) {
     return await this.postService.findOne(postId);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Mutation(() => Post, { name: 'CreatePost' })
+  @Mutation(() => Post, { name: 'createPost' })
   async create(
     @Args('postInput') post: CreatePostInput,
     @CurrentUser() user: User,
