@@ -39,6 +39,7 @@ export class CommentsService {
         'likedBy',
         'dislikedBy',
       ],
+      where: { isHidden: false },
     });
   }
 
@@ -65,8 +66,10 @@ export class CommentsService {
     }
   }
 
-  remove(id: string) {
-    return this.commentRepository.delete(id);
+  async remove(id: string) {
+    let comment = await this.commentRepository.findOne({ where: { id: id } });
+    comment.isHidden = true;
+    return await this.commentRepository.save(comment);
   }
 
   async save(comment: Comments) {
