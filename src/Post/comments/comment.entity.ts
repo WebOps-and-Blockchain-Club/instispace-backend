@@ -5,6 +5,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -56,4 +58,32 @@ export class Comments {
 
   @Field(() => Number)
   reportCount: Number;
+
+  @ManyToMany(() => User, (user) => user.likedComment)
+  @Field(() => [User], { nullable: true })
+  @JoinTable()
+  likedBy: User[];
+
+  @Field(() => Number, {
+    description: 'Total Number of likes for event',
+    nullable: true,
+  })
+  likeCount: number;
+
+  @Field(() => Boolean, {
+    description: 'Event is liked',
+    defaultValue: false,
+  })
+  isLiked: boolean;
+
+  @ManyToMany(() => User, (user) => user.dislikedComment)
+  @Field(() => [User], { nullable: true })
+  @JoinTable()
+  dislikedBy: User[];
+
+  @Field(() => Number)
+  dislikeCount: Number;
+
+  @Field(() => Boolean)
+  isDisliked: Boolean;
 }

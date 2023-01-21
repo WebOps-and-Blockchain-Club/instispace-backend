@@ -7,6 +7,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { Comments } from 'src/Post/comments/comment.entity';
 import { Post } from 'src/Post/post.entity';
 import { CurrentUser } from '../auth/current_user';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -29,7 +30,7 @@ export class UserResolver {
   @Query(() => User, { nullable: true })
   @UseGuards(JwtAuthGuard)
   async getMe(@CurrentUser() user: User) {
-    console.log(user)
+    console.log(user);
     return user;
   }
 
@@ -65,16 +66,36 @@ export class UserResolver {
     }
   }
 
-  @ResolveField(()=>[Post],{nullable:true})
-  async likedPost(@Parent()user:User){
-     let newUser=await this.userService.getOneById(user.id,['likedPost']);
-     return  newUser.likedPost;
+  @ResolveField(() => [Post], { nullable: true })
+  async likedPost(@Parent() user: User) {
+    let newUser = await this.userService.getOneById(user.id, ['likedPost']);
+    return newUser.likedPost;
   }
 
-  @ResolveField(()=>[Post],{nullable:true})
-  async savedPost(@Parent()user:User){
-     let newUser=await this.userService.getOneById(user.id,['savedPost']);
-     return newUser.savedPost;
+  @ResolveField(() => [Post], { nullable: true })
+  async dislikedPost(@Parent() user: User) {
+    let newUser = await this.userService.getOneById(user.id, ['likedPost']);
+    return newUser.dislikedPost;
+  }
+
+  @ResolveField(() => [Comments], { nullable: true })
+  async likedComment(@Parent() user: User) {
+    let newUser = await this.userService.getOneById(user.id, ['likedComment']);
+    return newUser.likedComment;
+  }
+
+  @ResolveField(() => [Comments], { nullable: true })
+  async dislikedComment(@Parent() user: User) {
+    let newUser = await this.userService.getOneById(user.id, [
+      'dislikedComment',
+    ]);
+    return newUser.dislikedComment;
+  }
+
+  @ResolveField(() => [Post], { nullable: true })
+  async savedPost(@Parent() user: User) {
+    let newUser = await this.userService.getOneById(user.id, ['savedPost']);
+    return newUser.savedPost;
   }
 
   @ResolveField(() => User)

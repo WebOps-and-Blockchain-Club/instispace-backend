@@ -32,14 +32,20 @@ export class CommentsService {
 
   findAll() {
     return this.commentRepository.find({
-      relations: ['commentReports', 'post', 'createBy'],
+      relations: [
+        'commentReports',
+        'post',
+        'createBy',
+        'likedBy',
+        'dislikedBy',
+      ],
     });
   }
 
-  findOne(id: string) {
+  findOne(id: string, relations: string[]) {
     return this.commentRepository.findOne({
       where: { id: id },
-      relations: ['commentReports', 'post', 'createBy'],
+      relations: relations,
     });
   }
 
@@ -63,10 +69,41 @@ export class CommentsService {
     return this.commentRepository.delete(id);
   }
 
-  async getComment(id: string, relation: [string]) {
-    return this.commentRepository.findOne({
-      where: { id: id },
-      relations: relation,
-    });
+  async save(comment: Comments) {
+    return this.commentRepository.save(comment);
+  }
+
+  async toggleLike(comment: Comments, user: User) {
+    try {
+      if (comment) {
+        if (comment?.likedBy?.filter((u) => u.id === user.id)?.length)
+          comment.likedBy = comment?.likedBy?.filter((e) => e.id !== user.id);
+        else comment?.likedBy?.push(user);
+
+        return await this.commentRepository.save(comment);
+      } else {
+        throw new Error('Invalid comment id ');
+      }
+    } catch (e) {
+      throw new Error(e.message);
+    }
+  }
+
+  async toggleDislike(comment: Comments, user: User) {
+    try {
+      if (comment) {
+        if (comment?.dislikedBy?.filter((u) => u.id === user.id)?.length)
+          comment.dislikedBy = comment?.dislikedBy?.filter(
+            (e) => e.id !== user.id,
+          );
+        else comment?.dislikedBy?.push(user);
+
+        return await this.commentRepository.save(comment);
+      } else {
+        throw new Error('Invalid comment id ');
+      }
+    } catch (e) {
+      throw new Error(e.message);
+    }
   }
 }
