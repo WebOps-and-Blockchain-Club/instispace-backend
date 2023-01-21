@@ -217,6 +217,7 @@ export class PostService {
         'likedBy',
         'tags',
         'savedBy',
+        'dislikedBy',
       ],
     });
   }
@@ -262,20 +263,8 @@ export class PostService {
     return await this.postRepository.save(post);
   }
 
-  async getPost(id: string) {
-    return this.postRepository.findOne({
-      where: {
-        id: id,
-      },
-      relations: [
-        'postComments',
-        'postReports',
-        'createdBy',
-        'likedBy',
-        'tags',
-        'savedBy',
-      ],
-    });
+  async save(post: Post) {
+    return await this.postRepository.save(post);
   }
 
   async toggleLike(post: Post, user: User) {
@@ -284,6 +273,22 @@ export class PostService {
         if (post?.likedBy?.filter((u) => u.id === user.id)?.length)
           post.likedBy = post?.likedBy?.filter((e) => e.id !== user.id);
         else post?.likedBy?.push(user);
+
+        return await this.postRepository.save(post);
+      } else {
+        throw new Error('Invalid post ');
+      }
+    } catch (e) {
+      throw new Error(e.message);
+    }
+  }
+
+  async toggleDislike(post: Post, user: User) {
+    try {
+      if (post) {
+        if (post?.dislikedBy?.filter((u) => u.id === user.id)?.length)
+          post.dislikedBy = post?.dislikedBy?.filter((e) => e.id !== user.id);
+        else post?.dislikedBy?.push(user);
 
         return await this.postRepository.save(post);
       } else {

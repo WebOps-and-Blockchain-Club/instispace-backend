@@ -5,7 +5,7 @@ import { ReportreasonsModule } from './reportReasons/reportReasons.module';
 import { ReportsModule } from './reports/reports.module';
 
 @Module({
-  imports: [PostModule, CommentsModule, ReportsModule, ReportreasonsModule],
+  imports: [PostModule, CommentsModule, ReportreasonsModule, ReportsModule],
 })
 export class PostParentModule {
   constructor() {}

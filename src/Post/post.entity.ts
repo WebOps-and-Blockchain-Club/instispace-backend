@@ -1,4 +1,4 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 import Tag from 'src/tag/tag.entity';
 import { User } from 'src/user/user.entity';
 import {
@@ -15,6 +15,7 @@ import {
 import { Comments } from './comments/comment.entity';
 import { Report } from './reports/report.entity';
 import { PostStatus } from './type/postStatus.enum';
+registerEnumType(PostStatus, { name: 'PostStatus' });
 
 @ObjectType()
 @Entity('Post')
@@ -126,4 +127,15 @@ export class Post {
 
   @Field(() => Number)
   reportCount: Number;
+
+  @Field(() => Number)
+  dislikeCount: Number;
+
+  @Field(() => Boolean)
+  isDisliked: Boolean;
+
+  @ManyToMany(() => User, (user) => user.dislikedPost)
+  @Field(() => [User], { nullable: true })
+  @JoinTable()
+  dislikedBy: User[];
 }

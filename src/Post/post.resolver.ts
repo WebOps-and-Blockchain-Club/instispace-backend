@@ -16,7 +16,7 @@ import { Post } from './post.entity';
 import { PostService } from './post.service';
 import { CreatePostInput } from './type/create-post.input';
 import { FilteringConditions } from './type/filtering-condition';
-import getPostOutput from './type/post-output';
+import findoneOutput from './type/post-output';
 import { OrderInput } from './type/sorting-conditions';
 import { UpdatePostInput } from './type/update-post';
 
@@ -25,7 +25,7 @@ export class PostResolver {
   constructor(private readonly postService: PostService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Query(() => getPostOutput, { name: 'FindAllposts' })
+  @Query(() => findoneOutput, { name: 'FindAllposts' })
   async findPost(
     @Args('lastEventId') lastEventId: string,
     @Args('take') take: number,
@@ -68,23 +68,37 @@ export class PostResolver {
 
   @Mutation(() => Post)
   async removePost(@Args('id') id: string) {
-    let post = await this.postService.getPost(id);
+    let post = await this.postService.findOne(id);
     return await this.postService.remove(post);
   }
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => Post)
-  async toggleLike(@Args('postId') postId: string, @CurrentUser() user: User) {
+  async toggleLikePost(
+    @Args('postId') postId: string,
+    @CurrentUser() user: User,
+  ) {
     let post = await this.postService.findOne(postId);
-    console.log(user);
     return await this.postService.toggleLike(post, user);
   }
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => Post)
-  async toggleSave(@Args('postId') postId: string, @CurrentUser() user: User) {
+  async toggleDislikePost(
+    @Args('postId') postId: string,
+    @CurrentUser() user: User,
+  ) {
     let post = await this.postService.findOne(postId);
-    console.log(user);
+    return await this.postService.toggleDislike(post, user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => Post)
+  async toggleSavePost(
+    @Args('postId') postId: string,
+    @CurrentUser() user: User,
+  ) {
+    let post = await this.postService.findOne(postId);
     return await this.postService.toggleSave(post, user);
   }
 
@@ -92,6 +106,12 @@ export class PostResolver {
   async likedBy(@Parent() post: Post) {
     let newPost = await this.postService.findOne(post.id);
     return newPost.likedBy;
+  }
+
+  @ResolveField(() => [User])
+  async dislikedBy(@Parent() post: Post) {
+    let newPost = await this.postService.findOne(post.id);
+    return newPost.dislikedBy;
   }
 
   @ResolveField(() => [Post])
@@ -112,16 +132,23 @@ export class PostResolver {
     return newPost.likeCount;
   }
 
+  @ResolveField(() => Number)
+  async dislikeCount(@Parent() post: Post) {
+    let newPost = await this.postService.findOne(post.id);
+    newPost.dislikeCount = newPost.dislikedBy.length;
+    return newPost.dislikeCount;
+  }
+
   @ResolveField(() => User)
   async createdBy(@Parent() post: Post) {
-    let newPost = await this.postService.getPost(post.id);
+    let newPost = await this.postService.findOne(post.id);
     return newPost.createdBy;
   }
 
   @UseGuards(JwtAuthGuard)
   @ResolveField(() => Boolean)
   async isSaved(@Parent() post: Post, @CurrentUser() user: User) {
-    let newPost = await this.postService.getPost(post.id);
+    let newPost = await this.postService.findOne(post.id);
     console.log(newPost.savedBy.filter((u) => u.id === user.id));
     if (newPost.savedBy.filter((u) => u.id === user.id)?.length)
       newPost.isSaved = true;
@@ -132,7 +159,7 @@ export class PostResolver {
   @UseGuards(JwtAuthGuard)
   @ResolveField(() => Boolean)
   async isLiked(@Parent() post: Post, @CurrentUser() user: User) {
-    let newPost = await this.postService.getPost(post.id);
+    let newPost = await this.postService.findOne(post.id);
     if (newPost.likedBy.filter((u) => u.id === user.id).length)
       newPost.isLiked = true;
     else newPost.isLiked = false;
@@ -141,8 +168,18 @@ export class PostResolver {
 
   @UseGuards(JwtAuthGuard)
   @ResolveField(() => Boolean)
+  async isDisliked(@Parent() post: Post, @CurrentUser() user: User) {
+    let newPost = await this.postService.findOne(post.id);
+    if (newPost.dislikedBy.filter((u) => u.id === user.id).length)
+      newPost.isDisliked = true;
+    else newPost.isDisliked = false;
+    return newPost.isDisliked;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ResolveField(() => Boolean)
   async isReported(@Parent() post: Post, @CurrentUser() user: User) {
-    let newPost = await this.postService.getPost(post.id);
+    let newPost = await this.postService.findOne(post.id);
     if (newPost.postReports.filter((r) => r.createdBy.id === user.id).length)
       newPost.isReported = true;
     else newPost.isReported = false;
@@ -152,7 +189,7 @@ export class PostResolver {
 
   @ResolveField(() => Number)
   async reportCount(@Parent() post: Post) {
-    let newPost = await this.postService.getPost(post.id);
+    let newPost = await this.postService.findOne(post.id);
     newPost.reportCount = newPost.postReports.length;
     return newPost.reportCount;
   }
