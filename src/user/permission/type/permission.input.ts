@@ -10,5 +10,17 @@ export class PermissionInput {
   livePosts: string[];
 
   @Field(() => [String])
-  unlivePosts: string[];
+  hostel: string[];
+
+  @Field(() => Boolean, { nullable: true })
+  createTag?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  createNotification?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  handleReports?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  approvePosts?: boolean;
 }

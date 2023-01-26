@@ -5,6 +5,9 @@ export class FilteringConditions {
   @Field({ nullable: true })
   search?: string;
 
+  @Field({ nullable: true })
+  posttobeApproved: boolean;
+
   @Field(() => [String], { nullable: true })
   tags: string[];
 

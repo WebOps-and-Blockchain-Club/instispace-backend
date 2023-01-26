@@ -102,6 +102,9 @@ export class Post {
   @Field(() => User)
   createdBy: User;
 
+  @ManyToOne(() => User, (user) => user.postsAporoved, { nullable: true })
+  approvedBy: User;
+
   @ManyToMany(() => User, (user) => user.likedPost)
   @Field(() => [User], { nullable: true })
   @JoinTable()

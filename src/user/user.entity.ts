@@ -18,7 +18,7 @@ import { UserRole } from './type/role.enum';
 import Permission from './permission/permission.entity';
 
 @ObjectType()
-@Entity()
+@Entity('User')
 @Tree('materialized-path')
 export class User {
   @Field()
@@ -54,6 +54,9 @@ export class User {
   @OneToMany(() => Post, (post) => post.createdBy, { nullable: true })
   @Field(() => [Post], { nullable: true })
   post: Post[];
+
+  @OneToMany(() => Post, (post) => post.approvedBy, { nullable: true })
+  postsAporoved: Post[];
 
   @ManyToMany(() => Post, (post) => post.savedBy, { nullable: true })
   savedPost: Post[];
