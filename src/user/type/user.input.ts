@@ -11,6 +11,9 @@ export class CreateUserInput {
 
   @Field(() => UserRole)
   role: UserRole;
+
+  @Field(() => String)
+  pass: string;
 }
 
 @InputType()

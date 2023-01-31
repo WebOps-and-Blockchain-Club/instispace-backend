@@ -1,4 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { Post } from 'src/Post/post.entity';
 import {
   Column,
   Entity,
@@ -9,7 +10,7 @@ import {
 } from 'typeorm';
 import { User } from '../user/user.entity';
 
-@Entity()
+@Entity('Tag')
 @ObjectType()
 export class Tag {
   @PrimaryGeneratedColumn('uuid')
@@ -30,6 +31,10 @@ export class Tag {
     nullable: true,
   })
   users: User[];
+
+  @ManyToMany(() => Post, (post) => post.tags)
+  @JoinTable()
+  post: Post[];
 }
 
 export default Tag;

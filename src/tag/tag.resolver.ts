@@ -6,6 +6,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { Post } from 'src/Post/post.entity';
 import { User } from '../user/user.entity';
 import { Tag } from './tag.entity';
 import { TagService } from './tag.service';
@@ -60,5 +61,11 @@ export class TagResolver {
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
+  }
+
+  @ResolveField(()=>[Post])
+  async post(@Parent() tag:Tag){
+    const tags=await this.tagService.getOne(tag.id,['post']);
+    return tag.post;
   }
 }

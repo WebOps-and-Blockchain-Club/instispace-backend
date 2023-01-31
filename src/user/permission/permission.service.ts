@@ -24,9 +24,21 @@ export class PermissionService {
         livePosts: Raw((alias) => `${alias} = :livePosts`, {
           livePosts: permissionInput.livePosts,
         }),
-        unlivePosts: Raw((alias) => `${alias} = :unlivePosts`, {
-          unlivePosts: permissionInput.unlivePosts,
+        hostel: Raw((alias) => `${alias} = :hostel`, {
+          hostel: permissionInput.hostel,
         }),
+        createTag: permissionInput.createTag
+          ? permissionInput.createTag
+          : false,
+        createNotification: permissionInput.createNotification
+          ? permissionInput.createNotification
+          : false,
+        handleReports: permissionInput.handleReports
+          ? permissionInput.handleReports
+          : false,
+        approvePosts: permissionInput.approvePosts
+          ? permissionInput.approvePosts
+          : false,
       },
       relations: ['users'],
     });

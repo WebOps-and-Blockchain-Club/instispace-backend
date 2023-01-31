@@ -7,13 +7,109 @@ type Tag {
   title: String!
   category: String!
   users: [User!]
+  post: [Post!]!
+}
+
+type Report {
+  id: String!
+  description: String!
+  createdAt: DateTime!
+  post: Post
+  comment: Comments
+  createdBy: User
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Post {
+  id: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  title: String
+  content: String!
+  category: String!
+  photo: String
+
+  """Visiblity state of announcements"""
+  isHidden: Boolean!
+  location: String
+
+  """Total Number of likes for event"""
+  likeCount: Float
+
+  """Event saved boolean"""
+  isSaved: Boolean!
+
+  """Visiblity state of reports"""
+  status: PostStatus!
+  linkName: String
+  Link: String
+  endTime: DateTime
+  postComments: [Comments!]
+  postReports: [Report!]
+  createdBy: User!
+  likedBy: [User!]
+  savedBy: [User!]
+
+  """Event is liked"""
+  isLiked: Boolean!
+  isReported: Boolean!
+  reportCount: Float!
+  dislikeCount: Float!
+  isDisliked: Boolean!
+  dislikedBy: [User!]
+  tags: [Post!]!
+}
+
+enum PostStatus {
+  POSTED
+  TO_BE_APPROVED
+  APPROVED
+  REPORTED
+  IN_REVIEW
+  REPORT_ACCEPTED
+  REPORT_REJECTED
+}
+
+type Comments {
+  id: String!
+  content: String!
+  createdAt: DateTime!
+
+  """Visiblity state of announcements"""
+  isHidden: Boolean!
+  post: Post!
+  commentReports: [Report!]
+  createdBy: User!
+
+  """Visiblity state of reports"""
+  status: PostStatus!
+  isReported: Boolean!
+  reportCount: Float!
+  likedBy: [User!]
+
+  """Total Number of likes for event"""
+  likeCount: Float
+
+  """Event is liked"""
+  isLiked: Boolean!
+  dislikedBy: [User!]
+  dislikeCount: Float!
+  isDisliked: Boolean!
 }
 
 type Permission {
   id: String!
   account: [UserRole!]!
   livePosts: [String!]!
-  unlivePosts: [String!]!
+  hostel: [String!]!
+  createTag: Boolean!
+  createNotification: Boolean!
+  handleReports: Boolean!
+  approvePosts: Boolean!
   users: [User!]
 }
 
@@ -34,17 +130,40 @@ type User {
   roll: String!
   mobile: String
   isNewUser: Boolean!
+  post: [Post!]
+  comment: [Comments!]
+  reports: [Report!]
   permission: Permission!
 
   """User's role"""
   role: UserRole!
   createdBy: User
   interests: [Tag!]
+  likedPost: [Post!]
+  dislikedPost: [Post!]
+  likedComment: [Comments!]
+  dislikedComment: [Comments!]
+  savedPost: [Post!]
   accountsCreated: [User!]!
 }
 
 type LoginOutput {
   accessToken: String!
+}
+
+type getPostOutput {
+  list: [Post!]
+  total: Float!
+}
+
+type ReportReason {
+  id: String!
+
+  """Reason for the post bieng reported"""
+  reason: String!
+
+  """Reports severity count"""
+  count: Float
 }
 
 type Query {
@@ -53,12 +172,52 @@ type Query {
   getTags: [Tag!]!
   getTag(TagId: String!): Tag!
   getCategories: [String!]!
+  findPosts(lastEventId: String!, take: Float!, filteringCondition: FilteringConditions!, orderInput: OrderInput!): getPostOutput!
+  findOnePost(Postid: String!): Post!
+  getAllComments: [Comments!]!
+  getComments(id: String!): Comments!
+  reportreasons: [ReportReason!]!
+  reportreason(id: String!): ReportReason!
+  reports: [Report!]!
+  getReport(id: String!): Report!
+}
+
+input FilteringConditions {
+  search: String
+  posttobeApproved: Boolean
+  tags: [String!]
+  isSaved: Boolean! = false
+  categories: [String!]
+  isLiked: Boolean! = false
+  showOldPost: Boolean! = false
+}
+
+input OrderInput {
+  byLikes: Boolean
+  byComments: Boolean
 }
 
 type Mutation {
   login(loginInput: LoginInput!): LoginOutput!
   createUser(user: CreateUserInput!, permission: PermissionInput!): User!
   createTag(CreateTagInput: CreateTagInput!): Tag!
+  createPost(postInput: CreatePostInput!): Post!
+  updatePost(updatePostInput: UpdatePostInput!, id: String!): Post!
+  changePostsStatus(id: String!): Post!
+  removePost(id: String!): Post!
+  toggleLikePost(postId: String!): Post!
+  toggleDislikePost(postId: String!): Post!
+  toggleSavePost(postId: String!): Post!
+  createComment(createCommentInput: CreateCommentInput!): Comments!
+  updateComment(updateCommentInput: UpdateCommentInput!, id: String!): Comments!
+  removeComment(id: String!): Comments!
+  toggleLikeComment(commentId: String!): Comments!
+  toggleDislikeComment(commentId: String!): Comments!
+  createReportreason(createReportreasonInput: CreateReportreasonInput!): ReportReason!
+  updateReportreason(updateReportreasonInput: UpdateReportreasonInput!, id: String!): ReportReason!
+  removeReportreason(id: String!): ReportReason!
+  createReport(createReportInput: CreateReportInput!, postId: String!): Report!
+  removeReport(id: String!): Report!
 }
 
 input LoginInput {
@@ -70,15 +229,82 @@ input CreateUserInput {
   name: String!
   roll: String!
   role: UserRole!
+  pass: String!
 }
 
 input PermissionInput {
   account: [UserRole!]!
   livePosts: [String!]!
-  unlivePosts: [String!]!
+  hostel: [String!]!
+  createTag: Boolean
+  createNotification: Boolean
+  handleReports: Boolean
+  approvePosts: Boolean
 }
 
 input CreateTagInput {
   title: String!
   category: String!
+}
+
+input CreatePostInput {
+  title: String
+  content: String!
+  endTime: DateTime
+  linkName: String
+  link: String
+  tagIds: [String!]!
+  isHidden: Boolean
+  category: String!
+  location: String
+  Photo: String
+}
+
+input UpdatePostInput {
+  title: String
+  content: String
+  endTime: DateTime
+  linkName: String
+  link: String
+  tagIds: [String!]
+  isHidden: Boolean
+  category: String
+  location: String
+  Photo: String
+}
+
+input CreateCommentInput {
+  content: String!
+  postId: String!
+
+  """Visiblity state of announcements"""
+  isHidden: Boolean!
+}
+
+input UpdateCommentInput {
+  content: String
+  postId: String
+
+  """Visiblity state of announcements"""
+  isHidden: Boolean
+}
+
+input CreateReportreasonInput {
+  """Reason for the post bieng reported"""
+  reason: String!
+
+  """Reports severity count"""
+  count: Float
+}
+
+input UpdateReportreasonInput {
+  """Reason for the post bieng reported"""
+  reason: String!
+
+  """Reports severity count"""
+  count: Float
+}
+
+input CreateReportInput {
+  description: String!
 }

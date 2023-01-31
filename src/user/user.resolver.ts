@@ -7,6 +7,8 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { Comments } from 'src/Post/comments/comment.entity';
+import { Post } from 'src/Post/post.entity';
 import { CurrentUser } from '../auth/current_user';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import Tag from '../tag/tag.entity';
@@ -28,6 +30,7 @@ export class UserResolver {
   @Query(() => User, { nullable: true })
   @UseGuards(JwtAuthGuard)
   async getMe(@CurrentUser() user: User) {
+    console.log(user);
     return user;
   }
 
@@ -37,6 +40,7 @@ export class UserResolver {
   }
 
   @Mutation(() => User)
+  @UseGuards(JwtAuthGuard)
   async createUser(
     @CurrentUser() currUser: User,
     @Args('user') user: CreateUserInput,
@@ -48,6 +52,7 @@ export class UserResolver {
       permissionInput,
       user.role,
       user.name,
+      user.pass,
     );
   }
 
@@ -62,11 +67,45 @@ export class UserResolver {
     }
   }
 
+  @ResolveField(() => [Post], { nullable: true })
+  async likedPost(@Parent() user: User) {
+    let newUser = await this.userService.getOneById(user.id, ['likedPost']);
+    return newUser.likedPost;
+  }
+
+  @ResolveField(() => [Post], { nullable: true })
+  async dislikedPost(@Parent() user: User) {
+    let newUser = await this.userService.getOneById(user.id, ['likedPost']);
+    return newUser.dislikedPost;
+  }
+
+  @ResolveField(() => [Comments], { nullable: true })
+  async likedComment(@Parent() user: User) {
+    let newUser = await this.userService.getOneById(user.id, ['likedComment']);
+    return newUser.likedComment;
+  }
+
+  @ResolveField(() => [Comments], { nullable: true })
+  async dislikedComment(@Parent() user: User) {
+    let newUser = await this.userService.getOneById(user.id, [
+      'dislikedComment',
+    ]);
+    return newUser.dislikedComment;
+  }
+
+  @ResolveField(() => [Post], { nullable: true })
+  async savedPost(@Parent() user: User) {
+    let newUser = await this.userService.getOneById(user.id, ['savedPost']);
+    return newUser.savedPost;
+  }
+
   @ResolveField(() => User)
   async createdBy(@Parent() { id, createdBy }: User) {
     if (createdBy) return createdBy;
     const user = await this.userService.getOneById(id, null);
-    return await this.userService.getParent(user);
+    const parents = await this.userService.getParents(user);
+    if (parents.length <= 1) return null;
+    else return parents[parents.length - 2];
   }
 
   @ResolveField(() => [User])

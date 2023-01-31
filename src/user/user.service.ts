@@ -9,10 +9,10 @@ import { TreeRepository } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 import { LoginInput } from './type/user.input';
 import { User } from './user.entity';
-import bcrypt from 'bcryptjs';
 import { PermissionService } from './permission/permission.service';
 import { PermissionInput } from './permission/type/permission.input';
 import { UserRole } from './type/role.enum';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UserService {
@@ -21,8 +21,7 @@ export class UserService {
     private usersRepository: TreeRepository<User>,
     @Inject(forwardRef(() => AuthService))
     private authService: AuthService,
-    @Inject(forwardRef(() => PermissionService))
-    private permissionService: PermissionService,
+    private readonly permissionService: PermissionService,
   ) {}
 
   async login(loginInput: LoginInput) {
@@ -41,7 +40,7 @@ export class UserService {
     return this.usersRepository.find();
   }
 
-  getOneById(id: string, relations: [string]): Promise<User> {
+  getOneById(id: string, relations?: [string]): Promise<User> {
     return this.usersRepository.findOne({
       where: { id: id },
       relations,
@@ -54,12 +53,27 @@ export class UserService {
     });
   }
 
-  getParent(child: User): Promise<User> {
-    return this.usersRepository.findAncestors(child)[0];
+  async getParents(child: User): Promise<User[]> {
+    const parents = await this.usersRepository.findAncestors(child, {
+      relations: ['permission'],
+    });
+    return parents;
+  }
+
+  async getAncestorswithAprrovalAccess(child: User): Promise<User[]> {
+    let parents = await this.getParents(child);
+    parents = parents.filter((p) => p.permission.approvePosts === true);
+    return parents;
+  }
+
+  getDescendantsTree(parent: User) {
+    return this.usersRepository.findDescendantsTree(parent);
   }
 
   getChildren(parent: User): Promise<User[]> {
-    return this.usersRepository.findDescendants(parent);
+    return this.usersRepository.findDescendants(parent, {
+      relations: ['permission'],
+    });
   }
 
   async create(
@@ -68,8 +82,8 @@ export class UserService {
     permissionInput: PermissionInput,
     role: UserRole,
     name?: string,
-    ldapName?: string,
     password?: string,
+    ldapName?: string,
   ): Promise<User> {
     let user = this.usersRepository.create();
     user.roll = roll;
@@ -93,6 +107,7 @@ export class UserService {
       permission = await this.permissionService.create(permissionInput);
     user.permission = permission;
     user.createdBy = currentUser;
+    console.log(user.createdBy);
     return this.usersRepository.save(user);
   }
 }
