@@ -27,8 +27,6 @@ export class PostService {
     user: User,
   ) {
     try {
-      // -- TODO --
-      // add a filter to view posts to be approved
       const current_user = await this.userService.getOneById(user.id, [
         'permission',
       ]);
