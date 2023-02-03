@@ -53,7 +53,10 @@ export class UserService {
     });
   }
 
-  async updateUser(userToUpdate: User, userInput: UpdateUserInput) {
+  async updateUser(
+    userToUpdate: User,
+    userInput: UpdateUserInput,
+  ): Promise<User> {
     if (userToUpdate.name) userToUpdate.name = userInput.name;
     if (userToUpdate.mobile)
       userToUpdate.mobile = userToUpdate.password = userInput.mobile;
@@ -67,7 +70,7 @@ export class UserService {
       userToUpdate.interests = interests;
     }
     userToUpdate.isNewUser = false;
-    return await this.usersRepository.save(userToUpdate);
+    return this.usersRepository.save(userToUpdate);
   }
 
   getOneByRoll(roll: string): Promise<User> {

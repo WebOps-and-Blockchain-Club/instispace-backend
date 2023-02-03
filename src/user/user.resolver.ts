@@ -59,13 +59,14 @@ export class UserResolver {
     );
   }
 
-  @Mutation(() => User)
+  @Mutation(() => Boolean)
   @UseGuards(JwtAuthGuard)
   async updateUser(
     @Args('userInput') userInput: UpdateUserInput,
     @CurrentUser() user: User,
   ) {
-    return await this.userService.updateUser(user, userInput);
+    const userUpdated = await this.userService.updateUser(user, userInput);
+    return !!userUpdated;
   }
 
   @ResolveField(() => [Tag], { nullable: true })
