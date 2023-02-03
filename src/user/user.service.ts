@@ -12,7 +12,10 @@ import { User } from './user.entity';
 import { PermissionService } from './permission/permission.service';
 import { PermissionInput } from './permission/type/permission.input';
 import { UserRole } from './type/role.enum';
-import * as bcrypt from 'bcryptjs'; 
+import * as bcrypt from 'bcryptjs';
+import { UpdateUserInput } from './type/user.update';
+import Tag from 'src/tag/tag.entity';
+import { TagService } from 'src/tag/tag.service';
 
 @Injectable()
 export class UserService {
@@ -23,6 +26,8 @@ export class UserService {
     private authService: AuthService,
     @Inject(forwardRef(() => PermissionService))
     private permissionService: PermissionService,
+    @Inject(forwardRef(() => TagService))
+    private tagService: TagService,
   ) {}
 
   async login(loginInput: LoginInput) {
@@ -46,6 +51,23 @@ export class UserService {
       where: { id: id },
       relations,
     });
+  }
+
+  async updateUser(userToUpdate: User, userInput: UpdateUserInput) {
+    if (userToUpdate.name) userToUpdate.name = userInput.name;
+    if (userToUpdate.mobile)
+      userToUpdate.mobile = userToUpdate.password = userInput.mobile;
+    if (userInput.interests.length) {
+      let interests: Tag[] = [];
+      await Promise.all(
+        userInput.interests.map(async (interestId) => {
+          interests.push(await this.tagService.getOne(interestId));
+        }),
+      );
+      userToUpdate.interests = interests;
+    }
+    userToUpdate.isNewUser = false;
+    return await this.usersRepository.save(userToUpdate);
   }
 
   getOneByRoll(roll: string): Promise<User> {

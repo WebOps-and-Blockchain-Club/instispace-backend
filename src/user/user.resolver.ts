@@ -15,6 +15,7 @@ import Tag from '../tag/tag.entity';
 import { PermissionInput } from './permission/type/permission.input';
 import { CreateUserInput, LoginInput } from './type/user.input';
 import { LoginOutput } from './type/user.object';
+import { UpdateUserInput } from './type/user.update';
 import { User } from './user.entity';
 import { UserService } from './user.service';
 
@@ -53,6 +54,15 @@ export class UserResolver {
       user.name,
       user.pass,
     );
+  }
+
+  @Mutation(() => User)
+  @UseGuards(JwtAuthGuard)
+  async updateUser(
+    @Args('userInput') userInput: UpdateUserInput,
+    @CurrentUser() user: User,
+  ) {
+    return await this.userService.updateUser(user, userInput);
   }
 
   @ResolveField(() => [Tag], { nullable: true })
