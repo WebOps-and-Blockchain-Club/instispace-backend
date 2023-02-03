@@ -12,6 +12,7 @@ import { Post } from 'src/Post/post.entity';
 import { CurrentUser } from '../auth/current_user';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import Tag from '../tag/tag.entity';
+import Permission from './permission/permission.entity';
 import { PermissionInput } from './permission/type/permission.input';
 import { CreateUserInput, LoginInput } from './type/user.input';
 import { LoginOutput } from './type/user.object';
@@ -113,5 +114,12 @@ export class UserResolver {
     if (accountsCreated) return accountsCreated;
     const user = await this.userService.getOneById(id, null);
     return await this.userService.getChildren(user);
+  }
+
+  @ResolveField(() => Permission)
+  async permission(@Parent() { id, permission }: User) {
+    if (permission) return permission;
+    const user = await this.userService.getOneById(id, ['permission']);
+    return user.permission;
   }
 }

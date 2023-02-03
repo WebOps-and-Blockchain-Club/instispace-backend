@@ -84,7 +84,7 @@ export class User {
   @ManyToOne((type) => Permission, (permission) => permission.users, {
     nullable: true,
   })
-  @Field(() => Permission)
+  @Field(() => Permission, { nullable: true })
   permission: Permission;
 
   @Column('enum', { enum: UserRole, default: UserRole.USER })
