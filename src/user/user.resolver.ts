@@ -41,6 +41,7 @@ export class UserResolver {
   }
 
   @Mutation(() => User)
+  @UseGuards(JwtAuthGuard)
   async createUser(
     @CurrentUser() currUser: User,
     @Args('user') user: CreateUserInput,
@@ -112,7 +113,9 @@ export class UserResolver {
   async createdBy(@Parent() { id, createdBy }: User) {
     if (createdBy) return createdBy;
     const user = await this.userService.getOneById(id, null);
-    return await this.userService.getParent(user);
+    const parents = await this.userService.getParents(user);
+    if (parents.length <= 1) return null;
+    else return parents[parents.length - 2];
   }
 
   @ResolveField(() => [User])

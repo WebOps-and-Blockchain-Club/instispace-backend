@@ -7,8 +7,6 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { AuthGuard } from '@nestjs/passport';
-import { userInfo } from 'os';
 import { CurrentUser } from 'src/auth/current_user';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { User } from 'src/user/user.entity';
@@ -64,6 +62,13 @@ export class PostResolver {
   ) {
     let postToUpdate = await this.postService.findOne(id);
     return await this.postService.update(updatePostInput, postToUpdate);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => Post)
+  async changePostsStatus(@Args('id') id: string, @CurrentUser() user: User) {
+    let postToUpdate = await this.postService.findOne(id);
+    return await this.postService.changeStatus(postToUpdate, user);
   }
 
   @Mutation(() => Post)

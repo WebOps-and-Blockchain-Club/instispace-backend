@@ -16,7 +16,7 @@ export class AuthService {
     const user = await this.userService.getOneByRoll(roll);
     if (user) {
       if (await bcrypt.compare(password, user.password)) {
-        delete user.password; //WHY
+        delete user.password;
         return user;
       }
     }

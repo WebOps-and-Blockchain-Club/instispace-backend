@@ -66,6 +66,8 @@ type Post {
 
 enum PostStatus {
   POSTED
+  TO_BE_APPROVED
+  APPROVED
   REPORTED
   IN_REVIEW
   REPORT_ACCEPTED
@@ -103,7 +105,11 @@ type Permission {
   id: String!
   account: [UserRole!]!
   livePosts: [String!]!
-  unlivePosts: [String!]!
+  hostel: [String!]!
+  createTag: Boolean!
+  createNotification: Boolean!
+  handleReports: Boolean!
+  approvePosts: Boolean!
   users: [User!]
 }
 
@@ -178,6 +184,7 @@ type Query {
 
 input FilteringConditions {
   search: String
+  posttobeApproved: Boolean
   tags: [String!]
   isSaved: Boolean! = false
   categories: [String!]
@@ -196,6 +203,7 @@ type Mutation {
   createTag(CreateTagInput: CreateTagInput!): Tag!
   createPost(postInput: CreatePostInput!): Post!
   updatePost(updatePostInput: UpdatePostInput!, id: String!): Post!
+  changePostsStatus(id: String!): Post!
   removePost(id: String!): Post!
   toggleLikePost(postId: String!): Post!
   toggleDislikePost(postId: String!): Post!
@@ -227,7 +235,11 @@ input CreateUserInput {
 input PermissionInput {
   account: [UserRole!]!
   livePosts: [String!]!
-  unlivePosts: [String!]!
+  hostel: [String!]!
+  createTag: Boolean
+  createNotification: Boolean
+  handleReports: Boolean
+  approvePosts: Boolean
 }
 
 input CreateTagInput {
