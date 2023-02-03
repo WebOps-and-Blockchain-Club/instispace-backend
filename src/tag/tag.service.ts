@@ -15,7 +15,7 @@ export class TagService {
     return this.tagRepository.find();
   }
 
-  getOne(id: string, relations: [string]): Promise<Tag> {
+  getOne(id: string, relations?: [string]): Promise<Tag> {
     return this.tagRepository.findOne({ where: { id }, relations });
   }
 
