@@ -45,7 +45,7 @@ export class User {
   mobile?: string;
 
   @Field()
-  @Column({ type: Boolean, default: false })
+  @Column({ type: Boolean, default: true })
   isNewUser: Boolean;
 
   @ManyToMany((type) => Tag, (interests) => interests.users, { nullable: true })
