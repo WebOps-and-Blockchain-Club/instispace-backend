@@ -14,6 +14,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import Tag from '../tag/tag.entity';
 import Permission from './permission/permission.entity';
 import { PermissionInput } from './permission/type/permission.input';
+import { UserRole } from './type/role.enum';
 import { CreateUserInput, LoginInput } from './type/user.input';
 import { LoginOutput } from './type/user.object';
 import { User } from './user.entity';
@@ -121,5 +122,12 @@ export class UserResolver {
     if (permission) return permission;
     const user = await this.userService.getOneById(id, ['permission']);
     return user.permission;
+  }
+
+  @ResolveField(() => String)
+  async photo(@Parent() { roll, role }: User) {
+    return role === UserRole.USER || role === UserRole.MODERATOR
+      ? `https://instispace.iitm.ac.in/photos/byroll.php?roll=${roll.toUpperCase()}`
+      : '';
   }
 }
