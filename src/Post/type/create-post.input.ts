@@ -18,7 +18,7 @@ export class CreatePostInput {
   @Field({ nullable: true })
   link: string;
 
-  @Field(() => [String])
+  @Field(() => [String], { nullable : true })
   tagIds: string[];
 
   @Field({ nullable: true })

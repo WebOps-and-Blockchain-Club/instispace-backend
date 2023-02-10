@@ -115,7 +115,7 @@ export class Post {
   @JoinTable()
   savedBy: User[];
 
-  @ManyToMany(() => Tag, (tag) => tag.post, { cascade: true })
+  @ManyToMany(() => Tag, (tag) => tag.post, { cascade: true, nullable: true })
   @JoinTable()
   tags: Tag[];
 

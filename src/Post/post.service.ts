@@ -82,17 +82,17 @@ export class PostService {
         // default filters (endtime should not exceed)
 
         let filterDate = {
-          Review: 7,
-          'Random Thoughts': 3,
+          Reviews: 7,
+          'Random thoughts': 3,
           Help: 3,
-          Announcement: 7,
+          Announcements: 7,
         };
 
         if (filteringConditions.showOldPost) {
           postList = postList.filter((n) => {
             if (n.endTime && new Date(n.endTime).getTime() < d.getTime()) {
               return true;
-            } else if (n.category === 'Query') {
+            } else if (n.category === 'Queries') {
               return true;
             } else {
               d.setDate(d.getDate() - filterDate[n.category]);
@@ -106,7 +106,7 @@ export class PostService {
           postList = postList.filter((n) => {
             if (n.endTime && new Date(n.endTime).getTime() > d.getTime())
               return true;
-            else if (n.category === 'Query') {
+            else if (n.category === 'Queries') {
               return true;
             } else {
               d.setDate(d.getDate() - filterDate[n.category]);
@@ -204,7 +204,8 @@ export class PostService {
       postStatus = PostStatus.TO_BE_APPROVED;
     }
     var tags: Tag[] = [];
-
+    
+    if (post.tagIds){
     await Promise.all(
       post.tagIds.map(async (id) => {
         const tag = await this.tagService.getOne(id, ['post']);
@@ -215,7 +216,8 @@ export class PostService {
     );
 
     if (tags.length !== post.tagIds.length) throw new Error('Invalid tagIds');
-    post.tags = tags;
+    post.tags = tags ;
+    }
 
     let newPost = new Post();
     newPost.Link = post.link;

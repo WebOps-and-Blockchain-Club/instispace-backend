@@ -261,7 +261,7 @@ input CreatePostInput {
   endTime: DateTime
   linkName: String
   link: String
-  tagIds: [String!]!
+  tagIds: [String!]
   isHidden: Boolean
   category: String!
   location: String
