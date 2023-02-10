@@ -1,7 +1,7 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { ReportReason } from './reportReasons.entity';
 
-import { ReportreasonsService } from './reportreasons.service';
+import { ReportreasonsService } from './reportReasons.service';
 import { CreateReportreasonInput } from './type/create-reportReason.input';
 import { UpdateReportreasonInput } from './type/update-reportReason.input';
 

@@ -1,4 +1,4 @@
-import { CreateReportreasonInput } from './create-reportreason.input';
+import { CreateReportreasonInput } from './create-reportReason.input';
 import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
 
 @InputType()

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ReportreasonsService } from './reportreasons.service';
-import { ReportreasonsResolver } from './reportreasons.resolver';
+import { ReportreasonsService } from './reportReasons.service';
+import { ReportreasonsResolver } from './reportReasons.resolver';
 import { ReportReason } from './reportReasons.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ReportsService } from '../reports/reports.service';

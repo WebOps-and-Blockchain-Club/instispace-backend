@@ -33,7 +33,7 @@ export class Tag {
   users: User[];
 
   @ManyToMany(() => Post, (post) => post.tags)
-  post: Post[];
+  @JoinTable()  post: Post[];
 }
 
 export default Tag;

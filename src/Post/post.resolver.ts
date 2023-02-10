@@ -7,6 +7,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import Tag from 'src/tag/tag.entity';
 import { CurrentUser } from 'src/auth/current_user';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { User } from 'src/user/user.entity';
@@ -119,11 +120,12 @@ export class PostResolver {
     return newPost.dislikedBy;
   }
 
-  @ResolveField(() => [Post])
+  @ResolveField(() => [Tag])
   async tags(@Parent() post: Post) {
     let newPost = await this.postService.findOne(post.id);
     return newPost.tags;
   }
+
   @ResolveField(() => [User])
   async savedBy(@Parent() post: Post) {
     let newPost = await this.postService.findOne(post.id);

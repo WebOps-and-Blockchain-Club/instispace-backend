@@ -7,7 +7,7 @@ import { CommentsService } from '../comments/comments.service';
 import { Post } from '../post.entity';
 import { PostService } from '../post.service';
 import { ReportReason } from '../reportReasons/reportReasons.entity';
-import { ReportreasonsService } from '../reportReasons/reportreasons.service';
+import { ReportreasonsService } from '../reportReasons/reportReasons.service';
 import { PostStatus } from '../type/postStatus.enum';
 import { Report } from './report.entity';
 import { CreateReportInput } from './types/create-report.input';
