@@ -7,6 +7,8 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { AuthGuard } from '@nestjs/passport';
+import Hostel from 'src/hostel/hostel.entity';
 import { Comments } from 'src/Post/comments/comment.entity';
 import { Post } from 'src/Post/post.entity';
 import { CurrentUser } from '../auth/current_user';
@@ -140,5 +142,12 @@ export class UserResolver {
     return role === UserRole.USER || role === UserRole.MODERATOR
       ? `https://instispace.iitm.ac.in/photos/byroll.php?roll=${roll.toUpperCase()}`
       : '';
+  }
+
+  @Mutation(() => Hostel)
+  @UseGuards(JwtAuthGuard)
+  async setHostel(@Args('hostelname') name: string, @CurrentUser() user: User) {
+    let hostel = this.userService.hostel(name, user);
+    return hostel;
   }
 }

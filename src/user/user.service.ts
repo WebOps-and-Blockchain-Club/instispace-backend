@@ -16,6 +16,10 @@ import * as bcrypt from 'bcryptjs';
 import { UpdateUserInput } from './type/user.update';
 import Tag from 'src/tag/tag.entity';
 import { TagService } from 'src/tag/tag.service';
+import Hostel from 'src/hostel/hostel.entity';
+import { Repository } from 'typeorm';
+import { Notification } from 'src/utils';
+import { In } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -28,6 +32,8 @@ export class UserService {
     private permissionService: PermissionService,
     @Inject(forwardRef(() => TagService))
     private tagService: TagService,
+    @InjectRepository(Hostel)
+    private hostelRepository: Repository<Hostel>,
   ) {}
 
   async login(loginInput: LoginInput) {
@@ -135,5 +141,35 @@ export class UserService {
     user.createdBy = currentUser;
     console.log(user.createdBy);
     return this.usersRepository.save(user);
+  }
+
+  async validate(roll: string) {
+    let user = await this.usersRepository.findOne({ where: { roll } });
+    // TODO: Check the password
+    const isPasswordCorrect = true;
+    if (isPasswordCorrect) {
+      return user;
+    }
+    return null;
+  }
+
+  async hostel(name: string, user: User) {
+    let hostel = await this.hostelRepository.findOne({ where: { name } });
+    let currUser = await this.usersRepository.findOne({
+      where: { id: user.id },
+    });
+    currUser.hostel = hostel;
+    this.usersRepository.save(currUser);
+    return hostel;
+  }
+
+  async usersForNotif() {
+    return await this.usersRepository.find({
+      where: {
+        isNewUser: false,
+        notifyPost: In([Notification.FOLLOWED_TAGS, Notification.FORALL]),
+      },
+      relations: ['interests'],
+    });
   }
 }

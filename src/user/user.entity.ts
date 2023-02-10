@@ -16,6 +16,9 @@ import {
 } from 'typeorm';
 import { UserRole } from './type/role.enum';
 import Permission from './permission/permission.entity';
+import Hostel from 'src/hostel/hostel.entity';
+import HostelAnnouncement from 'src/hostelAnnouncement/hostelAnnouncement.entity';
+import { Notification } from 'src/utils';
 
 @ObjectType()
 @Entity('User')
@@ -47,6 +50,30 @@ export class User {
   @Field()
   @Column({ type: Boolean, default: true })
   isNewUser: Boolean;
+
+  @Field()
+  @Column()
+  notifyPost: Notification;
+
+  @Column({ type: String, nullable: true })
+  @Field((_type) => String)
+  fcmToken: string;
+
+  @ManyToOne((_type) => Hostel, (hostel) => hostel.users, { nullable: true })
+  @Field((_type) => Hostel, {
+    nullable: true,
+    description: "User's Hostel amd its details",
+  })
+  hostel?: Hostel;
+
+  @OneToMany(
+    (_type) => HostelAnnouncement,
+    (announcements) => announcements.user,
+  )
+  @Field((_type) => [HostelAnnouncement], {
+    description: 'Announcements Created by User',
+  })
+  hostelannouncements: HostelAnnouncement[];
 
   @ManyToMany((type) => Tag, (interests) => interests.users, { nullable: true })
   interests: Tag[];
