@@ -76,7 +76,6 @@ export class PostService {
           order: { createdAt: 'ASC' },
         });
 
-        const d = new Date();
         //Filter the posts after the 2 hours time of completion
 
         // default filters (endtime should not exceed)
@@ -90,10 +89,11 @@ export class PostService {
 
         if (filteringConditions.showOldPost) {
           postList = postList.filter((n) => {
+            const d = new Date();
             if (n.endTime && new Date(n.endTime).getTime() < d.getTime()) {
               return true;
             } else if (n.category === 'Queries') {
-              return true;
+              return false;
             } else {
               d.setDate(d.getDate() - filterDate[n.category]);
               if (new Date(n.updatedAt).getTime() < d.getTime()) {
@@ -103,6 +103,7 @@ export class PostService {
             return false;
           });
         } else {
+          const d = new Date();
           postList = postList.filter((n) => {
             if (n.endTime && new Date(n.endTime).getTime() > d.getTime())
               return true;
@@ -204,19 +205,19 @@ export class PostService {
       postStatus = PostStatus.TO_BE_APPROVED;
     }
     var tags: Tag[] = [];
-    
-    if (post.tagIds){
-    await Promise.all(
-      post.tagIds.map(async (id) => {
-        const tag = await this.tagService.getOne(id, ['post']);
-        if (tag) {
-          tags = tags.concat([tag]);
-        }
-      }),
-    );
 
-    if (tags.length !== post.tagIds.length) throw new Error('Invalid tagIds');
-    post.tags = tags ;
+    if (post.tagIds) {
+      await Promise.all(
+        post.tagIds.map(async (id) => {
+          const tag = await this.tagService.getOne(id, ['post']);
+          if (tag) {
+            tags = tags.concat([tag]);
+          }
+        }),
+      );
+
+      if (tags.length !== post.tagIds.length) throw new Error('Invalid tagIds');
+      post.tags = tags;
     }
 
     let newPost = new Post();
