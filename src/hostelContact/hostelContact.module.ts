@@ -9,4 +9,4 @@ import ContactService from './hostelContact.service';
   imports: [TypeOrmModule.forFeature([Hostel, HostelContact])],
   providers: [ContactResolver, ContactService],
 })
-export class HostelcontactModule {}
+export class HostelContactModule {}

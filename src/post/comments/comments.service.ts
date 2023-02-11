@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PostService } from 'src/Post/post.service';
+import { PostService } from 'src/post/post.service';
 import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { Post } from '../post.entity';

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import Hostel from 'src/hostel/hostel.entity';
+import HostelService from 'src/hostel/hostel.service';
 import Tag from 'src/tag/tag.entity';
 import { UserService } from 'src/user/user.service';
 import { Notification } from 'src/utils';
@@ -12,9 +13,8 @@ export class NotificationService {
   constructor(
     private readonly firebase: FirebaseService,
     private readonly userServce: UserService,
-    @InjectRepository(Hostel)
-    private hostelRepository: Repository<Hostel>,
-  ) {}
+    private hostelRepository: HostelService,
+  ) { }
 
   //TODO: change the type to Post
   async notifyPost(post: any) {
@@ -84,9 +84,7 @@ export class NotificationService {
   }
 
   async notifyAmenity(amenity: any) {
-    const hostel = await this.hostelRepository.findOne({
-      where: { id: amenity.hostel.id },
-    });
+    const hostel = await this.hostelRepository.getOne(amenity.hostel.id);
 
     let tokens: string[] = [];
     hostel?.users.map(

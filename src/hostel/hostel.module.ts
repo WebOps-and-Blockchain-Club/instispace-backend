@@ -19,5 +19,6 @@ import HostelService from './hostel.service';
     ]),
   ],
   providers: [HostelResolver, HostelService],
+  exports: [HostelService]
 })
-export class HostelModule {}
+export class HostelModule { }

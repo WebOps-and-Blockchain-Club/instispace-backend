@@ -11,7 +11,7 @@ import { CommentsService } from './comments.service';
 import { Comments } from './comment.entity';
 import { CreateCommentInput } from './type/create-comment.input';
 import { UpdateCommentInput } from './type/update-comment.input';
-import { Post } from 'src/Post/post.entity';
+import { Post } from 'src/post/post.entity';
 import { CurrentUser } from 'src/auth/current_user';
 import { User } from 'src/user/user.entity';
 import { PostService } from '../post.service';

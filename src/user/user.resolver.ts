@@ -9,8 +9,8 @@ import {
 } from '@nestjs/graphql';
 import { AuthGuard } from '@nestjs/passport';
 import Hostel from 'src/hostel/hostel.entity';
-import { Comments } from 'src/Post/comments/comment.entity';
-import { Post } from 'src/Post/post.entity';
+import { Comments } from 'src/post/comments/comment.entity';
+import { Post } from 'src/post/post.entity';
 import { CurrentUser } from '../auth/current_user';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import Tag from '../tag/tag.entity';

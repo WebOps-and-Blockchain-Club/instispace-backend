@@ -6,7 +6,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { Post } from 'src/Post/post.entity';
+import { Post } from 'src/post/post.entity';
 import { User } from '../user/user.entity';
 import { Tag } from './tag.entity';
 import { TagService } from './tag.service';

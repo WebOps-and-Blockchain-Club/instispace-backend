@@ -20,7 +20,7 @@ class HostelService {
     private amenityRepository: Repository<Amenity>,
     @InjectRepository(HostelContact)
     private contactRepository: Repository<HostelContact>,
-  ) {}
+  ) { }
 
   create(name: string): Promise<Hostel> {
     let hostel = this.hostelRepository.create();
@@ -38,6 +38,12 @@ class HostelService {
       return hostels;
     }
     return await this.hostelRepository.find();
+  }
+
+  async getOne(id: string) {
+    return this.hostelRepository.findOne({
+      where: { id: id },
+    });
   }
 
   users(id: string): Promise<User[]> {

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PostModule } from 'src/Post/post.module';
+import { PostModule } from 'src/post/post.module';
 import { Comments } from './comment.entity';
 import { CommentsResolver } from './comments.resolver';
 import { CommentsService } from './comments.service';

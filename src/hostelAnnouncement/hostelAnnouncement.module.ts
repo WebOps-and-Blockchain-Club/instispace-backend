@@ -9,4 +9,4 @@ import HostelAnnouncementService from './hostelAnnouncement.service';
   imports: [TypeOrmModule.forFeature([Hostel, HostelAnnouncement])],
   providers: [HostelAnnouncementResolver, HostelAnnouncementService],
 })
-export class HostelannouncementModule {}
+export class HostelAnnouncementModule {}

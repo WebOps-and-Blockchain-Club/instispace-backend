@@ -2,28 +2,7 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-<<<<<<< HEAD
 type Report {
-=======
-type Amenity {
-  """Auto generated uuid for an Amenity"""
-  id: String!
-
-  """Amenity's name"""
-  name: String!
-
-  """Amenity image"""
-  description: String!
-
-  """Amenity's visual description"""
-  images: String
-
-  """Hostel to which amenity is related"""
-  hostel: Hostel!
-}
-
-type Tag {
->>>>>>> 47edb5ec4cafb17fcf1b6ca74d166b85b68e7c4d
   id: String!
   description: String!
   createdAt: DateTime!
@@ -96,6 +75,83 @@ enum UserRole {
   SECRETARY
 }
 
+type Amenity {
+  """Auto generated uuid for an Amenity"""
+  id: String!
+
+  """Amenity's name"""
+  name: String!
+
+  """Amenity image"""
+  description: String!
+
+  """Amenity's visual description"""
+  images: String
+
+  """Hostel to which amenity is related"""
+  hostel: Hostel!
+}
+
+"""Annoucements Entity, It will be diplayed for all hostels"""
+type HostelAnnouncement {
+  """Unique uuid generated for each announcement"""
+  id: String!
+
+  """Announcement's Title"""
+  title: String!
+
+  """Announcement's Description, text"""
+  description: String!
+
+  """Image description for announcement"""
+  images: String
+  createdAt: DateTime!
+  endTime: DateTime!
+
+  """Visiblity state of announcements"""
+  isHidden: Boolean!
+
+  """User who created the announcement"""
+  user: User!
+
+  """Hostels on which the announcement needs to be diplayed"""
+  hostels: [Hostel!]!
+}
+
+type HostelContact {
+  """Auto generated uuid"""
+  id: String!
+
+  """name of the person with whom the contact is related to"""
+  name: String!
+
+  """type of contact Warden-contact/secretory-contact etc."""
+  type: String!
+
+  """contact"""
+  contact: String!
+
+  """relation which stores the contact-hostel"""
+  hostel: Hostel
+}
+
+"""Hostel entity"""
+type Hostel {
+  """Unique uuid generated for each Hostel"""
+  id: String!
+
+  """Hostel's name"""
+  name: String!
+
+  """Residents of The Hostel"""
+  users: [User!]
+
+  """Hostel's Announcement, they will be displayed on the notice board"""
+  announcements: [HostelAnnouncement!]
+  contacts: [HostelContact!]!
+  amenities: [Amenity!]!
+}
+
 type User {
   id: String!
   name: String
@@ -103,16 +159,6 @@ type User {
   roll: String!
   mobile: String
   isNewUser: Boolean!
-<<<<<<< HEAD
-  post: [Post!]
-  comment: [Comments!]
-  reports: [Report!]
-  permission: Permission
-
-  """User's role"""
-  role: UserRole!
-  createdBy: User
-=======
   notifyPost: String!
   fcmToken: String!
 
@@ -121,7 +167,14 @@ type User {
 
   """Announcements Created by User"""
   hostelannouncements: [HostelAnnouncement!]!
->>>>>>> 47edb5ec4cafb17fcf1b6ca74d166b85b68e7c4d
+  post: [Post!]
+  comment: [Comments!]
+  reports: [Report!]
+  permission: Permission
+
+  """User's role"""
+  role: UserRole!
+  createdBy: User
   interests: [Tag!]
   likedPost: [Post!]
   dislikedPost: [Post!]
@@ -180,71 +233,6 @@ type Tag {
   post: [Post!]!
 }
 
-"""Annoucements Entity, It will be diplayed for all hostels"""
-type HostelAnnouncement {
-  """Unique uuid generated for each announcement"""
-  id: String!
-
-  """Announcement's Title"""
-  title: String!
-
-  """Announcement's Description, text"""
-  description: String!
-
-  """Image description for announcement"""
-  images: String
-  createdAt: DateTime!
-  endTime: DateTime!
-
-  """Visiblity state of announcements"""
-  isHidden: Boolean!
-
-  """User who created the announcement"""
-  user: User!
-
-  """Hostels on which the announcement needs to be diplayed"""
-  hostels: [Hostel!]!
-}
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-
-type HostelContact {
-  """Auto generated uuid"""
-  id: String!
-
-  """name of the person with whom the contact is related to"""
-  name: String!
-
-  """type of contact Warden-contact/secretory-contact etc."""
-  type: String!
-
-  """contact"""
-  contact: String!
-
-  """relation which stores the contact-hostel"""
-  hostel: Hostel
-}
-
-"""Hostel entity"""
-type Hostel {
-  """Unique uuid generated for each Hostel"""
-  id: String!
-
-  """Hostel's name"""
-  name: String!
-
-  """Residents of The Hostel"""
-  users: [User!]
-
-  """Hostel's Announcement, they will be displayed on the notice board"""
-  announcements: [HostelAnnouncement!]
-  contacts: [HostelContact!]!
-  amenities: [Amenity!]!
-}
-
 type LoginOutput {
   accessToken: String!
 }
@@ -270,7 +258,6 @@ type Query {
   getTags: [Tag!]!
   getTag(TagId: String!): Tag!
   getCategories: [String!]!
-<<<<<<< HEAD
   findPosts(lastEventId: String!, take: Float!, filteringCondition: FilteringConditions!, orderInput: OrderInput!): getPostOutput!
   findOnePost(Postid: String!): Post!
   getAllComments: [Comments!]!
@@ -279,6 +266,7 @@ type Query {
   reportreason(id: String!): ReportReason!
   reports: [Report!]!
   getReport(id: String!): Report!
+  getHostels: [Hostel!]!
 }
 
 input FilteringConditions {
@@ -294,16 +282,13 @@ input FilteringConditions {
 input OrderInput {
   byLikes: Boolean
   byComments: Boolean
-=======
-  getHostels: [Hostel!]!
->>>>>>> 47edb5ec4cafb17fcf1b6ca74d166b85b68e7c4d
 }
 
 type Mutation {
   login(loginInput: LoginInput!): LoginOutput!
-<<<<<<< HEAD
   createUser(user: CreateUserInput!, permission: PermissionInput!): User!
   updateUser(userInput: UpdateUserInput!): Boolean!
+  setHostel(hostelname: String!): Hostel!
   createTag(CreateTagInput: CreateTagInput!): Tag!
   createPost(postInput: CreatePostInput!): Post!
   updatePost(updatePostInput: UpdatePostInput!, id: String!): Post!
@@ -322,24 +307,19 @@ type Mutation {
   removeReportreason(id: String!): ReportReason!
   createReport(createReportInput: CreateReportInput!, postId: String!): Report!
   removeReport(id: String!): Report!
-=======
-  createUser(user: CreateUserInput!): User!
-  setHostel(hostelname: String!): Hostel!
-  createTag(CreateTagInput: CreateTagInput!): Tag!
 
   """Mutation to create hostel"""
   createHostel(name: String!): Hostel!
 
   """Mutation to create amenity"""
   createAmenity(NewAmenity: CreateAmenityInput!, HostelId: String!): Amenity!
+  createNotification(NotificationData: NotificationInput!): Boolean!
 
   """Mutation to create contact"""
   createContact(NewContact: CreateContactInput!, HostelId: String!): HostelContact!
 
   """Mutation to create announcement"""
   createHostelAnnouncement(NewHostelAnnouncement: createHostelAnnounceInput!): HostelAnnouncement!
-  createNotification(NotificationData: NotificationInput!): Boolean!
->>>>>>> 47edb5ec4cafb17fcf1b6ca74d166b85b68e7c4d
 }
 
 input LoginInput {
@@ -375,7 +355,6 @@ input CreateTagInput {
   category: String!
 }
 
-<<<<<<< HEAD
 input CreatePostInput {
   title: String
   content: String!
@@ -436,13 +415,29 @@ input UpdateReportreasonInput {
 
 input CreateReportInput {
   description: String!
-=======
+}
+
 input CreateAmenityInput {
   """Amenity's name"""
   name: String!
 
   """Amenity description"""
   description: String!
+}
+
+"""Input-Type for Create Notification Mutaion"""
+input NotificationInput {
+  """Title of Notification"""
+  title: String!
+
+  """Roll no.s"""
+  rolls: [String!]
+
+  """Body of Notification"""
+  body: String!
+
+  """Images for Notification"""
+  imageUrl: String
 }
 
 input CreateContactInput {
@@ -471,20 +466,4 @@ input createHostelAnnounceInput {
 
   """Hostels' Ids"""
   hostelIds: [String!]!
-}
-
-"""Input-Type for Create Notification Mutaion"""
-input NotificationInput {
-  """Title of Notification"""
-  title: String!
-
-  """Roll no.s"""
-  rolls: [String!]
-
-  """Body of Notification"""
-  body: String!
-
-  """Images for Notification"""
-  imageUrl: String
->>>>>>> 47edb5ec4cafb17fcf1b6ca74d166b85b68e7c4d
 }

@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Comments } from 'src/Post/comments/comment.entity';
-import { Post } from 'src/Post/post.entity';
-import { Report } from 'src/Post/reports/report.entity';
+import { Comments } from 'src/post/comments/comment.entity';
+import { Post } from 'src/post/post.entity';
+import { Report } from 'src/post/reports/report.entity';
 import Tag from 'src/tag/tag.entity';
 import {
   Entity,
