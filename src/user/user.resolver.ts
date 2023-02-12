@@ -56,8 +56,6 @@ export class UserResolver {
       user.roll,
       permissionInput,
       user.role,
-      user.name,
-      user.pass,
     );
   }
 

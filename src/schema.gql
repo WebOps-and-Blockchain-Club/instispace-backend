@@ -330,10 +330,8 @@ input LoginInput {
 }
 
 input CreateUserInput {
-  name: String!
   roll: String!
   role: UserRole!
-  pass: String!
 }
 
 input PermissionInput {

@@ -18,7 +18,7 @@ import Tag from 'src/tag/tag.entity';
 import { TagService } from 'src/tag/tag.service';
 import Hostel from 'src/hostel/hostel.entity';
 import { Repository } from 'typeorm';
-import { Notification } from 'src/utils';
+import { autoGenPass, Notification } from 'src/utils';
 import { In } from 'typeorm';
 import { emailExpresion } from 'src/utils/index';
 import {
@@ -202,21 +202,21 @@ export class UserService {
     roll: string,
     permissionInput: PermissionInput,
     role: UserRole,
-    name?: string,
-    password?: string,
     ldapName?: string,
   ): Promise<User> {
     let user = this.usersRepository.create();
     user.roll = roll;
-    user.name = name;
     user.ldapName = ldapName;
     user.role = role;
-    if (!!password) {
-      user.password = bcrypt.hashSync(
-        password,
-        bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
-      );
-    }
+    let password =
+      process.env.NODE_ENV === 'development' ? accountPassword : autoGenPass(8);
+    // TODO: mail this password
+    user.password = bcrypt.hashSync(
+      password,
+      bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
+    );
+    console.log(password);
+
     const current_user = await this.usersRepository.findOne({
       where: { id: currentUser.id },
       relations: ['permission'],
