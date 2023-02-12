@@ -51,12 +51,12 @@ export class User {
   @Column({ type: Boolean, default: true })
   isNewUser: Boolean;
 
-  @Field()
-  @Column()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   notifyPost: Notification;
 
   @Column({ type: String, nullable: true })
-  @Field((_type) => String)
+  @Field((_type) => String, { nullable: true })
   fcmToken: string;
 
   @ManyToOne((_type) => Hostel, (hostel) => hostel.users, { nullable: true })

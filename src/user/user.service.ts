@@ -20,31 +20,120 @@ import Hostel from 'src/hostel/hostel.entity';
 import { Repository } from 'typeorm';
 import { Notification } from 'src/utils';
 import { In } from 'typeorm';
+import { emailExpresion } from 'src/utils/index';
+import {
+  adminEmail,
+  adminPassword,
+  accountPassword,
+  usersDevList,
+} from 'src/utils/config.json';
+import UsersDev from './usersDev.entity';
+import { LdapService } from 'src/ldap/ldap.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private usersRepository: TreeRepository<User>,
+    @InjectRepository(UsersDev)
+    private usersDevRepository: Repository<UsersDev>,
     @Inject(forwardRef(() => AuthService))
     private authService: AuthService,
     @Inject(forwardRef(() => PermissionService))
     private permissionService: PermissionService,
     @Inject(forwardRef(() => TagService))
     private tagService: TagService,
+    @Inject(LdapService)
+    private ldapService: LdapService,
     @InjectRepository(Hostel)
     private hostelRepository: Repository<Hostel>,
   ) {}
 
-  async login(loginInput: LoginInput) {
-    const user = await this.authService.validateUser(
-      loginInput.roll,
-      loginInput.pass,
-    );
-    if (!user) {
-      throw new BadRequestException(`Email or password are invalid`);
-    } else {
-      return this.authService.generateToken(user);
+  async login({ roll, pass }: LoginInput) {
+    if (emailExpresion.test(roll) === false) {
+      let ldapUser: any;
+      if (process.env.NODE_ENV === 'development') {
+        // If user development database is empty add few random users in database
+        const usersDevCount = await this.usersDevRepository.count();
+        if (usersDevCount === 0) {
+          await Promise.all(
+            usersDevList.map(async (_user) => {
+              const userDev = this.usersDevRepository.create({ ..._user });
+              await this.usersDevRepository.save(userDev);
+            }),
+          );
+        }
+
+        // Check the user credentials in development database
+        ldapUser = await this.usersDevRepository.findOne({
+          where: { roll: roll.toLowerCase(), pass: pass },
+        });
+        if (!ldapUser) throw new Error('Invalid Credentials');
+      } else {
+        // Check with LDAP
+        ldapUser = await this.ldapService.auth(roll, pass);
+        if (!ldapUser) throw new Error('Invalid Credentials');
+      }
+
+      /************ Check the user details ************/
+      const user = await this.usersRepository.findOne({
+        where: { roll: roll.toLowerCase() },
+      });
+      // If user doesn't exists
+      if (!user) {
+        const newUser = this.usersRepository.create();
+        newUser.roll = roll.toLowerCase();
+        newUser.role = UserRole.USER;
+        newUser.ldapName = ldapUser.displayName;
+        newUser.isNewUser = true;
+        // TODO: notification
+        await this.usersRepository.save(newUser);
+        const token = (await this.authService.generateToken(newUser))
+          .accessToken;
+        return { isNewUser: newUser.isNewUser, role: UserRole.USER, token };
+      }
+      // If user exists
+      else {
+        // TODO: notification
+        const token = (await this.authService.generateToken(user)).accessToken;
+        return {
+          isNewUser: user.isNewUser,
+          role: user.role,
+          token,
+        };
+      }
+    }
+    // For superusers
+    else {
+      if (process.env.NODE_ENV === 'development') {
+        const admins = await this.usersRepository.find({
+          where: { role: UserRole.ADMIN },
+        });
+
+        if (admins.length === 0) {
+          const admin = this.usersRepository.create();
+          admin.roll = adminEmail.toLowerCase();
+          admin.role = UserRole.ADMIN;
+          admin.isNewUser = false;
+          // TODO: notification
+          admin.password = bcrypt.hashSync(
+            adminPassword,
+            bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
+          );
+          await this.usersRepository.save(admin);
+        }
+      }
+      const user = await this.authService.validateUser(roll, pass);
+      if (!user) throw new BadRequestException(`Email or password are invalid`);
+      else {
+        const token = (await this.authService.generateToken(user)).accessToken;
+        // TODO: notification
+        return {
+          isNewUser: user.isNewUser,
+          role: user.role,
+          token,
+        };
+      }
     }
   }
 
