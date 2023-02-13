@@ -73,7 +73,7 @@ export class PostService {
             'savedBy',
             'tags',
           ],
-          order: { createdAt: 'ASC' },
+          order: { createdAt: 'DESC' },
         });
 
         //Filter the posts after the 2 hours time of completion
@@ -118,6 +118,7 @@ export class PostService {
             return false;
           });
         }
+        console.log(postList);
 
         postList = postList.filter(
           (n) =>
@@ -147,9 +148,11 @@ export class PostService {
             filteringConditions.categories &&
             filteringConditions.categories.length
           ) {
+            console.log(filteringConditions.categories);
             postList = postList.filter((n) =>
               filteringConditions.categories.includes(n.category),
             );
+            // console.log(postList);
           }
           if (filteringConditions.isSaved) {
             postList = postList.filter((e) => e.isSaved === true);
@@ -230,6 +233,7 @@ export class PostService {
     newPost.location = post.location;
     newPost.title = post.title;
     newPost.tags = post.tags;
+
     if (postStatus) {
       const superUsers = await this.userService.getAncestorswithAprrovalAccess(
         user,
@@ -238,7 +242,7 @@ export class PostService {
       console.log(superUsers);
       newPost.status = postStatus;
     }
-    if (newPost.endTime) newPost.endTime = post.endTime;
+    if (post.endTime) newPost.endTime = post.endTime;
     newPost.createdBy = user;
     return this.postRepository.save(newPost);
   }
