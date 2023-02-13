@@ -52,7 +52,7 @@ export class User {
   isNewUser: Boolean;
 
   @Field()
-  @Column()
+  @Column({ default: Notification.NONE })
   notifyPost: Notification;
 
   @Column({ type: String, nullable: true })
