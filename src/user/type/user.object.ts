@@ -4,6 +4,12 @@ registerEnumType(UserRole, { name: 'UserRole' });
 
 @ObjectType()
 export class LoginOutput {
+  @Field(() => Boolean)
+  isNewUser: boolean;
+
   @Field()
-  accessToken: string;
+  role: string;
+
+  @Field()
+  token: string;
 }

@@ -159,8 +159,8 @@ type User {
   roll: String!
   mobile: String
   isNewUser: Boolean!
-  notifyPost: String!
-  fcmToken: String!
+  notifyPost: String
+  fcmToken: String
 
   """User's Hostel amd its details"""
   hostel: Hostel
@@ -234,7 +234,9 @@ type Tag {
 }
 
 type LoginOutput {
-  accessToken: String!
+  isNewUser: Boolean!
+  role: String!
+  token: String!
 }
 
 type getPostOutput {
@@ -328,10 +330,8 @@ input LoginInput {
 }
 
 input CreateUserInput {
-  name: String!
   roll: String!
   role: UserRole!
-  pass: String!
 }
 
 input PermissionInput {

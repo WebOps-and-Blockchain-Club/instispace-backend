@@ -103,10 +103,9 @@ export class PostService {
             return false;
           });
         } else {
-//          const d = new Date();
           postList = postList.filter((n) => {
-  const d = new Date();
-		  if (n.endTime && new Date(n.endTime).getTime() > d.getTime())
+            const d = new Date();
+            if (n.endTime && new Date(n.endTime).getTime() > d.getTime())
               return true;
             else if (n.category === 'Queries') {
               return true;

@@ -7,13 +7,16 @@ import Hostel from 'src/hostel/hostel.entity';
 import { User } from './user.entity';
 import { UserResolver } from './user.resolver';
 import { UserService } from './user.service';
+import UsersDev from './usersDev.entity';
+import { LdapModule } from 'src/ldap/ldap.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Hostel]),
+    TypeOrmModule.forFeature([User, Hostel, UsersDev]),
     AuthModule,
     PermissionModule,
     TagModule,
+    LdapModule,
   ],
   providers: [UserResolver, UserService],
   exports: [UserService],
