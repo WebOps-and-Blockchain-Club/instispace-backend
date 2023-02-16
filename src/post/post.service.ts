@@ -45,7 +45,7 @@ export class PostService {
             'savedBy',
             'tags',
           ],
-          order: { createdAt: 'ASC' },
+          order: { createdAt: 'DESC' },
         });
         // get posts made by descendents
         const descendentsStr = JSON.stringify(
@@ -223,14 +223,19 @@ export class PostService {
       post.tags = tags;
     }
 
+    let imageUrls;
+    if (post.photoList && post.photoList.length) {
+      imageUrls = post.photoList.join(' AND ');
+    }
+
     let newPost = new Post();
     newPost.Link = post.link;
     newPost.category = post.category;
     newPost.content = post.content;
     newPost.isHidden = post.isHidden;
-    newPost.photo = post.Photo;
     newPost.linkName = post.linkName;
     newPost.location = post.location;
+    newPost.photo = imageUrls === '' ? null : imageUrls;
     newPost.title = post.title;
     newPost.tags = post.tags;
 
@@ -295,9 +300,12 @@ export class PostService {
         throw new Error('Invalid tagIds');
       postToUpdate.tags = tags;
     }
-
+    let imageUrls;
+    if (updatePostInput.photoList && updatePostInput.photoList.length) {
+      imageUrls = updatePostInput.photoList.join(' AND ');
+    }
+    postToUpdate.photo = imageUrls === '' ? null : imageUrls;
     if (updatePostInput.link) postToUpdate.Link = updatePostInput.link;
-    if (updatePostInput.Photo) postToUpdate.photo = updatePostInput.Photo;
     if (updatePostInput.category)
       postToUpdate.category = updatePostInput.category;
     if (updatePostInput.content) postToUpdate.content = updatePostInput.content;
