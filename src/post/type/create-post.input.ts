@@ -30,7 +30,7 @@ export class CreatePostInput {
   @Field({ nullable: true })
   location: string;
 
-  @Field({ nullable: true })
+  @Field(() => [String], { nullable: true })
   photoList: string[];
 
   tags?: Tag[];
