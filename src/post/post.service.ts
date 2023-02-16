@@ -45,7 +45,7 @@ export class PostService {
             'savedBy',
             'tags',
           ],
-          order: { createdAt: 'ASC' },
+          order: { createdAt: 'DESC' },
         });
         // get posts made by descendents
         const descendentsStr = JSON.stringify(
@@ -238,7 +238,7 @@ export class PostService {
       console.log(superUsers);
       newPost.status = postStatus;
     }
-    if (newPost.endTime) newPost.endTime = post.endTime;
+    if (post.endTime) newPost.endTime = post.endTime;
     newPost.createdBy = user;
     return this.postRepository.save(newPost);
   }

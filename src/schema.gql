@@ -299,7 +299,7 @@ type Mutation {
   toggleLikePost(postId: String!): Post!
   toggleDislikePost(postId: String!): Post!
   toggleSavePost(postId: String!): Post!
-  createComment(createCommentInput: CreateCommentInput!): Comments!
+  createComment(createCommentInput: CreateCommentInput!, postId: String!): Comments!
   updateComment(updateCommentInput: UpdateCommentInput!, id: String!): Comments!
   removeComment(id: String!): Comments!
   toggleLikeComment(commentId: String!): Comments!
