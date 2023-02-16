@@ -18,7 +18,7 @@ export class CreatePostInput {
   @Field({ nullable: true })
   link: string;
 
-  @Field(() => [String], { nullable : true })
+  @Field(() => [String], { nullable: true })
   tagIds: string[];
 
   @Field({ nullable: true })
@@ -31,7 +31,7 @@ export class CreatePostInput {
   location: string;
 
   @Field({ nullable: true })
-  Photo: string;
+  photoList: string[];
 
   tags?: Tag[];
 }

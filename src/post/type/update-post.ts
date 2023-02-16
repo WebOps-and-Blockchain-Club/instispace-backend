@@ -31,7 +31,7 @@ export class UpdatePostInput {
   location: string;
 
   @Field({ nullable: true })
-  Photo: string;
+  photoList: string[];
 
   tags?: Tag[];
 }
