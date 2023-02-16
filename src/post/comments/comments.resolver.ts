@@ -31,7 +31,7 @@ export class CommentsResolver {
   async createComment(
     @Args('createCommentInput') createCommentInput: CreateCommentInput,
     @CurrentUser() user: User,
-    postId: string,
+    @Args('postId') postId: string,
   ) {
     let post = await this.postService.findOne(postId);
     return this.commentsService.create(createCommentInput, user, post);
