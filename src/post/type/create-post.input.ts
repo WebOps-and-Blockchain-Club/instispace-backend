@@ -13,6 +13,9 @@ export class CreatePostInput {
   endTime: Date;
 
   @Field({ nullable: true })
+  postTime: Date;
+
+  @Field({ nullable: true })
   linkName: string;
 
   @Field({ nullable: true })

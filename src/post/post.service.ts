@@ -235,6 +235,7 @@ export class PostService {
     newPost.isHidden = post.isHidden;
     newPost.linkName = post.linkName;
     newPost.location = post.location;
+    if (post.postTime) newPost.postTime = post.postTime;
     newPost.photo = imageUrls === '' ? null : imageUrls;
     newPost.title = post.title;
     newPost.tags = post.tags;
@@ -315,6 +316,9 @@ export class PostService {
       postToUpdate.linkName = updatePostInput.linkName;
     if (updatePostInput.location)
       postToUpdate.location = updatePostInput.location;
+    if (updatePostInput.endTime) postToUpdate.endTime = updatePostInput.endTime;
+    if (updatePostInput.postTime)
+      postToUpdate.postTime = updatePostInput.postTime;
     if (updatePostInput.title) postToUpdate.title = updatePostInput.title;
     return this.postRepository.save(postToUpdate);
   }

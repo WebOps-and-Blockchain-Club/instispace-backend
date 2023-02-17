@@ -88,6 +88,10 @@ export class Post {
   @Field(() => Date, { nullable: true })
   endTime: Date;
 
+  @Column({ type: 'timestamptz', nullable: true })
+  @Field(() => Date, { nullable: true })
+  postTime: Date;
+
   @OneToMany(() => Comments, (comment) => comment.post)
   @Field(() => [Comments], { nullable: true })
   postComments: Comments[];
