@@ -24,6 +24,12 @@ export class CommentsService {
       element.content = comment.content;
       element.post = post!;
       element.createdBy = user;
+      let imageUrls;
+      if (comment.photoList && comment.photoList.length) {
+        imageUrls = comment.photoList.join(' AND ');
+      }
+      element.photo = imageUrls === '' ? null : imageUrls;
+
       return await this.commentRepository.save(element);
     } catch (e) {
       throw new Error(e.message);
@@ -60,6 +66,13 @@ export class CommentsService {
 
       if ((commentToUpdate.isHidden = updateCommentInput.isHidden))
         commentToUpdate.isHidden = updateCommentInput.isHidden;
+
+      let imageUrls;
+      if (updateCommentInput.photoList && updateCommentInput.photoList.length) {
+        imageUrls = updateCommentInput.photoList.join(' AND ');
+      }
+      if (imageUrls !== '') commentToUpdate.photo = imageUrls;
+
       return await this.commentRepository.save(commentToUpdate);
     } catch (e) {
       throw new Error(e.message);

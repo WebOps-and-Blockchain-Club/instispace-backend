@@ -53,6 +53,10 @@ export class Comments {
   })
   status: PostStatus;
 
+  @Column({ type: 'text', nullable: true })
+  @Field((_type) => String, { nullable: true })
+  photo?: string | null;
+
   @Field(() => Boolean)
   isReported: Boolean;
 

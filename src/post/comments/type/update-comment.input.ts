@@ -11,4 +11,7 @@ export class UpdateCommentInput extends PartialType(CreateCommentInput) {
     nullable: true,
   })
   isHidden: boolean;
+
+  @Field(() => [String], { nullable: true })
+  photoList: string[];
 }
