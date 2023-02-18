@@ -1,38 +1,60 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Scope } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FirebaseService } from 'src/firebase/firebase.service';
-import Hostel from 'src/hostel/hostel.entity';
 import HostelService from 'src/hostel/hostel.service';
 import Tag from 'src/tag/tag.entity';
+import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Notification } from 'src/utils';
 import { Repository } from 'typeorm';
+import { NotificationConfig } from './notification.entity';
+import { UpdateNotificationConfigInput } from './type/update-notification-config';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class NotificationService {
   constructor(
+    @InjectRepository(NotificationConfig)
+    private notificationRepository: Repository<NotificationConfig>,
     private readonly firebase: FirebaseService,
-    private readonly userServce: UserService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
     private hostelRepository: HostelService,
-  ) { }
+  ) {}
 
   //TODO: change the type to Post
   async notifyPost(post: any) {
-    let users = await this.userServce.usersForNotif();
+    let users = await this.userService.usersForNotif();
 
-    if (post.tags) {
-    }
-    users = users.filter(
-      (user) =>
-        user.notifyPost === Notification.FORALL ||
-        (user.notifyPost === Notification.FOLLOWED_TAGS &&
-          user.interests?.filter(
-            (tag) =>
-              post.tags.filter((_tag: Tag) => _tag.id === tag.id).length !== 0,
-          ).length !== 0),
-    );
     let tokens: string[] = [];
-    users.map((user) => (tokens = tokens.concat(user.fcmToken.split(' AND '))));
+    //populating tokenDemo based on updated structure
+    await Promise.all(
+      users.map(async (user) => {
+        user.notificationConfig.map((c) => {
+          if (
+            c.configForPost === Notification.FORALL ||
+            (c.configForPost === Notification.FOLLOWED_TAGS &&
+              user.interests?.filter(
+                (tag) =>
+                  post.tags.filter((_tag: Tag) => _tag.id === tag.id).length !==
+                  0,
+              ).length !== 0)
+          )
+            tokens.push(c.fcmToken);
+        });
+      }),
+    );
+
+    // users = users.filter(
+    //   (user) =>
+    //     user.notifyPost === Notification.FORALL ||
+    //     (user.notifyPost === Notification.FOLLOWED_TAGS &&
+    //       user.interests?.filter(
+    //         (tag) =>
+    //           post.tags.filter((_tag: Tag) => _tag.id === tag.id).length !== 0,
+    //       ).length !== 0),
+    // );
+    // let tokens: string[] = [];
+    // users.map((user) => (tokens = tokens.concat(user.fcmToken.split(' AND '))));
 
     tokens = tokens.filter((t) => t !== '' && t != null);
     if (tokens.length === 0) return;
@@ -104,6 +126,45 @@ export class NotificationService {
       },
     });
   }
-
   //TODO: logic for notify all in other post types
+
+  async createNotificationConfig(
+    user: User,
+    fcmToken: string,
+  ): Promise<NotificationConfig> {
+    let newNotify = new NotificationConfig();
+    newNotify.createdBy = user;
+    newNotify.fcmToken = fcmToken;
+    return this.notificationRepository.save(newNotify);
+  }
+
+  async updateNotificationConfig(
+    notificationConfigInput: UpdateNotificationConfigInput,
+    fcmToken: string,
+  ) {
+    let notifToUpdate = new NotificationConfig();
+    notifToUpdate = await this.notificationRepository.findOne({
+      where: { fcmToken: fcmToken },
+    });
+    console.log(notifToUpdate);
+    if (notificationConfigInput.configForPost)
+      notifToUpdate.configForPost = notificationConfigInput.configForPost;
+
+    if (notificationConfigInput.configForLikeReply)
+      notifToUpdate.configForLikeReply =
+        notificationConfigInput.configForLikeReply;
+
+    if (notificationConfigInput.configForCommentOnQuery)
+      notifToUpdate.configForCommentOnQuery =
+        notificationConfigInput.configForCommentOnQuery;
+
+    return await this.notificationRepository.save(notifToUpdate);
+  }
+
+  async FindNotifByid(id: string) {
+    return await this.notificationRepository.findOne({
+      where: { id: id },
+      relations: ['createdBy'],
+    });
+  }
 }

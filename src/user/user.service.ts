@@ -29,6 +29,7 @@ import {
 } from 'src/utils/config.json';
 import UsersDev from './usersDev.entity';
 import { LdapService } from 'src/ldap/ldap.service';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class UserService {
@@ -43,13 +44,15 @@ export class UserService {
     private permissionService: PermissionService,
     @Inject(forwardRef(() => TagService))
     private tagService: TagService,
+    @Inject(forwardRef(() => NotificationService))
+    private notificationService: NotificationService,
     @Inject(LdapService)
     private ldapService: LdapService,
     @InjectRepository(Hostel)
     private hostelRepository: Repository<Hostel>,
   ) {}
 
-  async login({ roll, pass }: LoginInput) {
+  async login({ roll, pass }: LoginInput, fcmToken: string) {
     if (emailExpresion.test(roll) === false) {
       let ldapUser: any;
       if (process.env.NODE_ENV === 'development') {
@@ -66,7 +69,10 @@ export class UserService {
 
         // Check the user credentials in development database
         ldapUser = await this.usersDevRepository.findOne({
-          where: { roll: roll.toLowerCase(), pass: pass },
+          where: {
+            roll: roll.toLowerCase(),
+            pass: pass,
+          },
         });
         if (!ldapUser) throw new Error('Invalid Credentials');
       } else {
@@ -78,6 +84,7 @@ export class UserService {
       /************ Check the user details ************/
       const user = await this.usersRepository.findOne({
         where: { roll: roll.toLowerCase() },
+        relations: ['notificationConfig'],
       });
       // If user doesn't exists
       if (!user) {
@@ -87,6 +94,7 @@ export class UserService {
         newUser.ldapName = ldapUser.displayName;
         newUser.isNewUser = true;
         // TODO: notification
+        await this.notificationService.createNotificationConfig(user, fcmToken);
         await this.usersRepository.save(newUser);
         const token = (await this.authService.generateToken(newUser))
           .accessToken;
@@ -95,6 +103,17 @@ export class UserService {
       // If user exists
       else {
         // TODO: notification
+        console.log('Hi1');
+        if (
+          user?.notificationConfig?.filter((n) => n.fcmToken === fcmToken)
+            .length === 0
+        ) {
+          console.log('Hi');
+          await this.notificationService.createNotificationConfig(
+            user,
+            fcmToken,
+          );
+        }
         const token = (await this.authService.generateToken(user)).accessToken;
         return {
           isNewUser: user.isNewUser,
@@ -108,6 +127,7 @@ export class UserService {
       if (process.env.NODE_ENV === 'development') {
         const admins = await this.usersRepository.find({
           where: { role: UserRole.ADMIN },
+          relations: ['notificationConfig'],
         });
 
         if (admins.length === 0) {
@@ -116,6 +136,15 @@ export class UserService {
           admin.role = UserRole.ADMIN;
           admin.isNewUser = false;
           // TODO: notification
+          if (
+            admin.notificationConfig.filter((n) => n.fcmToken === fcmToken)
+              .length === 0
+          ) {
+            await this.notificationService.createNotificationConfig(
+              admin,
+              fcmToken,
+            );
+          }
           admin.password = bcrypt.hashSync(
             adminPassword,
             bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
@@ -128,6 +157,15 @@ export class UserService {
       else {
         const token = (await this.authService.generateToken(user)).accessToken;
         // TODO: notification
+        if (
+          user.notificationConfig.filter((n) => n.fcmToken === fcmToken)
+            .length === 0
+        ) {
+          await this.notificationService.createNotificationConfig(
+            user,
+            fcmToken,
+          );
+        }
         return {
           isNewUser: user.isNewUser,
           role: user.role,
