@@ -25,9 +25,6 @@ export class UpdatePostInput {
   tagIds: string[];
 
   @Field({ nullable: true })
-  isHidden: boolean;
-
-  @Field({ nullable: true })
   category: string;
 
   @Field({ nullable: true })

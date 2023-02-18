@@ -232,7 +232,6 @@ export class PostService {
     newPost.Link = post.link;
     newPost.category = post.category;
     newPost.content = post.content;
-    newPost.isHidden = post.isHidden;
     newPost.linkName = post.linkName;
     newPost.location = post.location;
     if (post.postTime) newPost.postTime = post.postTime;
@@ -310,8 +309,6 @@ export class PostService {
     if (updatePostInput.category)
       postToUpdate.category = updatePostInput.category;
     if (updatePostInput.content) postToUpdate.content = updatePostInput.content;
-    if (updatePostInput.isHidden)
-      postToUpdate.isHidden = updatePostInput.isHidden;
     if (updatePostInput.linkName)
       postToUpdate.linkName = updatePostInput.linkName;
     if (updatePostInput.location)

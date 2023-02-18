@@ -145,4 +145,10 @@ export class Post {
   @Field(() => [User], { nullable: true })
   @JoinTable()
   dislikedBy: User[];
+
+  @Field(() => [String])
+  permissions: string[];
+
+  @Field(() => [String])
+  actions: string[];
 }
