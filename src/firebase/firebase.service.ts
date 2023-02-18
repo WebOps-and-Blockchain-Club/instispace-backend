@@ -8,12 +8,14 @@ export class FirebaseService {
   private admin: firebaseAdmin.app.App | null;
   constructor() {
     this.admin = null;
-    if (this.admin === null) {
+    if (this.admin === null && !firebaseAdmin.apps.length) {
       this.admin = firebaseAdmin.initializeApp({
         credential: firebaseAdmin.credential.cert(
           serviceAccount as firebaseAdmin.ServiceAccount,
         ),
       });
+    } else {
+      firebaseAdmin.app();
     }
   }
 
