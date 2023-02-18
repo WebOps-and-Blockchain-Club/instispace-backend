@@ -200,4 +200,37 @@ export class PostResolver {
     newPost.reportCount = newPost.postReports.length;
     return newPost.reportCount;
   }
+
+  // Permissions: edit, report, comment, save
+  // Actions: like/upvotes & downvotes, share, setRemider
+  @ResolveField(() => [String])
+  @UseGuards(JwtAuthGuard)
+  async permissions(@Parent() post: Post, @CurrentUser() user: User) {
+    let permissions = ['Report', 'Comment', 'Save'];
+    const _post = await this.postService.findOne(post.id);
+    if (user.id === _post?.createdBy.id) permissions.push('Edit');
+    else permissions.push('Report');
+    // view reported, approve post
+    return permissions;
+  }
+
+  @ResolveField(() => [String])
+  async actions(@Parent() post: Post) {
+    if (['LOST', 'FOUND'].includes(post.category)) return [];
+    let actions: string[] = ['Share'];
+    if (
+      [
+        'Club Events',
+        'Announcements',
+        'Recruitments',
+        'Competitions',
+        'Opportunities',
+      ].includes(post.category)
+    )
+      actions.push('Like', 'Set_Reminder');
+    if (['Random thoughts', 'Reviews'].includes(post.category))
+      actions.push('Like');
+    if (post.category === 'Queries') actions.push('Upvote_Downvote');
+    return actions;
+  }
 }

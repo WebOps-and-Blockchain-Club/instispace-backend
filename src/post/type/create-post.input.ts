@@ -24,9 +24,6 @@ export class CreatePostInput {
   @Field(() => [String], { nullable: true })
   tagIds: string[];
 
-  @Field({ nullable: true })
-  isHidden: boolean;
-
   @Field()
   category: string;
 
