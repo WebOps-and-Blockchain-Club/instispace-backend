@@ -31,7 +31,23 @@ export class PostService {
         'permission',
       ]);
       let postList: Post[];
-      if (filteringConditions.posttobeApproved) {
+      if (filteringConditions.viewReportedPosts) {
+        postList = await this.postRepository.find({
+          where: {
+            status: PostStatus.REPORTED,
+          },
+          relations: [
+            'postComments',
+            'postReports',
+            'postReports.createdBy',
+            'likedBy',
+            'createdBy',
+            'savedBy',
+            'tags',
+          ],
+          order: { createdAt: 'DESC' },
+        });
+      } else if (filteringConditions.posttobeApproved) {
         postList = await this.postRepository.find({
           where: {
             isHidden: false,
@@ -252,14 +268,18 @@ export class PostService {
     return this.postRepository.save(newPost);
   }
 
-  async changeStatus(post: Post, user: User): Promise<Post> {
+  async changeStatus(
+    post: Post,
+    user: User,
+    status: PostStatus,
+  ): Promise<Post> {
     const superUsers = await this.userService.getAncestorswithAprrovalAccess(
       user,
     );
     if (!superUsers.filter((u) => u.id === user.id).length) {
       throw new Error('Permission Denied');
     }
-    post.status = PostStatus.APPROVED;
+    post.status = status;
     post.approvedBy = user;
     return this.postRepository.save(post);
   }

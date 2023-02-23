@@ -10,16 +10,16 @@ export class Permission {
   @Field()
   id: string;
 
-  @Column({ type: 'enum', enum: UserRole, array: true })
-  @Field(() => [UserRole])
+  @Column({ type: 'enum', enum: UserRole, array: true, nullable: true })
+  @Field(() => [UserRole], { nullable: true })
   account: UserRole[];
 
-  @Column({ type: 'text', array: true })
-  @Field(() => [String])
+  @Column({ type: 'text', array: true, nullable: true })
+  @Field(() => [String], { nullable: true })
   livePosts: string[];
 
   @Column({ type: 'text', array: true, nullable: true })
-  @Field(() => [String])
+  @Field(() => [String], { nullable: true })
   hostel: string[];
 
   @Column({ type: 'boolean', default: false })

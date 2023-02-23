@@ -1,5 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import Tag from 'src/tag/tag.entity';
+import { PostStatus } from './postStatus.enum';
 
 @InputType()
 export class UpdatePostInput {
@@ -34,4 +35,10 @@ export class UpdatePostInput {
   photoList: string[];
 
   tags?: Tag[];
+}
+
+@InputType()
+export class PostStatusInput {
+  @Field(() => PostStatus)
+  status: PostStatus;
 }
