@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TagModule } from 'src/tag/tag.module';
 import { AuthModule } from '../auth/auth.module';
@@ -13,12 +13,11 @@ import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Hostel, UsersDev]),
     AuthModule,
+    TypeOrmModule.forFeature([User, Hostel, UsersDev]),
     PermissionModule,
     TagModule,
     LdapModule,
-    NotificationModule,
   ],
   providers: [UserResolver, UserService],
   exports: [UserService],

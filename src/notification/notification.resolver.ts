@@ -7,8 +7,8 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { CurrentUser } from 'src/auth/current_user';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { User } from 'src/user/user.entity';
+import { UserService } from 'src/user/user.service';
 import { NotificationConfig } from './notification.entity';
 import { NotificationService } from './notification.service';
 import NotificationInput from './type/notification.input';
@@ -16,7 +16,10 @@ import { UpdateNotificationConfigInput } from './type/update-notification-config
 
 @Resolver(() => NotificationConfig)
 export class NotificationResolver {
-  constructor(private readonly notificationService: NotificationService) {}
+  constructor(
+    private readonly notificationService: NotificationService,
+    private readonly userService: UserService,
+  ) {}
 
   @Mutation(() => Boolean)
   async createNotification(
@@ -44,7 +47,6 @@ export class NotificationResolver {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
   @Mutation(() => NotificationConfig)
   async createNotifConfig(
     @CurrentUser() user: User,

@@ -103,16 +103,17 @@ export class UserService {
       // If user exists
       else {
         // TODO: notification
-        console.log('Hi1');
+
         if (
           user?.notificationConfig?.filter((n) => n.fcmToken === fcmToken)
             .length === 0
         ) {
-          console.log('Hi');
-          await this.notificationService.createNotificationConfig(
-            user,
-            fcmToken,
-          );
+          let notificationConfig =
+            await this.notificationService.createNotificationConfig(
+              user,
+              fcmToken,
+            );
+          console.log(notificationConfig);
         }
         const token = (await this.authService.generateToken(user)).accessToken;
         return {

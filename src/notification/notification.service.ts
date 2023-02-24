@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Scope } from '@nestjs/common';
+import { forwardRef, Global, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import HostelService from 'src/hostel/hostel.service';
@@ -10,7 +10,7 @@ import { Repository } from 'typeorm';
 import { NotificationConfig } from './notification.entity';
 import { UpdateNotificationConfigInput } from './type/update-notification-config';
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class NotificationService {
   constructor(
     @InjectRepository(NotificationConfig)
@@ -43,6 +43,7 @@ export class NotificationService {
         });
       }),
     );
+    console.log(tokens);
 
     // users = users.filter(
     //   (user) =>
@@ -135,7 +136,10 @@ export class NotificationService {
     let newNotify = new NotificationConfig();
     newNotify.createdBy = user;
     newNotify.fcmToken = fcmToken;
-    return this.notificationRepository.save(newNotify);
+    console.log(newNotify);
+    const notif = await this.notificationRepository.save(newNotify);
+    console.log(notif);
+    return notif;
   }
 
   async updateNotificationConfig(

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NotificationService } from 'src/notification/notification.service';
 import Tag from 'src/tag/tag.entity';
 import { TagService } from 'src/tag/tag.service';
 import { User } from 'src/user/user.entity';
@@ -17,7 +18,9 @@ export class PostService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
     private readonly tagService: TagService,
+
     private readonly userService: UserService,
+    private readonly notificationService: NotificationService,
   ) {}
   async findAll(
     lastpostId: string,
@@ -204,9 +207,9 @@ export class PostService {
     const currentUser = await this.userService.getOneById(user.id, [
       'permission',
     ]);
-    if (!currentUser.permission.livePosts.includes(post.category)) {
-      postStatus = PostStatus.TO_BE_APPROVED;
-    }
+    // if (!currentUser.permission.livePosts.includes(post.category)) {
+    //   postStatus = PostStatus.TO_BE_APPROVED;
+    // }
     var tags: Tag[] = [];
 
     if (post.tagIds) {
@@ -249,7 +252,10 @@ export class PostService {
     }
     if (post.endTime) newPost.endTime = post.endTime;
     newPost.createdBy = user;
-    return this.postRepository.save(newPost);
+    let eventSave = this.postRepository.save(newPost);
+    let x = await this.notificationService.notifyPost(newPost);
+    console.log(x);
+    return eventSave;
   }
 
   async changeStatus(post: Post, user: User): Promise<Post> {

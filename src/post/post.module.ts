@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { forwardRef } from '@nestjs/common/utils';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NotificationModule } from 'src/notification/notification.module';
 import { TagModule } from 'src/tag/tag.module';
@@ -10,10 +11,10 @@ import { PostService } from './post.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Post]),
     UserModule,
+    TypeOrmModule.forFeature([Post]),
+    // NotificationModule,
     TagModule,
-    NotificationModule,
   ],
   controllers: [],
   providers: [PostService, PostResolver],

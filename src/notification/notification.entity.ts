@@ -18,6 +18,18 @@ export class NotificationConfig {
   })
   configForPost: Notification;
 
+  // @Column(() => String)
+  // @Field(() => [String])
+  // forAllPost: string[];
+
+  // @Column(() => String)
+  // @Field(() => [String])
+  // followedTagsPost: string[];
+
+  // @Column(() => String)
+  // @Field(() => [String])
+  // nonePost: string[];
+
   @Column({ type: 'boolean', nullable: true, default: true })
   @Field(() => Boolean, {
     description:
