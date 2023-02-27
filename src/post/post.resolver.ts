@@ -18,10 +18,11 @@ import { FilteringConditions } from './type/filtering-condition';
 import findoneOutput from './type/post-output';
 import { OrderInput } from './type/sorting-conditions';
 import { UpdatePostInput } from './type/update-post';
+import { PostCategory } from './type/post-category.enum';
 
 @Resolver(() => Post)
 export class PostResolver {
-  constructor(private readonly postService: PostService) {}
+  constructor(private readonly postService: PostService) { }
 
   @UseGuards(JwtAuthGuard)
   @Query(() => findoneOutput)
@@ -216,21 +217,21 @@ export class PostResolver {
 
   @ResolveField(() => [String])
   async actions(@Parent() post: Post) {
-    if (['LOST', 'FOUND'].includes(post.category)) return [];
+    if ([PostCategory.Lost, PostCategory.Found].includes(post.category as PostCategory)) return [];
     let actions: string[] = ['Share'];
     if (
       [
-        'Club Events',
-        'Announcements',
-        'Recruitments',
-        'Competitions',
-        'Opportunities',
-      ].includes(post.category)
+        PostCategory.Event,
+        PostCategory.Announcement,
+        PostCategory.Recruitment,
+        PostCategory.Competition,
+        PostCategory.Opportunity,
+      ].includes(post.category as PostCategory)
     )
       actions.push('Like', 'Set_Reminder');
-    if (['Random thoughts', 'Reviews'].includes(post.category))
+    if ([PostCategory.RandomThought, PostCategory.Review].includes(post.category as PostCategory))
       actions.push('Like');
-    if (post.category === 'Queries') actions.push('Upvote_Downvote');
+    if (post.category === PostCategory.Query) actions.push('Upvote_Downvote');
     return actions;
   }
 }

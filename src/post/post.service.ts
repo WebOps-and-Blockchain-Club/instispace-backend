@@ -5,6 +5,7 @@ import { TagService } from 'src/tag/tag.service';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { In, Repository } from 'typeorm';
+import { PostCategory } from './type/post-category.enum';
 import { Post } from './post.entity';
 import { CreatePostInput } from './type/create-post.input';
 import { FilteringConditions } from './type/filtering-condition';
@@ -18,7 +19,7 @@ export class PostService {
     @InjectRepository(Post) private postRepository: Repository<Post>,
     private readonly tagService: TagService,
     private readonly userService: UserService,
-  ) {}
+  ) { }
   async findAll(
     lastpostId: string,
     take: number,
@@ -81,10 +82,12 @@ export class PostService {
         // default filters (endtime should not exceed)
 
         let filterDate = {
-          Reviews: 7,
-          'Random thoughts': 3,
-          Help: 3,
-          Announcements: 7,
+          [PostCategory.Review]: 7,
+          [PostCategory.RandomThought]: 3,
+          [PostCategory.Help]: 3,
+          [PostCategory.Announcement]: 7,
+          [PostCategory.Lost]: 7,
+          [PostCategory.Found]: 7,
         };
 
         if (filteringConditions.showOldPost) {
@@ -92,7 +95,7 @@ export class PostService {
             const d = new Date();
             if (n.endTime && new Date(n.endTime).getTime() < d.getTime()) {
               return true;
-            } else if (n.category === 'Queries') {
+            } else if (n.category === PostCategory.Query) {
               return false;
             } else {
               d.setDate(d.getDate() - filterDate[n.category]);
@@ -107,7 +110,7 @@ export class PostService {
             const d = new Date();
             if (n.endTime && new Date(n.endTime).getTime() > d.getTime())
               return true;
-            else if (n.category === 'Queries') {
+            else if (n.category === PostCategory.Query) {
               return true;
             } else {
               d.setDate(d.getDate() - filterDate[n.category]);
@@ -169,16 +172,16 @@ export class PostService {
               a.likedBy.length > b.likedBy.length
                 ? -1
                 : a.likedBy.length < b.likedBy.length
-                ? 1
-                : 0,
+                  ? 1
+                  : 0,
             );
           } else if (orderInput.byLikes == false) {
             postList.sort((a, b) =>
               a.likedBy.length < b.likedBy.length
                 ? -1
                 : a.likedBy.length > b.likedBy.length
-                ? 1
-                : 0,
+                  ? 1
+                  : 0,
             );
           }
         }
