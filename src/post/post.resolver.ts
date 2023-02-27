@@ -17,7 +17,7 @@ import { CreatePostInput } from './type/create-post.input';
 import { FilteringConditions } from './type/filtering-condition';
 import findoneOutput from './type/post-output';
 import { OrderInput } from './type/sorting-conditions';
-import { UpdatePostInput } from './type/update-post';
+import { PostStatusInput, UpdatePostInput } from './type/update-post';
 import { PostCategory } from './type/post-category.enum';
 
 @Resolver(() => Post)
@@ -68,9 +68,13 @@ export class PostResolver {
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => Post)
-  async changePostsStatus(@Args('id') id: string, @CurrentUser() user: User) {
+  async changePostsStatus(
+    @Args('id') id: string,
+    @Args('status') { status }: PostStatusInput,
+    @CurrentUser() user: User,
+  ) {
     let postToUpdate = await this.postService.findOne(id);
-    return await this.postService.changeStatus(postToUpdate, user);
+    return await this.postService.changeStatus(postToUpdate, user, status);
   }
 
   @Mutation(() => Post)

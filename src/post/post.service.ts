@@ -32,7 +32,28 @@ export class PostService {
         'permission',
       ]);
       let postList: Post[];
-      if (filteringConditions.posttobeApproved) {
+      if (filteringConditions.viewReportedPosts) {
+        postList = await this.postRepository.find({
+          where: {
+            status: In([
+              PostStatus.REPORTED,
+              PostStatus.IN_REVIEW,
+              PostStatus.REPORT_ACCEPTED,
+              PostStatus.REPORT_REJECTED,
+            ]),
+          },
+          relations: [
+            'postComments',
+            'postReports',
+            'postReports.createdBy',
+            'likedBy',
+            'createdBy',
+            'savedBy',
+            'tags',
+          ],
+          order: { createdAt: 'DESC' },
+        });
+      } else if (filteringConditions.posttobeApproved) {
         postList = await this.postRepository.find({
           where: {
             isHidden: false,
@@ -255,16 +276,28 @@ export class PostService {
     return this.postRepository.save(newPost);
   }
 
-  async changeStatus(post: Post, user: User): Promise<Post> {
-    const superUsers = await this.userService.getAncestorswithAprrovalAccess(
-      user,
-    );
-    if (!superUsers.filter((u) => u.id === user.id).length) {
-      throw new Error('Permission Denied');
+  async changeStatus(
+    post: Post,
+    user: User,
+    status: PostStatus,
+  ): Promise<Post> {
+    if ([PostStatus.APPROVED, PostStatus.REJECTED].includes(status)) {
+      const superUsers = await this.userService.getAncestorswithAprrovalAccess(
+        user,
+      );
+      if (!superUsers.filter((u) => u.id === user.id).length) {
+        throw new Error('Permission Denied');
+      }
+      post.status = status;
+      post.approvedBy = user;
+      return this.postRepository.save(post);
+    } else {
+      const _user = await this.userService.getOneById(user.id, ['permission']);
+      if (!_user.permission.handleReports) throw new Error('Permission Denied');
+      post.status = status;
+      // TODO: maintain resolved by
+      return this.postRepository.save(post);
     }
-    post.status = PostStatus.APPROVED;
-    post.approvedBy = user;
-    return this.postRepository.save(post);
   }
 
   async findOne(id: string): Promise<Post> {

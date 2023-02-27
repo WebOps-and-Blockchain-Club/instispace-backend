@@ -8,6 +8,9 @@ export class FilteringConditions {
   @Field({ nullable: true })
   posttobeApproved: boolean;
 
+  @Field({ nullable: true })
+  viewReportedPosts: boolean;
+
   @Field(() => [String], { nullable: true })
   tags: string[];
 
