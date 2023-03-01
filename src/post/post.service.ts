@@ -62,6 +62,7 @@ export class PostService {
           relations: [
             'postComments',
             'postReports',
+            'postReports.createdBy',
             'likedBy',
             'createdBy',
             'savedBy',
@@ -90,15 +91,17 @@ export class PostService {
           relations: [
             'postComments',
             'postReports',
+            'postReports.createdBy',
             'likedBy',
             'createdBy',
+            'createdBy.interests',
             'savedBy',
             'tags',
           ],
           order: { createdAt: 'DESC' },
         });
 
-        //Filter the posts after the 2 hours time of completion
+        // Filter the posts after the 2 hours time of completion
 
         // default filters (endtime should not exceed)
 
@@ -142,7 +145,6 @@ export class PostService {
             return false;
           });
         }
-        console.log(postList);
 
         postList = postList.filter(
           (n) =>
