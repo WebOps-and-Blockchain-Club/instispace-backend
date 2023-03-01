@@ -19,7 +19,7 @@ export class PostService {
     @InjectRepository(Post) private postRepository: Repository<Post>,
     private readonly tagService: TagService,
     private readonly userService: UserService,
-  ) { }
+  ) {}
   async findAll(
     lastpostId: string,
     take: number,
@@ -168,6 +168,16 @@ export class PostService {
             );
           }
 
+          if (filteringConditions.followedTags) {
+            const current_user = await this.userService.getOneById(user.id, [
+              'interests',
+            ]);
+            postList = postList.filter((n) => {
+              n.tags.filter((tag) => current_user.interests.includes(tag))
+                .length;
+            });
+          }
+
           if (
             filteringConditions.categories &&
             filteringConditions.categories.length
@@ -193,16 +203,16 @@ export class PostService {
               a.likedBy.length > b.likedBy.length
                 ? -1
                 : a.likedBy.length < b.likedBy.length
-                  ? 1
-                  : 0,
+                ? 1
+                : 0,
             );
           } else if (orderInput.byLikes == false) {
             postList.sort((a, b) =>
               a.likedBy.length < b.likedBy.length
                 ? -1
                 : a.likedBy.length > b.likedBy.length
-                  ? 1
-                  : 0,
+                ? 1
+                : 0,
             );
           }
         }
