@@ -5,10 +5,13 @@ export class FilteringConditions {
   @Field({ nullable: true })
   search?: string;
 
-  @Field({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
   posttobeApproved: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
+  followedTags: boolean;
+
+  @Field(() => Boolean, { nullable: true })
   viewReportedPosts: boolean;
 
   @Field(() => [String], { nullable: true })

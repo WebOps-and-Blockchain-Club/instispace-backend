@@ -19,7 +19,7 @@ export class PostService {
     @InjectRepository(Post) private postRepository: Repository<Post>,
     private readonly tagService: TagService,
     private readonly userService: UserService,
-  ) { }
+  ) {}
   async findAll(
     lastpostId: string,
     take: number,
@@ -62,6 +62,7 @@ export class PostService {
           relations: [
             'postComments',
             'postReports',
+            'postReports.createdBy',
             'likedBy',
             'createdBy',
             'savedBy',
@@ -90,15 +91,17 @@ export class PostService {
           relations: [
             'postComments',
             'postReports',
+            'postReports.createdBy',
             'likedBy',
             'createdBy',
+            'createdBy.interests',
             'savedBy',
             'tags',
           ],
           order: { createdAt: 'DESC' },
         });
 
-        //Filter the posts after the 2 hours time of completion
+        // Filter the posts after the 2 hours time of completion
 
         // default filters (endtime should not exceed)
 
@@ -142,7 +145,6 @@ export class PostService {
             return false;
           });
         }
-        console.log(postList);
 
         postList = postList.filter(
           (n) =>
@@ -166,6 +168,16 @@ export class PostService {
                   filteringConditions.tags.includes(tag.id),
                 ).length,
             );
+          }
+
+          if (filteringConditions.followedTags) {
+            const current_user = await this.userService.getOneById(user.id, [
+              'interests',
+            ]);
+            postList = postList.filter((n) => {
+              n.tags.filter((tag) => current_user.interests.includes(tag))
+                .length;
+            });
           }
 
           if (
@@ -193,16 +205,16 @@ export class PostService {
               a.likedBy.length > b.likedBy.length
                 ? -1
                 : a.likedBy.length < b.likedBy.length
-                  ? 1
-                  : 0,
+                ? 1
+                : 0,
             );
           } else if (orderInput.byLikes == false) {
             postList.sort((a, b) =>
               a.likedBy.length < b.likedBy.length
                 ? -1
                 : a.likedBy.length > b.likedBy.length
-                  ? 1
-                  : 0,
+                ? 1
+                : 0,
             );
           }
         }
