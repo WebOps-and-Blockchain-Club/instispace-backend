@@ -48,4 +48,10 @@ export class CourseResolver {
   removeCourse(@Args('id', { type: () => Int }) id: number) {
     return this.courseService.remove(id);
   }
+
+  @Mutation(() => Boolean)
+  Populate_course_db() {
+    this.courseService.get_data();
+    return true;
+  }
 }

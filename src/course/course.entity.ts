@@ -21,8 +21,8 @@ export class Course {
   @Field()
   name: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   semester: string;
 
   @Column()
@@ -37,11 +37,11 @@ export class Course {
   @Field()
   slots: string;
 
-  @CreateDateColumn({ type: 'timestamptz' })
-  @Field(() => Date)
+  @Column({ nullable: true })
+  @Field(() => Date, { nullable: true })
   from: Date;
 
-  @CreateDateColumn({ type: 'timestamptz' })
-  @Field(() => Date)
+  @Column({ nullable: true })
+  @Field(() => Date, { nullable: true })
   to: Date;
 }

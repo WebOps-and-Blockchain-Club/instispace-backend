@@ -8,7 +8,7 @@ export class CreateCourseInput {
   @Field()
   name: string;
 
-  @Field()
+  @Field({ nullable: true })
   semester: string;
 
   @Field()
@@ -20,9 +20,9 @@ export class CreateCourseInput {
   @Field(() => [String], { description: 'slot of course + additional slots' })
   slots: string[];
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   from: Date;
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   to: Date;
 }
