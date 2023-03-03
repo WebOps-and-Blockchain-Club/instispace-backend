@@ -95,7 +95,7 @@ export class CourseService {
     return `This action removes a #${id} course`;
   }
 
-  async get_data() {
+  async getData() {
     let x = await axios.get(
       'https://instispace.iitm.ac.in/api/files/course.csv',
     );

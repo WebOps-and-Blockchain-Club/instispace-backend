@@ -50,8 +50,8 @@ export class CourseResolver {
   }
 
   @Mutation(() => Boolean)
-  Populate_course_db() {
-    this.courseService.get_data();
+  populateCourseDb() {
+    this.courseService.getData();
     return true;
   }
 }
