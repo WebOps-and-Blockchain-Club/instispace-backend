@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import axios from 'axios';
 import { Repository } from 'typeorm';
 import { Course } from './course.entity';
 import { CreateCourseInput } from './type/create-course.input';
 import { CourseFilteringConditions } from './type/filtering-conditions';
 import { UpdateCourseInput } from './type/update-course.input';
-import fetch from 'node-fetch';
-import axios from 'axios';
 
 @Injectable()
 export class CourseService {
@@ -95,10 +94,8 @@ export class CourseService {
     return `This action removes a #${id} course`;
   }
 
-  async getData() {
-    let x = await axios.get(
-      'https://instispace.iitm.ac.in/api/files/course.csv',
-    );
+  async getData(csvUrl: string, to: Date, from: Date) {
+    let x = await axios.get(csvUrl);
     let data = x.data;
     const list = data.split('\n');
     var final: string[][] = [];
@@ -112,19 +109,21 @@ export class CourseService {
 
     for (const x of final) {
       try {
-        let newCourse = new Course();
+        let newCourse = new CreateCourseInput();
         console.log(x);
-        newCourse.code = x[3].replace(/"/g , "");
-        newCourse.instructorName = x[5].replace(/"/g , "");
-        newCourse.name = x[4].replace(/"/g , "");
-        let slots = x[1]?.replace(/"/g , "").split(',');
-        let additionalSlots = x[2]?.replace(/"/g , "").split(',');
-        slots=slots?.concat(additionalSlots);
-        let slotString = slots?.join(' && ');
-        newCourse.slots = slotString;
-        newCourse.venue = x[8].replace(/"/g , "");
+        newCourse.code = x[3].replace(/"/g, '');
+        newCourse.instructorName = x[5].replace(/"/g, '');
+        newCourse.name = x[4].replace(/"/g, '');
+        let slots = x[1]?.replace(/"/g, '').split(',');
+        let additionalSlots = x[2]?.replace(/"/g, '').split(',');
+        if (!(additionalSlots.length === 1 && additionalSlots[0] === ''))
+          slots = slots?.concat(additionalSlots);
+        newCourse.slots = slots;
+        newCourse.to = to;
+        newCourse.from = from;
+        newCourse.venue = x[8].replace(/"/g, '');
         console.log(newCourse);
-        await this.courseRepository.save(newCourse);
+        await this.create(newCourse);
         console.log('entry added');
       } catch (error) {
         throw new Error(`message : ${error}`);

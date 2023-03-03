@@ -50,8 +50,12 @@ export class CourseResolver {
   }
 
   @Mutation(() => Boolean)
-  populateCourseDb() {
-    this.courseService.getData();
+  populateCourseDb(
+    @Args('csvUrl') csvUrl: string,
+    @Args('to') to: Date,
+    @Args('from') from: Date,
+  ) {
+    this.courseService.getData(csvUrl, to, from);
     return true;
   }
 }
