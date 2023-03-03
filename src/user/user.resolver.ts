@@ -16,6 +16,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import Tag from '../tag/tag.entity';
 import Permission from './permission/permission.entity';
 import { PermissionInput } from './permission/type/permission.input';
+import findPeopleOutput from './type/findPeople.output';
 import { UserRole } from './type/role.enum';
 import { CreateUserInput, LoginInput } from './type/user.input';
 import { LoginOutput } from './type/user.object';
@@ -147,5 +148,14 @@ export class UserResolver {
   async setHostel(@Args('hostelname') name: string, @CurrentUser() user: User) {
     let hostel = this.userService.hostel(name, user);
     return hostel;
+  }
+
+  @Query(()=>findPeopleOutput)
+  async findPeople(
+    @Args('LastUserId') lastUserId: string,
+    @Args('take') take: number,
+    @Args('search', { nullable: true }) search?: string,
+  ) {
+     return  this.userService.getUsers(lastUserId,take,search);
   }
 }

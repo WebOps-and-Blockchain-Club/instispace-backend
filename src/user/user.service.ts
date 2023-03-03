@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TreeRepository } from 'typeorm';
+import { ILike, TreeRepository } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 import { LoginInput } from './type/user.input';
 import { User } from './user.entity';
@@ -139,6 +139,47 @@ export class UserService {
 
   getAll(): Promise<User[]> {
     return this.usersRepository.find();
+  }
+
+  async getUsers(
+   lastUserId: string,
+   take: number,
+   search?: string,
+  ) {
+    try {
+      let usersList: User[] = [];
+      if (search) {
+        await Promise.all(
+          ['roll', 'name'].map(async (field: string) => {
+            const filter = { [field]: ILike(`%${search}%`) };
+            const userF = await this.usersRepository.find({ where: filter });
+            userF.forEach((user) => {
+              usersList.push(user);
+            });
+          }),
+        );
+
+        const userStr = usersList.map((obj) => JSON.stringify(obj));
+        const uniqueUserStr = new Set(userStr);
+        usersList = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
+      } else {
+        usersList = await this.usersRepository.find({
+          where: { role: In([UserRole.USER, UserRole.MODERATOR]) },
+        });
+      }
+      const total = usersList.length;
+      var finalList;
+      if (lastUserId) {
+        const index = usersList.map((n) => n.id).indexOf(lastUserId);
+        finalList = usersList.splice(index + 1, take);
+      } else {
+        finalList = usersList.splice(0, take);
+      }
+      console.log(finalList);
+      return { list:finalList, total };
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
   }
 
   getOneById(id: string, relations?: [string]): Promise<User> {
