@@ -141,16 +141,12 @@ export class UserService {
     return this.usersRepository.find();
   }
 
-  async getUsers(
-   lastUserId: string,
-   take: number,
-   search?: string,
-  ) {
+  async getUsers(lastUserId: string, take: number, search?: string) {
     try {
       let usersList: User[] = [];
       if (search) {
         await Promise.all(
-          ['roll', 'name'].map(async (field: string) => {
+          ['roll', 'name', 'ldapName'].map(async (field: string) => {
             const filter = { [field]: ILike(`%${search}%`) };
             const userF = await this.usersRepository.find({ where: filter });
             userF.forEach((user) => {
@@ -176,7 +172,7 @@ export class UserService {
         finalList = usersList.splice(0, take);
       }
       console.log(finalList);
-      return { list:finalList, total };
+      return { list: finalList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
