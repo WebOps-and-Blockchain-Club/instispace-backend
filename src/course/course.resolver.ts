@@ -49,13 +49,13 @@ export class CourseResolver {
     return this.courseService.remove(id);
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => String)
   populateCourseDb(
     @Args('csvUrl') csvUrl: string,
     @Args('to') to: Date,
     @Args('from') from: Date,
+    @Args('sem') sem: string,
   ) {
-    this.courseService.getData(csvUrl, to, from);
-    return true;
+    return this.courseService.getData(csvUrl, to, from, sem);
   }
 }

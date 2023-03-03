@@ -94,8 +94,13 @@ export class CourseService {
     return `This action removes a #${id} course`;
   }
 
-  async getData(csvUrl: string, to: Date, from: Date) {
-    let x = await axios.get(csvUrl);
+  async getData(csvUrl: string, to: Date, from: Date, sem: string) {
+    let x;
+    try {
+      x = await axios.get(csvUrl);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
     let data = x.data;
     const list = data.split('\n');
     var final: string[][] = [];
@@ -121,13 +126,14 @@ export class CourseService {
         newCourse.slots = slots;
         newCourse.to = to;
         newCourse.from = from;
+        newCourse.semester = sem;
         newCourse.venue = x[8].replace(/"/g, '');
         console.log(newCourse);
         await this.create(newCourse);
-        console.log('entry added');
       } catch (error) {
         throw new Error(`message : ${error}`);
       }
     }
+    return 'entries added successfully';
   }
 }
