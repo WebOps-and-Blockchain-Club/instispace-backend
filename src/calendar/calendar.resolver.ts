@@ -3,40 +3,38 @@ import { CalendarService } from './calendar.service';
 import { Calendar } from './calendar.entity';
 import { CreateCalendarInput } from './type/create-calendar.input';
 import { UpdateCalendarInput } from './type/update-calendar.input';
+import { CalendarFilteringConditions } from './type/calendar.filteringConditions';
+import getCalendarEntryOutput from './type/getCalendar.output';
 
 @Resolver(() => Calendar)
 export class CalendarResolver {
   constructor(private readonly calendarService: CalendarService) {}
 
   @Mutation(() => Calendar)
-  createCalendar(
+  async createCalendarEntry(
     @Args('createCalendarInput') createCalendarInput: CreateCalendarInput,
   ) {
-    return this.calendarService.create(createCalendarInput);
+    return await this.calendarService.create(createCalendarInput);
   }
 
-  @Query(() => [Calendar], { name: 'calendar' })
-  findAll() {
-    return this.calendarService.findAll();
+  @Query(() => getCalendarEntryOutput)
+  getCalendarEntry(
+    @Args('calendarFilteringConditions')
+    calendarFilteringConditions: CalendarFilteringConditions,
+    @Args('take')
+    take: number,
+    @Args('lastEntryId')
+    lastEntryId: string,
+  ) {
+    return this.calendarService.findAll(
+      calendarFilteringConditions,
+      take,
+      lastEntryId,
+    );
   }
 
   @Query(() => Calendar, { name: 'calendar' })
   findOne(@Args('id', { type: () => Int }) id: number) {
     return this.calendarService.findOne(id);
-  }
-
-  @Mutation(() => Calendar)
-  updateCalendar(
-    @Args('updateCalendarInput') updateCalendarInput: UpdateCalendarInput,
-  ) {
-    return this.calendarService.update(
-      updateCalendarInput.id,
-      updateCalendarInput,
-    );
-  }
-
-  @Mutation(() => Calendar)
-  removeCalendar(@Args('id', { type: () => Int }) id: number) {
-    return this.calendarService.remove(id);
   }
 }

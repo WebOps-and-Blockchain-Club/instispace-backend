@@ -16,7 +16,7 @@ export class Calendar {
   @Field()
   id: string;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @Column()
   @Field(() => Date)
   date: Date;
 

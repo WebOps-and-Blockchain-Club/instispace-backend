@@ -14,12 +14,14 @@ import { NotificationModule } from './notification/notification.module';
 import { LdapModule } from './ldap/ldap.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { CourseModule } from './course/course.module';
+import { CalendarModule } from './calendar/calendar.module';
 
 @Module({
   imports: [
     CommonModule,
     AuthModule,
     UserModule,
+    CalendarModule,
     CourseModule,
     TagModule,
     PostParentModule,
