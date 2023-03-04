@@ -28,4 +28,7 @@ export class FilteringConditions {
 
   @Field(() => Boolean, { defaultValue: false })
   showOldPost: boolean;
+
+  @Field(() => Boolean, { defaultValue: false })
+  createdByMe: boolean;
 }

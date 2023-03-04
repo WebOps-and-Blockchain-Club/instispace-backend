@@ -22,7 +22,7 @@ import { PostCategory } from './type/post-category.enum';
 
 @Resolver(() => Post)
 export class PostResolver {
-  constructor(private readonly postService: PostService) { }
+  constructor(private readonly postService: PostService) {}
 
   @UseGuards(JwtAuthGuard)
   @Query(() => findoneOutput)
@@ -221,7 +221,12 @@ export class PostResolver {
 
   @ResolveField(() => [String])
   async actions(@Parent() post: Post) {
-    if ([PostCategory.Lost, PostCategory.Found].includes(post.category as PostCategory)) return [];
+    if (
+      [PostCategory.Lost, PostCategory.Found].includes(
+        post.category as PostCategory,
+      )
+    )
+      return [];
     let actions: string[] = ['Share'];
     if (
       [
@@ -233,7 +238,11 @@ export class PostResolver {
       ].includes(post.category as PostCategory)
     )
       actions.push('Like', 'Set_Reminder');
-    if ([PostCategory.RandomThought, PostCategory.Review].includes(post.category as PostCategory))
+    if (
+      [PostCategory.RandomThought, PostCategory.Review].includes(
+        post.category as PostCategory,
+      )
+    )
       actions.push('Like');
     if (post.category === PostCategory.Query) actions.push('Upvote_Downvote');
     return actions;

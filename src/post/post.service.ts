@@ -170,6 +170,10 @@ export class PostService {
             );
           }
 
+          if (filteringConditions.createdByMe) {
+            postList = postList.filter((e) => e.createdBy.id === user.id);
+          }
+
           if (filteringConditions.followedTags) {
             const current_user = await this.userService.getOneById(user.id, [
               'interests',
