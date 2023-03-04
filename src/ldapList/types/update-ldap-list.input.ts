@@ -1,5 +1,6 @@
 import { CreateLdapListInput } from './create-ldap-list.input';
 import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
+import { Gender } from './gender-enum';
 
 @InputType()
 export class UpdateLdapListInput extends PartialType(CreateLdapListInput) {
@@ -10,11 +11,17 @@ export class UpdateLdapListInput extends PartialType(CreateLdapListInput) {
   ldapName: String;
 
   @Field()
-  gender: String;
+  gender: Gender;
 
   @Field()
   sem: String;
 
   @Field()
   program: String;
+
+  @Field()
+  advisor: String;
+
+  @Field()
+  residencyType: String;
 }

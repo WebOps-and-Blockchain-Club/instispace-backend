@@ -1,4 +1,5 @@
 import { InputType, Int, Field } from '@nestjs/graphql';
+import { Gender } from './gender-enum';
 
 @InputType()
 export class CreateLdapListInput {
@@ -9,11 +10,17 @@ export class CreateLdapListInput {
   ldapName: String;
 
   @Field()
-  gender: String;
+  gender: Gender;
 
   @Field()
   sem: String;
 
   @Field()
   program: String;
+
+  @Field()
+  advisor: String;
+
+  @Field()
+  residencyType: String;
 }

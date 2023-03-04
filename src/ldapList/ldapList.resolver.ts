@@ -4,6 +4,7 @@ import { LdapList } from './ldapList.entity';
 import { CreateLdapListInput } from './types/create-ldap-list.input';
 import { UpdateLdapListInput } from './types/update-ldap-list.input';
 import getLdapUserOutput from './types/ldap-output';
+import { LdapFilteringConditions } from './types/ldap-filteringConditions';
 
 @Resolver(() => LdapList)
 export class LdapListResolver {
@@ -19,10 +20,10 @@ export class LdapListResolver {
   @Query(() => getLdapUserOutput)
   getLdapStudents(
     @Args('take') take: number,
-    @Args('search') search: string,
+    @Args('filteringconditions') filteringConditions: LdapFilteringConditions,
     @Args('lastUserId') lastUserId: string,
   ) {
-    return this.ldapListService.getUsers(lastUserId, take, search);
+    return this.ldapListService.getUsers(lastUserId, take, filteringConditions);
   }
 
   @Mutation(() => String)

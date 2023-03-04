@@ -4,6 +4,8 @@ import axios from 'axios';
 import { ILike, Repository } from 'typeorm';
 import { LdapList } from './ldapList.entity';
 import { CreateLdapListInput } from './types/create-ldap-list.input';
+import { Gender } from './types/gender-enum';
+import { LdapFilteringConditions } from './types/ldap-filteringConditions';
 import { UpdateLdapListInput } from './types/update-ldap-list.input';
 
 @Injectable()
@@ -18,6 +20,8 @@ export class LdapListService {
     newEntry.program = createLdapListInput.program;
     newEntry.roll = createLdapListInput.roll;
     newEntry.sem = createLdapListInput.sem;
+    newEntry.advisor = createLdapListInput.advisor;
+    newEntry.residencyType = createLdapListInput.residencyType;
     return await this.ldapRepository.save(newEntry);
   }
 
@@ -35,13 +39,19 @@ export class LdapListService {
     return `This action removes a #${id} ldapList`;
   }
 
-  async getUsers(lastUserId: string, take: number, search?: string) {
+  async getUsers(
+    lastUserId: string,
+    take: number,
+    filteringConditions: LdapFilteringConditions,
+  ) {
     try {
       let usersList: LdapList[] = [];
-      if (search) {
+      if (filteringConditions && filteringConditions.search) {
         await Promise.all(
           ['roll', 'ldapName'].map(async (field: string) => {
-            const filter = { [field]: ILike(`%${search}%`) };
+            const filter = {
+              [field]: ILike(`%${filteringConditions.search}%`),
+            };
             const userF = await this.ldapRepository.find({ where: filter });
             userF.forEach((user) => {
               usersList.push(user);
@@ -54,6 +64,23 @@ export class LdapListService {
         usersList = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
       } else {
         usersList = await this.ldapRepository.find();
+      }
+      if (filteringConditions) {
+        if (filteringConditions.batch) {
+          usersList = usersList.filter(
+            (e) => e.roll.slice(2, 4) === filteringConditions.batch,
+          );
+        }
+        if (filteringConditions.gender) {
+          usersList = usersList.filter(
+            (e) => e.gender === filteringConditions.gender,
+          );
+        }
+        if (filteringConditions.program) {
+          usersList = usersList.filter(
+            (e) => e.program === filteringConditions.program,
+          );
+        }
       }
       const total = usersList.length;
       var finalList;
@@ -92,7 +119,9 @@ export class LdapListService {
       try {
         let newUser = new CreateLdapListInput();
         console.log(x);
-        newUser.gender = x[5].replace(/"/g, '');
+        x[5].replace(/"/g, '') === 'M'
+          ? (newUser.gender = Gender.Male)
+          : (newUser.gender = Gender.Female);
         newUser.program = program;
         newUser.roll = x[1].replace(/"/g, '');
         let name = x[2].replace(/"/g, '');
@@ -100,6 +129,8 @@ export class LdapListService {
         if (lastName !== '') name = name + ' ' + lastName;
         newUser.ldapName = name;
         newUser.sem = x[4].replace(/"/g, '');
+        newUser.advisor = x[6].replace(/"/g, '');
+        newUser.residencyType = x[8].replace(/"/g, '');
         console.log(newUser);
         await this.create(newUser);
       } catch (error) {

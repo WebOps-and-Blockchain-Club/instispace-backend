@@ -1,5 +1,7 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { ObjectType, Field, Int, registerEnumType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Gender } from './types/gender-enum';
+registerEnumType(Gender, { name: 'Gender' });
 
 @ObjectType()
 @Entity('LdapList')
@@ -18,7 +20,7 @@ export class LdapList {
 
   @Column()
   @Field()
-  gender: String;
+  gender: Gender;
 
   @Column()
   @Field()
@@ -27,4 +29,12 @@ export class LdapList {
   @Column()
   @Field()
   program: String;
+
+  @Column()
+  @Field()
+  advisor: String;
+
+  @Column()
+  @Field()
+  residencyType: String;
 }
