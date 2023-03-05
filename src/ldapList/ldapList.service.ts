@@ -22,6 +22,7 @@ export class LdapListService {
     newEntry.sem = createLdapListInput.sem;
     newEntry.advisor = createLdapListInput.advisor;
     newEntry.residencyType = createLdapListInput.residencyType;
+    newEntry.department = await this.getDepartment(newEntry.roll.slice(0, 2));
     return await this.ldapRepository.save(newEntry);
   }
 
@@ -79,6 +80,13 @@ export class LdapListService {
         if (filteringConditions.program) {
           usersList = usersList.filter(
             (e) => e.program === filteringConditions.program,
+          );
+        }
+        if (filteringConditions.department) {
+          usersList = usersList.filter((e) =>
+            e.department
+              .toLowerCase()
+              .includes(filteringConditions.department.toLowerCase()),
           );
         }
       }
@@ -139,4 +147,52 @@ export class LdapListService {
     }
     return 'entries added successfully';
   }
+
+  getDepartment = (code: string) => {
+    let deptCode = code.toUpperCase();
+    switch (deptCode) {
+      case 'AE':
+        return 'Aerospace Engineering';
+      case 'AM':
+        return 'Applied Mechanics';
+      case 'BE':
+        return 'Biotechnology';
+      case 'BS':
+        return 'Biotechnology';
+      case 'BT':
+        return 'Biotechnology';
+      case 'CH':
+        return 'Chemical Engineering';
+      case 'CY':
+        return 'Chemistry';
+      case 'CE':
+        return 'Civil Engineering';
+      case 'CS':
+        return 'Computer Science and Engineering';
+      case 'EE':
+        return 'Electrical Engineering';
+      case 'ED':
+        return 'Engineering Design';
+      case 'EP':
+        return 'Physics';
+      case 'HS':
+        return 'Humanities and Social Sciences';
+      case 'MS':
+        return 'Management Studies';
+      case 'MA':
+        return 'Mathematics';
+      case 'ME':
+        return 'Mechanical Engineering';
+      case 'MM':
+        return 'Metallurgical and Materials Engineering';
+      case 'OE':
+        return 'Ocean Engineering';
+      case 'NA':
+        return 'Ocean Engineering';
+      case 'PH':
+        return 'Physics';
+      default:
+        return 'Null';
+    }
+  };
 }

@@ -4,23 +4,23 @@ import { Gender } from './gender-enum';
 @InputType()
 export class CreateLdapListInput {
   @Field()
-  roll: String;
+  roll: string;
 
   @Field()
-  ldapName: String;
+  ldapName: string;
 
   @Field()
   gender: Gender;
 
   @Field()
-  sem: String;
+  sem: string;
 
   @Field()
-  program: String;
+  program: string;
 
   @Field()
-  advisor: String;
+  advisor: string;
 
   @Field()
-  residencyType: String;
+  residencyType: string;
 }

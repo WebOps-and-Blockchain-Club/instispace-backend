@@ -1,5 +1,5 @@
 import { ObjectType, Field, Int, registerEnumType } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { Gender } from './types/gender-enum';
 registerEnumType(Gender, { name: 'Gender' });
 
@@ -8,15 +8,15 @@ registerEnumType(Gender, { name: 'Gender' });
 export class LdapList {
   @PrimaryGeneratedColumn('uuid')
   @Field()
-  id: String;
+  id: string;
+
+  @PrimaryColumn()
+  @Field()
+  roll: string;
 
   @Column()
   @Field()
-  roll: String;
-
-  @Column()
-  @Field()
-  ldapName: String;
+  ldapName: string;
 
   @Column()
   @Field()
@@ -24,17 +24,21 @@ export class LdapList {
 
   @Column()
   @Field()
-  sem: String;
+  sem: string;
 
   @Column()
   @Field()
-  program: String;
+  program: string;
 
   @Column()
   @Field()
-  advisor: String;
+  advisor: string;
 
   @Column()
   @Field()
-  residencyType: String;
+  residencyType: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  department: string;
 }
