@@ -150,12 +150,12 @@ export class UserResolver {
     return hostel;
   }
 
-  @Query(()=>findPeopleOutput)
-  async findPeople(
+  @Query(() => findPeopleOutput)
+  async findSuperUser(
     @Args('LastUserId') lastUserId: string,
     @Args('take') take: number,
     @Args('search', { nullable: true }) search?: string,
   ) {
-     return  this.userService.getUsers(lastUserId,take,search);
+    return this.userService.getSuperusers(lastUserId, take, search);
   }
 }

@@ -141,12 +141,12 @@ export class UserService {
     return this.usersRepository.find();
   }
 
-  async getUsers(lastUserId: string, take: number, search?: string) {
+  async getSuperusers(lastUserId: string, take: number, search?: string) {
     try {
       let usersList: User[] = [];
       if (search) {
         await Promise.all(
-          ['roll', 'name', 'ldapName'].map(async (field: string) => {
+          ['name', 'ldapName', 'roll'].map(async (field: string) => {
             const filter = { [field]: ILike(`%${search}%`) };
             const userF = await this.usersRepository.find({ where: filter });
             userF.forEach((user) => {
@@ -160,7 +160,14 @@ export class UserService {
         usersList = Array.from(uniqueUserStr).map((str) => JSON.parse(str));
       } else {
         usersList = await this.usersRepository.find({
-          where: { role: In([UserRole.USER, UserRole.MODERATOR]) },
+          where: {
+            role: In([
+              UserRole.DEV_TEAM,
+              UserRole.HOSTEL_SEC,
+              UserRole.LEADS,
+              UserRole.SECRETARY,
+            ]),
+          },
         });
       }
       const total = usersList.length;
