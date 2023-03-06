@@ -18,7 +18,6 @@ export class PostService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
     private readonly tagService: TagService,
-
     private readonly userService: UserService,
     private readonly notificationService: NotificationService,
   ) {}

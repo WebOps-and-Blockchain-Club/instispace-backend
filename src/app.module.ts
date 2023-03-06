@@ -11,12 +11,13 @@ import { NotificationModule } from './notification/notification.module';
 import { LdapModule } from './ldap/ldap.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { AuthModule } from './auth/auth.module';
+import { JwtStrategy } from './auth/jwt.strategy';
 
 @Module({
   imports: [
     CommonModule,
-    NotificationModule,
     UserModule,
+    NotificationModule,
     TagModule,
     PostParentModule,
     HostelModule,

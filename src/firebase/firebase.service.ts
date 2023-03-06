@@ -3,7 +3,7 @@ import * as firebaseAdmin from 'firebase-admin';
 import * as serviceAccount from './serviceAccountKey.json';
 
 //scope: Request scope creates an instance when injected and deletes it when the request is done
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class FirebaseService {
   private admin: firebaseAdmin.app.App | null;
   constructor() {

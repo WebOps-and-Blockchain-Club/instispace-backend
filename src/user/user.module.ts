@@ -10,14 +10,16 @@ import { UserService } from './user.service';
 import UsersDev from './usersDev.entity';
 import { LdapModule } from 'src/ldap/ldap.module';
 import { NotificationModule } from 'src/notification/notification.module';
+import { JwtStrategy } from 'src/auth/jwt.strategy';
 
 @Module({
   imports: [
-    AuthModule,
     TypeOrmModule.forFeature([User, Hostel, UsersDev]),
+    AuthModule,
     PermissionModule,
     TagModule,
     LdapModule,
+    NotificationModule,
   ],
   providers: [UserResolver, UserService],
   exports: [UserService],

@@ -6,8 +6,8 @@ import { HostelModule } from 'src/hostel/hostel.module';
 import { NotificationConfig } from './notification.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from 'src/user/user.module';
+import * as jwt from 'jsonwebtoken';
 
-@Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([NotificationConfig]),

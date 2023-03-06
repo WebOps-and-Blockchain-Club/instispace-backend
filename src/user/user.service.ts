@@ -44,7 +44,7 @@ export class UserService {
     private permissionService: PermissionService,
     @Inject(forwardRef(() => TagService))
     private tagService: TagService,
-    @Inject(forwardRef(() => NotificationService))
+    // @Inject(forwardRef(() => NotificationService))
     private notificationService: NotificationService,
     @Inject(LdapService)
     private ldapService: LdapService,
@@ -293,11 +293,7 @@ export class UserService {
 
   async usersForNotif() {
     return await this.usersRepository.find({
-      where: {
-        isNewUser: false,
-        notifyPost: In([Notification.FOLLOWED_TAGS, Notification.FORALL]),
-      },
-      relations: ['interests'],
+      relations: ['interests', 'notificationConfig'],
     });
   }
 }

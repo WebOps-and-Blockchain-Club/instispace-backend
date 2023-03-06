@@ -24,12 +24,12 @@ export class NotificationService {
   //TODO: change the type to Post
   async notifyPost(post: any) {
     let users = await this.userService.usersForNotif();
-
+    // console.log(users);
     let tokens: string[] = [];
     //populating tokenDemo based on updated structure
     await Promise.all(
-      users.map(async (user) => {
-        user.notificationConfig.map((c) => {
+      users?.map(async (user) => {
+        user.notificationConfig?.map((c) => {
           if (
             c.configForPost === Notification.FORALL ||
             (c.configForPost === Notification.FOLLOWED_TAGS &&
@@ -43,7 +43,6 @@ export class NotificationService {
         });
       }),
     );
-    console.log(tokens);
 
     // users = users.filter(
     //   (user) =>

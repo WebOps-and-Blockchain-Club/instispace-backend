@@ -12,7 +12,7 @@ export class NotificationConfig {
   @Field()
   id: string;
 
-  @Column('enum', { enum: Notification, default: Notification.FOLLOWED_TAGS })
+  @Column('enum', { enum: Notification, default: Notification.FORALL })
   @Field((_type) => Notification, {
     description: 'Notification settings for config of Post',
   })

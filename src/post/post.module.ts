@@ -13,7 +13,7 @@ import { PostService } from './post.service';
   imports: [
     UserModule,
     TypeOrmModule.forFeature([Post]),
-    // NotificationModule,
+    NotificationModule,
     TagModule,
   ],
   controllers: [],
