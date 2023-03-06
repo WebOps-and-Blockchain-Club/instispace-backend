@@ -78,13 +78,27 @@ export class CalendarService {
     final.shift();
 
     for (const x of final) {
-      let newEntry = new CreateCalendarInput();
-      newEntry.date = new Date(x[0]?.replace(/"/g, ''));
-      let typeList = x[2]?.replace(/"/g, '').split(',');
-      newEntry.type = typeList;
-      newEntry.description = x[1]?.replace(/"/g, '');
+      let newEntry = new Calendar();
+      let entryDate = x[0]?.replace(/"/g, '');
+      console.log(entryDate);
+      let date;
+      if (entryDate !== '') {
+        date = new Date(
+          entryDate.slice(3, 5) +
+            '-' +
+            entryDate.slice(0, 2) +
+            '-' +
+            entryDate.slice(6, 10),
+        );
+        date.setHours(0, 0, 0);
+        newEntry.date = date;
+      }
+      if (x[2]?.replace(/"/g, '') !== '')
+        newEntry.type = x[2]?.replace(/"/g, '');
+      if (x[1]?.replace(/"/g, '') !== '')
+        newEntry.description = x[1]?.replace(/"/g, '');
       console.log(newEntry);
-      await this.create(newEntry);
+      if (newEntry) await this.calendarRepository.save(newEntry);
     }
     return 'entries added successfully';
   }

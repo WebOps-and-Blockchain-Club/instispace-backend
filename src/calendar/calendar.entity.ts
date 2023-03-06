@@ -16,7 +16,7 @@ export class Calendar {
   @Field()
   id: string;
 
-  @Column()
+  @Column({ unique: true })
   @Field(() => Date)
   date: Date;
 
