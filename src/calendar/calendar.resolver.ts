@@ -33,8 +33,8 @@ export class CalendarResolver {
     );
   }
 
-  @Query(() => Calendar, { name: 'calendar' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.calendarService.findOne(id);
+  @Mutation(() => String)
+  populateCalendar(@Args('csvUrl') csvUrl: string) {
+    return this.calendarService.populateCalendar(csvUrl);
   }
 }

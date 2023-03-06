@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import axios from 'axios';
 import { Repository } from 'typeorm';
 import { Calendar } from './calendar.entity';
 import { CalendarFilteringConditions } from './type/calendar.filteringConditions';
@@ -17,7 +18,8 @@ export class CalendarService {
     let newEntry = new Calendar();
     newEntry.date = createCalendarInput.date;
     newEntry.description = createCalendarInput.description;
-    newEntry.type = createCalendarInput.type;
+    let type = createCalendarInput.type.join(' && ');
+    newEntry.type = type;
     return this.calendarRepository.save(newEntry);
   }
 
@@ -39,8 +41,10 @@ export class CalendarService {
         );
       }
       if (calendarFilteringConditions.type) {
-        entryList = entryList.filter(
-          (e) => e.type === calendarFilteringConditions.type,
+        entryList = entryList.filter((e) =>
+          e.type
+            .toLowerCase()
+            .includes(calendarFilteringConditions.type.toLowerCase()),
         );
       }
     }
@@ -53,6 +57,36 @@ export class CalendarService {
       finalList = entryList.splice(0, take);
     }
     return { list: finalList, total };
+  }
+
+  async populateCalendar(csvUrl: string) {
+    let x;
+    try {
+      x = await axios.get(csvUrl);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
+    let data = x.data;
+    const list = data.split('\n');
+    var final: string[][] = [];
+    await Promise.all(
+      list.map(async (item) => {
+        let arr = item.split(',');
+        final.push(arr);
+      }),
+    );
+    final.shift();
+
+    for (const x of final) {
+      let newEntry = new CreateCalendarInput();
+      newEntry.date = new Date(x[0]?.replace(/"/g, ''));
+      let typeList = x[2]?.replace(/"/g, '').split(',');
+      newEntry.type = typeList;
+      newEntry.description = x[1]?.replace(/"/g, '');
+      console.log(newEntry);
+      await this.create(newEntry);
+    }
+    return 'entries added successfully';
   }
 
   findOne(id: number) {

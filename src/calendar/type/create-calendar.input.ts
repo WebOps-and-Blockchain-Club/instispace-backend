@@ -6,9 +6,9 @@ export class CreateCalendarInput {
   @Field(() => Date)
   date: Date;
 
-  @Field()
-  description: String;
+  @Field({ nullable: true })
+  description: string;
 
-  @Field((_type) => CalendarType)
-  type: CalendarType;
+  @Field(() => [String])
+  type: string[];
 }

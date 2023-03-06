@@ -20,11 +20,11 @@ export class Calendar {
   @Field(() => Date)
   date: Date;
 
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  description: string;
+
   @Column()
   @Field()
-  description: String;
-
-  @Column('enum', { enum: CalendarType })
-  @Field((_type) => CalendarType)
-  type: CalendarType;
+  type: string;
 }
