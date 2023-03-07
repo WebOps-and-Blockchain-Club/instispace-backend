@@ -59,6 +59,10 @@ export class User {
   @Field((_type) => String, { nullable: true })
   fcmToken: string;
 
+  @Column()
+  @Field()
+  photo: string;
+
   @Field()
   department: string;
 

@@ -196,9 +196,10 @@ export class UserService {
     userToUpdate: User,
     userInput: UpdateUserInput,
   ): Promise<User> {
-    if (userToUpdate.name) userToUpdate.name = userInput.name;
-    if (userToUpdate.mobile)
+    if (userInput.name) userToUpdate.name = userInput.name;
+    if (userInput.mobile)
       userToUpdate.mobile = userToUpdate.password = userInput.mobile;
+    if (userInput.photoUrl) userToUpdate.photo = userInput.photoUrl;
     if (userInput.interests.length) {
       let interests: Tag[] = [];
       await Promise.all(
