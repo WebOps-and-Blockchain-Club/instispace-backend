@@ -178,10 +178,11 @@ export class PostService {
             const current_user = await this.userService.getOneById(user.id, [
               'interests',
             ]);
-            postList = postList.filter((n) => {
-              n.tags.filter((tag) => current_user.interests.includes(tag))
-                .length;
-            });
+            postList = postList.filter(
+              (n) =>
+                n.tags.filter((tag) => current_user.interests.includes(tag))
+                  .length !== 0,
+            );
           }
 
           if (
