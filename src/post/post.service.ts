@@ -202,6 +202,11 @@ export class PostService {
           if (filteringConditions.isLiked) {
             postList = postList.filter((e) => e.isLiked === true);
           }
+          if (filteringConditions.createBy) {
+            postList = postList.filter(
+              (e) => e.createdBy.id === filteringConditions.createBy,
+            );
+          }
         }
 
         if (orderInput) {

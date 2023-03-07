@@ -31,4 +31,10 @@ export class FilteringConditions {
 
   @Field(() => Boolean, { defaultValue: false })
   createdByMe: boolean;
+
+  @Field({
+    description: 'filters the post based on created by id provided to it.',
+    nullable: true,
+  })
+  createBy: string;
 }
