@@ -12,6 +12,6 @@ export class UpdateUserInput {
   @Field(() => [String], { nullable: true })
   interests: string[];
 
-  @Field()
+  @Field({ nullable: true })
   photoUrl: string;
 }
