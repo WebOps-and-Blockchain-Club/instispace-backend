@@ -59,6 +59,12 @@ export class User {
   @Field((_type) => String, { nullable: true })
   fcmToken: string;
 
+  @Field()
+  department: string;
+
+  @Field()
+  programme: string;
+
   @ManyToOne((_type) => Hostel, (hostel) => hostel.users, { nullable: true })
   @Field((_type) => Hostel, {
     nullable: true,

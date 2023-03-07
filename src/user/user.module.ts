@@ -9,6 +9,7 @@ import { UserResolver } from './user.resolver';
 import { UserService } from './user.service';
 import UsersDev from './usersDev.entity';
 import { LdapModule } from 'src/ldap/ldap.module';
+import { LdapListModule } from 'src/ldapList/ldapList.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { LdapModule } from 'src/ldap/ldap.module';
     PermissionModule,
     TagModule,
     LdapModule,
+    LdapListModule,
   ],
   providers: [UserResolver, UserService],
   exports: [UserService],

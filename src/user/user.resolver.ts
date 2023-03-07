@@ -9,6 +9,7 @@ import {
 } from '@nestjs/graphql';
 import { AuthGuard } from '@nestjs/passport';
 import Hostel from 'src/hostel/hostel.entity';
+import { LdapListService } from 'src/ldapList/ldapList.service';
 import { Comments } from 'src/post/comments/comment.entity';
 import { Post } from 'src/post/post.entity';
 import { CurrentUser } from '../auth/current_user';
@@ -26,7 +27,10 @@ import { UserService } from './user.service';
 
 @Resolver(() => User)
 export class UserResolver {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly ldapListService: LdapListService,
+  ) {}
 
   @Mutation(() => LoginOutput)
   async login(@Args('loginInput') loginInput: LoginInput) {
@@ -141,6 +145,21 @@ export class UserResolver {
     return role === UserRole.USER || role === UserRole.MODERATOR
       ? `https://instispace.iitm.ac.in/photos/byroll.php?roll=${roll.toUpperCase()}`
       : '';
+  }
+
+  @ResolveField(() => String)
+  async department(@Parent() user: User) {
+    let newUser = await this.userService.getOneByRoll(user.roll);
+    newUser.department = this.ldapListService.getDepartment(
+      newUser.roll.slice(0, 2),
+    );
+    return newUser.department;
+  }
+
+  @ResolveField(() => String)
+  async programme(@Parent() user: User) {
+    user.programme = this.userService.getprogramme(user.roll);
+    return user.programme;
   }
 
   @Mutation(() => Hostel)

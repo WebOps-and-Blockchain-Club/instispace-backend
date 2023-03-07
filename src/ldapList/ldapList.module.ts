@@ -7,5 +7,6 @@ import { LdapList } from './ldapList.entity';
 @Module({
   providers: [LdapListResolver, LdapListService],
   imports: [TypeOrmModule.forFeature([LdapList])],
+  exports: [LdapListService],
 })
 export class LdapListModule {}
