@@ -166,6 +166,26 @@ export class PostResolver {
     } else return null;
   }
 
+  @ResolveField(() => String)
+  async photo(@Parent() post: Post) {
+    if (
+      post.category === PostCategory.Connect ||
+      post.category === PostCategory.Opportunity ||
+      post.category === PostCategory.Query ||
+      post.category === PostCategory.Help ||
+      post.category === PostCategory.Review ||
+      post.category === PostCategory.RandomThought
+    )
+      return null;
+    else {
+      if (post.photo) {
+        return post.photo;
+      } else {
+        return null;
+      }
+    }
+  }
+
   @ResolveField(() => User)
   async createdBy(@Parent() post: Post) {
     let newPost = await this.postService.findOne(post.id);
