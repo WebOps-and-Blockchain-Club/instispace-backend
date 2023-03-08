@@ -50,8 +50,10 @@ export class UserResolver {
   }
 
   @Query(() => User)
-  async getUser(@Args('userId') userId: string) {
-    return await this.userService.getOneById(userId, ['hostel', 'interests']);
+  async getUser(@Args('userId') userId: string, @Args('roll') roll: string) {
+    if (userId)
+      return await this.userService.getOneById(userId, ['hostel', 'interests']);
+    if (roll) return await this.userService.getOneByRoll(roll);
   }
 
   @Mutation(() => User)
