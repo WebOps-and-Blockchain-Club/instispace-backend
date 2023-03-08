@@ -47,13 +47,8 @@ export class LdapListResolver {
     return this.ldapListService.populateUser(csvUrl, program);
   }
 
-  @Query(() => LdapList, { name: 'ldapList' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.ldapListService.findOne(id);
-  }
-
-  @Mutation(() => LdapList)
-  removeLdapList(@Args('id', { type: () => Int }) id: number) {
-    return this.ldapListService.remove(id);
+  @ResolveField(() => String)
+  async photo(@Parent() ldaplist: LdapList) {
+    return `https://instispace.iitm.ac.in/photos/byroll.php?roll=${ldaplist.roll.toUpperCase()}`;
   }
 }

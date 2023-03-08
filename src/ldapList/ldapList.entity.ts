@@ -41,4 +41,7 @@ export class LdapList {
   @Column({ nullable: true })
   @Field({ nullable: true })
   department: string;
+
+  @Field()
+  photo: string;
 }
