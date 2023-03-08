@@ -163,7 +163,7 @@ export class PostResolver {
         post.category === PostCategory.RandomThought)
     ) {
       return post.photo;
-    }
+    } else return null;
   }
 
   @ResolveField(() => User)
