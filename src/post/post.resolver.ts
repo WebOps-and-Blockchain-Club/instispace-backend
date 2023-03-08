@@ -151,6 +151,21 @@ export class PostResolver {
     return newPost.dislikeCount;
   }
 
+  @ResolveField(() => String)
+  async attachment(@Parent() post: Post) {
+    if (
+      post.photo &&
+      (post.category === PostCategory.Connect ||
+        post.category === PostCategory.Opportunity ||
+        post.category === PostCategory.Query ||
+        post.category === PostCategory.Help ||
+        post.category === PostCategory.Review ||
+        post.category === PostCategory.RandomThought)
+    ) {
+      return post.photo;
+    }
+  }
+
   @ResolveField(() => User)
   async createdBy(@Parent() post: Post) {
     let newPost = await this.postService.findOne(post.id);
