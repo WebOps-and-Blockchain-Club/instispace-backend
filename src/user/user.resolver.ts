@@ -49,6 +49,11 @@ export class UserResolver {
     return await this.userService.getAll();
   }
 
+  @Query(() => User)
+  async getUser(@Args('userId') userId: string) {
+    return await this.userService.getOneById(userId, ['hostel', 'interests']);
+  }
+
   @Mutation(() => User)
   @UseGuards(JwtAuthGuard)
   async createUser(
