@@ -196,11 +196,15 @@ export class PostService {
             // console.log(postList);
           }
           if (filteringConditions.isSaved) {
-            postList = postList.filter((e) => e.isSaved === true);
+            postList = postList.filter(
+              (e) => e.savedBy.filter((u) => u.id === user.id).length,
+            );
           }
 
           if (filteringConditions.isLiked) {
-            postList = postList.filter((e) => e.isLiked === true);
+            postList = postList.filter(
+              (e) => e.likedBy.filter((u) => u.id === user.id).length,
+            );
           }
           if (filteringConditions.createBy) {
             postList = postList.filter(
@@ -250,9 +254,9 @@ export class PostService {
     const currentUser = await this.userService.getOneById(user.id, [
       'permission',
     ]);
-    if (!currentUser.permission.livePosts.includes(post.category)) {
-      postStatus = PostStatus.TO_BE_APPROVED;
-    }
+    // if (!currentUser.permission.livePosts.includes(post.category)) {
+    //   postStatus = PostStatus.TO_BE_APPROVED;
+    // }
     var tags: Tag[] = [];
 
     if (post.tagIds) {

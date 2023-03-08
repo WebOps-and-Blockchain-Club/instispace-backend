@@ -19,10 +19,14 @@ import findoneOutput from './type/post-output';
 import { OrderInput } from './type/sorting-conditions';
 import { PostStatusInput, UpdatePostInput } from './type/update-post';
 import { PostCategory } from './type/post-category.enum';
+import { UserService } from 'src/user/user.service';
 
 @Resolver(() => Post)
 export class PostResolver {
-  constructor(private readonly postService: PostService) {}
+  constructor(
+    private readonly postService: PostService,
+    private readonly userService: UserService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Query(() => findoneOutput)
@@ -90,7 +94,8 @@ export class PostResolver {
     @CurrentUser() user: User,
   ) {
     let post = await this.postService.findOne(postId);
-    return await this.postService.toggleLike(post, user);
+    let newUser = await this.userService.getOneById(user.id, ['likedPost']);
+    return await this.postService.toggleLike(post, newUser);
   }
 
   @UseGuards(JwtAuthGuard)
