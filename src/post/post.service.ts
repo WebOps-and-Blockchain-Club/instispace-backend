@@ -113,37 +113,45 @@ export class PostService {
           [PostCategory.Lost]: 7,
           [PostCategory.Found]: 7,
         };
-
-        if (filteringConditions.showOldPost) {
-          postList = postList.filter((n) => {
-            const d = new Date();
-            if (n.endTime && new Date(n.endTime).getTime() < d.getTime()) {
-              return true;
-            } else if (n.category === PostCategory.Query) {
+        if (
+          !(
+            filteringConditions.createBy ||
+            filteringConditions.createdByMe ||
+            filteringConditions.isLiked ||
+            filteringConditions.isSaved
+          )
+        ) {
+          if (filteringConditions.showOldPost) {
+            postList = postList.filter((n) => {
+              const d = new Date();
+              if (n.endTime && new Date(n.endTime).getTime() < d.getTime()) {
+                return true;
+              } else if (n.category === PostCategory.Query) {
+                return false;
+              } else {
+                d.setDate(d.getDate() - filterDate[n.category]);
+                if (new Date(n.updatedAt).getTime() < d.getTime()) {
+                  return true;
+                }
+              }
               return false;
-            } else {
-              d.setDate(d.getDate() - filterDate[n.category]);
-              if (new Date(n.updatedAt).getTime() < d.getTime()) {
+            });
+          } else {
+            postList = postList.filter((n) => {
+              const d = new Date();
+              if (n.endTime && new Date(n.endTime).getTime() > d.getTime())
                 return true;
-              }
-            }
-            return false;
-          });
-        } else {
-          postList = postList.filter((n) => {
-            const d = new Date();
-            if (n.endTime && new Date(n.endTime).getTime() > d.getTime())
-              return true;
-            else if (n.category === PostCategory.Query) {
-              return true;
-            } else {
-              d.setDate(d.getDate() - filterDate[n.category]);
-              if (new Date(n.updatedAt).getTime() > d.getTime()) {
+              else if (n.category === PostCategory.Query) {
                 return true;
+              } else {
+                d.setDate(d.getDate() - filterDate[n.category]);
+                if (new Date(n.updatedAt).getTime() > d.getTime()) {
+                  return true;
+                }
               }
-            }
-            return false;
-          });
+              return false;
+            });
+          }
         }
 
         postList = postList.filter(
@@ -254,9 +262,9 @@ export class PostService {
     const currentUser = await this.userService.getOneById(user.id, [
       'permission',
     ]);
-    // if (!currentUser.permission.livePosts.includes(post.category)) {
-    //   postStatus = PostStatus.TO_BE_APPROVED;
-    // }
+    if (!currentUser.permission.livePosts.includes(post.category)) {
+      postStatus = PostStatus.TO_BE_APPROVED;
+    }
     var tags: Tag[] = [];
 
     if (post.tagIds) {
