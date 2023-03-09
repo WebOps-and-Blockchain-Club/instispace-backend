@@ -47,14 +47,14 @@ export class CourseService {
       }
 
       if (filteringConditions.code) {
-        courseList = courseList.filter(
-          (c) => c.code === filteringConditions.code,
+        courseList = courseList.filter((c) =>
+          c.code.toLowerCase().includes(filteringConditions.code.toLowerCase()),
         );
       }
 
       if (filteringConditions.name) {
-        courseList = courseList.filter(
-          (c) => c.name === filteringConditions.name,
+        courseList = courseList.filter((c) =>
+          c.name.toLowerCase().includes(filteringConditions.name.toLowerCase()),
         );
       }
 
@@ -67,6 +67,13 @@ export class CourseService {
       if (filteringConditions.slot) {
         courseList = courseList.filter((c) =>
           c.slots.includes(filteringConditions.slot),
+        );
+      }
+      if (filteringConditions.search) {
+        courseList = courseList.filter((c) =>
+          JSON.stringify(c)
+            .toLowerCase()
+            .includes(filteringConditions.search.toLowerCase()),
         );
       }
     }

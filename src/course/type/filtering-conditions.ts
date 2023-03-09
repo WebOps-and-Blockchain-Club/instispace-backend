@@ -16,4 +16,7 @@ export class CourseFilteringConditions {
 
   @Field({ nullable: true })
   semester: string;
+
+  @Field({ nullable: true })
+  search: string;
 }
