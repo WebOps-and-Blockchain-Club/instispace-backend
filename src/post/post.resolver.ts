@@ -251,9 +251,7 @@ export class PostResolver {
   @UseGuards(JwtAuthGuard)
   @ResolveField(() => [String])
   async permissions(@Parent() post: Post, @CurrentUser() user: User) {
-    console.log('=================');
     let permissions = ['Comment', 'Save'];
-    console.log(permissions);
     let newPost = await this.postService.findOne(post?.id);
     if (user?.id === newPost?.createdBy?.id) permissions.push('Edit');
     else permissions.push('Report');
