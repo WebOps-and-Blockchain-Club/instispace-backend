@@ -106,6 +106,9 @@ export class Post {
   @Field(() => User)
   createdBy: User;
 
+  @Field({ nullable: true })
+  attachment: string;
+
   @ManyToOne(() => User, (user) => user.postsAporoved, { nullable: true })
   approvedBy: User;
 

@@ -11,6 +11,7 @@ import UsersDev from './usersDev.entity';
 import { LdapModule } from 'src/ldap/ldap.module';
 import { NotificationModule } from 'src/notification/notification.module';
 import { JwtStrategy } from 'src/auth/jwt.strategy';
+import { LdapListModule } from 'src/ldapList/ldapList.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { JwtStrategy } from 'src/auth/jwt.strategy';
     TagModule,
     LdapModule,
     NotificationModule,
+    LdapListModule,
   ],
   providers: [UserResolver, UserService],
   exports: [UserService],

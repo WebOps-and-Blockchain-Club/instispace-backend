@@ -18,12 +18,20 @@ class HostelResolver {
     description: 'Mutation to create hostel',
   })
   async createHostel(@Args('name') name: string) {
-    return await this.hostelService.create(name);
+    try {
+      return await this.hostelService.create(name);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @Query(() => [Hostel])
   async getHostels() {
-    return await this.hostelService.getAll();
+    try {
+      return await this.hostelService.getAll();
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
   //TODO: userresolver
   // @ResolveField('users', () => [User])

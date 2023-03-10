@@ -60,6 +60,16 @@ export class User {
   @Field((_type) => String, { nullable: true })
   fcmToken: string;
 
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  photo: string;
+
+  @Field()
+  department: string;
+
+  @Field()
+  programme: string;
+
   @ManyToOne((_type) => Hostel, (hostel) => hostel.users, { nullable: true })
   @Field((_type) => Hostel, {
     nullable: true,

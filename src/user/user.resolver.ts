@@ -9,6 +9,7 @@ import {
 } from '@nestjs/graphql';
 import { AuthGuard } from '@nestjs/passport';
 import Hostel from 'src/hostel/hostel.entity';
+import { LdapListService } from 'src/ldapList/ldapList.service';
 import { Comments } from 'src/post/comments/comment.entity';
 import { Post } from 'src/post/post.entity';
 import { CurrentUser } from '../auth/current_user';
@@ -16,6 +17,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import Tag from '../tag/tag.entity';
 import Permission from './permission/permission.entity';
 import { PermissionInput } from './permission/type/permission.input';
+import findPeopleOutput from './type/findPeople.output';
 import { UserRole } from './type/role.enum';
 import { CreateUserInput, LoginInput } from './type/user.input';
 import { LoginOutput } from './type/user.object';
@@ -25,7 +27,10 @@ import { UserService } from './user.service';
 
 @Resolver(() => User)
 export class UserResolver {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly ldapListService: LdapListService,
+  ) {}
 
   @Mutation(() => LoginOutput)
   async login(
@@ -45,6 +50,13 @@ export class UserResolver {
   @Query(() => [User])
   async getUsers() {
     return await this.userService.getAll();
+  }
+
+  @Query(() => User)
+  async getUser(@Args('userId') userId: string, @Args('roll') roll: string) {
+    if (userId)
+      return await this.userService.getOneById(userId, ['hostel', 'interests']);
+    if (roll) return await this.userService.getOneByRoll(roll);
   }
 
   @Mutation(() => User)
@@ -85,20 +97,34 @@ export class UserResolver {
 
   @ResolveField(() => [Post], { nullable: true })
   async likedPost(@Parent() user: User) {
-    let newUser = await this.userService.getOneById(user.id, ['likedPost']);
-    return newUser.likedPost;
+    try {
+      let newUser = await this.userService.getOneById(user.id, ['likedPost']);
+      return newUser.likedPost;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => [Post], { nullable: true })
   async dislikedPost(@Parent() user: User) {
-    let newUser = await this.userService.getOneById(user.id, ['likedPost']);
-    return newUser.dislikedPost;
+    try {
+      let newUser = await this.userService.getOneById(user.id, ['likedPost']);
+      return newUser.dislikedPost;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => [Comments], { nullable: true })
   async likedComment(@Parent() user: User) {
-    let newUser = await this.userService.getOneById(user.id, ['likedComment']);
-    return newUser.likedComment;
+    try {
+      let newUser = await this.userService.getOneById(user.id, [
+        'likedComment',
+      ]);
+      return newUser.likedComment;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => [Comments], { nullable: true })
@@ -111,38 +137,77 @@ export class UserResolver {
 
   @ResolveField(() => [Post], { nullable: true })
   async savedPost(@Parent() user: User) {
-    let newUser = await this.userService.getOneById(user.id, ['savedPost']);
-    return newUser.savedPost;
+    try {
+      let newUser = await this.userService.getOneById(user.id, ['savedPost']);
+      return newUser.savedPost;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => User)
   async createdBy(@Parent() { id, createdBy }: User) {
-    if (createdBy) return createdBy;
-    const user = await this.userService.getOneById(id, null);
-    const parents = await this.userService.getParents(user);
-    if (parents.length <= 1) return null;
-    else return parents[parents.length - 2];
+    try {
+      if (createdBy) return createdBy;
+      const user = await this.userService.getOneById(id, null);
+      const parents = await this.userService.getParents(user);
+      if (parents.length <= 1) return null;
+      else return parents[parents.length - 2];
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => [User])
   async accountsCreated(@Parent() { id, accountsCreated }: User) {
-    if (accountsCreated) return accountsCreated;
-    const user = await this.userService.getOneById(id, null);
-    return await this.userService.getChildren(user);
+    try {
+      if (accountsCreated) return accountsCreated;
+      const user = await this.userService.getOneById(id, null);
+      return await this.userService.getChildren(user);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => Permission)
   async permission(@Parent() { id, permission }: User) {
-    if (permission) return permission;
-    const user = await this.userService.getOneById(id, ['permission']);
-    return user.permission;
+    try {
+      if (permission) return permission;
+      const user = await this.userService.getOneById(id, ['permission']);
+      return user.permission;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => String)
-  async photo(@Parent() { roll, role }: User) {
-    return role === UserRole.USER || role === UserRole.MODERATOR
-      ? `https://instispace.iitm.ac.in/photos/byroll.php?roll=${roll.toUpperCase()}`
-      : '';
+  async photo(@Parent() user: User) {
+    try {
+      if (user.photo) {
+        return user.photo;
+      } else {
+        return user.role === UserRole.USER || user.role === UserRole.MODERATOR
+          ? `https://instispace.iitm.ac.in/photos/byroll.php?roll=${user.roll.toUpperCase()}`
+          : '';
+      }
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
+  }
+
+  @ResolveField(() => String)
+  async department(@Parent() user: User) {
+    let newUser = await this.userService.getOneByRoll(user.roll);
+    newUser.department = this.ldapListService.getDepartment(
+      newUser.roll.slice(0, 2),
+    );
+    return newUser.department;
+  }
+
+  @ResolveField(() => String)
+  async programme(@Parent() user: User) {
+    user.programme = this.userService.getprogramme(user.roll);
+    return user.programme;
   }
 
   @Mutation(() => Hostel)
@@ -150,5 +215,14 @@ export class UserResolver {
   async setHostel(@Args('hostelname') name: string, @CurrentUser() user: User) {
     let hostel = this.userService.hostel(name, user);
     return hostel;
+  }
+
+  @Query(() => findPeopleOutput)
+  async findSuperUser(
+    @Args('LastUserId') lastUserId: string,
+    @Args('take') take: number,
+    @Args('search', { nullable: true }) search?: string,
+  ) {
+    return this.userService.getSuperusers(lastUserId, take, search);
   }
 }

@@ -6,6 +6,7 @@ import { TagService } from 'src/tag/tag.service';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { In, Repository } from 'typeorm';
+import { PostCategory } from './type/post-category.enum';
 import { Post } from './post.entity';
 import { CreatePostInput } from './type/create-post.input';
 import { FilteringConditions } from './type/filtering-condition';
@@ -33,7 +34,28 @@ export class PostService {
         'permission',
       ]);
       let postList: Post[];
-      if (filteringConditions.posttobeApproved) {
+      if (filteringConditions.viewReportedPosts) {
+        postList = await this.postRepository.find({
+          where: {
+            status: In([
+              PostStatus.REPORTED,
+              PostStatus.IN_REVIEW,
+              PostStatus.REPORT_ACCEPTED,
+              PostStatus.REPORT_REJECTED,
+            ]),
+          },
+          relations: [
+            'postComments',
+            'postReports',
+            'postReports.createdBy',
+            'likedBy',
+            'createdBy',
+            'savedBy',
+            'tags',
+          ],
+          order: { createdAt: 'DESC' },
+        });
+      } else if (filteringConditions.posttobeApproved) {
         postList = await this.postRepository.find({
           where: {
             isHidden: false,
@@ -42,6 +64,7 @@ export class PostService {
           relations: [
             'postComments',
             'postReports',
+            'postReports.createdBy',
             'likedBy',
             'createdBy',
             'savedBy',
@@ -70,57 +93,68 @@ export class PostService {
           relations: [
             'postComments',
             'postReports',
+            'postReports.createdBy',
             'likedBy',
             'createdBy',
+            'createdBy.interests',
             'savedBy',
             'tags',
           ],
           order: { createdAt: 'DESC' },
         });
 
-        //Filter the posts after the 2 hours time of completion
+        // Filter the posts after the 2 hours time of completion
 
         // default filters (endtime should not exceed)
 
         let filterDate = {
-          Reviews: 7,
-          'Random thoughts': 3,
-          Help: 3,
-          Announcements: 7,
+          [PostCategory.Review]: 7,
+          [PostCategory.RandomThought]: 3,
+          [PostCategory.Help]: 3,
+          [PostCategory.Announcement]: 7,
+          [PostCategory.Lost]: 7,
+          [PostCategory.Found]: 7,
         };
-
-        if (filteringConditions.showOldPost) {
-          postList = postList.filter((n) => {
-            const d = new Date();
-            if (n.endTime && new Date(n.endTime).getTime() < d.getTime()) {
-              return true;
-            } else if (n.category === 'Queries') {
+        if (
+          !(
+            filteringConditions.createBy ||
+            filteringConditions.createdByMe ||
+            filteringConditions.isLiked ||
+            filteringConditions.isSaved
+          )
+        ) {
+          if (filteringConditions.showOldPost) {
+            postList = postList.filter((n) => {
+              const d = new Date();
+              if (n.endTime && new Date(n.endTime).getTime() < d.getTime()) {
+                return true;
+              } else if (n.category === PostCategory.Query) {
+                return false;
+              } else {
+                d.setDate(d.getDate() - filterDate[n.category]);
+                if (new Date(n.updatedAt).getTime() < d.getTime()) {
+                  return true;
+                }
+              }
               return false;
-            } else {
-              d.setDate(d.getDate() - filterDate[n.category]);
-              if (new Date(n.updatedAt).getTime() < d.getTime()) {
+            });
+          } else {
+            postList = postList.filter((n) => {
+              const d = new Date();
+              if (n.endTime && new Date(n.endTime).getTime() > d.getTime())
                 return true;
-              }
-            }
-            return false;
-          });
-        } else {
-          postList = postList.filter((n) => {
-            const d = new Date();
-            if (n.endTime && new Date(n.endTime).getTime() > d.getTime())
-              return true;
-            else if (n.category === 'Queries') {
-              return true;
-            } else {
-              d.setDate(d.getDate() - filterDate[n.category]);
-              if (new Date(n.updatedAt).getTime() > d.getTime()) {
+              else if (n.category === PostCategory.Query) {
                 return true;
+              } else {
+                d.setDate(d.getDate() - filterDate[n.category]);
+                if (new Date(n.updatedAt).getTime() > d.getTime()) {
+                  return true;
+                }
               }
-            }
-            return false;
-          });
+              return false;
+            });
+          }
         }
-        console.log(postList);
 
         postList = postList.filter(
           (n) =>
@@ -146,22 +180,44 @@ export class PostService {
             );
           }
 
+          if (filteringConditions.createdByMe) {
+            postList = postList.filter((e) => e.createdBy.id === user.id);
+          }
+
+          if (filteringConditions.followedTags) {
+            const current_user = await this.userService.getOneById(user.id, [
+              'interests',
+            ]);
+            postList = postList.filter(
+              (n) =>
+                n.tags.filter((tag) => current_user.interests.includes(tag))
+                  .length !== 0,
+            );
+          }
+
           if (
             filteringConditions.categories &&
             filteringConditions.categories.length
           ) {
-            console.log(filteringConditions.categories);
             postList = postList.filter((n) =>
               filteringConditions.categories.includes(n.category),
             );
-            // console.log(postList);
           }
           if (filteringConditions.isSaved) {
-            postList = postList.filter((e) => e.isSaved === true);
+            postList = postList.filter(
+              (e) => e.savedBy.filter((u) => u.id === user.id).length,
+            );
           }
 
           if (filteringConditions.isLiked) {
-            postList = postList.filter((e) => e.isLiked === true);
+            postList = postList.filter(
+              (e) => e.likedBy.filter((u) => u.id === user.id).length,
+            );
+          }
+          if (filteringConditions.createBy) {
+            postList = postList.filter(
+              (e) => e.createdBy.id === filteringConditions.createBy,
+            );
           }
         }
 
@@ -202,87 +258,109 @@ export class PostService {
   }
 
   async create(post: CreatePostInput, user: User): Promise<Post> {
-    var postStatus;
-    const currentUser = await this.userService.getOneById(user.id, [
-      'permission',
-    ]);
-    // if (!currentUser.permission.livePosts.includes(post.category)) {
-    //   postStatus = PostStatus.TO_BE_APPROVED;
-    // }
-    var tags: Tag[] = [];
+    try {
+      var postStatus;
+      const currentUser = await this.userService.getOneById(user.id, [
+        'permission',
+      ]);
+      if (!currentUser.permission.livePosts.includes(post.category)) {
+        postStatus = PostStatus.TO_BE_APPROVED;
+      }
+      var tags: Tag[] = [];
 
-    if (post.tagIds) {
-      await Promise.all(
-        post.tagIds.map(async (id) => {
-          const tag = await this.tagService.getOne(id, ['post']);
-          if (tag) {
-            tags = tags.concat([tag]);
-          }
-        }),
-      );
+      if (post.tagIds) {
+        await Promise.all(
+          post.tagIds.map(async (id) => {
+            const tag = await this.tagService.getOne(id, ['post']);
+            if (tag) {
+              tags = tags.concat([tag]);
+            }
+          }),
+        );
 
-      if (tags.length !== post.tagIds.length) throw new Error('Invalid tagIds');
-      post.tags = tags;
+        if (tags.length !== post.tagIds.length)
+          throw new Error('Invalid tagIds');
+        post.tags = tags;
+      }
+
+      let imageUrls;
+      if (post.photoList && post.photoList.length) {
+        imageUrls = post.photoList.join(' AND ');
+      }
+
+      let newPost = new Post();
+      newPost.Link = post.link;
+      newPost.category = post.category;
+      newPost.content = post.content;
+      newPost.linkName = post.linkName;
+      newPost.location = post.location;
+      if (post.postTime) newPost.postTime = post.postTime;
+      newPost.photo = imageUrls === '' ? null : imageUrls;
+      newPost.title = post.title;
+      newPost.tags = post.tags;
+
+      if (postStatus) {
+        const superUsers =
+          await this.userService.getAncestorswithAprrovalAccess(user);
+        // TODO: send notif
+        newPost.status = postStatus;
+      }
+      if (post.endTime) newPost.endTime = post.endTime;
+      newPost.createdBy = user;
+      return this.postRepository.save(newPost);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
     }
-
-    let imageUrls;
-    if (post.photoList && post.photoList.length) {
-      imageUrls = post.photoList.join(' AND ');
-    }
-
-    let newPost = new Post();
-    newPost.Link = post.link;
-    newPost.category = post.category;
-    newPost.content = post.content;
-    newPost.linkName = post.linkName;
-    newPost.location = post.location;
-    if (post.postTime) newPost.postTime = post.postTime;
-    newPost.photo = imageUrls === '' ? null : imageUrls;
-    newPost.title = post.title;
-    newPost.tags = post.tags;
-
-    if (postStatus) {
-      const superUsers = await this.userService.getAncestorswithAprrovalAccess(
-        user,
-      );
-      // send notif
-      console.log(superUsers);
-      newPost.status = postStatus;
-    }
-    if (post.endTime) newPost.endTime = post.endTime;
-    newPost.createdBy = user;
-    let eventSave = this.postRepository.save(newPost);
-    let x = await this.notificationService.notifyPost(newPost);
-    console.log(x);
-    return eventSave;
   }
 
-  async changeStatus(post: Post, user: User): Promise<Post> {
-    const superUsers = await this.userService.getAncestorswithAprrovalAccess(
-      user,
-    );
-    if (!superUsers.filter((u) => u.id === user.id).length) {
-      throw new Error('Permission Denied');
+  async changeStatus(
+    post: Post,
+    user: User,
+    status: PostStatus,
+  ): Promise<Post> {
+    try {
+      if ([PostStatus.APPROVED, PostStatus.REJECTED].includes(status)) {
+        const superUsers =
+          await this.userService.getAncestorswithAprrovalAccess(user);
+        if (!superUsers.filter((u) => u.id === user.id).length) {
+          throw new Error('Permission Denied');
+        }
+        post.status = status;
+        post.approvedBy = user;
+        return this.postRepository.save(post);
+      } else {
+        const _user = await this.userService.getOneById(user.id, [
+          'permission',
+        ]);
+        if (!_user.permission.handleReports)
+          throw new Error('Permission Denied');
+        post.status = status;
+        // TODO: maintain resolved by
+        return this.postRepository.save(post);
+      }
+    } catch (error) {
+      throw new Error(`message : ${error}`);
     }
-    post.status = PostStatus.APPROVED;
-    post.approvedBy = user;
-    return this.postRepository.save(post);
   }
 
   async findOne(id: string): Promise<Post> {
-    return this.postRepository.findOne({
-      where: { id: id },
-      relations: [
-        'postComments',
-        'postReports',
-        'createdBy',
-        'likedBy',
-        'tags',
-        'savedBy',
-        'dislikedBy',
-        'approvedBy',
-      ],
-    });
+    try {
+      return this.postRepository.findOne({
+        where: { id: id },
+        relations: [
+          'postComments',
+          'postReports',
+          'createdBy',
+          'likedBy',
+          'tags',
+          'savedBy',
+          'dislikedBy',
+          'approvedBy',
+        ],
+      });
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   async update(
@@ -291,47 +369,61 @@ export class PostService {
   ): Promise<Post> {
     var tags: Tag[] = [];
 
-    if (updatePostInput.tagIds) {
-      await Promise.all(
-        updatePostInput.tagIds.map(async (id) => {
-          const tag = await this.tagService.getOne(id, ['post']);
-          if (tag) {
-            tags = tags.concat([tag]);
-          }
-        }),
-      );
+    try {
+      if (updatePostInput.tagIds) {
+        await Promise.all(
+          updatePostInput.tagIds.map(async (id) => {
+            const tag = await this.tagService.getOne(id, ['post']);
+            if (tag) {
+              tags = tags.concat([tag]);
+            }
+          }),
+        );
 
-      if (tags.length !== updatePostInput.tagIds.length)
-        throw new Error('Invalid tagIds');
-      postToUpdate.tags = tags;
+        if (tags.length !== updatePostInput.tagIds.length)
+          throw new Error('Invalid tagIds');
+        postToUpdate.tags = tags;
+      }
+      let imageUrls;
+      if (updatePostInput.photoList && updatePostInput.photoList.length) {
+        imageUrls = updatePostInput.photoList.join(' AND ');
+      }
+      postToUpdate.photo = imageUrls === '' ? null : imageUrls;
+      if (updatePostInput.link) postToUpdate.Link = updatePostInput.link;
+      if (updatePostInput.category)
+        postToUpdate.category = updatePostInput.category;
+      if (updatePostInput.content)
+        postToUpdate.content = updatePostInput.content;
+      if (updatePostInput.linkName)
+        postToUpdate.linkName = updatePostInput.linkName;
+      if (updatePostInput.location)
+        postToUpdate.location = updatePostInput.location;
+      if (updatePostInput.endTime)
+        postToUpdate.endTime = updatePostInput.endTime;
+      if (updatePostInput.postTime)
+        postToUpdate.postTime = updatePostInput.postTime;
+      if (updatePostInput.title) postToUpdate.title = updatePostInput.title;
+      return this.postRepository.save(postToUpdate);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
     }
-    let imageUrls;
-    if (updatePostInput.photoList && updatePostInput.photoList.length) {
-      imageUrls = updatePostInput.photoList.join(' AND ');
-    }
-    postToUpdate.photo = imageUrls === '' ? null : imageUrls;
-    if (updatePostInput.link) postToUpdate.Link = updatePostInput.link;
-    if (updatePostInput.category)
-      postToUpdate.category = updatePostInput.category;
-    if (updatePostInput.content) postToUpdate.content = updatePostInput.content;
-    if (updatePostInput.linkName)
-      postToUpdate.linkName = updatePostInput.linkName;
-    if (updatePostInput.location)
-      postToUpdate.location = updatePostInput.location;
-    if (updatePostInput.endTime) postToUpdate.endTime = updatePostInput.endTime;
-    if (updatePostInput.postTime)
-      postToUpdate.postTime = updatePostInput.postTime;
-    if (updatePostInput.title) postToUpdate.title = updatePostInput.title;
-    return this.postRepository.save(postToUpdate);
   }
 
   async remove(post: Post) {
-    post.isHidden = true;
-    return await this.postRepository.save(post);
+    try {
+      post.isHidden = true;
+      return await this.postRepository.save(post);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   async save(post: Post) {
-    return await this.postRepository.save(post);
+    try {
+      return await this.postRepository.save(post);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   async toggleLike(post: Post, user: User) {

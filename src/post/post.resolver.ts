@@ -17,11 +17,19 @@ import { CreatePostInput } from './type/create-post.input';
 import { FilteringConditions } from './type/filtering-condition';
 import findoneOutput from './type/post-output';
 import { OrderInput } from './type/sorting-conditions';
-import { UpdatePostInput } from './type/update-post';
+import { PostStatusInput, UpdatePostInput } from './type/update-post';
+import { PostCategory } from './type/post-category.enum';
+import { UserService } from 'src/user/user.service';
+import { Role } from 'src/permission/permission.decorator';
+import { UserRole } from 'src/user/type/role.enum';
+import { RolesGuard } from 'src/permission/roles.guard';
 
 @Resolver(() => Post)
 export class PostResolver {
-  constructor(private readonly postService: PostService) {}
+  constructor(
+    private readonly postService: PostService,
+    private readonly userService: UserService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Query(() => findoneOutput)
@@ -41,6 +49,9 @@ export class PostResolver {
     );
   }
 
+  // @UseGuards(JwtAuthGuard)
+  // @UseGuards(RolesGuard)
+  // @Role(UserRole.USER)
   @Query(() => Post)
   async findOnePost(@Args('Postid') postId: string) {
     return await this.postService.findOne(postId);
@@ -67,9 +78,13 @@ export class PostResolver {
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => Post)
-  async changePostsStatus(@Args('id') id: string, @CurrentUser() user: User) {
+  async changePostsStatus(
+    @Args('id') id: string,
+    @Args('status') { status }: PostStatusInput,
+    @CurrentUser() user: User,
+  ) {
     let postToUpdate = await this.postService.findOne(id);
-    return await this.postService.changeStatus(postToUpdate, user);
+    return await this.postService.changeStatus(postToUpdate, user, status);
   }
 
   @Mutation(() => Post)
@@ -85,7 +100,8 @@ export class PostResolver {
     @CurrentUser() user: User,
   ) {
     let post = await this.postService.findOne(postId);
-    return await this.postService.toggleLike(post, user);
+    let newUser = await this.userService.getOneById(user.id, ['likedPost']);
+    return await this.postService.toggleLike(post, newUser);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -110,127 +126,235 @@ export class PostResolver {
 
   @ResolveField(() => [User])
   async likedBy(@Parent() post: Post) {
-    let newPost = await this.postService.findOne(post.id);
-    return newPost.likedBy;
+    try {
+      let newPost = await this.postService.findOne(post.id);
+      return newPost.likedBy;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => [User])
   async dislikedBy(@Parent() post: Post) {
-    let newPost = await this.postService.findOne(post.id);
-    return newPost.dislikedBy;
+    try {
+      let newPost = await this.postService.findOne(post.id);
+      return newPost.dislikedBy;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => [Tag])
   async tags(@Parent() post: Post) {
-    let newPost = await this.postService.findOne(post.id);
-    return newPost.tags;
+    try {
+      let newPost = await this.postService.findOne(post.id);
+      return newPost.tags;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => [User])
   async savedBy(@Parent() post: Post) {
-    let newPost = await this.postService.findOne(post.id);
-    return newPost.savedBy;
+    try {
+      let newPost = await this.postService.findOne(post.id);
+      return newPost.savedBy;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => Number)
   async likeCount(@Parent() post: Post) {
-    let newPost = await this.postService.findOne(post.id);
-    newPost.likeCount = newPost.likedBy.length;
-    return newPost.likeCount;
+    try {
+      let newPost = await this.postService.findOne(post.id);
+      newPost.likeCount = newPost.likedBy.length;
+      return newPost.likeCount;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => Number)
   async dislikeCount(@Parent() post: Post) {
-    let newPost = await this.postService.findOne(post.id);
-    newPost.dislikeCount = newPost.dislikedBy.length;
-    return newPost.dislikeCount;
+    try {
+      let newPost = await this.postService.findOne(post.id);
+      newPost.dislikeCount = newPost.dislikedBy.length;
+      return newPost.dislikeCount;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
+  }
+
+  @ResolveField(() => String)
+  async attachment(@Parent() post: Post) {
+    try {
+      if (
+        post.photo &&
+        (post.category === PostCategory.Connect ||
+          post.category === PostCategory.Opportunity ||
+          post.category === PostCategory.Query ||
+          post.category === PostCategory.Help ||
+          post.category === PostCategory.Review ||
+          post.category === PostCategory.RandomThought)
+      ) {
+        return post.photo;
+      } else return null;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
+  }
+
+  @ResolveField(() => String)
+  async photo(@Parent() post: Post) {
+    try {
+      if (
+        post.category === PostCategory.Connect ||
+        post.category === PostCategory.Opportunity ||
+        post.category === PostCategory.Query ||
+        post.category === PostCategory.Help ||
+        post.category === PostCategory.Review ||
+        post.category === PostCategory.RandomThought
+      )
+        return null;
+      else {
+        if (post.photo) {
+          return post.photo;
+        } else {
+          return null;
+        }
+      }
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => User)
   async createdBy(@Parent() post: Post) {
-    let newPost = await this.postService.findOne(post.id);
-    return newPost.createdBy;
+    try {
+      let newPost = await this.postService.findOne(post.id);
+      return newPost.createdBy;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @UseGuards(JwtAuthGuard)
   @ResolveField(() => Boolean)
   async isSaved(@Parent() post: Post, @CurrentUser() user: User) {
-    let newPost = await this.postService.findOne(post.id);
-    console.log(newPost.savedBy.filter((u) => u.id === user.id));
-    if (newPost.savedBy.filter((u) => u.id === user.id)?.length)
-      newPost.isSaved = true;
-    else newPost.isSaved = false;
-    return newPost.isSaved;
+    try {
+      let newPost = await this.postService.findOne(post.id);
+      console.log(newPost.savedBy.filter((u) => u.id === user.id));
+      if (newPost.savedBy.filter((u) => u.id === user.id)?.length)
+        newPost.isSaved = true;
+      else newPost.isSaved = false;
+      return newPost.isSaved;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @UseGuards(JwtAuthGuard)
   @ResolveField(() => Boolean)
   async isLiked(@Parent() post: Post, @CurrentUser() user: User) {
-    let newPost = await this.postService.findOne(post.id);
-    if (newPost.likedBy.filter((u) => u.id === user.id).length)
-      newPost.isLiked = true;
-    else newPost.isLiked = false;
-    return newPost.isLiked;
+    try {
+      let newPost = await this.postService.findOne(post.id);
+      if (newPost.likedBy.filter((u) => u.id === user.id).length)
+        newPost.isLiked = true;
+      else newPost.isLiked = false;
+      return newPost.isLiked;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @UseGuards(JwtAuthGuard)
   @ResolveField(() => Boolean)
   async isDisliked(@Parent() post: Post, @CurrentUser() user: User) {
-    let newPost = await this.postService.findOne(post.id);
-    if (newPost.dislikedBy.filter((u) => u.id === user.id).length)
-      newPost.isDisliked = true;
-    else newPost.isDisliked = false;
-    return newPost.isDisliked;
+    try {
+      let newPost = await this.postService.findOne(post.id);
+      if (newPost.dislikedBy.filter((u) => u.id === user.id).length)
+        newPost.isDisliked = true;
+      else newPost.isDisliked = false;
+      return newPost.isDisliked;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @UseGuards(JwtAuthGuard)
   @ResolveField(() => Boolean)
   async isReported(@Parent() post: Post, @CurrentUser() user: User) {
-    let newPost = await this.postService.findOne(post.id);
-    if (newPost.postReports.filter((r) => r.createdBy.id === user.id).length)
-      newPost.isReported = true;
-    else newPost.isReported = false;
+    try {
+      let newPost = await this.postService.findOne(post.id);
+      if (newPost.postReports.filter((r) => r.createdBy.id === user.id).length)
+        newPost.isReported = true;
+      else newPost.isReported = false;
 
-    return newPost.isReported;
+      return newPost.isReported;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => Number)
   async reportCount(@Parent() post: Post) {
-    let newPost = await this.postService.findOne(post.id);
-    newPost.reportCount = newPost.postReports.length;
-    return newPost.reportCount;
+    try {
+      let newPost = await this.postService.findOne(post.id);
+      newPost.reportCount = newPost.postReports.length;
+      return newPost.reportCount;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   // Permissions: edit, report, comment, save
   // Actions: like/upvotes & downvotes, share, setRemider
-  @ResolveField(() => [String])
   @UseGuards(JwtAuthGuard)
+  @ResolveField(() => [String])
   async permissions(@Parent() post: Post, @CurrentUser() user: User) {
-    let permissions = ['Report', 'Comment', 'Save'];
-    const _post = await this.postService.findOne(post.id);
-    if (user.id === _post?.createdBy.id) permissions.push('Edit');
-    else permissions.push('Report');
-    // view reported, approve post
-    return permissions;
+    try {
+      let permissions = ['Comment', 'Save'];
+      let newPost = await this.postService.findOne(post?.id);
+      if (user?.id === newPost?.createdBy?.id) permissions.push('Edit');
+      else permissions.push('Report');
+      // view reported, approve post
+      return permissions;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => [String])
   async actions(@Parent() post: Post) {
-    if (['LOST', 'FOUND'].includes(post.category)) return [];
-    let actions: string[] = ['Share'];
-    if (
-      [
-        'Club Events',
-        'Announcements',
-        'Recruitments',
-        'Competitions',
-        'Opportunities',
-      ].includes(post.category)
-    )
-      actions.push('Like', 'Set_Reminder');
-    if (['Random thoughts', 'Reviews'].includes(post.category))
-      actions.push('Like');
-    if (post.category === 'Queries') actions.push('Upvote_Downvote');
-    return actions;
+    try {
+      if (
+        [PostCategory.Lost, PostCategory.Found].includes(
+          post.category as PostCategory,
+        )
+      )
+        return [];
+      let actions: string[] = ['Share'];
+      if (
+        [
+          PostCategory.Event,
+          PostCategory.Announcement,
+          PostCategory.Recruitment,
+          PostCategory.Competition,
+          PostCategory.Opportunity,
+        ].includes(post.category as PostCategory)
+      )
+        actions.push('Like', 'Set_Reminder');
+      if (
+        [PostCategory.RandomThought, PostCategory.Review].includes(
+          post.category as PostCategory,
+        )
+      )
+        actions.push('Like');
+      if (post.category === PostCategory.Query) actions.push('Upvote_Downvote');
+      return actions;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 }

@@ -5,8 +5,14 @@ export class FilteringConditions {
   @Field({ nullable: true })
   search?: string;
 
-  @Field({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
   posttobeApproved: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  followedTags: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  viewReportedPosts: boolean;
 
   @Field(() => [String], { nullable: true })
   tags: string[];
@@ -22,4 +28,13 @@ export class FilteringConditions {
 
   @Field(() => Boolean, { defaultValue: false })
   showOldPost: boolean;
+
+  @Field(() => Boolean, { defaultValue: false })
+  createdByMe: boolean;
+
+  @Field({
+    description: 'filters the post based on created by id provided to it.',
+    nullable: true,
+  })
+  createBy: string;
 }
