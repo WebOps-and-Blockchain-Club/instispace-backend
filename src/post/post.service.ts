@@ -256,55 +256,59 @@ export class PostService {
   }
 
   async create(post: CreatePostInput, user: User): Promise<Post> {
-    var postStatus;
-    const currentUser = await this.userService.getOneById(user.id, [
-      'permission',
-    ]);
-    if (!currentUser.permission.livePosts.includes(post.category)) {
-      postStatus = PostStatus.TO_BE_APPROVED;
+    try {
+      var postStatus;
+      const currentUser = await this.userService.getOneById(user.id, [
+        'permission',
+      ]);
+      if (!currentUser.permission.livePosts.includes(post.category)) {
+        postStatus = PostStatus.TO_BE_APPROVED;
+      }
+      var tags: Tag[] = [];
+
+      if (post.tagIds) {
+        await Promise.all(
+          post.tagIds.map(async (id) => {
+            const tag = await this.tagService.getOne(id, ['post']);
+            if (tag) {
+              tags = tags.concat([tag]);
+            }
+          }),
+        );
+
+        if (tags.length !== post.tagIds.length)
+          throw new Error('Invalid tagIds');
+        post.tags = tags;
+      }
+
+      let imageUrls;
+      if (post.photoList && post.photoList.length) {
+        imageUrls = post.photoList.join(' AND ');
+      }
+
+      let newPost = new Post();
+      newPost.Link = post.link;
+      newPost.category = post.category;
+      newPost.content = post.content;
+      newPost.linkName = post.linkName;
+      newPost.location = post.location;
+      if (post.postTime) newPost.postTime = post.postTime;
+      newPost.photo = imageUrls === '' ? null : imageUrls;
+      newPost.title = post.title;
+      newPost.tags = post.tags;
+
+      if (postStatus) {
+        const superUsers =
+          await this.userService.getAncestorswithAprrovalAccess(user);
+        // TODO: send notif
+        newPost.status = postStatus;
+      }
+      if (post.endTime) newPost.endTime = post.endTime;
+      newPost.createdBy = user;
+      return this.postRepository.save(newPost);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
     }
-    var tags: Tag[] = [];
-
-    if (post.tagIds) {
-      await Promise.all(
-        post.tagIds.map(async (id) => {
-          const tag = await this.tagService.getOne(id, ['post']);
-          if (tag) {
-            tags = tags.concat([tag]);
-          }
-        }),
-      );
-
-      if (tags.length !== post.tagIds.length) throw new Error('Invalid tagIds');
-      post.tags = tags;
-    }
-
-    let imageUrls;
-    if (post.photoList && post.photoList.length) {
-      imageUrls = post.photoList.join(' AND ');
-    }
-
-    let newPost = new Post();
-    newPost.Link = post.link;
-    newPost.category = post.category;
-    newPost.content = post.content;
-    newPost.linkName = post.linkName;
-    newPost.location = post.location;
-    if (post.postTime) newPost.postTime = post.postTime;
-    newPost.photo = imageUrls === '' ? null : imageUrls;
-    newPost.title = post.title;
-    newPost.tags = post.tags;
-
-    if (postStatus) {
-      const superUsers = await this.userService.getAncestorswithAprrovalAccess(
-        user,
-      );
-      // TODO: send notif
-      newPost.status = postStatus;
-    }
-    if (post.endTime) newPost.endTime = post.endTime;
-    newPost.createdBy = user;
-    return this.postRepository.save(newPost);
   }
 
   async changeStatus(
@@ -312,39 +316,49 @@ export class PostService {
     user: User,
     status: PostStatus,
   ): Promise<Post> {
-    if ([PostStatus.APPROVED, PostStatus.REJECTED].includes(status)) {
-      const superUsers = await this.userService.getAncestorswithAprrovalAccess(
-        user,
-      );
-      if (!superUsers.filter((u) => u.id === user.id).length) {
-        throw new Error('Permission Denied');
+    try {
+      if ([PostStatus.APPROVED, PostStatus.REJECTED].includes(status)) {
+        const superUsers =
+          await this.userService.getAncestorswithAprrovalAccess(user);
+        if (!superUsers.filter((u) => u.id === user.id).length) {
+          throw new Error('Permission Denied');
+        }
+        post.status = status;
+        post.approvedBy = user;
+        return this.postRepository.save(post);
+      } else {
+        const _user = await this.userService.getOneById(user.id, [
+          'permission',
+        ]);
+        if (!_user.permission.handleReports)
+          throw new Error('Permission Denied');
+        post.status = status;
+        // TODO: maintain resolved by
+        return this.postRepository.save(post);
       }
-      post.status = status;
-      post.approvedBy = user;
-      return this.postRepository.save(post);
-    } else {
-      const _user = await this.userService.getOneById(user.id, ['permission']);
-      if (!_user.permission.handleReports) throw new Error('Permission Denied');
-      post.status = status;
-      // TODO: maintain resolved by
-      return this.postRepository.save(post);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
     }
   }
 
   async findOne(id: string): Promise<Post> {
-    return this.postRepository.findOne({
-      where: { id: id },
-      relations: [
-        'postComments',
-        'postReports',
-        'createdBy',
-        'likedBy',
-        'tags',
-        'savedBy',
-        'dislikedBy',
-        'approvedBy',
-      ],
-    });
+    try {
+      return this.postRepository.findOne({
+        where: { id: id },
+        relations: [
+          'postComments',
+          'postReports',
+          'createdBy',
+          'likedBy',
+          'tags',
+          'savedBy',
+          'dislikedBy',
+          'approvedBy',
+        ],
+      });
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   async update(
@@ -353,47 +367,61 @@ export class PostService {
   ): Promise<Post> {
     var tags: Tag[] = [];
 
-    if (updatePostInput.tagIds) {
-      await Promise.all(
-        updatePostInput.tagIds.map(async (id) => {
-          const tag = await this.tagService.getOne(id, ['post']);
-          if (tag) {
-            tags = tags.concat([tag]);
-          }
-        }),
-      );
+    try {
+      if (updatePostInput.tagIds) {
+        await Promise.all(
+          updatePostInput.tagIds.map(async (id) => {
+            const tag = await this.tagService.getOne(id, ['post']);
+            if (tag) {
+              tags = tags.concat([tag]);
+            }
+          }),
+        );
 
-      if (tags.length !== updatePostInput.tagIds.length)
-        throw new Error('Invalid tagIds');
-      postToUpdate.tags = tags;
+        if (tags.length !== updatePostInput.tagIds.length)
+          throw new Error('Invalid tagIds');
+        postToUpdate.tags = tags;
+      }
+      let imageUrls;
+      if (updatePostInput.photoList && updatePostInput.photoList.length) {
+        imageUrls = updatePostInput.photoList.join(' AND ');
+      }
+      postToUpdate.photo = imageUrls === '' ? null : imageUrls;
+      if (updatePostInput.link) postToUpdate.Link = updatePostInput.link;
+      if (updatePostInput.category)
+        postToUpdate.category = updatePostInput.category;
+      if (updatePostInput.content)
+        postToUpdate.content = updatePostInput.content;
+      if (updatePostInput.linkName)
+        postToUpdate.linkName = updatePostInput.linkName;
+      if (updatePostInput.location)
+        postToUpdate.location = updatePostInput.location;
+      if (updatePostInput.endTime)
+        postToUpdate.endTime = updatePostInput.endTime;
+      if (updatePostInput.postTime)
+        postToUpdate.postTime = updatePostInput.postTime;
+      if (updatePostInput.title) postToUpdate.title = updatePostInput.title;
+      return this.postRepository.save(postToUpdate);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
     }
-    let imageUrls;
-    if (updatePostInput.photoList && updatePostInput.photoList.length) {
-      imageUrls = updatePostInput.photoList.join(' AND ');
-    }
-    postToUpdate.photo = imageUrls === '' ? null : imageUrls;
-    if (updatePostInput.link) postToUpdate.Link = updatePostInput.link;
-    if (updatePostInput.category)
-      postToUpdate.category = updatePostInput.category;
-    if (updatePostInput.content) postToUpdate.content = updatePostInput.content;
-    if (updatePostInput.linkName)
-      postToUpdate.linkName = updatePostInput.linkName;
-    if (updatePostInput.location)
-      postToUpdate.location = updatePostInput.location;
-    if (updatePostInput.endTime) postToUpdate.endTime = updatePostInput.endTime;
-    if (updatePostInput.postTime)
-      postToUpdate.postTime = updatePostInput.postTime;
-    if (updatePostInput.title) postToUpdate.title = updatePostInput.title;
-    return this.postRepository.save(postToUpdate);
   }
 
   async remove(post: Post) {
-    post.isHidden = true;
-    return await this.postRepository.save(post);
+    try {
+      post.isHidden = true;
+      return await this.postRepository.save(post);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   async save(post: Post) {
-    return await this.postRepository.save(post);
+    try {
+      return await this.postRepository.save(post);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   async toggleLike(post: Post, user: User) {
