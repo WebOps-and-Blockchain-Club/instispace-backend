@@ -30,6 +30,7 @@ import {
 } from 'src/utils/config.json';
 import UsersDev from './usersDev.entity';
 import { LdapService } from 'src/ldap/ldap.service';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class UserService {
@@ -44,6 +45,8 @@ export class UserService {
     private permissionService: PermissionService,
     @Inject(forwardRef(() => TagService))
     private tagService: TagService,
+    // @Inject(forwardRef(() => NotificationService))
+    private notificationService: NotificationService,
     @Inject(LdapService)
     private ldapService: LdapService,
     @InjectRepository(Hostel)
@@ -80,6 +83,7 @@ export class UserService {
         /************ Check the user details ************/
         const user = await this.usersRepository.findOne({
           where: { roll: roll.toLowerCase() },
+          relations: ['notificationConfig'],
         });
         // If user doesn't exists
         if (!user) {
@@ -88,7 +92,7 @@ export class UserService {
           newUser.role = UserRole.USER;
           newUser.ldapName = ldapUser.displayName;
           newUser.isNewUser = true;
-          // TODO: notification
+          await this.notificationService.createNotificationConfig(user, fcmToken);
           await this.usersRepository.save(newUser);
           const token = (await this.authService.generateToken(newUser))
             .accessToken;
@@ -96,7 +100,17 @@ export class UserService {
         }
         // If user exists
         else {
-          // TODO: notification
+          if (
+            user?.notificationConfig?.filter((n) => n.fcmToken === fcmToken)
+              .length === 0
+          ) {
+            let notificationConfig =
+              await this.notificationService.createNotificationConfig(
+                user,
+                fcmToken,
+              );
+            console.log(notificationConfig);
+          }
           const token = (await this.authService.generateToken(user))
             .accessToken;
           return {
@@ -111,6 +125,7 @@ export class UserService {
         if (process.env.NODE_ENV !== 'production') {
           const admins = await this.usersRepository.find({
             where: { role: UserRole.ADMIN },
+            relations: ['notificationConfig'],
           });
 
           if (admins.length === 0) {
@@ -132,7 +147,15 @@ export class UserService {
         else {
           const token = (await this.authService.generateToken(user))
             .accessToken;
-          // TODO: notification
+          if (
+            user.notificationConfig.filter((n) => n.fcmToken === fcmToken)
+              .length === 0
+          ) {
+            await this.notificationService.createNotificationConfig(
+              user,
+              fcmToken,
+            );
+          }
           return {
             isNewUser: user.isNewUser,
             role: user.role,
@@ -355,11 +378,7 @@ export class UserService {
   async usersForNotif() {
     try {
       return await this.usersRepository.find({
-        where: {
-          isNewUser: false,
-          notifyPost: In([Notification.FOLLOWED_TAGS, Notification.FORALL]),
-        },
-        relations: ['interests'],
+        relations: ['interests', 'notificationConfig'],
       });
     } catch (error) {
       throw new Error(`message : ${error}`);

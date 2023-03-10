@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TagModule } from 'src/tag/tag.module';
 import { AuthModule } from '../auth/auth.module';
@@ -9,6 +9,8 @@ import { UserResolver } from './user.resolver';
 import { UserService } from './user.service';
 import UsersDev from './usersDev.entity';
 import { LdapModule } from 'src/ldap/ldap.module';
+import { NotificationModule } from 'src/notification/notification.module';
+import { JwtStrategy } from 'src/auth/jwt.strategy';
 import { LdapListModule } from 'src/ldapList/ldapList.module';
 
 @Module({
@@ -18,6 +20,7 @@ import { LdapListModule } from 'src/ldapList/ldapList.module';
     PermissionModule,
     TagModule,
     LdapModule,
+    NotificationModule,
     LdapListModule,
   ],
   providers: [UserResolver, UserService],

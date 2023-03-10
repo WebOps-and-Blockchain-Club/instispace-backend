@@ -19,6 +19,7 @@ import Permission from './permission/permission.entity';
 import Hostel from 'src/hostel/hostel.entity';
 import HostelAnnouncement from 'src/hostelAnnouncement/hostelAnnouncement.entity';
 import { Notification } from 'src/utils';
+import { NotificationConfig } from 'src/notification/notification.entity';
 
 @ObjectType()
 @Entity('User')
@@ -117,6 +118,13 @@ export class User {
   @OneToMany(() => Report, (report) => report.createdBy, { nullable: true })
   @Field(() => [Report], { nullable: true })
   reports: Report[];
+
+  @OneToMany(
+    () => NotificationConfig,
+    (notificationConfig) => notificationConfig.createdBy,
+  )
+  @Field(() => [NotificationConfig])
+  notificationConfig: NotificationConfig[];
 
   @ManyToOne((type) => Permission, (permission) => permission.users, {
     nullable: true,

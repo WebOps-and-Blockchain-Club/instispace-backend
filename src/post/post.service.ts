@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NotificationService } from 'src/notification/notification.service';
 import Tag from 'src/tag/tag.entity';
 import { TagService } from 'src/tag/tag.service';
 import { User } from 'src/user/user.entity';
@@ -19,6 +20,7 @@ export class PostService {
     @InjectRepository(Post) private postRepository: Repository<Post>,
     private readonly tagService: TagService,
     private readonly userService: UserService,
+    private readonly notificationService: NotificationService,
   ) {}
   async findAll(
     lastpostId: string,
