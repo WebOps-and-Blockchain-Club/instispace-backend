@@ -46,6 +46,7 @@ export class UserResolver {
     console.log(user);
     return user;
   }
+  //(@Args('userId', { nullable: true }) userId: string, @Args('roll', { nullable: true }) roll: string)
 
   @Query(() => [User])
   async getUsers() {
@@ -53,7 +54,10 @@ export class UserResolver {
   }
 
   @Query(() => User)
-  async getUser(@Args('userId') userId: string, @Args('roll') roll: string) {
+  async getUser(
+    @Args('userId', { nullable: true }) userId: string,
+    @Args('roll', { nullable: true }) roll: string,
+  ) {
     if (userId)
       return await this.userService.getOneById(userId, ['hostel', 'interests']);
     if (roll) return await this.userService.getOneByRoll(roll);

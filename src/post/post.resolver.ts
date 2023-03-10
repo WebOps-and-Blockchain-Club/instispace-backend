@@ -20,9 +20,6 @@ import { OrderInput } from './type/sorting-conditions';
 import { PostStatusInput, UpdatePostInput } from './type/update-post';
 import { PostCategory } from './type/post-category.enum';
 import { UserService } from 'src/user/user.service';
-import { Role } from 'src/permission/permission.decorator';
-import { UserRole } from 'src/user/type/role.enum';
-import { RolesGuard } from 'src/permission/roles.guard';
 
 @Resolver(() => Post)
 export class PostResolver {
@@ -49,9 +46,6 @@ export class PostResolver {
     );
   }
 
-  // @UseGuards(JwtAuthGuard)
-  // @UseGuards(RolesGuard)
-  // @Role(UserRole.USER)
   @Query(() => Post)
   async findOnePost(@Args('Postid') postId: string) {
     return await this.postService.findOne(postId);

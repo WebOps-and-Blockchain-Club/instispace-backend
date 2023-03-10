@@ -7,15 +7,19 @@ import * as serviceAccount from './serviceAccountKey.json';
 export class FirebaseService {
   private admin: firebaseAdmin.app.App | null;
   constructor() {
-    this.admin = null;
-    if (this.admin === null && !firebaseAdmin.apps.length) {
-      this.admin = firebaseAdmin.initializeApp({
-        credential: firebaseAdmin.credential.cert(
-          serviceAccount as firebaseAdmin.ServiceAccount,
-        ),
-      });
-    } else {
-      firebaseAdmin.app();
+    try {
+      this.admin = null;
+      if (this.admin === null && !firebaseAdmin.apps.length) {
+        this.admin = firebaseAdmin.initializeApp({
+          credential: firebaseAdmin.credential.cert(
+            serviceAccount as firebaseAdmin.ServiceAccount,
+          ),
+        });
+      } else {
+        firebaseAdmin.app();
+      }
+    } catch (error) {
+      throw new Error(`message : ${error}`);
     }
   }
 
@@ -23,23 +27,27 @@ export class FirebaseService {
     registrationTokenOrTokens: string | string[],
     payload: firebaseAdmin.messaging.MessagingPayload,
   ) {
-    const limit = 999;
-    for (
-      let index = 0;
-      index < registrationTokenOrTokens.length;
-      index += limit
-    ) {
-      const tokens = registrationTokenOrTokens.slice(index, index + limit);
+    try {
+      const limit = 999;
+      for (
+        let index = 0;
+        index < registrationTokenOrTokens.length;
+        index += limit
+      ) {
+        const tokens = registrationTokenOrTokens.slice(index, index + limit);
 
-      this.admin
-        ?.messaging()
-        .sendToDevice(tokens, payload, {
-          contentAvailable: true,
-          priority: 'high',
-          timeToLive: 60 * 60 * 24,
-        })
-        .then((a) => console.log(a))
-        .catch((e) => console.log(e));
+        this.admin
+          ?.messaging()
+          .sendToDevice(tokens, payload, {
+            contentAvailable: true,
+            priority: 'high',
+            timeToLive: 60 * 60 * 24,
+          })
+          .then((a) => console.log(a))
+          .catch((e) => console.log(e));
+      }
+    } catch (error) {
+      throw new Error(`message : ${error}`);
     }
   }
 }

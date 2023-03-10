@@ -12,15 +12,30 @@ export class TagService {
   ) {}
 
   getAll(): Promise<Tag[]> {
-    return this.tagRepository.find();
+    try {
+      return this.tagRepository.find();
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   getOne(id: string, relations?: [string]): Promise<Tag> {
-    return this.tagRepository.findOne({ where: { id }, relations });
+    try {
+      return this.tagRepository.findOne({ where: { id }, relations });
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   create(title: string, category: string): Promise<Tag> {
-    const tag = this.tagRepository.create({ title: title, category: category });
-    return this.tagRepository.save(tag);
+    try {
+      const tag = this.tagRepository.create({
+        title: title,
+        category: category,
+      });
+      return this.tagRepository.save(tag);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 }

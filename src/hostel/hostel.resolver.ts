@@ -48,11 +48,19 @@ class HostelResolver {
   // }
   @ResolveField('amenities', () => [Amenity])
   async getAmenities(@Parent() hostel: Hostel) {
-    return await this.hostelService.amenities(hostel);
+    try {
+      return await this.hostelService.amenities(hostel);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
   @ResolveField('contacts', () => [HostelContact])
   async getHostelContacts(@Parent() hostel: Hostel) {
-    return await this.hostelService.contacts(hostel);
+    try {
+      return await this.hostelService.contacts(hostel);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 }
 export default HostelResolver;

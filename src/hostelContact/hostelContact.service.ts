@@ -12,15 +12,19 @@ class ContactService {
   ) {}
 
   async create({ name, type, contact }, id: string) {
-    const hostel = await this.hostelRepository.findOne({ where: { id } });
-    if (!hostel) throw new Error('Invalid Hostel');
+    try {
+      const hostel = await this.hostelRepository.findOne({ where: { id } });
+      if (!hostel) throw new Error('Invalid Hostel');
 
-    let cont = this.contactRepository.create();
-    cont.name = name;
-    cont.type = type;
-    cont.contact = contact;
-    cont.hostel = hostel;
-    return this.contactRepository.save(cont);
+      let cont = this.contactRepository.create();
+      cont.name = name;
+      cont.type = type;
+      cont.contact = contact;
+      cont.hostel = hostel;
+      return this.contactRepository.save(cont);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 }
 

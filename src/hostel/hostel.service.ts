@@ -20,37 +20,53 @@ class HostelService {
     private amenityRepository: Repository<Amenity>,
     @InjectRepository(HostelContact)
     private contactRepository: Repository<HostelContact>,
-  ) { }
+  ) {}
 
   create(name: string): Promise<Hostel> {
-    let hostel = this.hostelRepository.create();
-    hostel.name = name;
-    return this.hostelRepository.save(hostel);
+    try {
+      let hostel = this.hostelRepository.create();
+      hostel.name = name;
+      return this.hostelRepository.save(hostel);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   async getAll(ids?: string[]): Promise<Hostel[]> {
-    if (ids) {
-      let hostels: Hostel[] = [];
-      ids.map(async (id: string) => {
-        let hostel = await this.hostelRepository.findOne({ where: { id } });
-        if (hostel) hostels.push(hostel);
-      });
-      return hostels;
+    try {
+      if (ids) {
+        let hostels: Hostel[] = [];
+        ids.map(async (id: string) => {
+          let hostel = await this.hostelRepository.findOne({ where: { id } });
+          if (hostel) hostels.push(hostel);
+        });
+        return hostels;
+      }
+      return await this.hostelRepository.find();
+    } catch (error) {
+      throw new Error(`message : ${error}`);
     }
-    return await this.hostelRepository.find();
   }
 
   async getOne(id: string) {
-    return this.hostelRepository.findOne({
-      where: { id: id },
-    });
+    try {
+      return this.hostelRepository.findOne({
+        where: { id: id },
+      });
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   users(id: string): Promise<User[]> {
-    return this.userRepository.find({
-      where: { id },
-      relations: ['users'],
-    });
+    try {
+      return this.userRepository.find({
+        where: { id },
+        relations: ['users'],
+      });
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
   // async announcements(id): Promise<HostelAnnouncement[]> {
   //   let hostel = await this.announcementRepository.findOne({
@@ -62,18 +78,26 @@ class HostelService {
   // }
 
   async amenities(hostel): Promise<Amenity[]> {
-    let list = await this.amenityRepository.find({
-      where: { hostel },
-      relations: ['hostel'],
-    });
-    return list;
+    try {
+      let list = await this.amenityRepository.find({
+        where: { hostel },
+        relations: ['hostel'],
+      });
+      return list;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
   async contacts(hostel): Promise<HostelContact[]> {
-    let list = await this.contactRepository.find({
-      where: { hostel },
-      relations: ['hostel'],
-    });
-    return list;
+    try {
+      let list = await this.contactRepository.find({
+        where: { hostel },
+        relations: ['hostel'],
+      });
+      return list;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 }
 

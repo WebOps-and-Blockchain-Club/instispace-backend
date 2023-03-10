@@ -14,16 +14,20 @@ export class LdapListService {
     @InjectRepository(LdapList) private ldapRepository: Repository<LdapList>,
   ) {}
   async create(createLdapListInput: CreateLdapListInput) {
-    let newEntry = new LdapList();
-    newEntry.gender = createLdapListInput.gender;
-    newEntry.ldapName = createLdapListInput.ldapName;
-    newEntry.program = createLdapListInput.program;
-    newEntry.roll = createLdapListInput.roll;
-    newEntry.sem = createLdapListInput.sem;
-    newEntry.advisor = createLdapListInput.advisor;
-    newEntry.residencyType = createLdapListInput.residencyType;
-    newEntry.department = await this.getDepartment(newEntry.roll.slice(0, 2));
-    return await this.ldapRepository.save(newEntry);
+    try {
+      let newEntry = new LdapList();
+      newEntry.gender = createLdapListInput.gender;
+      newEntry.ldapName = createLdapListInput.ldapName;
+      newEntry.program = createLdapListInput.program;
+      newEntry.roll = createLdapListInput.roll;
+      newEntry.sem = createLdapListInput.sem;
+      newEntry.advisor = createLdapListInput.advisor;
+      newEntry.residencyType = createLdapListInput.residencyType;
+      newEntry.department = await this.getDepartment(newEntry.roll.slice(0, 2));
+      return await this.ldapRepository.save(newEntry);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   findAll() {}

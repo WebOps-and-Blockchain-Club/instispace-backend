@@ -53,7 +53,7 @@ export class UserService {
     private hostelRepository: Repository<Hostel>,
   ) {}
 
-  async login({ roll, pass }: LoginInput) {
+  async login({ roll, pass }: LoginInput, fcmToken: string) {
     try {
       if (emailExpresion.test(roll) === false) {
         let ldapUser: any;
@@ -92,7 +92,10 @@ export class UserService {
           newUser.role = UserRole.USER;
           newUser.ldapName = ldapUser.displayName;
           newUser.isNewUser = true;
-          await this.notificationService.createNotificationConfig(user, fcmToken);
+          await this.notificationService.createNotificationConfig(
+            user,
+            fcmToken,
+          );
           await this.usersRepository.save(newUser);
           const token = (await this.authService.generateToken(newUser))
             .accessToken;
@@ -239,7 +242,7 @@ export class UserService {
       if (userInput.mobile)
         userToUpdate.mobile = userToUpdate.password = userInput.mobile;
       if (userInput.photoUrl) userToUpdate.photo = userInput.photoUrl;
-      if (userInput.interests.length) {
+      if (userInput.interests != null && userInput.interests.length) {
         let interests: Tag[] = [];
         await Promise.all(
           userInput.interests.map(async (interestId) => {

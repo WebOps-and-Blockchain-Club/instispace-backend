@@ -24,36 +24,38 @@ class HostelAnnouncementService {
     }: createHostelAnnounceInput,
     user: User,
   ) {
-    let hostels: Hostel[] = [];
-    let users: User[] = [];
+    try {
+      let hostels: Hostel[] = [];
+      let users: User[] = [];
 
-    await Promise.all(
-      hostelIds.map(async (id) => {
-        const hostel = await this.hostelRepository.findOne({
-          where: { id },
-          relations: ['users'],
-        });
-        if (hostel) {
-          hostels.push(hostel);
-          users = users.concat(hostel.users);
-        }
-      }),
-    );
+      await Promise.all(
+        hostelIds.map(async (id) => {
+          const hostel = await this.hostelRepository.findOne({
+            where: { id },
+            relations: ['users'],
+          });
+          if (hostel) {
+            hostels.push(hostel);
+            users = users.concat(hostel.users);
+          }
+        }),
+      );
 
-    let announcement = this.announcementRepository.create();
-    announcement.title = title;
-    announcement.endTime = new Date(endTime);
-    announcement.description = description;
-    announcement.hostels = hostels;
-    if (imageUrls) {
-      let images = imageUrls.join(' AND ');
-      announcement.images = images === '' ? null : images;
+      let announcement = this.announcementRepository.create();
+      announcement.title = title;
+      announcement.endTime = new Date(endTime);
+      announcement.description = description;
+      announcement.hostels = hostels;
+      if (imageUrls) {
+        let images = imageUrls.join(' AND ');
+        announcement.images = images === '' ? null : images;
+      }
+
+      const announce = this.announcementRepository.save(announcement);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
     }
-
-    const announce = this.announcementRepository.save(announcement);
   }
-
-  get;
 }
 
 export default HostelAnnouncementService;
