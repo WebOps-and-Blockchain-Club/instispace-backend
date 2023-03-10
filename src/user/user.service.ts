@@ -21,6 +21,7 @@ import { Repository } from 'typeorm';
 import { autoGenPass, Notification } from 'src/utils';
 import { In } from 'typeorm';
 import { emailExpresion } from 'src/utils/index';
+import MailService from '../utils/mail';
 import {
   adminEmail,
   adminPassword,
@@ -52,7 +53,11 @@ export class UserService {
   async login({ roll, pass }: LoginInput) {
     if (emailExpresion.test(roll) === false) {
       let ldapUser: any;
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'production') {
+        // Check with LDAP
+        ldapUser = await this.ldapService.auth(roll, pass);
+        if (!ldapUser) throw new Error('Invalid Credentials');
+      } else {
         // If user development database is empty add few random users in database
         const usersDevCount = await this.usersDevRepository.count();
         if (usersDevCount === 0) {
@@ -68,10 +73,6 @@ export class UserService {
         ldapUser = await this.usersDevRepository.findOne({
           where: { roll: roll.toLowerCase(), pass: pass },
         });
-        if (!ldapUser) throw new Error('Invalid Credentials');
-      } else {
-        // Check with LDAP
-        ldapUser = await this.ldapService.auth(roll, pass);
         if (!ldapUser) throw new Error('Invalid Credentials');
       }
 
@@ -105,7 +106,7 @@ export class UserService {
     }
     // For superusers
     else {
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV !== 'production') {
         const admins = await this.usersRepository.find({
           where: { role: UserRole.ADMIN },
         });
@@ -178,7 +179,6 @@ export class UserService {
       } else {
         finalList = usersList.splice(0, take);
       }
-      console.log(finalList);
       return { list: finalList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
@@ -261,7 +261,8 @@ export class UserService {
       password,
       bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
     );
-    console.log(password);
+    if (process.env.NODE_ENV === 'production')
+      MailService.sendAccountCreationMail(user.role, user.roll, password);
 
     const current_user = await this.usersRepository.findOne({
       where: { id: currentUser.id },
@@ -274,10 +275,10 @@ export class UserService {
       permission = await this.permissionService.create(permissionInput);
     user.permission = permission;
     user.createdBy = currentUser;
-    console.log(user.createdBy);
     return this.usersRepository.save(user);
   }
 
+  // Not bieng used
   async validate(roll: string) {
     let user = await this.usersRepository.findOne({ where: { roll } });
     // TODO: Check the password

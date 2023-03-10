@@ -197,11 +197,9 @@ export class PostService {
             filteringConditions.categories &&
             filteringConditions.categories.length
           ) {
-            console.log(filteringConditions.categories);
             postList = postList.filter((n) =>
               filteringConditions.categories.includes(n.category),
             );
-            // console.log(postList);
           }
           if (filteringConditions.isSaved) {
             postList = postList.filter(
@@ -301,8 +299,7 @@ export class PostService {
       const superUsers = await this.userService.getAncestorswithAprrovalAccess(
         user,
       );
-      // send notif
-      console.log(superUsers);
+      // TODO: send notif
       newPost.status = postStatus;
     }
     if (post.endTime) newPost.endTime = post.endTime;
