@@ -49,6 +49,10 @@ export class LdapListResolver {
 
   @ResolveField(() => String)
   async photo(@Parent() ldaplist: LdapList) {
-    return `https://instispace.iitm.ac.in/photos/byroll.php?roll=${ldaplist.roll.toUpperCase()}`;
+    try {
+      return `https://instispace.iitm.ac.in/photos/byroll.php?roll=${ldaplist.roll.toUpperCase()}`;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 }

@@ -109,91 +109,99 @@ export class LdapListService {
   }
 
   async populateUser(csvUrl: string, program: string) {
-    let x;
     try {
-      x = await axios.get(csvUrl);
-    } catch (error) {
-      throw new Error(`message : ${error}`);
-    }
-    let data = x.data;
-    const list = data.split('\n');
-    var final: string[][] = [];
-    await Promise.all(
-      list.map(async (item) => {
-        let arr = item.split(',');
-        final.push(arr);
-      }),
-    );
-    final.shift();
-
-    for (const x of final) {
+      let x;
       try {
-        let newUser = new CreateLdapListInput();
-        x[5].replace(/"/g, '') === 'M'
-          ? (newUser.gender = Gender.Male)
-          : (newUser.gender = Gender.Female);
-        newUser.program = program;
-        newUser.roll = x[1].replace(/"/g, '');
-        let name = x[2].replace(/"/g, '');
-        let lastName = x[3].replace(/"/g, '');
-        if (lastName !== '') name = name + ' ' + lastName;
-        newUser.ldapName = name;
-        newUser.sem = x[4].replace(/"/g, '');
-        newUser.advisor = x[6].replace(/"/g, '');
-        newUser.residencyType = x[8].replace(/"/g, '');
-        await this.create(newUser);
+        x = await axios.get(csvUrl);
       } catch (error) {
         throw new Error(`message : ${error}`);
       }
+      let data = x.data;
+      const list = data.split('\n');
+      var final: string[][] = [];
+      await Promise.all(
+        list.map(async (item) => {
+          let arr = item.split(',');
+          final.push(arr);
+        }),
+      );
+      final.shift();
+
+      for (const x of final) {
+        try {
+          let newUser = new CreateLdapListInput();
+          x[5].replace(/"/g, '') === 'M'
+            ? (newUser.gender = Gender.Male)
+            : (newUser.gender = Gender.Female);
+          newUser.program = program;
+          newUser.roll = x[1].replace(/"/g, '');
+          let name = x[2].replace(/"/g, '');
+          let lastName = x[3].replace(/"/g, '');
+          if (lastName !== '') name = name + ' ' + lastName;
+          newUser.ldapName = name;
+          newUser.sem = x[4].replace(/"/g, '');
+          newUser.advisor = x[6].replace(/"/g, '');
+          newUser.residencyType = x[8].replace(/"/g, '');
+          await this.create(newUser);
+        } catch (error) {
+          throw new Error(`message : ${error}`);
+        }
+      }
+      return 'entries added successfully';
+    } catch (error) {
+      throw new Error(`message : ${error}`);
     }
-    return 'entries added successfully';
   }
 
   getDepartment = (code: string) => {
-    let deptCode = code.toUpperCase();
-    switch (deptCode) {
-      case 'AE':
-        return 'Aerospace Engineering';
-      case 'AM':
-        return 'Applied Mechanics';
-      case 'BE':
-        return 'Biotechnology';
-      case 'BS':
-        return 'Biotechnology';
-      case 'BT':
-        return 'Biotechnology';
-      case 'CH':
-        return 'Chemical Engineering';
-      case 'CY':
-        return 'Chemistry';
-      case 'CE':
-        return 'Civil Engineering';
-      case 'CS':
-        return 'Computer Science and Engineering';
-      case 'EE':
-        return 'Electrical Engineering';
-      case 'ED':
-        return 'Engineering Design';
-      case 'EP':
-        return 'Physics';
-      case 'HS':
-        return 'Humanities and Social Sciences';
-      case 'MS':
-        return 'Management Studies';
-      case 'MA':
-        return 'Mathematics';
-      case 'ME':
-        return 'Mechanical Engineering';
-      case 'MM':
-        return 'Metallurgical and Materials Engineering';
-      case 'OE':
-        return 'Ocean Engineering';
-      case 'NA':
-        return 'Ocean Engineering';
-      case 'PH':
-        return 'Physics';
-      default:
-        return 'Null';
+    try {
+      let deptCode = code.toUpperCase();
+      switch (deptCode) {
+        case 'AE':
+          return 'Aerospace Engineering';
+        case 'AM':
+          return 'Applied Mechanics';
+        case 'BE':
+          return 'Biotechnology';
+        case 'BS':
+          return 'Biotechnology';
+        case 'BT':
+          return 'Biotechnology';
+        case 'CH':
+          return 'Chemical Engineering';
+        case 'CY':
+          return 'Chemistry';
+        case 'CE':
+          return 'Civil Engineering';
+        case 'CS':
+          return 'Computer Science and Engineering';
+        case 'EE':
+          return 'Electrical Engineering';
+        case 'ED':
+          return 'Engineering Design';
+        case 'EP':
+          return 'Physics';
+        case 'HS':
+          return 'Humanities and Social Sciences';
+        case 'MS':
+          return 'Management Studies';
+        case 'MA':
+          return 'Mathematics';
+        case 'ME':
+          return 'Mechanical Engineering';
+        case 'MM':
+          return 'Metallurgical and Materials Engineering';
+        case 'OE':
+          return 'Ocean Engineering';
+        case 'NA':
+          return 'Ocean Engineering';
+        case 'PH':
+          return 'Physics';
+        default:
+          return 'Null';
+      }
+    } catch (error) {
+      throw new Error(`message : ${error}`);
     }
   };
 }
