@@ -57,7 +57,6 @@ export class PostResolver {
     @Args('postInput') post: CreatePostInput,
     @CurrentUser() user: User,
   ) {
-    console.log(user);
     return await this.postService.create(post, user);
   }
 
@@ -238,7 +237,6 @@ export class PostResolver {
   async isSaved(@Parent() post: Post, @CurrentUser() user: User) {
     try {
       let newPost = await this.postService.findOne(post.id);
-      console.log(newPost.savedBy.filter((u) => u.id === user.id));
       if (newPost.savedBy.filter((u) => u.id === user.id)?.length)
         newPost.isSaved = true;
       else newPost.isSaved = false;

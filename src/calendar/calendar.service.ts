@@ -89,7 +89,6 @@ export class CalendarService {
       for (const x of final) {
         let newEntry = new Calendar();
         let entryDate = x[0]?.replace(/"/g, '');
-        console.log(entryDate);
         let date;
         if (entryDate !== '') {
           date = new Date(
@@ -106,7 +105,6 @@ export class CalendarService {
           newEntry.type = x[2]?.replace(/"/g, '');
         if (x[1]?.replace(/"/g, '') !== '')
           newEntry.description = x[1]?.replace(/"/g, '');
-        console.log(newEntry);
         if (newEntry) await this.calendarRepository.save(newEntry);
       }
       return 'entries added successfully';

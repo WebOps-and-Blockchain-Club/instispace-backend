@@ -63,9 +63,13 @@ export class TagResolver {
     }
   }
 
-  @ResolveField(()=>[Post])
-  async post(@Parent() tag:Tag){
-    const tags=await this.tagService.getOne(tag.id,['post']);
-    return tag.post;
+  @ResolveField(() => [Post])
+  async post(@Parent() tag: Tag) {
+    try {
+      const tags = await this.tagService.getOne(tag.id, ['post']);
+      return tag.post;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 }

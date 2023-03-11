@@ -9,8 +9,15 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
+  try {
+    const app = await NestFactory.create<NestFastifyApplication>(
+      AppModule,
+      new FastifyAdapter(),
+    );
 
-  await app.listen(8001);
+    await app.listen(8001);
+  } catch (error) {
+    throw new Error(`message : ${error}`);
+  }
 }
 bootstrap();

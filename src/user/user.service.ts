@@ -112,7 +112,6 @@ export class UserService {
                 user,
                 fcmToken,
               );
-            console.log(notificationConfig);
           }
           const token = (await this.authService.generateToken(user))
             .accessToken;

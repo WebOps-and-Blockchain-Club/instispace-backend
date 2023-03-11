@@ -98,100 +98,141 @@ export class CommentsResolver {
 
   @ResolveField(() => Post)
   async post(@Parent() comment: Comments) {
-    let newComment = await this.commentsService.findOne(comment.id, ['post']);
-    return newComment.post;
+    try {
+      let newComment = await this.commentsService.findOne(comment.id, ['post']);
+      return newComment.post;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => User)
   async createdBy(@Parent() comment: Comments) {
-    let newComment = await this.commentsService.findOne(comment.id, [
-      'createdBy',
-    ]);
-    return newComment.createdBy;
+    try {
+      let newComment = await this.commentsService.findOne(comment.id, [
+        'createdBy',
+      ]);
+      return newComment.createdBy;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @UseGuards(JwtAuthGuard)
   @ResolveField(() => Boolean)
   async isReported(@Parent() comment: Comments, @CurrentUser() user: User) {
-    let newComment = await this.commentsService.findOne(comment.id, [
-      'commentReports',
-    ]);
-    if (
-      newComment.commentReports.filter((r) => r.createdBy.id === user.id).length
-    )
-      comment.isReported = true;
-    else comment.isReported = false;
+    try {
+      let newComment = await this.commentsService.findOne(comment.id, [
+        'commentReports',
+      ]);
+      if (
+        newComment.commentReports.filter((r) => r.createdBy.id === user.id)
+          .length
+      )
+        comment.isReported = true;
+      else comment.isReported = false;
 
-    return comment.isReported;
+      return comment.isReported;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => Number)
   async reportCount(@Parent() comment: Comments) {
-    let newComment = await this.commentsService.findOne(comment.id, [
-      'commentReports',
-    ]);
-    newComment.reportCount = comment.commentReports.length;
+    try {
+      let newComment = await this.commentsService.findOne(comment.id, [
+        'commentReports',
+      ]);
+      newComment.reportCount = comment.commentReports.length;
 
-    return newComment.reportCount;
+      return newComment.reportCount;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => [User])
   async likedBy(@Parent() comment: Comments) {
-    let newComment = await this.commentsService.findOne(comment.id, [
-      'likedBy',
-    ]);
-    return newComment.likedBy;
+    try {
+      let newComment = await this.commentsService.findOne(comment.id, [
+        'likedBy',
+      ]);
+      return newComment.likedBy;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => [User])
   async dislikedBy(@Parent() comment: Comments) {
-    let newComment = await this.commentsService.findOne(comment.id, [
-      'dislikedBy',
-    ]);
-    return newComment.dislikedBy;
+    try {
+      let newComment = await this.commentsService.findOne(comment.id, [
+        'dislikedBy',
+      ]);
+      return newComment.dislikedBy;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @UseGuards(JwtAuthGuard)
   @ResolveField(() => Boolean)
   async isLiked(@Parent() comment: Comments, @CurrentUser() user: User) {
-    let newComment = await this.commentsService.findOne(comment.id, [
-      'likedBy',
-    ]);
-    if (newComment.likedBy.filter((u) => u.id === user.id).length)
-      newComment.isLiked = true;
-    else newComment.isLiked = false;
+    try {
+      let newComment = await this.commentsService.findOne(comment.id, [
+        'likedBy',
+      ]);
+      if (newComment.likedBy.filter((u) => u.id === user.id).length)
+        newComment.isLiked = true;
+      else newComment.isLiked = false;
 
-    return newComment.isLiked;
+      return newComment.isLiked;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => Number)
   async likeCount(@Parent() comment: Comments) {
-    let newComment = await this.commentsService.findOne(comment.id, [
-      'likedBy',
-    ]);
-    newComment.likeCount = newComment.likedBy.length;
-    return newComment.likeCount;
+    try {
+      let newComment = await this.commentsService.findOne(comment.id, [
+        'likedBy',
+      ]);
+      newComment.likeCount = newComment.likedBy.length;
+      return newComment.likeCount;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @UseGuards(JwtAuthGuard)
   @ResolveField(() => Boolean)
   async isDisliked(@Parent() comment: Comments, @CurrentUser() user: User) {
-    let newComment = await this.commentsService.findOne(comment.id, [
-      'dislikedBy',
-    ]);
-    if (newComment.dislikedBy.filter((u) => u.id === user.id).length)
-      newComment.isDisliked = true;
-    else newComment.isDisliked = false;
+    try {
+      let newComment = await this.commentsService.findOne(comment.id, [
+        'dislikedBy',
+      ]);
+      if (newComment.dislikedBy.filter((u) => u.id === user.id).length)
+        newComment.isDisliked = true;
+      else newComment.isDisliked = false;
 
-    return newComment.isDisliked;
+      return newComment.isDisliked;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => Number)
   async dislikeCount(@Parent() comment: Comments) {
-    let newComment = await this.commentsService.findOne(comment.id, [
-      'dislikedBy',
-    ]);
-    newComment.dislikeCount = newComment.dislikedBy.length;
-    return newComment.dislikeCount;
+    try {
+      let newComment = await this.commentsService.findOne(comment.id, [
+        'dislikedBy',
+      ]);
+      newComment.dislikeCount = newComment.dislikedBy.length;
+      return newComment.dislikeCount;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 }

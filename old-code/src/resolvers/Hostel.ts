@@ -1,4 +1,4 @@
-import Hostel from "../entities/Hostel";
+import Hostel from '../entities/Hostel';
 import {
   Arg,
   Authorized,
@@ -7,24 +7,24 @@ import {
   Query,
   Resolver,
   Root,
-} from "type-graphql";
-import User from "../entities/User";
-import { autoGenPass, salt, UserRole } from "../utils/index";
-import bcrypt from "bcryptjs";
-import { CreateSecInput, CreateHostelInput } from "../types/inputs/hostel";
-import HostelContact from "../entities/Contact";
-import Amenity from "../entities/Amenity";
-import { accountPassword } from "../utils/config.json";
+} from 'type-graphql';
+import User from '../entities/User';
+import { autoGenPass, salt, UserRole } from '../utils/index';
+import bcrypt from 'bcryptjs';
+import { CreateSecInput, CreateHostelInput } from '../types/inputs/hostel';
+import HostelContact from '../entities/Contact';
+import Amenity from '../entities/Amenity';
+import { accountPassword } from '../utils/config.json';
 
 @Resolver((_type) => Hostel)
 class HostelResolver {
   @Mutation(() => Boolean, {
-    description: "Mutation deprecated",
+    description: 'Mutation deprecated',
   })
   @Authorized([UserRole.HAS, UserRole.ADMIN])
   async createSec(
-    @Arg("CreateSecInput") createSecInput: CreateSecInput,
-    @Arg("HostelId") id: string
+    @Arg('CreateSecInput') createSecInput: CreateSecInput,
+    @Arg('HostelId') id: string,
   ) {
     try {
       // Finding the hostel
@@ -32,7 +32,7 @@ class HostelResolver {
 
       // Autogenerating the password
       var password =
-        process.env.NODE_ENV === "development"
+        process.env.NODE_ENV === 'development'
           ? accountPassword
           : autoGenPass(8);
 
@@ -46,7 +46,7 @@ class HostelResolver {
       await user.save();
 
       // Sending the mail
-      console.log(password);
+      // console.log(password);
       //this password is going to be emailed to Hostel_SEC
       return !!user;
     } catch (e) {
@@ -56,10 +56,10 @@ class HostelResolver {
 
   @Mutation(() => Boolean, {
     description:
-      "Mutation to create Hostels, Restrictions : {Admin, Hostel Secretory and Hostel Affair Secretory}",
+      'Mutation to create Hostels, Restrictions : {Admin, Hostel Secretory and Hostel Affair Secretory}',
   })
   @Authorized([UserRole.ADMIN, UserRole.HAS])
-  async createHostel(@Arg("CreateHostelInput") { name }: CreateHostelInput) {
+  async createHostel(@Arg('CreateHostelInput') { name }: CreateHostelInput) {
     try {
       const hostel = new Hostel();
       hostel.name = name;
@@ -72,12 +72,12 @@ class HostelResolver {
 
   @Query(() => [Hostel], {
     description:
-      "query to fetch hostels, Restrictions : {anyone who is authorized}",
+      'query to fetch hostels, Restrictions : {anyone who is authorized}',
   })
   @Authorized()
   async getHostels() {
     try {
-      return await Hostel.find({ order: { name: "ASC" } });
+      return await Hostel.find({ order: { name: 'ASC' } });
     } catch (e) {
       throw new Error(`message : ${e}`);
     }
@@ -86,7 +86,7 @@ class HostelResolver {
   @FieldResolver(() => [User], { nullable: true })
   async users(@Root() { id }: Hostel) {
     try {
-      const hostel = await Hostel.findOne({ where: id, relations: ["users"] });
+      const hostel = await Hostel.findOne({ where: id, relations: ['users'] });
       return hostel?.users;
     } catch (e) {
       throw new Error(`message : ${e}`);
@@ -99,7 +99,7 @@ class HostelResolver {
       if (contacts) return contacts;
       const hostel = await Hostel.findOne({
         where: { id },
-        relations: ["contacts"],
+        relations: ['contacts'],
       });
       return hostel?.contacts;
     } catch (e) {
@@ -113,7 +113,7 @@ class HostelResolver {
       if (amenities) return amenities;
       const hostel = await Hostel.findOne({
         where: { id: id },
-        relations: ["amenities"],
+        relations: ['amenities'],
       });
       return hostel?.amenities;
     } catch (e) {

@@ -43,7 +43,6 @@ export class UserResolver {
   @Query(() => User, { nullable: true })
   @UseGuards(JwtAuthGuard)
   async getMe(@CurrentUser() user: User) {
-    console.log(user);
     return user;
   }
   //(@Args('userId', { nullable: true }) userId: string, @Args('roll', { nullable: true }) roll: string)
@@ -201,17 +200,25 @@ export class UserResolver {
 
   @ResolveField(() => String)
   async department(@Parent() user: User) {
-    let newUser = await this.userService.getOneByRoll(user.roll);
-    newUser.department = this.ldapListService.getDepartment(
-      newUser.roll.slice(0, 2),
-    );
-    return newUser.department;
+    try {
+      let newUser = await this.userService.getOneByRoll(user.roll);
+      newUser.department = this.ldapListService.getDepartment(
+        newUser.roll.slice(0, 2),
+      );
+      return newUser.department;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => String)
   async programme(@Parent() user: User) {
-    user.programme = this.userService.getprogramme(user.roll);
-    return user.programme;
+    try {
+      user.programme = this.userService.getprogramme(user.roll);
+      return user.programme;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @Mutation(() => Hostel)

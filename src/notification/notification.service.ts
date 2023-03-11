@@ -152,9 +152,7 @@ export class NotificationService {
       let newNotify = new NotificationConfig();
       newNotify.createdBy = user;
       newNotify.fcmToken = fcmToken;
-      console.log(newNotify);
       const notif = await this.notificationRepository.save(newNotify);
-      console.log(notif);
       return notif;
     } catch (error) {
       throw new Error(`message : ${error}`);
@@ -170,7 +168,6 @@ export class NotificationService {
       notifToUpdate = await this.notificationRepository.findOne({
         where: { fcmToken: fcmToken },
       });
-      console.log(notifToUpdate);
       if (notificationConfigInput.configForPost)
         notifToUpdate.configForPost = notificationConfigInput.configForPost;
 

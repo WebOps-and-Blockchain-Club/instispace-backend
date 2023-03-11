@@ -18,27 +18,31 @@ class MailService {
   }
 
   async connect() {
-    if (this.mail === null) {
-      const oAuth2Client = new google.auth.OAuth2(
-        CLIENT_ID,
-        CLIENT_SECRET,
-        REDIRECT_URI,
-      );
+    try {
+      if (this.mail === null) {
+        const oAuth2Client = new google.auth.OAuth2(
+          CLIENT_ID,
+          CLIENT_SECRET,
+          REDIRECT_URI,
+        );
 
-      oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
-      const accessToken = await oAuth2Client.getAccessToken();
+        oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+        const accessToken = await oAuth2Client.getAccessToken();
 
-      this.mail = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          type: 'OAuth2',
-          user: 'instispace_cfi@smail.iitm.ac.in',
-          clientId: CLIENT_ID,
-          clientSecret: CLIENT_SECRET,
-          refreshToken: REFRESH_TOKEN,
-          accessToken: accessToken,
-        },
-      } as SMTPTransport.Options);
+        this.mail = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            type: 'OAuth2',
+            user: 'instispace_cfi@smail.iitm.ac.in',
+            clientId: CLIENT_ID,
+            clientSecret: CLIENT_SECRET,
+            refreshToken: REFRESH_TOKEN,
+            accessToken: accessToken,
+          },
+        } as SMTPTransport.Options);
+      }
+    } catch (error) {
+      throw new Error(`message : ${error}`);
     }
   }
 
@@ -47,23 +51,27 @@ class MailService {
     email: string,
     password: string,
   ) {
-    if (this.mail == null) await this.connect();
+    try {
+      if (this.mail == null) await this.connect();
 
-    let htmlContent = fs.readFileSync('src/assets/email/newAccount.html', {
-      encoding: 'utf-8',
-      flag: 'r',
-    });
-    htmlContent = htmlContent.replace('VARIABLE_EMAIL', email);
-    htmlContent = htmlContent.replace('VARIABLE_PASSWORD', password);
-    htmlContent = htmlContent.replace('VARIABLE_ROLE', role);
-    const mailOptions = {
-      from: 'instispace_cfi@smail.iitm.ac.in',
-      fromName: 'InstiSpace, WebOps and Blockchain Club, CFI',
-      to: email,
-      subject: `Congrats! ${role} Account Created || InstiSpace App`,
-      html: htmlContent,
-    };
-    this.mail?.sendMail(mailOptions);
+      let htmlContent = fs.readFileSync('src/assets/email/newAccount.html', {
+        encoding: 'utf-8',
+        flag: 'r',
+      });
+      htmlContent = htmlContent.replace('VARIABLE_EMAIL', email);
+      htmlContent = htmlContent.replace('VARIABLE_PASSWORD', password);
+      htmlContent = htmlContent.replace('VARIABLE_ROLE', role);
+      const mailOptions = {
+        from: 'instispace_cfi@smail.iitm.ac.in',
+        fromName: 'InstiSpace, WebOps and Blockchain Club, CFI',
+        to: email,
+        subject: `Congrats! ${role} Account Created || InstiSpace App`,
+        html: htmlContent,
+      };
+      this.mail?.sendMail(mailOptions);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 }
 

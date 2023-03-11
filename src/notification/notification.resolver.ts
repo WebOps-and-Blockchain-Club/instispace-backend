@@ -32,8 +32,12 @@ export class NotificationResolver {
 
   @ResolveField(() => User)
   async createdBy(@Parent() notif: NotificationConfig) {
-    let newPost = await this.notificationService.FindNotifByid(notif.id);
-    return newPost.createdBy;
+    try {
+      let newPost = await this.notificationService.FindNotifByid(notif.id);
+      return newPost.createdBy;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @Mutation(() => NotificationConfig)

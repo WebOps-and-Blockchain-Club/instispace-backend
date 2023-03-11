@@ -135,7 +135,6 @@ export class CourseService {
       for (const x of final) {
         try {
           let newCourse = new CreateCourseInput();
-          console.log(x);
           newCourse.code = x[3].replace(/"/g, '');
           newCourse.instructorName = x[5].replace(/"/g, '');
           newCourse.name = x[4].replace(/"/g, '');
@@ -148,7 +147,6 @@ export class CourseService {
           newCourse.from = from;
           newCourse.semester = sem;
           newCourse.venue = x[8].replace(/"/g, '');
-          console.log(newCourse);
           await this.create(newCourse);
         } catch (error) {
           throw new Error(`message : ${error}`);

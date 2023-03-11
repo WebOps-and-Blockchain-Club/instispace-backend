@@ -79,16 +79,24 @@ export class ReportsService {
   }
 
   findAll() {
-    return this.reportRepository.find({
-      relations: ['post', 'comment', 'createdBy'],
-    });
+    try {
+      return this.reportRepository.find({
+        relations: ['post', 'comment', 'createdBy'],
+      });
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   findOne(id: string) {
-    return this.reportRepository.findOne({
-      where: { id: id },
-      relations: ['post', 'comment', 'createdBy'],
-    });
+    try {
+      return this.reportRepository.findOne({
+        where: { id: id },
+        relations: ['post', 'comment', 'createdBy'],
+      });
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   remove(id: string) {
@@ -96,9 +104,13 @@ export class ReportsService {
   }
 
   async getReport(id: string, relation: [string]) {
-    return this.reportRepository.findOne({
-      where: { id: id },
-      relations: relation,
-    });
+    try {
+      return this.reportRepository.findOne({
+        where: { id: id },
+        relations: relation,
+      });
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 }

@@ -37,23 +37,31 @@ export class CommentsService {
   }
 
   findAll() {
-    return this.commentRepository.find({
-      relations: [
-        'commentReports',
-        'post',
-        'createBy',
-        'likedBy',
-        'dislikedBy',
-      ],
-      where: { isHidden: false },
-    });
+    try {
+      return this.commentRepository.find({
+        relations: [
+          'commentReports',
+          'post',
+          'createBy',
+          'likedBy',
+          'dislikedBy',
+        ],
+        where: { isHidden: false },
+      });
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   findOne(id: string, relations: string[]) {
-    return this.commentRepository.findOne({
-      where: { id: id },
-      relations: relations,
-    });
+    try {
+      return this.commentRepository.findOne({
+        where: { id: id },
+        relations: relations,
+      });
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   async update(
@@ -80,9 +88,13 @@ export class CommentsService {
   }
 
   async remove(id: string) {
-    let comment = await this.commentRepository.findOne({ where: { id: id } });
-    comment.isHidden = true;
-    return await this.commentRepository.save(comment);
+    try {
+      let comment = await this.commentRepository.findOne({ where: { id: id } });
+      comment.isHidden = true;
+      return await this.commentRepository.save(comment);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   async save(comment: Comments) {

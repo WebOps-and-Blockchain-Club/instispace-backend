@@ -47,21 +47,35 @@ export class ReportsResolver {
 
   @ResolveField(() => Post)
   async post(@Parent() report: Report) {
-    let newReport = await this.reportsService.getReport(report.id, ['post']);
-    return newReport.post;
+    try {
+      let newReport = await this.reportsService.getReport(report.id, ['post']);
+      return newReport.post;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => Comment)
   async comment(@Parent() report: Report) {
-    let newReport = await this.reportsService.getReport(report.id, ['comment']);
-    return newReport.comment;
+    try {
+      let newReport = await this.reportsService.getReport(report.id, [
+        'comment',
+      ]);
+      return newReport.comment;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => User)
   async createdBy(@Parent() report: Report) {
-    let newReport = await this.reportsService.getReport(report.id, [
-      'createdBy',
-    ]);
-    return newReport.createdBy;
+    try {
+      let newReport = await this.reportsService.getReport(report.id, [
+        'createdBy',
+      ]);
+      return newReport.createdBy;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 }

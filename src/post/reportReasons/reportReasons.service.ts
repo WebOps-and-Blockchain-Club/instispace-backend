@@ -13,8 +13,12 @@ export class ReportreasonsService {
   ) {}
 
   create(createReportreasonInput: CreateReportreasonInput) {
-    let newPost = this.ReasonRepository.create(createReportreasonInput);
-    return this.ReasonRepository.save(newPost);
+    try {
+      let newPost = this.ReasonRepository.create(createReportreasonInput);
+      return this.ReasonRepository.save(newPost);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   findAll() {
@@ -33,11 +37,15 @@ export class ReportreasonsService {
     updateReportreasonInput: UpdateReportreasonInput,
     reasonToUpdate: ReportReason,
   ) {
-    if (updateReportreasonInput.count)
-      reasonToUpdate.count = updateReportreasonInput.count;
-    if (updateReportreasonInput.reason)
-      reasonToUpdate.reason = updateReportreasonInput.reason;
-    return await this.ReasonRepository.save(reasonToUpdate);
+    try {
+      if (updateReportreasonInput.count)
+        reasonToUpdate.count = updateReportreasonInput.count;
+      if (updateReportreasonInput.reason)
+        reasonToUpdate.reason = updateReportreasonInput.reason;
+      return await this.ReasonRepository.save(reasonToUpdate);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   remove(id: string) {

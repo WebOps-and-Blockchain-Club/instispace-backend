@@ -102,7 +102,6 @@ export class LdapListService {
       } else {
         finalList = usersList.splice(0, take);
       }
-      console.log(finalList);
       return { list: finalList, total };
     } catch (e) {
       throw new Error(`message : ${e}`);
@@ -130,7 +129,6 @@ export class LdapListService {
     for (const x of final) {
       try {
         let newUser = new CreateLdapListInput();
-        console.log(x);
         x[5].replace(/"/g, '') === 'M'
           ? (newUser.gender = Gender.Male)
           : (newUser.gender = Gender.Female);
@@ -143,7 +141,6 @@ export class LdapListService {
         newUser.sem = x[4].replace(/"/g, '');
         newUser.advisor = x[6].replace(/"/g, '');
         newUser.residencyType = x[8].replace(/"/g, '');
-        console.log(newUser);
         await this.create(newUser);
       } catch (error) {
         throw new Error(`message : ${error}`);

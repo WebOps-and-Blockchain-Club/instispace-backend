@@ -15,17 +15,21 @@ class AmenityService {
 
   async create({ name, description }, id: string) {
     const hostel = await this.hostelRepository.findOne({ where: { id } });
-    if (!hostel) throw new Error('Invalid Hostel');
+    try {
+      if (!hostel) throw new Error('Invalid Hostel');
 
-    let amenity = this.amenityRepository.create();
-    amenity.name = name;
-    amenity.description = description;
-    amenity.hostel = hostel;
-    let createdAmenity = this.amenityRepository.save(amenity);
+      let amenity = this.amenityRepository.create();
+      amenity.name = name;
+      amenity.description = description;
+      amenity.hostel = hostel;
+      let createdAmenity = this.amenityRepository.save(amenity);
 
-    this.notificationService.notifyAmenity(createdAmenity);
+      this.notificationService.notifyAmenity(createdAmenity);
 
-    return createdAmenity;
+      return createdAmenity;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 }
 
