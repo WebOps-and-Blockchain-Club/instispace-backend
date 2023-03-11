@@ -29,6 +29,7 @@
     "@nestjs/jwt": "^10.0.1",
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/platform-fastify": "^9.3.9",
     "@nestjs/typeorm": "^9.0.1",
     "apollo-server-core": "^3.11.1",
     "apollo-server-express": "^3.11.1",

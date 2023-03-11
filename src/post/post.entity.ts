@@ -11,6 +11,7 @@ import {
   ManyToOne,
   JoinTable,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { Comments } from './comments/comment.entity';
 import { Report } from './reports/report.entity';
@@ -41,6 +42,7 @@ export class Post {
   content: string;
 
   @Column()
+  @Index()
   @Field()
   category: string;
 
