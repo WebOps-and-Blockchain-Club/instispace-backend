@@ -120,7 +120,7 @@ export class PostResolver {
   @ResolveField(() => [User])
   async likedBy(@Parent() post: Post) {
     try {
-      let newPost = await this.postService.findOne(post.id);
+      let newPost = await this.postService.findOne(post?.id);
       return newPost.likedBy;
     } catch (error) {
       throw new Error(`message : ${error}`);
@@ -130,7 +130,7 @@ export class PostResolver {
   @ResolveField(() => [User])
   async dislikedBy(@Parent() post: Post) {
     try {
-      let newPost = await this.postService.findOne(post.id);
+      let newPost = await this.postService.findOne(post?.id);
       return newPost.dislikedBy;
     } catch (error) {
       throw new Error(`message : ${error}`);
@@ -140,7 +140,7 @@ export class PostResolver {
   @ResolveField(() => [Tag])
   async tags(@Parent() post: Post) {
     try {
-      let newPost = await this.postService.findOne(post.id);
+      let newPost = await this.postService.findOne(post?.id);
       return newPost.tags;
     } catch (error) {
       throw new Error(`message : ${error}`);
@@ -150,7 +150,7 @@ export class PostResolver {
   @ResolveField(() => [User])
   async savedBy(@Parent() post: Post) {
     try {
-      let newPost = await this.postService.findOne(post.id);
+      let newPost = await this.postService.findOne(post?.id);
       return newPost.savedBy;
     } catch (error) {
       throw new Error(`message : ${error}`);
@@ -160,7 +160,7 @@ export class PostResolver {
   @ResolveField(() => Number)
   async likeCount(@Parent() post: Post) {
     try {
-      let newPost = await this.postService.findOne(post.id);
+      let newPost = await this.postService.findOne(post?.id);
       newPost.likeCount = newPost.likedBy.length;
       return newPost.likeCount;
     } catch (error) {
@@ -171,7 +171,7 @@ export class PostResolver {
   @ResolveField(() => Number)
   async dislikeCount(@Parent() post: Post) {
     try {
-      let newPost = await this.postService.findOne(post.id);
+      let newPost = await this.postService.findOne(post?.id);
       newPost.dislikeCount = newPost.dislikedBy.length;
       return newPost.dislikeCount;
     } catch (error) {
@@ -225,7 +225,7 @@ export class PostResolver {
   @ResolveField(() => User)
   async createdBy(@Parent() post: Post) {
     try {
-      let newPost = await this.postService.findOne(post.id);
+      let newPost = await this.postService.findOne(post?.id);
       return newPost.createdBy;
     } catch (error) {
       throw new Error(`message : ${error}`);
@@ -236,7 +236,7 @@ export class PostResolver {
   @ResolveField(() => Boolean)
   async isSaved(@Parent() post: Post, @CurrentUser() user: User) {
     try {
-      let newPost = await this.postService.findOne(post.id);
+      let newPost = await this.postService.findOne(post?.id);
       if (newPost.savedBy.filter((u) => u.id === user.id)?.length)
         newPost.isSaved = true;
       else newPost.isSaved = false;
@@ -250,7 +250,7 @@ export class PostResolver {
   @ResolveField(() => Boolean)
   async isLiked(@Parent() post: Post, @CurrentUser() user: User) {
     try {
-      let newPost = await this.postService.findOne(post.id);
+      let newPost = await this.postService.findOne(post?.id);
       if (newPost.likedBy.filter((u) => u.id === user.id).length)
         newPost.isLiked = true;
       else newPost.isLiked = false;
@@ -264,7 +264,7 @@ export class PostResolver {
   @ResolveField(() => Boolean)
   async isDisliked(@Parent() post: Post, @CurrentUser() user: User) {
     try {
-      let newPost = await this.postService.findOne(post.id);
+      let newPost = await this.postService.findOne(post?.id);
       if (newPost.dislikedBy.filter((u) => u.id === user.id).length)
         newPost.isDisliked = true;
       else newPost.isDisliked = false;
@@ -278,7 +278,7 @@ export class PostResolver {
   @ResolveField(() => Boolean)
   async isReported(@Parent() post: Post, @CurrentUser() user: User) {
     try {
-      let newPost = await this.postService.findOne(post.id);
+      let newPost = await this.postService.findOne(post?.id);
       if (newPost.postReports.filter((r) => r.createdBy.id === user.id).length)
         newPost.isReported = true;
       else newPost.isReported = false;
@@ -292,7 +292,7 @@ export class PostResolver {
   @ResolveField(() => Number)
   async reportCount(@Parent() post: Post) {
     try {
-      let newPost = await this.postService.findOne(post.id);
+      let newPost = await this.postService.findOne(post?.id);
       newPost.reportCount = newPost.postReports.length;
       return newPost.reportCount;
     } catch (error) {

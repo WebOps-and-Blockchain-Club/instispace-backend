@@ -130,7 +130,7 @@ export class UserService {
             relations: ['notificationConfig'],
           });
 
-          if (admins.length === 0) {
+          if (admins?.length === 0) {
             const admin = this.usersRepository.create();
             admin.roll = adminEmail.toLowerCase();
             admin.role = UserRole.ADMIN;
@@ -150,7 +150,7 @@ export class UserService {
           const token = (await this.authService.generateToken(user))
             .accessToken;
           if (
-            user.notificationConfig.filter((n) => n.fcmToken === fcmToken)
+            user.notificationConfig?.filter((n) => n.fcmToken === fcmToken)
               .length === 0
           ) {
             await this.notificationService.createNotificationConfig(
@@ -282,7 +282,7 @@ export class UserService {
   async getAncestorswithAprrovalAccess(child: User): Promise<User[]> {
     try {
       let parents = await this.getParents(child);
-      parents = parents.filter((p) => p.permission.approvePosts === true);
+      parents = parents?.filter((p) => p.permission.approvePosts === true);
       return parents;
     } catch (error) {
       throw new Error(`message : ${error}`);
