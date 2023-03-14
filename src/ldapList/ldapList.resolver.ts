@@ -33,15 +33,11 @@ export class LdapListResolver {
   @Query(() => getLdapUserOutput)
   getLdapStudents(
     @Args('take') take: number,
-    @Args('ldapFilteringconditions')
-    ldapFilteringConditions: LdapFilteringConditions,
+    @Args('filteringconditions')
+    filteringConditions: LdapFilteringConditions,
     @Args('lastUserId') lastUserId: string,
   ) {
-    return this.ldapListService.getUsers(
-      lastUserId,
-      take,
-      ldapFilteringConditions,
-    );
+    return this.ldapListService.getUsers(lastUserId, take, filteringConditions);
   }
 
   @Mutation(() => String)
