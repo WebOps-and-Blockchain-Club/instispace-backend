@@ -28,9 +28,12 @@ export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
   @Mutation(() => LoginOutput)
-  async login(@Args('loginInput') loginInput: LoginInput, @Args('fcmToken') fcmToken: String ) {
-	  console.log(fcmToken);
-    return this.userService.login(loginInput);
+  async login(
+    @Args('loginInput') loginInput: LoginInput,
+    @Args('fcmToken') fcmToken: string,
+  ) {
+    console.log(fcmToken);
+    return this.userService.login(loginInput, fcmToken);
   }
 
   @Query(() => User, { nullable: true })

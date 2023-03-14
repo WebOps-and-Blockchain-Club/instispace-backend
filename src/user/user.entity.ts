@@ -19,6 +19,7 @@ import Permission from './permission/permission.entity';
 import Hostel from 'src/hostel/hostel.entity';
 import HostelAnnouncement from 'src/hostelAnnouncement/hostelAnnouncement.entity';
 import { Notification } from 'src/utils';
+import { NotifConfig } from 'src/notif-config/notif-config.entity';
 
 @ObjectType()
 @Entity('User')
@@ -46,8 +47,6 @@ export class User {
   @Field({ nullable: true })
   @Column({ nullable: true })
   mobile?: string;
-
-
 
   @Field()
   @Column({ type: Boolean, default: true })
@@ -83,11 +82,11 @@ export class User {
   @OneToMany(() => Post, (post) => post.createdBy, { nullable: true })
   @Field(() => [Post], { nullable: true })
   post: Post[];
- 
- @Field({defaultValue:"mechanical"})
+
+  @Field({ defaultValue: 'mechanical' })
   department: string;
 
-  @Field({defaultValue:"btech"})
+  @Field({ defaultValue: 'btech' })
   programme: string;
 
   @OneToMany(() => Post, (post) => post.approvedBy, { nullable: true })
@@ -132,4 +131,11 @@ export class User {
   @TreeParent()
   @Field({ nullable: true })
   createdBy: User;
+
+  @OneToMany(
+    () => NotifConfig,
+    (notificationConfig) => notificationConfig.createdBy,
+  )
+  @Field(() => [NotifConfig])
+  notifConfig: NotifConfig[];
 }

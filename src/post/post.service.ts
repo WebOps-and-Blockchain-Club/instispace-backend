@@ -61,6 +61,7 @@ export class PostService {
             'createdBy',
             'savedBy',
             'tags',
+            'postReports.createdBy',
           ],
           order: { createdAt: 'DESC' },
         });
@@ -89,6 +90,7 @@ export class PostService {
             'createdBy',
             'savedBy',
             'tags',
+            'postReports.createdBy',
           ],
           order: { createdAt: 'DESC' },
         });

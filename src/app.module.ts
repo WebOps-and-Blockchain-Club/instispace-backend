@@ -13,6 +13,7 @@ import { HostelAnnouncementModule } from './hostelAnnouncement/hostelAnnouncemen
 import { NotificationModule } from './notification/notification.module';
 import { LdapModule } from './ldap/ldap.module';
 import { FirebaseModule } from './firebase/firebase.module';
+import { NotifConfigModule } from './notif-config/notif-config.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { FirebaseModule } from './firebase/firebase.module';
     NotificationModule,
     LdapModule,
     FirebaseModule,
+    NotifConfigModule,
   ],
 })
 export class AppModule {}

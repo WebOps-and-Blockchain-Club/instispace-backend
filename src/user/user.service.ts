@@ -29,6 +29,8 @@ import {
 } from 'src/utils/config.json';
 import UsersDev from './usersDev.entity';
 import { LdapService } from 'src/ldap/ldap.service';
+import { NotifConfigService } from 'src/notif-config/notif-config.service';
+import { CreateNotifConfigInput } from 'src/notif-config/type/create-notif-config.input';
 
 @Injectable()
 export class UserService {
@@ -47,9 +49,11 @@ export class UserService {
     private ldapService: LdapService,
     @InjectRepository(Hostel)
     private hostelRepository: Repository<Hostel>,
+    @Inject(forwardRef(() => NotifConfigService))
+    private notifService: NotifConfigService,
   ) {}
 
-  async login({ roll, pass }: LoginInput) {
+  async login({ roll, pass }: LoginInput, fmcToken: string) {
     if (emailExpresion.test(roll) === false) {
       let ldapUser: any;
       if (process.env.NODE_ENV === 'development') {
@@ -86,7 +90,11 @@ export class UserService {
         newUser.role = UserRole.USER;
         newUser.ldapName = ldapUser.displayName;
         newUser.isNewUser = true;
+        let newConfig = new CreateNotifConfigInput();
+        newConfig.fcmToken = fmcToken;
+        await this.notifService.create(newConfig, user);
         // TODO: notification
+
         await this.usersRepository.save(newUser);
         const token = (await this.authService.generateToken(newUser))
           .accessToken;
@@ -95,6 +103,11 @@ export class UserService {
       // If user exists
       else {
         // TODO: notification
+
+        let newConfig = new CreateNotifConfigInput();
+        newConfig.fcmToken = fmcToken;
+        await this.notifService.create(newConfig, user);
+
         const token = (await this.authService.generateToken(user)).accessToken;
         return {
           isNewUser: user.isNewUser,
@@ -116,6 +129,11 @@ export class UserService {
           admin.role = UserRole.ADMIN;
           admin.isNewUser = false;
           // TODO: notification
+
+          let newConfig = new CreateNotifConfigInput();
+          newConfig.fcmToken = fmcToken;
+          await this.notifService.create(newConfig, admin);
+
           admin.password = bcrypt.hashSync(
             adminPassword,
             bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
@@ -127,7 +145,13 @@ export class UserService {
       if (!user) throw new BadRequestException(`Email or password are invalid`);
       else {
         const token = (await this.authService.generateToken(user)).accessToken;
+
         // TODO: notification
+
+        let newConfig = new CreateNotifConfigInput();
+        newConfig.fcmToken = fmcToken;
+        await this.notifService.create(newConfig, user);
+
         return {
           isNewUser: user.isNewUser,
           role: user.role,
