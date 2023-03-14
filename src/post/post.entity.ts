@@ -43,6 +43,9 @@ export class Post {
   @Column()
   @Field()
   category: string;
+ 
+  @Field({ nullable: true})
+  attachment: string;
 
   @Column({ type: 'text', nullable: true })
   @Field((_type) => String, { nullable: true })

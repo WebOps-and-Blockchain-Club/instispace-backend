@@ -47,6 +47,8 @@ export class User {
   @Column({ nullable: true })
   mobile?: string;
 
+
+
   @Field()
   @Column({ type: Boolean, default: true })
   isNewUser: Boolean;
@@ -81,6 +83,12 @@ export class User {
   @OneToMany(() => Post, (post) => post.createdBy, { nullable: true })
   @Field(() => [Post], { nullable: true })
   post: Post[];
+ 
+ @Field({defaultValue:"mechanical"})
+  department: string;
+
+  @Field({defaultValue:"btech"})
+  programme: string;
 
   @OneToMany(() => Post, (post) => post.approvedBy, { nullable: true })
   postsAporoved: Post[];
