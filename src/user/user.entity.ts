@@ -83,10 +83,10 @@ export class User {
   @Field(() => [Post], { nullable: true })
   post: Post[];
 
-  @Field({ defaultValue: 'mechanical' })
+  @Field()
   department: string;
 
-  @Field({ defaultValue: 'btech' })
+  @Field()
   programme: string;
 
   @OneToMany(() => Post, (post) => post.approvedBy, { nullable: true })

@@ -219,6 +219,49 @@ export class PostResolver {
     return permissions;
   }
 
+  @ResolveField(() => String)
+  async attachment(@Parent() post: Post) {
+    try {
+      if (
+        post.photo &&
+        (post.category === PostCategory.Connect ||
+          post.category === PostCategory.Opportunity ||
+          post.category === PostCategory.Query ||
+          post.category === PostCategory.Help ||
+          post.category === PostCategory.Review ||
+          post.category === PostCategory.RandomThought)
+      ) {
+        return post.photo;
+      } else return null;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
+  }
+
+  @ResolveField(() => String)
+  async photo(@Parent() post: Post) {
+    try {
+      if (
+        post.category === PostCategory.Connect ||
+        post.category === PostCategory.Opportunity ||
+        post.category === PostCategory.Query ||
+        post.category === PostCategory.Help ||
+        post.category === PostCategory.Review ||
+        post.category === PostCategory.RandomThought
+      )
+        return null;
+      else {
+        if (post.photo) {
+          return post.photo;
+        } else {
+          return null;
+        }
+      }
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
+  }
+
   @ResolveField(() => [String])
   async actions(@Parent() post: Post) {
     if (
