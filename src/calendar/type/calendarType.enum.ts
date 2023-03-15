@@ -1,0 +1,10 @@
+export enum CalendarType {
+  NORMAL = 'NORMAL',
+  QUIZ = 'QUIZ',
+  ENDSEM = 'ENDSEM',
+  NON_INST = 'NON_INST',
+  DEADLINE = 'DEADLINE',
+  SLOT_CHANGE = 'SLOT_CHANGE',
+  EVENT = 'EVENT',
+  FUNCTION = 'FUNCTION',
+}
