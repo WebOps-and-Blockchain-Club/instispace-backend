@@ -4,7 +4,7 @@ import Tag from 'src/tag/tag.entity';
 import { TagService } from 'src/tag/tag.service';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
-import { In, Repository } from 'typeorm';
+import { FindOptionsWhere, ILike, In, IsNull, Not, Repository, FindManyOptions, MoreThanOrEqual } from 'typeorm';
 import { Post } from './post.entity';
 import { CreatePostInput } from './type/create-post.input';
 import { FilteringConditions } from './type/filtering-condition';
@@ -28,7 +28,211 @@ export class PostService {
     user: User,
   ) {
     try {
-      const current_user = await this.userService.getOneById(user.id, [
+      if (filteringConditions.showNewPost == null) {
+        filteringConditions.showNewPost = !filteringConditions.showOldPost
+        if (!!filteringConditions.viewReportedPosts
+          || !!filteringConditions.posttobeApproved
+          || !!filteringConditions.createdByMe
+          || !!filteringConditions.createBy) {
+          filteringConditions.showNewPost = false;
+        }
+        if (!!filteringConditions.followedTags) {
+          filteringConditions.showNewPost = true;
+        }
+      }
+      if (filteringConditions.followedTags) {
+        const current_user = await this.userService.getOneById(user.id, [
+          'interests',
+        ]);
+        filteringConditions.tags = current_user.interests.map((e) => e.id);
+      }
+
+      let filterOptions: FindOptionsWhere<Post> | FindOptionsWhere<Post>[] = {};
+      filterOptions = {
+        status: In([
+          PostStatus.POSTED,
+          PostStatus.REPORTED,
+          PostStatus.APPROVED,
+          PostStatus.REPORT_REJECTED,
+        ]),
+	isHidden: false,
+      };
+
+      if (filteringConditions) {
+        if (filteringConditions.viewReportedPosts) {
+          delete filterOptions.postReports;
+          filterOptions = {
+            ...filterOptions, status: In([
+              PostStatus.REPORTED,
+              PostStatus.IN_REVIEW,
+              PostStatus.REPORT_ACCEPTED,
+              PostStatus.REPORT_REJECTED,
+            ])
+          }
+        }
+        if (filteringConditions.posttobeApproved) {
+          const childrenUser = await this.userService.getChildren(user);
+          const childrenId = childrenUser.map((e) => e.id);
+          console.log(childrenId);
+          filterOptions = {
+            ...filterOptions, status: PostStatus.TO_BE_APPROVED, createdBy: {
+              id: In(childrenId)
+            }
+          }
+        }
+
+        if (filteringConditions.categories && filteringConditions.categories.length) {
+          filterOptions = { ...filterOptions, category: In(filteringConditions.categories) }
+        }
+        if (filteringConditions.isSaved) {
+          filterOptions = {
+            ...filterOptions, savedBy: {
+              id: user.id
+            }
+          }
+        }
+        if (filteringConditions.isLiked) {
+          filterOptions = {
+            ...filterOptions, likedBy: {
+              id: user.id
+            }
+          }
+        }
+        if (filteringConditions.createBy) {
+          filterOptions = {
+            ...filterOptions, createdBy: {
+              id: filteringConditions.createBy
+            }
+          }
+        }
+        if (filteringConditions.createdByMe) {
+          filterOptions = {
+            ...filterOptions, createdBy: {
+              id: user.id
+            }
+          }
+        }
+        if (filteringConditions.tags && filteringConditions.tags.length) {
+          filterOptions = {
+            ...filterOptions, tags: {
+              id: In(filteringConditions.tags)
+            }
+          }
+        }
+        if (filteringConditions.showNewPost) {
+          const currentDate = new Date();
+          filterOptions = [{ ...filterOptions, endTime: MoreThanOrEqual(currentDate) }, { ...filterOptions, endTime: IsNull() }]
+        }
+        if (filteringConditions.search) {
+          if (Array.isArray(filterOptions)) {
+            let _tmpFilterOptions: FindOptionsWhere<Post>[] = [];
+            filterOptions.map((e) => _tmpFilterOptions = _tmpFilterOptions.concat(
+              [
+                {
+                  ...e, title: ILike(`%${filteringConditions.search}%`)
+                }, {
+                  ...e, content: ILike(`%${filteringConditions.search}%`)
+                }
+              ]
+            ));
+            filterOptions = _tmpFilterOptions;
+          } else {
+            filterOptions = [
+              {
+                ...filterOptions, title: ILike(`%${filteringConditions.search}%`)
+              }, {
+                ...filterOptions, content: ILike(`%${filteringConditions.search}%`)
+              }
+            ];
+          }
+          filterOptions = [{ ...filterOptions, title: ILike(`%${filteringConditions.search}%`) }, { ...filterOptions, content: ILike(`%${filteringConditions.search}%`) }]
+        }
+
+      }
+
+      if (Array.isArray(filterOptions)) {
+        let _tmpFilterOptions: FindOptionsWhere<Post>[] = [];
+        filterOptions.map((e) => _tmpFilterOptions = _tmpFilterOptions.concat(
+          [
+            {
+              ...e, postReports: {
+                id: IsNull()
+              }
+            }, {
+              ...e, postReports: {
+                createdBy: {
+                  id: Not(user.id)
+                }
+              }
+            }
+          ]
+        ));
+        filterOptions = _tmpFilterOptions;
+      } else {
+        filterOptions = [
+          {
+            ...filterOptions, postReports: {
+              id: IsNull()
+            }
+          }, {
+            ...filterOptions, postReports: {
+              createdBy: {
+                id: Not(user.id)
+              }
+            }
+          }
+        ];
+      }
+      // console.log(filterOptions);
+
+      let findOptions: FindManyOptions<Post> = {};
+      findOptions = {
+        where: filterOptions,
+        relations: [
+          'postComments',
+          'postReports',
+          'postReports.createdBy',
+          'likedBy',
+          'createdBy',
+          'savedBy',
+          'tags'
+        ],
+        order: { createdAt: 'DESC' },
+      };
+
+      let posts: Post[] = await this.postRepository.find(findOptions);
+
+      if (orderInput) {
+        if (orderInput.byLikes == true) {
+          posts.sort((a, b) =>
+            a.likedBy.length > b.likedBy.length
+              ? -1
+              : a.likedBy.length < b.likedBy.length
+                ? 1
+                : 0,
+          );
+        } else if (orderInput.byLikes == false) {
+          posts.sort((a, b) =>
+            a.likedBy.length < b.likedBy.length
+              ? -1
+              : a.likedBy.length > b.likedBy.length
+                ? 1
+                : 0,
+          );
+        }
+      }
+
+      const total = posts.length;
+      let finalList;
+
+      if (lastpostId) {
+        const index = posts.map((n) => n.id).indexOf(lastpostId);
+        finalList = posts.splice(index + 1, take);
+      } else {
+        finalList = posts.splice(0, take);
+      }
+      return { list: finalList, total };
+     /* const current_user = await this.userService.getOneById(user.id, [
         'permission',
       ]);
       let postList: Post[];
@@ -214,7 +418,7 @@ export class PostService {
       } else {
         finalList = postList.splice(0, take);
       }
-      return { list: finalList, total };
+      return { list: finalList, total };*/
     } catch (e) {
       throw new Error(e.message);
     }
