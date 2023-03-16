@@ -165,7 +165,7 @@ export class UserService {
     return this.usersRepository.find();
   }
 
-  getOneById(id: string, relations?: [string]): Promise<User> {
+  getOneById(id: string, relations?: string[]): Promise<User> {
     return this.usersRepository.findOne({
       where: { id: id },
       relations,
@@ -195,6 +195,7 @@ export class UserService {
   getOneByRoll(roll: string): Promise<User> {
     return this.usersRepository.findOne({
       where: { roll },
+      relations: ['hostel', 'interests'],
     });
   }
 

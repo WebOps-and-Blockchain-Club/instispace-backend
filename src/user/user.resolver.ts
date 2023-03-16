@@ -179,4 +179,14 @@ export class UserResolver {
     let hostel = this.userService.hostel(name, user);
     return hostel;
   }
+
+  @Query(() => User)
+  async getUser(
+    @Args('userId', { nullable: true }) userId: string,
+    @Args('roll', { nullable: true }) roll: string,
+  ) {
+    if (userId)
+      return await this.userService.getOneById(userId, ['hostel', 'interests']);
+    if (roll) return await this.userService.getOneByRoll(roll);
+  }
 }

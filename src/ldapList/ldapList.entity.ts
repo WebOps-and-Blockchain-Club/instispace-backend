@@ -10,7 +10,7 @@ export class LdapList {
   @Field()
   id: string;
 
-  @Column({ unique: true })
+  @Column()
   @Field()
   roll: string;
 
