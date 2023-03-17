@@ -92,13 +92,13 @@ export class UserService {
         newUser.isNewUser = true;
         let newConfig = new CreateNotifConfigInput();
         newConfig.fcmToken = fmcToken;
-        await this.notifService.create(newConfig, user);
         // TODO: notification
 
-        await this.usersRepository.save(newUser);
+        let createdUser = await this.usersRepository.save(newUser);
+        await this.notifService.create(newConfig, createdUser);
         const token = (await this.authService.generateToken(newUser))
           .accessToken;
-        return { isNewUser: newUser.isNewUser, role: UserRole.USER, token };
+        return { isNewUser: createdUser.isNewUser, role: UserRole.USER, token };
       }
       // If user exists
       else {
