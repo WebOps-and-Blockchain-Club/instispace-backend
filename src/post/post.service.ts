@@ -1,14 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NotificationService } from 'src/notification/notification.service';
 import Tag from 'src/tag/tag.entity';
 import { TagService } from 'src/tag/tag.service';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
-import { FindOptionsWhere, ILike, In, IsNull, Not, Repository, FindManyOptions, MoreThanOrEqual } from 'typeorm';
+import {
+  FindOptionsWhere,
+  ILike,
+  In,
+  IsNull,
+  Not,
+  Repository,
+  FindManyOptions,
+  MoreThanOrEqual,
+} from 'typeorm';
 import { Post } from './post.entity';
 import { CreatePostInput } from './type/create-post.input';
 import { FilteringConditions } from './type/filtering-condition';
-import { PostCategory } from './type/post-category.enum';
 import { PostStatus } from './type/postStatus.enum';
 import { OrderInput } from './type/sorting-conditions';
 import { UpdatePostInput } from './type/update-post';
@@ -19,6 +28,7 @@ export class PostService {
     @InjectRepository(Post) private postRepository: Repository<Post>,
     private readonly tagService: TagService,
     private readonly userService: UserService,
+    private readonly notificationService: NotificationService,
   ) {}
   async findAll(
     lastpostId: string,
@@ -29,11 +39,13 @@ export class PostService {
   ) {
     try {
       if (filteringConditions.showNewPost == null) {
-        filteringConditions.showNewPost = !filteringConditions.showOldPost
-        if (!!filteringConditions.viewReportedPosts
-          || !!filteringConditions.posttobeApproved
-          || !!filteringConditions.createdByMe
-          || !!filteringConditions.createBy) {
+        filteringConditions.showNewPost = !filteringConditions.showOldPost;
+        if (
+          !!filteringConditions.viewReportedPosts ||
+          !!filteringConditions.posttobeApproved ||
+          !!filteringConditions.createdByMe ||
+          !!filteringConditions.createBy
+        ) {
           filteringConditions.showNewPost = false;
         }
         if (!!filteringConditions.followedTags) {
@@ -55,132 +67,171 @@ export class PostService {
           PostStatus.APPROVED,
           PostStatus.REPORT_REJECTED,
         ]),
-	isHidden: false,
+        isHidden: false,
       };
 
       if (filteringConditions) {
         if (filteringConditions.viewReportedPosts) {
           delete filterOptions.postReports;
           filterOptions = {
-            ...filterOptions, status: In([
+            ...filterOptions,
+            status: In([
               PostStatus.REPORTED,
               PostStatus.IN_REVIEW,
               PostStatus.REPORT_ACCEPTED,
               PostStatus.REPORT_REJECTED,
-            ])
-          }
+            ]),
+          };
         }
         if (filteringConditions.posttobeApproved) {
           const childrenUser = await this.userService.getChildren(user);
           const childrenId = childrenUser.map((e) => e.id);
           console.log(childrenId);
           filterOptions = {
-            ...filterOptions, status: PostStatus.TO_BE_APPROVED, createdBy: {
-              id: In(childrenId)
-            }
-          }
+            ...filterOptions,
+            status: PostStatus.TO_BE_APPROVED,
+            createdBy: {
+              id: In(childrenId),
+            },
+          };
         }
 
-        if (filteringConditions.categories && filteringConditions.categories.length) {
-          filterOptions = { ...filterOptions, category: In(filteringConditions.categories) }
+        if (
+          filteringConditions.categories &&
+          filteringConditions.categories.length
+        ) {
+          filterOptions = {
+            ...filterOptions,
+            category: In(filteringConditions.categories),
+          };
         }
         if (filteringConditions.isSaved) {
           filterOptions = {
-            ...filterOptions, savedBy: {
-              id: user.id
-            }
-          }
+            ...filterOptions,
+            savedBy: {
+              id: user.id,
+            },
+          };
         }
         if (filteringConditions.isLiked) {
           filterOptions = {
-            ...filterOptions, likedBy: {
-              id: user.id
-            }
-          }
+            ...filterOptions,
+            likedBy: {
+              id: user.id,
+            },
+          };
         }
         if (filteringConditions.createBy) {
           filterOptions = {
-            ...filterOptions, createdBy: {
-              id: filteringConditions.createBy
-            }
-          }
+            ...filterOptions,
+            createdBy: {
+              id: filteringConditions.createBy,
+            },
+          };
         }
         if (filteringConditions.createdByMe) {
           filterOptions = {
-            ...filterOptions, createdBy: {
-              id: user.id
-            }
-          }
+            ...filterOptions,
+            createdBy: {
+              id: user.id,
+            },
+          };
         }
         if (filteringConditions.tags && filteringConditions.tags.length) {
           filterOptions = {
-            ...filterOptions, tags: {
-              id: In(filteringConditions.tags)
-            }
-          }
+            ...filterOptions,
+            tags: {
+              id: In(filteringConditions.tags),
+            },
+          };
         }
         if (filteringConditions.showNewPost) {
           const currentDate = new Date();
-          filterOptions = [{ ...filterOptions, endTime: MoreThanOrEqual(currentDate) }, { ...filterOptions, endTime: IsNull() }]
+          filterOptions = [
+            { ...filterOptions, endTime: MoreThanOrEqual(currentDate) },
+            { ...filterOptions, endTime: IsNull() },
+          ];
         }
         if (filteringConditions.search) {
           if (Array.isArray(filterOptions)) {
             let _tmpFilterOptions: FindOptionsWhere<Post>[] = [];
-            filterOptions.map((e) => _tmpFilterOptions = _tmpFilterOptions.concat(
-              [
-                {
-                  ...e, title: ILike(`%${filteringConditions.search}%`)
-                }, {
-                  ...e, content: ILike(`%${filteringConditions.search}%`)
-                }
-              ]
-            ));
+            filterOptions.map(
+              (e) =>
+                (_tmpFilterOptions = _tmpFilterOptions.concat([
+                  {
+                    ...e,
+                    title: ILike(`%${filteringConditions.search}%`),
+                  },
+                  {
+                    ...e,
+                    content: ILike(`%${filteringConditions.search}%`),
+                  },
+                ])),
+            );
             filterOptions = _tmpFilterOptions;
           } else {
             filterOptions = [
               {
-                ...filterOptions, title: ILike(`%${filteringConditions.search}%`)
-              }, {
-                ...filterOptions, content: ILike(`%${filteringConditions.search}%`)
-              }
+                ...filterOptions,
+                title: ILike(`%${filteringConditions.search}%`),
+              },
+              {
+                ...filterOptions,
+                content: ILike(`%${filteringConditions.search}%`),
+              },
             ];
           }
-          filterOptions = [{ ...filterOptions, title: ILike(`%${filteringConditions.search}%`) }, { ...filterOptions, content: ILike(`%${filteringConditions.search}%`) }]
+          filterOptions = [
+            {
+              ...filterOptions,
+              title: ILike(`%${filteringConditions.search}%`),
+            },
+            {
+              ...filterOptions,
+              content: ILike(`%${filteringConditions.search}%`),
+            },
+          ];
         }
-
       }
 
       if (Array.isArray(filterOptions)) {
         let _tmpFilterOptions: FindOptionsWhere<Post>[] = [];
-        filterOptions.map((e) => _tmpFilterOptions = _tmpFilterOptions.concat(
-          [
-            {
-              ...e, postReports: {
-                id: IsNull()
-              }
-            }, {
-              ...e, postReports: {
-                createdBy: {
-                  id: Not(user.id)
-                }
-              }
-            }
-          ]
-        ));
+        filterOptions.map(
+          (e) =>
+            (_tmpFilterOptions = _tmpFilterOptions.concat([
+              {
+                ...e,
+                postReports: {
+                  id: IsNull(),
+                },
+              },
+              {
+                ...e,
+                postReports: {
+                  createdBy: {
+                    id: Not(user.id),
+                  },
+                },
+              },
+            ])),
+        );
         filterOptions = _tmpFilterOptions;
       } else {
         filterOptions = [
           {
-            ...filterOptions, postReports: {
-              id: IsNull()
-            }
-          }, {
-            ...filterOptions, postReports: {
+            ...filterOptions,
+            postReports: {
+              id: IsNull(),
+            },
+          },
+          {
+            ...filterOptions,
+            postReports: {
               createdBy: {
-                id: Not(user.id)
-              }
-            }
-          }
+                id: Not(user.id),
+              },
+            },
+          },
         ];
       }
       // console.log(filterOptions);
@@ -195,12 +246,18 @@ export class PostService {
           'likedBy',
           'createdBy',
           'savedBy',
-          'tags'
+          'tags',
         ],
         order: { createdAt: 'DESC' },
       };
 
       let posts: Post[] = await this.postRepository.find(findOptions);
+
+      if (!orderInput) {
+        posts.sort((a, b) =>
+          a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0,
+        );
+      }
 
       if (orderInput) {
         if (orderInput.byLikes == true) {
@@ -208,16 +265,16 @@ export class PostService {
             a.likedBy.length > b.likedBy.length
               ? -1
               : a.likedBy.length < b.likedBy.length
-                ? 1
-                : 0,
+              ? 1
+              : 0,
           );
         } else if (orderInput.byLikes == false) {
           posts.sort((a, b) =>
             a.likedBy.length < b.likedBy.length
               ? -1
               : a.likedBy.length > b.likedBy.length
-                ? 1
-                : 0,
+              ? 1
+              : 0,
           );
         }
       }
@@ -232,7 +289,7 @@ export class PostService {
         finalList = posts.splice(0, take);
       }
       return { list: finalList, total };
-     /* const current_user = await this.userService.getOneById(user.id, [
+      /* const current_user = await this.userService.getOneById(user.id, [
         'permission',
       ]);
       let postList: Post[];
@@ -424,14 +481,14 @@ export class PostService {
     }
   }
 
-  async create(post: CreatePostInput, user: User): Promise<Post> {
+  async create(post: CreatePostInput, user: User) {
     var postStatus;
     const currentUser = await this.userService.getOneById(user.id, [
       'permission',
     ]);
-    if (!currentUser.permission.livePosts.includes(post.category)) {
-      postStatus = PostStatus.TO_BE_APPROVED;
-    }
+    // if (!currentUser.permission.livePosts.includes(post.category)) {
+    //   postStatus = PostStatus.TO_BE_APPROVED;
+    // }
     var tags: Tag[] = [];
 
     if (post.tagIds) {
@@ -474,7 +531,9 @@ export class PostService {
     }
     if (post.endTime) newPost.endTime = post.endTime;
     newPost.createdBy = user;
-    return this.postRepository.save(newPost);
+    let createdPost = await this.postRepository.save(newPost);
+    await this.notificationService.notifyPost(createdPost);
+    return createdPost;
   }
 
   async changeStatus(

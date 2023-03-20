@@ -96,7 +96,7 @@ export class UserService {
 
         let createdUser = await this.usersRepository.save(newUser);
         await this.notifService.create(newConfig, createdUser);
-        const token = (await this.authService.generateToken(newUser))
+        const token = (await this.authService.generateToken(createdUser))
           .accessToken;
         return { isNewUser: createdUser.isNewUser, role: UserRole.USER, token };
       }

@@ -37,11 +37,10 @@ export class NotifConfigResolver {
   updateNotifConfig(
     @Args('updateNotifConfigInput')
     updateNotifConfigInput: UpdateNotifConfigInput,
+    @Args('fcmToken')
+    fcmToken: string,
   ) {
-    return this.notifConfigService.update(
-      updateNotifConfigInput.id,
-      updateNotifConfigInput,
-    );
+    return this.notifConfigService.update(fcmToken, updateNotifConfigInput);
   }
 
   @Mutation(() => NotifConfig)

@@ -1,8 +1,13 @@
-import { CreateNotifConfigInput } from './create-notif-config.input';
-import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
+import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
-export class UpdateNotifConfigInput extends PartialType(CreateNotifConfigInput) {
-  @Field(() => Int)
-  id: number;
+export class UpdateNotifConfigInput {
+  @Field(() => [String], { nullable: true })
+  forAllPost: string[];
+
+  @Field(() => [String], { nullable: true })
+  nonePost: string[];
+
+  @Field(() => [String], { nullable: true })
+  followedTagsPost: string[];
 }

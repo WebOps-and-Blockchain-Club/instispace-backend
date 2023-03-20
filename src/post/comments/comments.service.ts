@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NotifConfigService } from 'src/notif-config/notif-config.service';
+import { NotificationService } from 'src/notification/notification.service';
 import { PostService } from 'src/post/post.service';
 import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
@@ -12,6 +14,7 @@ import { UpdateCommentInput } from './type/update-comment.input';
 export class CommentsService {
   constructor(
     @InjectRepository(Comments) private commentRepository: Repository<Comments>,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async create(
@@ -30,7 +33,12 @@ export class CommentsService {
       }
       element.photo = imageUrls === '' ? null : imageUrls;
 
-      return await this.commentRepository.save(element);
+      let createdComment = await this.commentRepository.save(element);
+      await this.notificationService.notifyComment(
+        post,
+        createdComment.content,
+      );
+      return createdComment;
     } catch (e) {
       throw new Error(e.message);
     }

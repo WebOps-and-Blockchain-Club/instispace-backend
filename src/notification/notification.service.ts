@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import Hostel from 'src/hostel/hostel.entity';
 import HostelService from 'src/hostel/hostel.service';
+import { NotifConfigService } from 'src/notif-config/notif-config.service';
+import { Post } from 'src/post/post.entity';
 import Tag from 'src/tag/tag.entity';
 import { UserService } from 'src/user/user.service';
 import { Notification } from 'src/utils';
@@ -14,46 +16,54 @@ export class NotificationService {
     private readonly firebase: FirebaseService,
     private readonly userServce: UserService,
     private hostelRepository: HostelService,
-  ) { }
+    private readonly notifService: NotifConfigService,
+  ) {}
 
   //TODO: change the type to Post
   async notifyPost(post: any) {
-    let users = await this.userServce.usersForNotif();
+    // let users = await this.userServce.usersForNotif();
 
-    if (post.tags) {
+    // if (post.tags) {
+    // }
+    // users = users.filter(
+    //   (user) =>
+    //     user.notifyPost === Notification.FORALL ||
+    //     (user.notifyPost === Notification.FOLLOWED_TAGS &&
+    //       user.interests?.filter(
+    //         (tag) =>
+    //           post.tags.filter((_tag: Tag) => _tag.id === tag.id).length !== 0,
+    //       ).length !== 0),
+    // );
+    // let tokens: string[] = [];
+    // users.map((user) => (tokens = tokens.concat(user.fcmToken.split(' AND '))));
+
+    // tokens = tokens.filter((t) => t !== '' && t != null);
+    // if (tokens.length === 0) return;
+    let tokensForAll = await this.notifService.forAllNotifInputs(post);
+    // let tokensFollowedTags = await this.notifService.followedTagsNotifInput(
+    //   post,
+    // );
+    let tokens = tokensForAll;
+    // let tokens = tokensFollowedTags.concat(tokensForAll);
+    if (tokens) {
+      this.firebase.sendMessage(tokens, {
+        data: {
+          id: `${Math.floor(Math.random() * 100)}`,
+          click_action: 'FLUTTER_NOTIFICATION_CLICK',
+          title: post.title,
+          body: post.content,
+          image: post.photo?.split(' AND ')[0] ?? '',
+          route: `post/${post.id}`,
+        },
+      });
     }
-    users = users.filter(
-      (user) =>
-        user.notifyPost === Notification.FORALL ||
-        (user.notifyPost === Notification.FOLLOWED_TAGS &&
-          user.interests?.filter(
-            (tag) =>
-              post.tags.filter((_tag: Tag) => _tag.id === tag.id).length !== 0,
-          ).length !== 0),
-    );
-    let tokens: string[] = [];
-    users.map((user) => (tokens = tokens.concat(user.fcmToken.split(' AND '))));
-
-    tokens = tokens.filter((t) => t !== '' && t != null);
-    if (tokens.length === 0) return;
-
-    this.firebase.sendMessage(tokens, {
-      data: {
-        id: `${Math.floor(Math.random() * 100)}`,
-        click_action: 'FLUTTER_NOTIFICATION_CLICK',
-        title: post.title,
-        body: post.content,
-        image: post.photo?.split(' AND ')[0] ?? '',
-        route: `post/${post.id}`,
-      },
-    });
   }
   //TODO: change the type to Post
-  async notifyComment(post: any, description: string) {
-    let tokens = post.createdBy.fcmToken.split(' AND ');
-    tokens = tokens.filter((_t: string) => _t !== '' && _t !== null);
-
-    if (post.createdBy.notifyNetopComment && tokens.length !== 0) {
+  async notifyComment(post: Post, description: string) {
+    // let tokens = post.createdBy.fcmToken.split(' AND ');
+    // tokens = tokens.filter((_t: string) => _t !== '' && _t !== null);
+    let tokens = await this.notifService.notifComment(post);
+    if (tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
           id: `${Math.floor(Math.random() * 100)}`,

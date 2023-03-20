@@ -180,7 +180,7 @@ export class UserResolver {
     return hostel;
   }
 
-  @Query(() => User)
+  @Query(() => User, { nullable: true })
   async getUser(
     @Args('userId', { nullable: true }) userId: string,
     @Args('roll', { nullable: true }) roll: string,
