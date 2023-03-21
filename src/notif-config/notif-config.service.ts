@@ -119,4 +119,9 @@ export class NotifConfigService {
     post.createdBy.notifConfig.map((e) => tokens.push(e.fcmToken));
     return tokens;
   }
+  async likedComment(comment: Comments) {
+    let tokens = [];
+    comment.createdBy.notifConfig.map((e) => tokens.push(e.fcmToken));
+    return tokens;
+  }
 }

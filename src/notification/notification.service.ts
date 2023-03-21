@@ -19,28 +19,7 @@ export class NotificationService {
 
   //TODO: change the type to Post
   async notifyPost(post: any) {
-    // let users = await this.userServce.usersForNotif();
-
-    // if (post.tags) {
-    // }
-    // users = users.filter(
-    //   (user) =>
-    //     user.notifyPost === Notification.FORALL ||
-    //     (user.notifyPost === Notification.FOLLOWED_TAGS &&
-    //       user.interests?.filter(
-    //         (tag) =>
-    //           post.tags.filter((_tag: Tag) => _tag.id === tag.id).length !== 0,
-    //       ).length !== 0),
-    // );
-    // let tokens: string[] = [];
-    // users.map((user) => (tokens = tokens.concat(user.fcmToken.split(' AND '))));
-
-    // tokens = tokens.filter((t) => t !== '' && t != null);
-    // if (tokens.length === 0) return;
     let tokensForAll = await this.notifService.forAllNotifInputs(post);
-    // let tokensFollowedTags = await this.notifService.followedTagsNotifInput(
-    //   post,
-    // );
     let tokens = tokensForAll;
     // let tokens = tokensFollowedTags.concat(tokensForAll);
     if (tokens) {
@@ -68,7 +47,7 @@ export class NotificationService {
           click_action: 'FLUTTER_NOTIFICATION_CLICK',
           title: `${post.title} got commented`,
           body: description,
-          route: `post/${post.id}`,
+          route: `post/comment/${post.id}`,
         },
       });
     }
@@ -86,7 +65,7 @@ export class NotificationService {
           click_action: 'FLUTTER_NOTIFICATION_CLICK',
           title: `${post.title} got reported`,
           body: report,
-          route: `post/${post.id}`,
+          route: `post/reported/${post.id}`,
         },
       });
     }
@@ -105,7 +84,7 @@ export class NotificationService {
           click_action: 'FLUTTER_NOTIFICATION_CLICK',
           title: `${comment.content} got reported`,
           body: report,
-          route: `comment/${comment.id}`,
+          route: `comment/reported/${comment.id}`,
         },
       });
     }
@@ -141,7 +120,19 @@ export class NotificationService {
         click_action: 'FLUTTER_NOTIFICATION_CLICK',
         title: `${post.title} got liked `,
         body: post.content,
-        route: `post/${post.id}`,
+        route: `post/liked/${post.id}`,
+      },
+    });
+  }
+  async likedComment(comment: Comments) {
+    let tokens = await this.notifService.likedComment(comment);
+    this.firebase.sendMessage(tokens, {
+      data: {
+        id: `${Math.floor(Math.random() * 100)}`,
+        click_action: 'FLUTTER_NOTIFICATION_CLICK',
+        title: `${comment.content} got liked `,
+        body: '',
+        route: `comment/liked/${comment.id}`,
       },
     });
   }

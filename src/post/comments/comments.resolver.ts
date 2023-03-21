@@ -82,7 +82,10 @@ export class CommentsResolver {
     @Args('commentId') commentId: string,
     @CurrentUser() user: User,
   ) {
-    let comment = await this.commentsService.findOne(commentId, ['likedBy']);
+    let comment = await this.commentsService.findOne(commentId, [
+      'likedBy',
+      'createdBy.notifConfig',
+    ]);
     return await this.commentsService.toggleLike(comment, user);
   }
 

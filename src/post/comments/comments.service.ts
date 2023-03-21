@@ -100,11 +100,15 @@ export class CommentsService {
   async toggleLike(comment: Comments, user: User) {
     try {
       if (comment) {
-        if (comment?.likedBy?.filter((u) => u.id === user.id)?.length)
+        if (comment?.likedBy?.filter((u) => u.id === user.id)?.length) {
           comment.likedBy = comment?.likedBy?.filter((e) => e.id !== user.id);
-        else comment?.likedBy?.push(user);
-
-        return await this.commentRepository.save(comment);
+          return await this.commentRepository.save(comment);
+        } else {
+          comment?.likedBy?.push(user);
+          let likedComment = await this.commentRepository.save(comment);
+          await this.notificationService.likedComment(likedComment);
+          return likedComment;
+        }
       } else {
         throw new Error('Invalid comment id ');
       }
