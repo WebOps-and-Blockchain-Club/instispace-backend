@@ -486,9 +486,9 @@ export class PostService {
     const currentUser = await this.userService.getOneById(user.id, [
       'permission',
     ]);
-    if (!currentUser.permission.livePosts.includes(post.category)) {
-      postStatus = PostStatus.TO_BE_APPROVED;
-    }
+    // if (!currentUser.permission.livePosts.includes(post.category)) {
+    //   postStatus = PostStatus.TO_BE_APPROVED;
+    // }
     var tags: Tag[] = [];
 
     if (post.tagIds) {
@@ -564,6 +564,7 @@ export class PostService {
         'savedBy',
         'dislikedBy',
         'approvedBy',
+        'createdBy.notifConfig',
       ],
     });
   }
@@ -620,12 +621,16 @@ export class PostService {
   async toggleLike(post: Post, user: User) {
     try {
       if (post) {
-        if (post?.likedBy?.filter((u) => u.id === user.id)?.length)
+        if (post?.likedBy?.filter((u) => u.id === user.id)?.length) {
           post.likedBy = post?.likedBy?.filter((e) => e.id !== user.id);
-        else post?.likedBy?.push(user);
-        let likedPost = await this.postRepository.save(post);
-        await this.notificationService.likedPost(likedPost);
-        return likedPost;
+          return await this.postRepository.save(post);
+        } else {
+          post?.likedBy?.push(user);
+          let likedPost = await this.postRepository.save(post);
+          if (post.likedBy.filter((u) => u.id === user.id))
+            await this.notificationService.likedPost(likedPost);
+          return likedPost;
+        }
       } else {
         throw new Error('Invalid post ');
       }
