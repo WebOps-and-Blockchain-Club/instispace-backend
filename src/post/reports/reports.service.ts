@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NotifConfigService } from 'src/notif-config/notif-config.service';
+import { NotificationService } from 'src/notification/notification.service';
 import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { Comments } from '../comments/comment.entity';
@@ -19,6 +21,7 @@ export class ReportsService {
     private commentService: CommentsService,
     private postService: PostService,
     private reasonService: ReportreasonsService,
+    private notifService: NotificationService,
   ) {}
 
   async create(
@@ -32,6 +35,7 @@ export class ReportsService {
 
       const comment = await this.commentService.findOne(elementId, [
         'commentReports',
+        'createdBy',
       ]);
       const post = await this.postService.findOne(elementId);
 
@@ -51,7 +55,12 @@ export class ReportsService {
             ? PostStatus.IN_REVIEW
             : PostStatus.REPORTED
           : post.status;
-        await this.postService.save(post);
+        let reportedPost = await this.postService.save(post);
+
+        await this.notifService.notifyReportedPost(
+          reportedPost,
+          report.description,
+        );
       }
       if (rReason && comment) {
         comment.status = [PostStatus.POSTED, PostStatus.REPORTED].includes(
@@ -65,7 +74,12 @@ export class ReportsService {
             ? PostStatus.IN_REVIEW
             : PostStatus.REPORTED
           : comment.status;
-        await this.commentService.save(comment);
+        let reportedComment = await this.commentService.save(comment);
+
+        await this.notifService.notifyReportedComment(
+          reportedComment,
+          report.description,
+        );
       }
 
       report.createdBy = user;

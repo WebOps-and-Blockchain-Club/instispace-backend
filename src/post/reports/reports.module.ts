@@ -6,6 +6,8 @@ import { Report } from './report.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommentsModule } from '../comments/comments.module';
 import { ReportreasonsModule } from '../reportReasons/reportReasons.module';
+import { NotifConfigModule } from 'src/notif-config/notif-config.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
@@ -13,6 +15,7 @@ import { ReportreasonsModule } from '../reportReasons/reportReasons.module';
     PostModule,
     CommentsModule,
     ReportreasonsModule,
+    NotificationModule,
   ],
   providers: [ReportsResolver, ReportsService],
   exports: [ReportsService],

@@ -623,8 +623,9 @@ export class PostService {
         if (post?.likedBy?.filter((u) => u.id === user.id)?.length)
           post.likedBy = post?.likedBy?.filter((e) => e.id !== user.id);
         else post?.likedBy?.push(user);
-
-        return await this.postRepository.save(post);
+        let likedPost = await this.postRepository.save(post);
+        await this.notificationService.likedPost(likedPost);
+        return likedPost;
       } else {
         throw new Error('Invalid post ');
       }

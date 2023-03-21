@@ -1,14 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { FirebaseService } from 'src/firebase/firebase.service';
-import Hostel from 'src/hostel/hostel.entity';
 import HostelService from 'src/hostel/hostel.service';
 import { NotifConfigService } from 'src/notif-config/notif-config.service';
+import { Comments } from 'src/post/comments/comment.entity';
+import { CommentsService } from 'src/post/comments/comments.service';
 import { Post } from 'src/post/post.entity';
-import Tag from 'src/tag/tag.entity';
+import { PostService } from 'src/post/post.service';
 import { UserService } from 'src/user/user.service';
-import { Notification } from 'src/utils';
-import { Repository } from 'typeorm';
 
 @Injectable()
 export class NotificationService {
@@ -76,11 +74,12 @@ export class NotificationService {
     }
   }
   //TODO: change the type to Post
-  async notifyReportedPost(post: any, report: string) {
-    let tokens = post.createdBy.fcmToken.split(' AND ');
-    tokens = tokens.filter((_t) => _t !== '' && _t !== null);
+  async notifyReportedPost(post: Post, report: string) {
+    // let tokens = post.createdBy.fcmToken.split(' AND ');
+    // tokens = tokens.filter((_t) => _t !== '' && _t !== null);
 
-    if (post.createdBy.notifyMyQueryComment && tokens.length !== 0) {
+    let tokens = await this.notifService.reportedPost(post);
+    if (tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
           id: `${Math.floor(Math.random() * 100)}`,
@@ -88,6 +87,25 @@ export class NotificationService {
           title: `${post.title} got reported`,
           body: report,
           route: `post/${post.id}`,
+        },
+      });
+    }
+  }
+  async notifyReportedComment(comment: Comments, report: string) {
+    // let tokens = post.createdBy.fcmToken.split(' AND ');
+    // tokens = tokens.filter((_t) => _t !== '' && _t !== null);
+
+    // let tokens = await this.notifService.reportedPost(comment);
+
+    let tokens = await this.notifService.reportedComment(comment);
+    if (tokens.length !== 0) {
+      this.firebase.sendMessage(tokens, {
+        data: {
+          id: `${Math.floor(Math.random() * 100)}`,
+          click_action: 'FLUTTER_NOTIFICATION_CLICK',
+          title: `${comment.content} got reported`,
+          body: report,
+          route: `comment/${comment.id}`,
         },
       });
     }
@@ -111,6 +129,19 @@ export class NotificationService {
         title: 'Hostel Update!',
         body: `New amenity: ${amenity.title}`,
         route: 'hostel',
+      },
+    });
+  }
+
+  async likedPost(post: Post) {
+    let tokens = await this.notifService.likedPost(post);
+    this.firebase.sendMessage(tokens, {
+      data: {
+        id: `${Math.floor(Math.random() * 100)}`,
+        click_action: 'FLUTTER_NOTIFICATION_CLICK',
+        title: `${post.title} got liked `,
+        body: post.content,
+        route: `post/${post.id}`,
       },
     });
   }

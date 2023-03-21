@@ -1,6 +1,8 @@
 import { forwardRef, Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Comments } from 'src/post/comments/comment.entity';
 import { Post } from 'src/post/post.entity';
+import { Report } from 'src/post/reports/report.entity';
 import Tag from 'src/tag/tag.entity';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
@@ -102,5 +104,19 @@ export class NotifConfigService {
     return tokens;
   }
 
-  remove(id: number) {}
+  async reportedPost(post: Post) {
+    let tokens = [];
+    post.createdBy.notifConfig.map((e) => tokens.push(e.fcmToken));
+    return tokens;
+  }
+  async reportedComment(comment: Comments) {
+    let tokens = [];
+    comment.createdBy.notifConfig.map((e) => tokens.push(e.fcmToken));
+    return tokens;
+  }
+  async likedPost(post: Post) {
+    let tokens = [];
+    post.createdBy.notifConfig.map((e) => tokens.push(e.fcmToken));
+    return tokens;
+  }
 }

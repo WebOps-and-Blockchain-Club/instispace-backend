@@ -42,9 +42,4 @@ export class NotifConfigResolver {
   ) {
     return this.notifConfigService.update(fcmToken, updateNotifConfigInput);
   }
-
-  @Mutation(() => NotifConfig)
-  removeNotifConfig(@Args('id', { type: () => Int }) id: number) {
-    return this.notifConfigService.remove(id);
-  }
 }
