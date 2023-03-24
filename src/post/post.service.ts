@@ -486,9 +486,9 @@ export class PostService {
     const currentUser = await this.userService.getOneById(user.id, [
       'permission',
     ]);
-    // if (!currentUser.permission.livePosts.includes(post.category)) {
-    //   postStatus = PostStatus.TO_BE_APPROVED;
-    // }
+    if (!currentUser.permission.livePosts.includes(post.category)) {
+      postStatus = PostStatus.TO_BE_APPROVED;
+    }
     var tags: Tag[] = [];
 
     if (post.tagIds) {

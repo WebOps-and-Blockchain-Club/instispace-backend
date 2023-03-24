@@ -124,4 +124,11 @@ export class NotifConfigService {
     comment.createdBy.notifConfig.map((e) => tokens.push(e.fcmToken));
     return tokens;
   }
+
+  async reportApproval() {
+    let tokens = [];
+    let users = await this.userService.getReportHandlers();
+    users.map((u) => u.notifConfig.map((n) => tokens.push(n.fcmToken)));
+    return tokens;
+  }
 }

@@ -65,7 +65,7 @@ export class NotificationService {
           click_action: 'FLUTTER_NOTIFICATION_CLICK',
           title: `${post.title} got reported`,
           body: report,
-          route: `post/reported/${post.id}`,
+          route: `post/${post.id}`,
         },
       });
     }
@@ -84,7 +84,7 @@ export class NotificationService {
           click_action: 'FLUTTER_NOTIFICATION_CLICK',
           title: `${comment.content} got reported`,
           body: report,
-          route: `comment/reported/${comment.id}`,
+          route: `comment/${comment.id}`,
         },
       });
     }
@@ -120,7 +120,7 @@ export class NotificationService {
         click_action: 'FLUTTER_NOTIFICATION_CLICK',
         title: `${post.title} got liked `,
         body: post.content,
-        route: `post/liked/${post.id}`,
+        route: `post/${post.id}`,
       },
     });
   }
@@ -132,7 +132,35 @@ export class NotificationService {
         click_action: 'FLUTTER_NOTIFICATION_CLICK',
         title: `${comment.content} got liked `,
         body: '',
-        route: `comment/liked/${comment.id}`,
+        route: `comment/${comment.id}`,
+      },
+    });
+  }
+
+  async reportedPostApproval(post: Post, report: string) {
+    let tokens = await this.notifService.reportApproval();
+
+    this.firebase.sendMessage(tokens, {
+      data: {
+        id: `${Math.floor(Math.random() * 100)}`,
+        click_action: 'FLUTTER_NOTIFICATION_CLICK',
+        title: `${post.title} got reported`,
+        body: report,
+        route: `post/${post.id}`,
+      },
+    });
+  }
+
+  async reportedCommentApproval(comment: Comments, report: string) {
+    let tokens = await this.notifService.reportApproval();
+
+    this.firebase.sendMessage(tokens, {
+      data: {
+        id: `${Math.floor(Math.random() * 100)}`,
+        click_action: 'FLUTTER_NOTIFICATION_CLICK',
+        title: `${comment.content} got reported`,
+        body: report,
+        route: `comment/${comment.id}`,
       },
     });
   }

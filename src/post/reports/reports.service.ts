@@ -61,6 +61,7 @@ export class ReportsService {
           reportedPost,
           report.description,
         );
+        await this.notifService.reportedPostApproval(post, report.description);
       }
       if (rReason && comment) {
         comment.status = [PostStatus.POSTED, PostStatus.REPORTED].includes(
@@ -78,6 +79,10 @@ export class ReportsService {
 
         await this.notifService.notifyReportedComment(
           reportedComment,
+          report.description,
+        );
+        await this.notifService.reportedCommentApproval(
+          comment,
           report.description,
         );
       }

@@ -222,6 +222,12 @@ export class UserService {
     });
   }
 
+  async getReportHandlers() {
+    return await this.usersRepository.find({
+      where: { role: UserRole.HOSTEL_SEC || UserRole.MODERATOR },
+    });
+  }
+
   async create(
     currentUser: User,
     roll: string,
