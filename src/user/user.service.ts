@@ -180,7 +180,7 @@ export class UserService {
     if (userInput.mobile) userToUpdate.mobile = userInput.mobile;
     if (userInput.password) userToUpdate.password = userInput.password;
     if (userInput.photo) userToUpdate.photo = userInput.photo;
-    if (userInput.interests.length) {
+    if (userInput.interests?.length) {
       let interests: Tag[] = [];
       await Promise.all(
         userInput.interests.map(async (interestId) => {
