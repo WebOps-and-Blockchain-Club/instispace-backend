@@ -128,6 +128,10 @@ export class User {
   @TreeChildren()
   accountsCreated: User[];
 
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  photo: string;
+
   @TreeParent()
   @Field({ nullable: true })
   createdBy: User;

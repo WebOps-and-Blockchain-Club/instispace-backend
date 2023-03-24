@@ -9,6 +9,12 @@ export class UpdateUserInput {
   @Field({ nullable: true })
   mobile: string;
 
+  @Field({ nullable: true })
+  password: string;
+
+  @Field({ nullable: true })
+  photo: string;
+
   @Field(() => [String], { nullable: true })
   interests: string[];
 }

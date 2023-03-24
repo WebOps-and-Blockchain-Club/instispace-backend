@@ -167,10 +167,18 @@ export class UserResolver {
   }
 
   @ResolveField(() => String)
-  async photo(@Parent() { roll, role }: User) {
-    return role === UserRole.USER || role === UserRole.MODERATOR
-      ? `https://instispace.iitm.ac.in/photos/byroll.php?roll=${roll.toUpperCase()}`
-      : '';
+  async photo(@Parent() user: User) {
+    try {
+      if (user.photo) {
+        return user.photo;
+      } else {
+        return user.role === UserRole.USER || user.role === UserRole.MODERATOR
+          ? `https://instispace.iitm.ac.in/photos/byroll.php?roll=${user.roll.toUpperCase()}`
+          : '';
+      }
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @Mutation(() => Hostel)
