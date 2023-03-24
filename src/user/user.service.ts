@@ -224,7 +224,7 @@ export class UserService {
 
   async getReportHandlers() {
     return await this.usersRepository.find({
-      where: { role: UserRole.HOSTEL_SEC || UserRole.MODERATOR },
+      where: { role: UserRole.SECRETARY || UserRole.MODERATOR },
     });
   }
 
