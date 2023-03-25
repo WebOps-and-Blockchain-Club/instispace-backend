@@ -23,6 +23,6 @@ import { LdapListModule } from 'src/ldapList/ldapList.module';
     NotifConfigModule,
   ],
   providers: [UserResolver, UserService],
-  exports: [UserService],
+  exports: [UserService, TypeOrmModule],
 })
 export class UserModule {}

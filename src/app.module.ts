@@ -17,6 +17,8 @@ import { NotifConfigModule } from './notif-config/notif-config.module';
 import { LdapListModule } from './ldapList/ldapList.module';
 import { CourseModule } from './course/course.module';
 import { CalendarModule } from './calendar/calendar.module';
+import { ClubModule } from './club/club.module';
+import { BadgesModule } from './badges/badges.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { CalendarModule } from './calendar/calendar.module';
     LdapListModule,
     CourseModule,
     CalendarModule,
+    ClubModule,
+    BadgesModule,
   ],
 })
 export class AppModule {}

@@ -112,6 +112,26 @@ export class PostResolver {
     let post = await this.postService.findOne(postId);
     return await this.postService.toggleSave(post, user);
   }
+  @Mutation(()=>Post)
+  async toggleIsQRActive(@Args('postId') id:string){
+    let post = await this.postService.findOne(id);
+    return await this.postService.toggleIsQRActive(post);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Mutation(()=>Post)
+  async markEventAttendance(
+    @Args('postId') postId: string,
+    @CurrentUser() user:User,
+  ){
+    let post = await this.postService.findOne(postId);
+    return await this.postService.markEventAttendance(post, user);
+  }
+
+  @ResolveField(()=>[User])
+  async attendedBy(@Parent() post: Post){
+    let newPost = await this.postService.findOneWithAttendees(post.id);
+    return newPost.eventAttendees;
+  }
 
   @ResolveField(() => [User])
   async likedBy(@Parent() post: Post) {
