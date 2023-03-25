@@ -557,6 +557,7 @@ export class PostService {
       where: { id: id },
       relations: [
         'postComments',
+        'postComments.createdBy',
         'postReports',
         'createdBy',
         'likedBy',
