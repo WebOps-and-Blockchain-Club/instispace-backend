@@ -9,7 +9,9 @@ import {
   PrimaryGeneratedColumn,
   ManyToMany,
   OneToMany,
+  OneToOne,
   ManyToOne,
+  JoinColumn,
   Tree,
   TreeChildren,
   TreeParent,
@@ -19,6 +21,7 @@ import Permission from './permission/permission.entity';
 import Hostel from 'src/hostel/hostel.entity';
 import HostelAnnouncement from 'src/hostelAnnouncement/hostelAnnouncement.entity';
 import { Notification } from 'src/utils';
+import { Club } from 'src/club/club.entity';
 
 @ObjectType()
 @Entity('User')
@@ -120,6 +123,13 @@ export class User {
 
   @TreeChildren()
   accountsCreated: User[];
+
+  @OneToOne(()=>Club, {cascade:true, onUpdate:'CASCADE', onDelete:'CASCADE'})
+  @JoinColumn()
+  club:Club;
+
+  @ManyToMany(()=>Post, (post)=>post.eventAttendees, {nullable:true})
+  attendedEvents:Post[];
 
   @TreeParent()
   @Field({ nullable: true })

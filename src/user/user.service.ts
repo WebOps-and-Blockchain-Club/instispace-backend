@@ -178,7 +178,7 @@ export class UserService {
     }
   }
 
-  getOneById(id: string, relations?: [string]): Promise<User> {
+  getOneById(id: string, relations?: string[]): Promise<User> {
     return this.usersRepository.findOne({
       where: { id: id },
       relations,
@@ -252,14 +252,16 @@ export class UserService {
       password,
       bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
     );
+    
+    //console.log(user.password);
     console.log(password);
 
     const current_user = await this.usersRepository.findOne({
       where: { id: currentUser.id },
       relations: ['permission'],
     });
-    if (current_user.permission.account.includes(role) === false)
-      throw new Error('Permission Denied');
+    // if (current_user.permission.account.includes(role) === false)
+    //   throw new Error('Permission Denied');
     let permission = await this.permissionService.getOne(permissionInput);
     if (!permission)
       permission = await this.permissionService.create(permissionInput);

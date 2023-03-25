@@ -240,6 +240,8 @@ export class PostService {
     const currentUser = await this.userService.getOneById(user.id, [
       'permission',
     ]);
+    console.log("Current user is")
+    console.log(currentUser.permission.livePosts)
     if (!currentUser.permission.livePosts.includes(post.category)) {
       postStatus = PostStatus.TO_BE_APPROVED;
     }
@@ -265,6 +267,7 @@ export class PostService {
     }
 
     let newPost = new Post();
+    newPost.isQRActive = false;
     newPost.Link = post.link;
     newPost.category = post.category;
     newPost.content = post.content;
@@ -274,15 +277,20 @@ export class PostService {
     newPost.photo = imageUrls === '' ? null : imageUrls;
     newPost.title = post.title;
     newPost.tags = post.tags;
-
-    if (postStatus) {
-      const superUsers = await this.userService.getAncestorswithAprrovalAccess(
-        user,
-      );
-      // send notif
-      console.log(superUsers);
-      newPost.status = postStatus;
+    if(post.pointsValue){
+      newPost.pointsValue = post.pointsValue;
+      
+      console.log(newPost.isQRActive)
     }
+
+    // if (postStatus) {
+    //   const superUsers = await this.userService.getAncestorswithAprrovalAccess(
+    //     user,
+    //   );
+    //   // send notif
+    //   console.log(superUsers);
+    //   newPost.status = postStatus;
+    // }
     if (post.endTime) newPost.endTime = post.endTime;
     newPost.createdBy = user;
     return this.postRepository.save(newPost);
@@ -323,11 +331,18 @@ export class PostService {
         'tags',
         'savedBy',
         'dislikedBy',
-        'approvedBy',
+        'approvedBy'
       ],
     });
   }
-
+  async findOneWithAttendees(id:string):Promise<Post>{
+    return this.postRepository.findOne({
+      where: { id: id },
+      relations: [
+        'eventAttendees'
+      ],
+    });
+  }
   async update(
     updatePostInput: UpdatePostInput,
     postToUpdate: Post,
@@ -424,4 +439,53 @@ export class PostService {
       throw new Error(e.message);
     }
   }
+
+  async markEventAttendance(post:Post, user:User){
+    try{
+      if(post){
+        if(post.isQRActive){
+          if(post.eventAttendees==null)
+            post.eventAttendees = [];
+          if(post.isQRActive==true && post?.eventAttendees.filter((u)=>u.id === user.id)?.length == 0){
+            post?.eventAttendees?.push(user);
+          console.log(post.eventAttendees);
+          return await this.postRepository.save(post);
+          }
+          
+        }
+        else{
+          throw new Error('Post is not an event')
+        }
+      }
+      else{
+        throw new Error('Invalid post');
+      }
+    }
+    catch(e){
+      throw new Error(e.message);
+    }
+  }
+
+  async toggleIsQRActive(post:Post){
+    console.log(post.eventAttendees);
+    try{
+      if(post){
+        if(post.isQRActive!=null){
+          post.isQRActive = !post.isQRActive;
+          return await this.postRepository.save(post);
+        }
+        
+        else
+        throw new Error('Post is not an event');
+      }
+      else{
+        throw new Error('Invalid Post');
+      }
+    }
+    catch(e){
+      throw new Error(e.message);
+    }
+  }
 }
+
+

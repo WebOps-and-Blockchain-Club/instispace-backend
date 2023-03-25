@@ -15,6 +15,8 @@ import { LdapModule } from './ldap/ldap.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { CourseModule } from './course/course.module';
 import { CalendarModule } from './calendar/calendar.module';
+import { ClubModule } from './club/club.module';
+import { BadgeModule } from './badge/badge.module'
 
 @Module({
   imports: [
@@ -32,6 +34,9 @@ import { CalendarModule } from './calendar/calendar.module';
     NotificationModule,
     LdapModule,
     FirebaseModule,
+    ClubModule,
+    BadgeModule,
+    
   ],
 })
 export class AppModule {}

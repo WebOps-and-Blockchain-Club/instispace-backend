@@ -83,6 +83,11 @@ export class PostResolver {
     return await this.postService.remove(post);
   }
 
+  @Mutation(()=>Post)
+  async toggleIsQRActive(@Args('postId') id:string){
+    let post = await this.postService.findOne(id);
+    return await this.postService.toggleIsQRActive(post);
+  }
   @UseGuards(JwtAuthGuard)
   @Mutation(() => Post)
   async toggleLikePost(
@@ -111,6 +116,22 @@ export class PostResolver {
   ) {
     let post = await this.postService.findOne(postId);
     return await this.postService.toggleSave(post, user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(()=>Post)
+  async markEventAttendance(
+    @Args('postId') postId: string,
+    @CurrentUser() user:User,
+  ){
+    let post = await this.postService.findOne(postId);
+    return await this.postService.markEventAttendance(post, user);
+  }
+
+  @ResolveField(()=>[User])
+  async attendedBy(@Parent() post: Post){
+    let newPost = await this.postService.findOneWithAttendees(post.id);
+    return newPost.eventAttendees;
   }
 
   @ResolveField(() => [User])
@@ -214,6 +235,7 @@ export class PostResolver {
     let permissions = ['Report', 'Comment', 'Save'];
     const _post = await this.postService.findOne(post.id);
     if (user.id === _post?.createdBy.id) permissions.push('Edit');
+    //add permission for start event if event.category == "Event"
     else permissions.push('Report');
     // view reported, approve post
     return permissions;

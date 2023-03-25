@@ -19,6 +19,6 @@ import { LdapModule } from 'src/ldap/ldap.module';
     LdapModule,
   ],
   providers: [UserResolver, UserService],
-  exports: [UserService],
+  exports: [UserService, TypeOrmModule],
 })
 export class UserModule {}

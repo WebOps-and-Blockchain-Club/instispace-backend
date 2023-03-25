@@ -33,5 +33,9 @@ export class CreatePostInput {
   @Field(() => [String], { nullable: true })
   photoList: string[];
 
+  @Field(()=> Number, {nullable:true})
+  pointsValue:Number;
+
   tags?: Tag[];
+
 }

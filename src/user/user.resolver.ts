@@ -7,7 +7,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { AuthGuard } from '@nestjs/passport';
+
 import Hostel from 'src/hostel/hostel.entity';
 import { Comments } from 'src/post/comments/comment.entity';
 import { Post } from 'src/post/post.entity';
