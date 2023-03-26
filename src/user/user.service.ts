@@ -242,8 +242,7 @@ export class UserService {
     user.ldapName = ldapName;
     user.role = role;
     let password =
-      process.env.NODE_ENV === 'development' ? accountPassword : autoGenPass(8);
-    // TODO: mail this password
+      process.env.NODE_ENV === 'production' ? autoGenPass(8) : accountPassword;
     user.password = bcrypt.hashSync(
       password,
       bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
@@ -254,8 +253,8 @@ export class UserService {
       where: { id: currentUser.id },
       relations: ['permission'],
     });
-    // if (current_user.permission.account.includes(role) === false)
-    //   throw new Error('Permission Denied');
+    if (current_user.permission.account.includes(role) === false)
+      throw new Error('Permission Denied');
     let permission = await this.permissionService.getOne(permissionInput);
     if (!permission)
       permission = await this.permissionService.create(permissionInput);
@@ -263,7 +262,7 @@ export class UserService {
     user.createdBy = currentUser;
     console.log(user.createdBy);
     let newUser = await this.usersRepository.save(user);
-    if (process.env.NODE_ENV === 'development')
+    if (process.env.NODE_ENV === 'production')
       MailService.sendAccountCreationMail(newUser.role, newUser.roll, password);
     return newUser;
   }
