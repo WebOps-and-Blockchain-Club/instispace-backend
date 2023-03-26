@@ -31,6 +31,7 @@ import UsersDev from './usersDev.entity';
 import { LdapService } from 'src/ldap/ldap.service';
 import { NotifConfigService } from 'src/notif-config/notif-config.service';
 import { CreateNotifConfigInput } from 'src/notif-config/type/create-notif-config.input';
+import MailService from 'src/utils/mail';
 
 @Injectable()
 export class UserService {
@@ -235,7 +236,7 @@ export class UserService {
     permissionInput: PermissionInput,
     role: UserRole,
     ldapName?: string,
-  ): Promise<User> {
+  ) {
     let user = this.usersRepository.create();
     user.roll = roll;
     user.ldapName = ldapName;
@@ -253,15 +254,18 @@ export class UserService {
       where: { id: currentUser.id },
       relations: ['permission'],
     });
-    if (current_user.permission.account.includes(role) === false)
-      throw new Error('Permission Denied');
+    // if (current_user.permission.account.includes(role) === false)
+    //   throw new Error('Permission Denied');
     let permission = await this.permissionService.getOne(permissionInput);
     if (!permission)
       permission = await this.permissionService.create(permissionInput);
     user.permission = permission;
     user.createdBy = currentUser;
     console.log(user.createdBy);
-    return this.usersRepository.save(user);
+    let newUser = await this.usersRepository.save(user);
+    if (process.env.NODE_ENV === 'development')
+      MailService.sendAccountCreationMail(newUser.role, newUser.roll, password);
+    return newUser;
   }
 
   async validate(roll: string) {

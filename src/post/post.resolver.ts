@@ -208,15 +208,19 @@ export class PostResolver {
 
   // Permissions: edit, report, comment, save
   // Actions: like/upvotes & downvotes, share, setRemider
-  @ResolveField(() => [String])
   @UseGuards(JwtAuthGuard)
+  @ResolveField(() => [String])
   async permissions(@Parent() post: Post, @CurrentUser() user: User) {
-    let permissions = ['Report', 'Comment', 'Save'];
-    const _post = await this.postService.findOne(post.id);
-    if (user.id === _post?.createdBy.id) permissions.push('Edit');
-    else permissions.push('Report');
-    // view reported, approve post
-    return permissions;
+    try {
+      let permissions = ['Comment', 'Save'];
+      let newPost = await this.postService.findOne(post?.id);
+      if (user?.id === newPost?.createdBy?.id) permissions.push('Edit');
+      else permissions.push('Report');
+      // view reported, approve post
+      return permissions;
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
   }
 
   @ResolveField(() => String)

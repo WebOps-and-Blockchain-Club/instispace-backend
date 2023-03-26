@@ -157,13 +157,12 @@ export class CommentsResolver {
   @UseGuards(JwtAuthGuard)
   @ResolveField(() => Boolean)
   async isLiked(@Parent() comment: Comments, @CurrentUser() user: User) {
-    let newComment = await this.commentsService.findOne(comment.id, [
+    let newComment = await this.commentsService.findOne(comment?.id, [
       'likedBy',
     ]);
-    if (newComment.likedBy.filter((u) => u.id === user.id).length)
+    if (newComment.likedBy.filter((u) => u.id === user?.id).length)
       newComment.isLiked = true;
     else newComment.isLiked = false;
-
     return newComment.isLiked;
   }
 
