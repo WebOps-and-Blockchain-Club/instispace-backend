@@ -172,9 +172,7 @@ export class PostResolver {
   @ResolveField(() => Boolean)
   @UseGuards(JwtAuthGuard)
   async isLiked(@CurrentUser() user: User, @Parent() post: Post) {
-    console.log(user);
     let newPost = await this.postService.findOne(post?.id);
-    console.log(newPost.likedBy?.filter((u) => u?.id === user?.id).length);
     if (newPost.likedBy?.filter((u) => u?.id === user?.id).length) return true;
     else return false;
   }
