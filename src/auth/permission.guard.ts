@@ -1,5 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
+import { PostCategory } from 'src/post/type/post-category.enum';
 import { PostStatus } from 'src/post/type/postStatus.enum';
 import { PermissionEnum } from './permission.enum';
 
@@ -11,7 +12,23 @@ export class PermissionGuard implements CanActivate {
     const ctx = GqlExecutionContext.create(context);
     const user = ctx.getContext().req.user;
     if (this.requiredPermission === PermissionEnum.CREATE_POST)
-      if (user.permissions.livePost) return true;
+      if (
+        [
+          PostCategory.Announcement,
+          PostCategory.Competition,
+          PostCategory.Connect,
+          PostCategory.Event,
+          PostCategory.Found,
+          PostCategory.Help,
+          PostCategory.Lost,
+          PostCategory.Opportunity,
+          PostCategory.Query,
+          PostCategory.RandomThought,
+          PostCategory.Recruitment,
+          PostCategory.Review,
+        ].includes(ctx.getArgs().postInput.category)
+      )
+        return true;
     if (this.requiredPermission === PermissionEnum.HOSTEL)
       if (ctx.getArgs().Hostel)
         return user.permissions.hostel?.includes('Hostel');
