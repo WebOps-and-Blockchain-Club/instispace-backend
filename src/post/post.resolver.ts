@@ -44,6 +44,7 @@ export class PostResolver {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Query(() => Post)
   async findOnePost(@Args('Postid') postId: string) {
     return await this.postService.findOne(postId);
@@ -168,14 +169,14 @@ export class PostResolver {
     return newPost.isSaved;
   }
 
-  @UseGuards(JwtAuthGuard)
   @ResolveField(() => Boolean)
-  async isLiked(@Parent() post: Post, @CurrentUser() user: User) {
-    let newPost = await this.postService.findOne(post.id);
-    if (newPost.likedBy.filter((u) => u.id === user.id).length)
-      newPost.isLiked = true;
-    else newPost.isLiked = false;
-    return newPost.isLiked;
+  @UseGuards(JwtAuthGuard)
+  async isLiked(@CurrentUser() user: User, @Parent() post: Post) {
+    console.log(user);
+    let newPost = await this.postService.findOne(post?.id);
+    console.log(newPost.likedBy?.filter((u) => u?.id === user?.id).length);
+    if (newPost.likedBy?.filter((u) => u?.id === user?.id).length) return true;
+    else return false;
   }
 
   @UseGuards(JwtAuthGuard)
