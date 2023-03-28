@@ -43,6 +43,9 @@ export class Permission {
     nullable: true,
   })
   users: User[];
+
+  @Field(() => [String])
+  createPost: string[];
 }
 
 export default Permission;
