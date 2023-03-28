@@ -1,4 +1,5 @@
-import nodemailer, { SentMessageInfo, Transporter } from 'nodemailer';
+import * as nodemailer from 'nodemailer';
+import { SentMessageInfo, Transporter } from 'nodemailer';
 import { google } from 'googleapis';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import * as fs from 'fs';
@@ -65,7 +66,10 @@ class MailService {
       subject: `Congrats! ${role} Account Created || InstiSpace App`,
       html: htmlContent,
     };
-    this.mail?.sendMail(mailOptions);
+    this.mail
+      ?.sendMail(mailOptions)
+      .then((e) => console.log(e))
+      .catch((e) => console.log(e));
   }
 }
 

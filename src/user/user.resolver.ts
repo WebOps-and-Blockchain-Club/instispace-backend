@@ -19,7 +19,11 @@ import Tag from '../tag/tag.entity';
 import Permission from './permission/permission.entity';
 import { PermissionInput } from './permission/type/permission.input';
 import { UserRole } from './type/role.enum';
-import { CreateUserInput, LoginInput } from './type/user.input';
+import {
+  CreateUserInput,
+  ForgotPasswordInput,
+  LoginInput,
+} from './type/user.input';
 import { LoginOutput } from './type/user.object';
 import { UpdateUserInput } from './type/user.update';
 import { User } from './user.entity';
@@ -77,6 +81,17 @@ export class UserResolver {
     return !!userUpdated;
   }
 
+  @Mutation(() => Boolean)
+  async forgotPassword(
+    @Args('forgotPasswordInput') forgotPassInp: ForgotPasswordInput,
+  ) {
+    return await this.userService.forgotPassword(forgotPassInp);
+  }
+
+  @Mutation(() => Boolean)
+  async updateRole(@Args('roll') roll: string) {
+    return await this.userService.updateRole(roll);
+  }
   @ResolveField(() => [Tag], { nullable: true })
   async interests(@Parent() { id, interests }: User) {
     try {

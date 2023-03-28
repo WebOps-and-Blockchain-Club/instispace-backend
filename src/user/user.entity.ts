@@ -44,6 +44,9 @@ export class User {
   @Column({ nullable: true })
   password: string;
 
+  @Column({ nullable: true })
+  forgotPassword: string;
+
   @Field({ nullable: true })
   @Column({ nullable: true })
   mobile?: string;
