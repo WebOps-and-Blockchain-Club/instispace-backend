@@ -2,6 +2,7 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { PostCategory } from 'src/post/type/post-category.enum';
 import { PostStatus } from 'src/post/type/postStatus.enum';
+import { User } from 'src/user/user.entity';
 import { PermissionEnum } from './permission.enum';
 
 @Injectable()
@@ -10,7 +11,7 @@ export class PermissionGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = GqlExecutionContext.create(context);
-    const user = ctx.getContext().req.user;
+    const user: User = ctx.getContext().req.user;
     if (this.requiredPermission === PermissionEnum.CREATE_POST)
       if (
         [
@@ -41,9 +42,9 @@ export class PermissionGuard implements CanActivate {
         return true;
       }
     if (this.requiredPermission === PermissionEnum.CREATE_TAG)
-      return user.persmission.createTag;
+      return user.permission.createTag;
     if (this.requiredPermission === PermissionEnum.CREATE_NOTIFICATION)
-      return user.persmission.createNotification;
+      return user.permission.createNotification;
     if (this.requiredPermission === PermissionEnum.CHANGE_STATUS)
       if (
         [PostStatus.APPROVED, PostStatus.REJECTED].includes(
