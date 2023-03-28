@@ -214,12 +214,12 @@ export class UserService {
         : false;
 
       if (isvalid) {
-        const pass_hash = bcrypt.hashSync(
-          newpass,
-          bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
-        );
+        // const pass_hash = bcrypt.hashSync(
+        //   newpass,
+        //   bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
+        // );
         await this.updateUser(user, {
-          password: pass_hash,
+          password: newpass,
           forgotPassword: null,
         });
 
