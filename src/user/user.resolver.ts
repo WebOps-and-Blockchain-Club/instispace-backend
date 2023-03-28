@@ -7,6 +7,8 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { PermissionEnum } from 'src/auth/permission.enum';
+import { PermissionGuard } from 'src/auth/permission.guard';
 import Hostel from 'src/hostel/hostel.entity';
 import { LdapListService } from 'src/ldapList/ldapList.service';
 import { Comments } from 'src/post/comments/comment.entity';
@@ -39,14 +41,12 @@ export class UserResolver {
     @Args('loginInput') loginInput: LoginInput,
     @Args('fcmToken') fcmToken: string,
   ) {
-    console.log(fcmToken);
     return this.userService.login(loginInput, fcmToken);
   }
 
   @Query(() => User, { nullable: true })
   @UseGuards(JwtAuthGuard)
   async getMe(@CurrentUser() user: User) {
-    console.log(user);
     return user;
   }
 
@@ -56,7 +56,7 @@ export class UserResolver {
   }
 
   @Mutation(() => User)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, new PermissionGuard(PermissionEnum.CREATE_ACCOUNT))
   async createUser(
     @CurrentUser() currUser: User,
     @Args('user') user: CreateUserInput,

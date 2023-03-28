@@ -96,7 +96,7 @@ export class UserService {
         // TODO: notification
 
         let createdUser = await this.usersRepository.save(newUser);
-        await this.notifService.create(newConfig, createdUser);
+        this.notifService.create(newConfig, createdUser);
         const token = (await this.authService.generateToken(createdUser))
           .accessToken;
         return { isNewUser: createdUser.isNewUser, role: UserRole.USER, token };
@@ -107,7 +107,7 @@ export class UserService {
 
         let newConfig = new CreateNotifConfigInput();
         newConfig.fcmToken = fmcToken;
-        await this.notifService.create(newConfig, user);
+        this.notifService.create(newConfig, user);
 
         const token = (await this.authService.generateToken(user)).accessToken;
         return {
@@ -133,7 +133,7 @@ export class UserService {
 
           let newConfig = new CreateNotifConfigInput();
           newConfig.fcmToken = fmcToken;
-          await this.notifService.create(newConfig, admin);
+          this.notifService.create(newConfig, admin);
 
           admin.password = bcrypt.hashSync(
             adminPassword,
@@ -151,7 +151,7 @@ export class UserService {
 
         let newConfig = new CreateNotifConfigInput();
         newConfig.fcmToken = fmcToken;
-        await this.notifService.create(newConfig, user);
+        this.notifService.create(newConfig, user);
 
         return {
           isNewUser: user.isNewUser,
@@ -167,6 +167,8 @@ export class UserService {
   }
 
   getOneById(id: string, relations?: string[]): Promise<User> {
+    if (!relations) relations = ['permission'];
+    if (!relations?.includes('permission')) relations.push('permission');
     return this.usersRepository.findOne({
       where: { id: id },
       relations,
@@ -309,20 +311,11 @@ export class UserService {
       password,
       bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
     );
-    console.log(password);
-
-    const current_user = await this.usersRepository.findOne({
-      where: { id: currentUser.id },
-      relations: ['permission'],
-    });
-    if (current_user.permission.account.includes(role) === false)
-      throw new Error('Permission Denied');
     let permission = await this.permissionService.getOne(permissionInput);
     if (!permission)
       permission = await this.permissionService.create(permissionInput);
     user.permission = permission;
     user.createdBy = currentUser;
-    console.log(user.createdBy);
     let newUser = await this.usersRepository.save(user);
     if (process.env.NODE_ENV === 'production')
       MailService.sendAccountCreationMail(newUser.role, newUser.roll, password);

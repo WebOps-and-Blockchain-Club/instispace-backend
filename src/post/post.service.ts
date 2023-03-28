@@ -86,7 +86,6 @@ export class PostService {
         if (filteringConditions.posttobeApproved) {
           const childrenUser = await this.userService.getChildren(user);
           const childrenId = childrenUser.map((e) => e.id);
-          console.log(childrenId);
           filterOptions = {
             ...filterOptions,
             status: PostStatus.TO_BE_APPROVED,
@@ -234,7 +233,6 @@ export class PostService {
           },
         ];
       }
-      // console.log(filterOptions);
 
       let findOptions: FindManyOptions<Post> = {};
       findOptions = {
@@ -289,193 +287,6 @@ export class PostService {
         finalList = posts.splice(0, take);
       }
       return { list: finalList, total };
-      /* const current_user = await this.userService.getOneById(user.id, [
-        'permission',
-      ]);
-      let postList: Post[];
-      if (filteringConditions.viewReportedPosts) {
-        postList = await this.postRepository.find({
-          where: {
-            status: PostStatus.REPORTED,
-          },
-          relations: [
-            'postComments',
-            'postReports',
-            'postReports.createdBy',
-            'likedBy',
-            'createdBy',
-            'savedBy',
-            'tags',
-          ],
-          order: { createdAt: 'DESC' },
-        });
-      } else if (filteringConditions.posttobeApproved) {
-        postList = await this.postRepository.find({
-          where: {
-            isHidden: false,
-            status: PostStatus.TO_BE_APPROVED,
-          },
-          relations: [
-            'postComments',
-            'postReports',
-            'likedBy',
-            'createdBy',
-            'savedBy',
-            'tags',
-            'postReports.createdBy',
-          ],
-          order: { createdAt: 'DESC' },
-        });
-        // get posts made by descendents
-        const descendentsStr = JSON.stringify(
-          await this.userService.getDescendantsTree(current_user),
-        );
-        postList = postList.filter((post) =>
-          descendentsStr.includes(post.createdBy.id),
-        );
-      } else {
-        postList = await this.postRepository.find({
-          where: {
-            isHidden: false,
-            status: In([
-              PostStatus.POSTED,
-              PostStatus.REPORTED,
-              PostStatus.APPROVED,
-              PostStatus.REPORT_REJECTED,
-            ]),
-          },
-          relations: [
-            'postComments',
-            'postReports',
-            'likedBy',
-            'createdBy',
-            'savedBy',
-            'tags',
-            'postReports.createdBy',
-          ],
-          order: { createdAt: 'DESC' },
-        });
-
-        //Filter the posts after the 2 hours time of completion
-
-        // default filters (endtime should not exceed)
-
-        let filterDate = {
-          [PostCategory.Review]: 7,
-          [PostCategory.RandomThought]: 3,
-          [PostCategory.Help]: 3,
-          [PostCategory.Announcement]: 7,
-          [PostCategory.Lost]: 7,
-          [PostCategory.Found]: 7,
-        };
-
-        if (filteringConditions.showOldPost) {
-          postList = postList.filter((n) => {
-            const d = new Date();
-            if (n.endTime && new Date(n.endTime).getTime() < d.getTime()) {
-              return true;
-            } else if (n.category === PostCategory.Query) {
-              return false;
-            } else {
-              d.setDate(d.getDate() - filterDate[n.category]);
-              if (new Date(n.updatedAt).getTime() < d.getTime()) {
-                return true;
-              }
-            }
-            return false;
-          });
-        } else {
-          postList = postList.filter((n) => {
-            const d = new Date();
-            if (n.endTime && new Date(n.endTime).getTime() > d.getTime())
-              return true;
-            else if (n.category === PostCategory.Query) {
-              return true;
-            } else {
-              d.setDate(d.getDate() - filterDate[n.category]);
-              if (new Date(n.updatedAt).getTime() > d.getTime()) {
-                return true;
-              }
-            }
-            return false;
-          });
-        }
-        console.log(postList);
-
-        postList = postList.filter(
-          (n) =>
-            n.postReports.filter((nr) => nr.createdBy.id === user.id).length ===
-            0,
-        );
-
-        if (filteringConditions) {
-          if (filteringConditions.search) {
-            postList = postList.filter((post) =>
-              JSON.stringify(post)
-                .toLowerCase()
-                .includes(filteringConditions.search?.toLowerCase()!),
-            );
-          }
-
-          if (filteringConditions.tags && filteringConditions.tags.length) {
-            postList = postList.filter(
-              (n) =>
-                n.tags.filter((tag) =>
-                  filteringConditions.tags.includes(tag.id),
-                ).length,
-            );
-          }
-
-          if (
-            filteringConditions.categories &&
-            filteringConditions.categories.length
-          ) {
-            console.log(filteringConditions.categories);
-            postList = postList.filter((n) =>
-              filteringConditions.categories.includes(n.category),
-            );
-            // console.log(postList);
-          }
-          if (filteringConditions.isSaved) {
-            postList = postList.filter((e) => e.isSaved === true);
-          }
-
-          if (filteringConditions.isLiked) {
-            postList = postList.filter((e) => e.isLiked === true);
-          }
-        }
-
-        if (orderInput) {
-          if (orderInput.byLikes == true) {
-            postList.sort((a, b) =>
-              a.likedBy.length > b.likedBy.length
-                ? -1
-                : a.likedBy.length < b.likedBy.length
-                ? 1
-                : 0,
-            );
-          } else if (orderInput.byLikes == false) {
-            postList.sort((a, b) =>
-              a.likedBy.length < b.likedBy.length
-                ? -1
-                : a.likedBy.length > b.likedBy.length
-                ? 1
-                : 0,
-            );
-          }
-        }
-      }
-
-      const total = postList.length;
-      var finalList;
-
-      if (lastpostId) {
-        const index = postList.map((n) => n.id).indexOf(lastpostId);
-        finalList = postList.splice(index + 1, take);
-      } else {
-        finalList = postList.splice(0, take);
-      }
-      return { list: finalList, total };*/
     } catch (e) {
       throw new Error(e.message);
     }
@@ -526,13 +337,12 @@ export class PostService {
         user,
       );
       // send notif
-      console.log(superUsers);
       newPost.status = postStatus;
     }
     if (post.endTime) newPost.endTime = post.endTime;
     newPost.createdBy = user;
     let createdPost = await this.postRepository.save(newPost);
-    await this.notificationService.notifyPost(createdPost);
+    this.notificationService.notifyPost(createdPost);
     return createdPost;
   }
 
@@ -541,14 +351,9 @@ export class PostService {
     user: User,
     status: PostStatus,
   ): Promise<Post> {
-    const superUsers = await this.userService.getAncestorswithAprrovalAccess(
-      user,
-    );
-    if (!superUsers.filter((u) => u.id === user.id).length) {
-      throw new Error('Permission Denied');
-    }
     post.status = status;
-    post.approvedBy = user;
+    if ([PostStatus.APPROVED, PostStatus.REJECTED].includes(status))
+      post.approvedBy = user;
     return this.postRepository.save(post);
   }
 
@@ -629,7 +434,7 @@ export class PostService {
           post?.likedBy?.push(user);
           let likedPost = await this.postRepository.save(post);
           if (post.likedBy.filter((u) => u.id === user.id))
-            await this.notificationService.likedPost(likedPost);
+            this.notificationService.likedPost(likedPost);
           return likedPost;
         }
       } else {

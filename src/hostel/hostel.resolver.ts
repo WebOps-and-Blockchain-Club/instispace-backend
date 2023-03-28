@@ -1,3 +1,4 @@
+import { UseGuards } from '@nestjs/common';
 import {
   Args,
   Mutation,
@@ -7,6 +8,9 @@ import {
   ResolveField,
 } from '@nestjs/graphql';
 import Amenity from 'src/amenity/amenity.entity';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { PermissionEnum } from 'src/auth/permission.enum';
+import { PermissionGuard } from 'src/auth/permission.guard';
 import HostelContact from 'src/hostelContact/hostelContact.entity';
 import Hostel from './hostel.entity';
 import HostelService from './hostel.service';
@@ -17,7 +21,8 @@ class HostelResolver {
   @Mutation(() => Hostel, {
     description: 'Mutation to create hostel',
   })
-  async createHostel(@Args('name') name: string) {
+  @UseGuards(JwtAuthGuard, new PermissionGuard(PermissionEnum.HOSTEL))
+  async createHostel(@Args('Hostel') name: string) {
     return await this.hostelService.create(name);
   }
 
@@ -25,19 +30,7 @@ class HostelResolver {
   async getHostels() {
     return await this.hostelService.getAll();
   }
-  //TODO: userresolver
-  // @ResolveField('users', () => [User])
-  // async getUsers(@Parent() hostel: Hostel) {
-  //   let { id } = hostel;
-  //   return await this.hostelService.users(id);
-  // }
 
-  //TODO: announcement resolver
-  // @ResolveField('announcements', () => [HostelAnnouncement])
-  // async getHostelAnnouncements(@Parent() hostel: Hostel) {
-  //   let { id } = hostel;
-  //   return await this.hostelService.announcements(id);
-  // }
   @ResolveField('amenities', () => [Amenity])
   async getAmenities(@Parent() hostel: Hostel) {
     return await this.hostelService.amenities(hostel);

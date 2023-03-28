@@ -34,10 +34,7 @@ export class CommentsService {
       element.photo = imageUrls === '' ? null : imageUrls;
 
       let createdComment = await this.commentRepository.save(element);
-      await this.notificationService.notifyComment(
-        post,
-        createdComment.content,
-      );
+      this.notificationService.notifyComment(post, createdComment.content);
       return createdComment;
     } catch (e) {
       throw new Error(e.message);
@@ -106,7 +103,7 @@ export class CommentsService {
         } else {
           comment?.likedBy?.push(user);
           let likedComment = await this.commentRepository.save(comment);
-          await this.notificationService.likedComment(likedComment);
+          this.notificationService.likedComment(likedComment);
           return likedComment;
         }
       } else {
