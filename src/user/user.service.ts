@@ -236,12 +236,10 @@ export class UserService {
       forgotPassword: hash,
     });
 
-    // if (process.env.NODE_ENV === 'production') {
-    MailService.sendAccountCreationMail(user.role, user.roll, password);
-    user.forgotPassword = null;
-
-    return true;
-    // }
+    if (process.env.NODE_ENV === 'production') {
+      MailService.sendAccountCreationMail(user.role, user.roll, password);
+      return true;
+    }
     return false;
   }
 
