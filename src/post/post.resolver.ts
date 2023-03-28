@@ -19,6 +19,8 @@ import findoneOutput from './type/post-output';
 import { OrderInput } from './type/sorting-conditions';
 import { PostStatusInput, UpdatePostInput } from './type/update-post';
 import { PostCategory } from './type/post-category.enum';
+import { PermissionGuard } from 'src/auth/permission.guard';
+import { PermissionEnum } from 'src/auth/permission.enum';
 
 @Resolver(() => Post)
 export class PostResolver {
@@ -47,13 +49,12 @@ export class PostResolver {
     return await this.postService.findOne(postId);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, new PermissionGuard(PermissionEnum.CREATE_POST))
   @Mutation(() => Post, { name: 'createPost' })
   async create(
     @Args('postInput') post: CreatePostInput,
     @CurrentUser() user: User,
   ) {
-    console.log(user);
     return await this.postService.create(post, user);
   }
 
@@ -66,7 +67,7 @@ export class PostResolver {
     return await this.postService.update(updatePostInput, postToUpdate);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, new PermissionGuard(PermissionEnum.CHANGE_STATUS))
   @Mutation(() => Post)
   async changePostsStatus(
     @Args('id') id: string,

@@ -9,7 +9,7 @@ export class PermissionInput {
   @Field(() => [String])
   livePosts: string[];
 
-  @Field(() => [String])
+  @Field(() => [String], { nullable: true })
   hostel: string[];
 
   @Field(() => Boolean, { nullable: true })

@@ -1,3 +1,4 @@
+import { UseGuards } from '@nestjs/common';
 import {
   Args,
   Mutation,
@@ -6,6 +7,9 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { PermissionEnum } from 'src/auth/permission.enum';
+import { PermissionGuard } from 'src/auth/permission.guard';
 import { Post } from 'src/post/post.entity';
 import { User } from '../user/user.entity';
 import { Tag } from './tag.entity';
@@ -41,6 +45,7 @@ export class TagResolver {
   }
 
   @Mutation(() => Tag)
+  @UseGuards(JwtAuthGuard, new PermissionGuard(PermissionEnum.CREATE_TAG))
   async createTag(@Args('CreateTagInput') createTagInput: CreateTagInput) {
     try {
       return await this.tagService.create(
@@ -63,9 +68,9 @@ export class TagResolver {
     }
   }
 
-  @ResolveField(()=>[Post])
-  async post(@Parent() tag:Tag){
-    const tags=await this.tagService.getOne(tag.id,['post']);
+  @ResolveField(() => [Post])
+  async post(@Parent() tag: Tag) {
+    const tags = await this.tagService.getOne(tag.id, ['post']);
     return tag.post;
   }
 }
