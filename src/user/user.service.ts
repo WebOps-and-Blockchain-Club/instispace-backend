@@ -181,6 +181,10 @@ export class UserService {
     if (userInput.mobile) userToUpdate.mobile = userInput.mobile;
     if (userInput.password) userToUpdate.password = userInput.password;
     if (userInput.photo) userToUpdate.photo = userInput.photo;
+    if (userInput.forgotPassword)
+      userToUpdate.forgotPassword = userInput.forgotPassword;
+    if (userInput.forgotPassword == null) userToUpdate.forgotPassword = null;
+
     if (userInput.interests) {
       let interests: Tag[] = [];
       await Promise.all(
@@ -196,20 +200,23 @@ export class UserService {
 
   async forgotPassword({ roll, password, newpass }) {
     let user = await this.usersRepository.findOne({ where: { roll } });
-    let updateInput = {
-      password: null,
-      name: null,
-      mobile: null,
-      photo: null,
-      interests: null,
-      forgotPassword: null,
-    };
 
     //if password (new) is provided, validate
     if (password) {
-      let isvalid = bcrypt.compareSync(password, user.forgotPassword);
+      let isvalid = user.forgotPassword
+        ? bcrypt.compareSync(password, user.forgotPassword)
+        : false;
+
       if (isvalid) {
-        await this.updateUser(user, { password: newpass, ...updateInput });
+        const pass_hash = bcrypt.hashSync(
+          newpass,
+          bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
+        );
+        await this.updateUser(user, {
+          password: pass_hash,
+          forgotPassword: null,
+        });
+
         return true;
       }
       throw new BadRequestException(`Email or password are invalid`);
@@ -223,12 +230,16 @@ export class UserService {
       bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
     );
 
-    await this.updateUser(user, { forgotPassword: hash, ...updateInput });
+    await this.updateUser(user, {
+      forgotPassword: hash,
+    });
 
-    if (process.env.NODE_ENV === 'production') {
-      MailService.sendAccountCreationMail(user.role, user.roll, password);
-      return true;
-    }
+    // if (process.env.NODE_ENV === 'production') {
+    MailService.sendAccountCreationMail(user.role, user.roll, password);
+    user.forgotPassword = null;
+
+    return true;
+    // }
     return false;
   }
 
