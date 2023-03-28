@@ -194,6 +194,44 @@ export class UserService {
     return this.usersRepository.save(userToUpdate);
   }
 
+  async forgotPassword({ roll, password, newpass }) {
+    let user = await this.usersRepository.findOne({ where: { roll } });
+    let updateInput = {
+      password: null,
+      name: null,
+      mobile: null,
+      photo: null,
+      interests: null,
+      forgotPassword: null,
+    };
+
+    //if password (new) is provided, validate
+    if (password) {
+      let isvalid = bcrypt.compareSync(password, user.forgotPassword);
+      if (isvalid) {
+        await this.updateUser(user, { password: newpass, ...updateInput });
+        return true;
+      }
+      throw new BadRequestException(`Email or password are invalid`);
+    }
+
+    //else just send a mail with the generated passsword
+    password =
+      process.env.NODE_ENV === 'production' ? autoGenPass(8) : accountPassword;
+    let hash = bcrypt.hashSync(
+      password,
+      bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
+    );
+
+    await this.updateUser(user, { forgotPassword: hash, ...updateInput });
+
+    if (process.env.NODE_ENV === 'production') {
+      MailService.sendAccountCreationMail(user.role, user.roll, password);
+      return true;
+    }
+    return false;
+  }
+
   getOneByRoll(roll: string): Promise<User> {
     return this.usersRepository.findOne({
       where: { roll },

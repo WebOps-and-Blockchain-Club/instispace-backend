@@ -17,7 +17,11 @@ import Tag from '../tag/tag.entity';
 import Permission from './permission/permission.entity';
 import { PermissionInput } from './permission/type/permission.input';
 import { UserRole } from './type/role.enum';
-import { CreateUserInput, LoginInput } from './type/user.input';
+import {
+  CreateUserInput,
+  ForgotPasswordInput,
+  LoginInput,
+} from './type/user.input';
 import { LoginOutput } from './type/user.object';
 import { UpdateUserInput } from './type/user.update';
 import { User } from './user.entity';
@@ -74,6 +78,13 @@ export class UserResolver {
   ) {
     const userUpdated = await this.userService.updateUser(user, userInput);
     return !!userUpdated;
+  }
+
+  @Mutation(() => Boolean)
+  async forgotPassword(
+    @Args('forgotPasswordInput') forgotPassInp: ForgotPasswordInput,
+  ) {
+    return await this.forgotPassword(forgotPassInp);
   }
 
   @ResolveField(() => [Tag], { nullable: true })

@@ -18,3 +18,15 @@ export class LoginInput {
   @Field()
   pass: string;
 }
+
+@InputType()
+export class ForgotPasswordInput {
+  @Field()
+  roll: string;
+
+  @Field({ nullable: true })
+  password: string;
+
+  @Field({ nullable: true })
+  newpass: string;
+}
