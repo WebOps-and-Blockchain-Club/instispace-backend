@@ -248,7 +248,7 @@ export class PostService {
           'savedBy',
           'tags',
         ],
-        order: { createdAt: 'DESC' },
+        order: { createdAt: 'DESC', postComments: { createdAt: 'ASC' } },
       };
 
       let posts: Post[] = await this.postRepository.find(findOptions);
