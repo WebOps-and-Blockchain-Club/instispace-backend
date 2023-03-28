@@ -31,14 +31,15 @@ export class PermissionGuard implements CanActivate {
         return true;
     if (this.requiredPermission === PermissionEnum.HOSTEL)
       if (ctx.getArgs().Hostel)
-        return user.permissions.hostel?.includes('Hostel');
+        return user.permission.hostel?.includes('Hostel');
       else if (ctx.getArgs().Amenity)
-        return user.permissions.hostel?.includes('Amenity');
+        return user.permission.hostel?.includes('Amenity');
       else if (ctx.getArgs().Contact)
-        return user.permissions.hostel?.includes('Contact');
+        return user.permission.hostel?.includes('Contact');
     if (this.requiredPermission === PermissionEnum.CREATE_ACCOUNT)
-      if (user.permissions?.account?.includes(ctx.getArgs().user.role))
+      if (user.permission?.account?.includes(ctx.getArgs().user.role)) {
         return true;
+      }
     if (this.requiredPermission === PermissionEnum.CREATE_TAG)
       return user.persmission.createTag;
     if (this.requiredPermission === PermissionEnum.CREATE_NOTIFICATION)
