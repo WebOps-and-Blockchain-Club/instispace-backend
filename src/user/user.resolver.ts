@@ -84,9 +84,13 @@ export class UserResolver {
   async forgotPassword(
     @Args('forgotPasswordInput') forgotPassInp: ForgotPasswordInput,
   ) {
-    return await this.forgotPassword(forgotPassInp);
+    return await this.userService.forgotPassword(forgotPassInp);
   }
 
+  @Mutation(() => Boolean)
+  async updateRole(@Args('roll') roll: string) {
+    return await this.userService.updateRole(roll);
+  }
   @ResolveField(() => [Tag], { nullable: true })
   async interests(@Parent() { id, interests }: User) {
     try {

@@ -232,6 +232,19 @@ export class UserService {
     return false;
   }
 
+  async updateRole(roll: string) {
+    try {
+      const user = await this.usersRepository.findOne({ where: { roll } });
+      if (!user) throw new Error("User doesn't exist");
+      if (user.role !== UserRole.USER) throw new Error('Invalid Role');
+      user.role = UserRole.MODERATOR;
+      const updatedUser = await this.usersRepository.save(user);
+      return updatedUser;
+    } catch (e) {
+      throw new Error(`message: ${e}`);
+    }
+  }
+
   getOneByRoll(roll: string): Promise<User> {
     return this.usersRepository.findOne({
       where: { roll },
