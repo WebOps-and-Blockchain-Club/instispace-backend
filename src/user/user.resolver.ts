@@ -13,6 +13,7 @@ import Hostel from 'src/hostel/hostel.entity';
 import { LdapListService } from 'src/ldapList/ldapList.service';
 import { Comments } from 'src/post/comments/comment.entity';
 import { Post } from 'src/post/post.entity';
+import { PostCategory } from 'src/post/type/post-category.enum';
 import { CurrentUser } from '../auth/current_user';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import Tag from '../tag/tag.entity';
@@ -189,6 +190,45 @@ export class UserResolver {
         return user.role === UserRole.USER || user.role === UserRole.MODERATOR
           ? `https://instispace.iitm.ac.in/photos/byroll.php?roll=${user.roll.toUpperCase()}`
           : '';
+      }
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
+  }
+
+  @ResolveField(() => [String])
+  async createPost(@Parent() newUser: User) {
+    try {
+      if (
+        newUser.role === UserRole.USER ||
+        newUser.role === UserRole.MODERATOR ||
+        newUser.role === UserRole.LEADS
+      ) {
+        return [
+          PostCategory.Connect,
+          PostCategory.Query,
+          PostCategory.Opportunity,
+          PostCategory.Review,
+          PostCategory.RandomThought,
+          PostCategory.Lost,
+          PostCategory.Found,
+          PostCategory.Opportunity,
+        ];
+      } else {
+        return [
+          PostCategory.Announcement,
+          PostCategory.Competition,
+          PostCategory.Connect,
+          PostCategory.Event,
+          PostCategory.Found,
+          PostCategory.Help,
+          PostCategory.Lost,
+          PostCategory.Opportunity,
+          PostCategory.Query,
+          PostCategory.RandomThought,
+          PostCategory.Recruitment,
+          PostCategory.Review,
+        ];
       }
     } catch (error) {
       throw new Error(`message : ${error}`);
