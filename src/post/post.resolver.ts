@@ -162,7 +162,6 @@ export class PostResolver {
   @ResolveField(() => Boolean)
   async isSaved(@Parent() post: Post, @CurrentUser() user: User) {
     let newPost = await this.postService.findOne(post.id);
-    console.log(newPost.savedBy.filter((u) => u.id === user.id));
     if (newPost.savedBy.filter((u) => u.id === user.id)?.length)
       newPost.isSaved = true;
     else newPost.isSaved = false;

@@ -41,7 +41,6 @@ export class UserResolver {
     @Args('loginInput') loginInput: LoginInput,
     @Args('fcmToken') fcmToken: string,
   ) {
-    console.log(fcmToken);
     return this.userService.login(loginInput, fcmToken);
   }
 

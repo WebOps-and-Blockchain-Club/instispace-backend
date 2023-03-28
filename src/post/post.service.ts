@@ -86,7 +86,6 @@ export class PostService {
         if (filteringConditions.posttobeApproved) {
           const childrenUser = await this.userService.getChildren(user);
           const childrenId = childrenUser.map((e) => e.id);
-          console.log(childrenId);
           filterOptions = {
             ...filterOptions,
             status: PostStatus.TO_BE_APPROVED,
@@ -338,13 +337,12 @@ export class PostService {
         user,
       );
       // send notif
-      console.log(superUsers);
       newPost.status = postStatus;
     }
     if (post.endTime) newPost.endTime = post.endTime;
     newPost.createdBy = user;
     let createdPost = await this.postRepository.save(newPost);
-    await this.notificationService.notifyPost(createdPost);
+    this.notificationService.notifyPost(createdPost);
     return createdPost;
   }
 
@@ -436,7 +434,7 @@ export class PostService {
           post?.likedBy?.push(user);
           let likedPost = await this.postRepository.save(post);
           if (post.likedBy.filter((u) => u.id === user.id))
-            await this.notificationService.likedPost(likedPost);
+            this.notificationService.likedPost(likedPost);
           return likedPost;
         }
       } else {
