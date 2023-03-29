@@ -61,12 +61,15 @@ export class UserResolver {
     @CurrentUser() currUser: User,
     @Args('user') user: CreateUserInput,
     @Args('permission') permissionInput: PermissionInput,
+    @Args('hostelId', { nullable: true }) hostelId?: string,
   ) {
     return await this.userService.create(
       currUser,
       user.roll,
       permissionInput,
       user.role,
+      undefined,
+      hostelId,
     );
   }
 

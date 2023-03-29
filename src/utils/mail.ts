@@ -66,6 +66,8 @@ class MailService {
       subject: `Congrats! ${role} Account Created || InstiSpace App`,
       html: htmlContent,
     };
+
+    console.log(password);
     this.mail
       ?.sendMail(mailOptions)
       .then((e) => console.log(e))
