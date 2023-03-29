@@ -11,6 +11,7 @@ export class PermissionGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = GqlExecutionContext.create(context);
+    console.log(ctx.getArgs().Hostel);
     const user: User = ctx.getContext().req.user;
     if (this.requiredPermission === PermissionEnum.CREATE_POST)
       if (

@@ -301,19 +301,22 @@ export class UserService {
     roll: string,
     permissionInput: PermissionInput,
     role: UserRole,
+    hostelId: string | null,
     ldapName?: string,
-    hostelId?: string,
   ) {
     console.log(hostelId);
     console.log(ldapName);
     let user = this.usersRepository.create();
-    let hostel = await this.hostelRepository.findOne({
-      where: { id: hostelId },
-    });
+    if (hostelId != null) {
+      var hostel = await this.hostelRepository.findOne({
+        where: { id: hostelId },
+      });
+    }
+
     user.roll = roll;
     user.ldapName = ldapName;
     user.role = role;
-    if (hostel != null) user.hostel = hostel;
+    if (hostel != null || hostel != undefined) user.hostel = hostel;
 
     let password =
       process.env.NODE_ENV === 'production' ? autoGenPass(8) : accountPassword;
