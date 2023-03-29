@@ -181,7 +181,11 @@ export class UserService {
   ): Promise<User> {
     if (userInput.name) userToUpdate.name = userInput.name;
     if (userInput.mobile) userToUpdate.mobile = userInput.mobile;
-    if (userInput.password) userToUpdate.password = userInput.password;
+    if (userInput.password)
+      userToUpdate.password = bcrypt.hashSync(
+        userInput.password,
+        bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
+      );
     if (userInput.photo) userToUpdate.photo = userInput.photo;
     if (userInput.forgotPassword)
       userToUpdate.forgotPassword = userInput.forgotPassword;
@@ -210,12 +214,12 @@ export class UserService {
         : false;
 
       if (isvalid) {
-        const pass_hash = bcrypt.hashSync(
-          newpass,
-          bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
-        );
+        // const pass_hash = bcrypt.hashSync(
+        //   newpass,
+        //   bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
+        // );
         await this.updateUser(user, {
-          password: pass_hash,
+          password: newpass,
           forgotPassword: null,
         });
 

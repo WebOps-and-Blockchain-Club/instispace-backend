@@ -36,13 +36,16 @@ export class Permission {
 
   @Column({ type: 'boolean', default: false })
   @Field(() => Boolean)
-  approvePosts: Boolean;
+  approvePosts: boolean;
 
   @OneToMany((_type) => User, (users) => users.permission)
   @Field((_type) => [User], {
     nullable: true,
   })
   users: User[];
+
+  @Field(() => [String])
+  createPost: string[];
 }
 
 export default Permission;
