@@ -12,12 +12,15 @@ import { Club } from './club.entity';
 import { ClubService } from './club.service';
 import { CreateClubInput } from './type/create-club-input';
 import { getClubOutput } from './type/find-club-output';
-
+import { UpdateClubInput } from './type/update-club-input';
+import { UserService } from 'src/user/user.service';
 @Resolver(()=>Club)
 
 export class ClubResolver{
 
-    constructor(private readonly clubService:ClubService){}
+    constructor(
+        private readonly clubService:ClubService,
+        private readonly userService:UserService){}
 
     @Query(()=> getClubOutput)
     findAllClubs(){
@@ -35,11 +38,22 @@ export class ClubResolver{
         //console.log(user);
         return this.clubService.create(clubInput, user);
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Mutation(()=>Club)
+    async updateClub(@Args('updateClubInput', {type:()=>UpdateClubInput}) clubInput:UpdateClubInput,
+    @CurrentUser()user: User){
+        //console.log(user);
+        let currentUser = await this.userService.getOneById(user.id, ['club'])
+        return this.clubService.updateClub(clubInput, currentUser);
+    }
+
     @UseGuards(JwtAuthGuard)
     @Query(()=>Club)
     getMyClub(@CurrentUser()user: User){
         return this.clubService.getMyClub(user);
     }
+
     @Mutation(()=>Boolean)
     deleteAllClubs(){
         return this.clubService.deleteAll();

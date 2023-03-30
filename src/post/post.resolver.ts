@@ -113,9 +113,9 @@ export class PostResolver {
     return await this.postService.toggleSave(post, user);
   }
   @Mutation(()=>Post)
-  async toggleIsQRActive(@Args('postId') id:string){
+  async toggleIsQRActive(@Args('postId') id:string, @Args('points') points:Number){
     let post = await this.postService.findOne(id);
-    return await this.postService.toggleIsQRActive(post);
+    return await this.postService.toggleIsQRActive(post, points);
   }
   @UseGuards(JwtAuthGuard)
   @Mutation(()=>Post)
@@ -123,7 +123,7 @@ export class PostResolver {
     @Args('postId') postId: string,
     @CurrentUser() user:User,
   ){
-    let post = await this.postService.findOne(postId);
+    let post = await this.postService.findOneWithAttendees(postId);
     return await this.postService.markEventAttendance(post, user);
   }
 

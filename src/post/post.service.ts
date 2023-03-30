@@ -706,20 +706,22 @@ export class PostService {
     }
   }
 
-  async toggleIsQRActive(post:Post){
-    console.log(post.eventAttendees);
+  async toggleIsQRActive(post:Post, points:Number){
     try{
       if(post){
-        if(post.isQRActive!=null){
-          post.isQRActive = !post.isQRActive;
-          return await this.postRepository.save(post);
+        if(post.isQRActive == null){
+          post.isQRActive = true;
+          post.pointsValue = points;
         }
-        
-        else
-        throw new Error('Post is not an event');
+        else{
+          console.log('Changing activity status');
+          post.isQRActive = !post.isQRActive
+          post.pointsValue = points;
+        }
+        return await this.postRepository.save(post);
       }
       else{
-        throw new Error('Invalid Post');
+        throw new Error('Invalid post');
       }
     }
     catch(e){

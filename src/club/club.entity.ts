@@ -22,6 +22,10 @@ export class Club{
     @Field()
     clubName:string;
 
+    @Column({nullable:true})
+    @Field({nullable:true})
+    logo:string;
+
     @OneToMany(()=>Badge, (badge)=>badge.createdBy, {nullable:true})
     @Field(()=> [Badge], {nullable:true})
     badges:Badge[];

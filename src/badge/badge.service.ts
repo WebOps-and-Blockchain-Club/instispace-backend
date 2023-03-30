@@ -5,6 +5,7 @@ import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { Badge } from './badge.entity';
 import { CreateBadgeInput } from './type/create-badge.input';
+import { CreateBadgesInput } from './type/create-badges.input';
 @Injectable()
 export class BadgeService{
     constructor(
@@ -35,5 +36,9 @@ export class BadgeService{
         return this.badgeRepository.findOne({
             where:{id:id}
         });
+    }
+    async createBadges(badges:CreateBadgesInput, user:User){
+        badges.badges.forEach((badge)=> this.create(badge, user))
+        return true
     }
 }
