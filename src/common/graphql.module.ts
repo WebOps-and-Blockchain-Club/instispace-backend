@@ -12,6 +12,8 @@ import { join } from 'path';
             plugins: [ApolloServerPluginLandingPageLocalDefault()],
             debug: false,
             playground: false,
+	    introspection: true,
+	    cache: 'bounded',
         }),
     ],
 })
