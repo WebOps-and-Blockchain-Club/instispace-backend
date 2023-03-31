@@ -216,6 +216,13 @@ export class PostResolver {
       if (user?.id === newPost?.createdBy?.id) permissions.push('Edit');
       else permissions.push('Report');
       // view reported, approve post
+      if (
+        user.permission.approvePosts &&
+        user.accountsCreated.includes(post.createdBy) &&
+        !post.createdBy.permission.createPost.includes(post.category)
+      )
+        permissions.push('APPROVE_POST');
+      if (user.permission.handleReports) permissions.push('MODERATE_REPORT');
       return permissions;
     } catch (error) {
       throw new Error(`message : ${error}`);
