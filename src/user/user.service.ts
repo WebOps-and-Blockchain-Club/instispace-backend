@@ -26,6 +26,7 @@ import {
   adminPassword,
   accountPassword,
   usersDevList,
+  user_permission,
 } from 'src/utils/config.json';
 import UsersDev from './usersDev.entity';
 import { LdapService } from 'src/ldap/ldap.service';
@@ -91,10 +92,11 @@ export class UserService {
         newUser.role = UserRole.USER;
         newUser.ldapName = ldapUser.displayName;
         newUser.isNewUser = true;
+        newUser.permission = await this.permissionService.getOneById(
+          user_permission,
+        );
         let newConfig = new CreateNotifConfigInput();
         newConfig.fcmToken = fmcToken;
-        // TODO: notification
-
         let createdUser = await this.usersRepository.save(newUser);
         this.notifService.create(newConfig, createdUser);
         const token = (await this.authService.generateToken(createdUser))
@@ -103,8 +105,6 @@ export class UserService {
       }
       // If user exists
       else {
-        // TODO: notification
-
         let newConfig = new CreateNotifConfigInput();
         newConfig.fcmToken = fmcToken;
         this.notifService.create(newConfig, user);

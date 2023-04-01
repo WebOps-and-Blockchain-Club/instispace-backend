@@ -15,6 +15,10 @@ export class PermissionService {
     return this.permissionRepository.find();
   }
 
+  getOneById(id: string): Promise<Permission> {
+    return this.permissionRepository.findOne({ where: { id: id } });
+  }
+
   getOne(permissionInput: PermissionInput): Promise<Permission> {
     return this.permissionRepository.findOne({
       where: {
