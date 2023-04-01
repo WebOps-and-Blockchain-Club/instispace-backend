@@ -21,10 +21,14 @@ import { PostStatusInput, UpdatePostInput } from './type/update-post';
 import { PostCategory } from './type/post-category.enum';
 import { PermissionGuard } from 'src/auth/permission.guard';
 import { PermissionEnum } from 'src/auth/permission.enum';
+import { UserService } from 'src/user/user.service';
 
 @Resolver(() => Post)
 export class PostResolver {
-  constructor(private readonly postService: PostService) {}
+  constructor(
+    private readonly postService: PostService,
+    private readonly userServive: UserService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Query(() => findoneOutput)
@@ -213,9 +217,17 @@ export class PostResolver {
     try {
       let permissions = ['Comment', 'Save'];
       let newPost = await this.postService.findOne(post?.id);
+      let newUser = await this.userServive.getOneById(user?.id);
       if (user?.id === newPost?.createdBy?.id) permissions.push('Edit');
       else permissions.push('Report');
       // view reported, approve post
+      // if (
+      //   newUser.permission.approvePosts &&
+      //   newUser.accountsCreated.includes(newPost.createdBy) &&
+      //   !newPost.createdBy.permission.createPost?.includes(newPost.category)
+      // )
+      //   permissions.push('APPROVE_POST');
+      // if (newUser.permission.handleReports) permissions.push('MODERATE_REPORT');
       return permissions;
     } catch (error) {
       throw new Error(`message : ${error}`);
