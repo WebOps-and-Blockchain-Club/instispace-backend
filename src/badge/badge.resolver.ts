@@ -22,9 +22,16 @@ export class BadgeResolver{
     findAllBadges(){
         return this.badgeService.findAll();
     }
+    
     @Query(()=>Badge, {name:'badge'})
     findOne(@Args('id', {type:()=> String}) id:string) {
         return this.badgeService.findOne(id)
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Query(()=>getBadgeOutput)
+    getMyBadges(@CurrentUser()user:User){
+        return this.badgeService.getUserBadges(user);
     }
     @UseGuards(JwtAuthGuard)
     @Mutation(()=> Badge)
