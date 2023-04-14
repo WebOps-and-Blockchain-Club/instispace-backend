@@ -24,13 +24,11 @@ export class BadgeService{
         var currentUser = await this.userService.getOneById(user.id, ['club'])
         console.log(currentUser.club)
         newBadge.createdBy = currentUser.club;
-        //console.log(user.club)
         return await this.badgeRepository.save(newBadge);
     }
 
     async findAll(){
         var badgeList:Badge[];
-
         badgeList = await this.badgeRepository.find();
         var total = badgeList.length;
         return{list:badgeList, total};
@@ -66,6 +64,7 @@ export class BadgeService{
                 });
             }
         }
-        return badgesForUser;
+        let total = badgesForUser.length;
+        return {list: badgesForUser, total};
     }
 }
