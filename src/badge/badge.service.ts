@@ -58,9 +58,12 @@ export class BadgeService{
 
             for(let point of pointsMapping.entries()){
                 let superuser  = await this.userService.getOneById(point[0].id, ['club', 'club.badges']);
-                superuser.club.badges.forEach((badge)=>{
+                superuser.club.badges.forEach(async (badge)=>{
                     if(badge.threshold <= point[1]){
-                        badgesForUser.push(badge);
+                        badgesForUser.push(await this.badgeRepository.findOne({
+                            where: {id:badge.id},
+                            relations: ['createdBy']
+                        }));
                     }
                 });
             }
