@@ -12,7 +12,6 @@ export class BadgeService{
     constructor(
         @InjectRepository(Badge) private badgeRepository: Repository<Badge>,
         private readonly userService:UserService,
-        private readonly clubService:ClubService,
         )
         {}
     async create(badge:CreateBadgeInput, user:User){
