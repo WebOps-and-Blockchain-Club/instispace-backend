@@ -43,10 +43,11 @@ export class BadgeService{
     }
     async getUserBadges(user:User){
         let badgesForUser:Badge[] = [];
-        let currentUser = await this.userService.getOneById(user.id, ['attendedEvents']);
+        let currentUser = await this.userService.getOneById(user.id, ['attendedEvents', 'attendedEvents.createdBy']);
         if (currentUser.attendedEvents) {
             let pointsMapping = new Map();
             currentUser.attendedEvents.forEach((e)=>{
+
                 if(pointsMapping.has(e.createdBy)){
                     pointsMapping.set(e.createdBy, pointsMapping.get(e.createdBy)+e.pointsValue);
                 }
@@ -54,6 +55,7 @@ export class BadgeService{
                     pointsMapping.set(e.createdBy, e.pointsValue);
                 }
             });
+
             for(let point of pointsMapping.entries()){
                 let superuser  = await this.userService.getOneById(point[0].id, ['club', 'club.badges']);
                 superuser.club.badges.forEach((badge)=>{
