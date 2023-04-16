@@ -7,6 +7,7 @@ import { Badge } from './badge.entity';
 import { CreateBadgeInput } from './type/create-badge.input';
 import { CreateBadgesInput } from './type/create-badges.input';
 import { ClubService } from 'src/club/club.service';
+import { UpdateBadgeInput } from './type/update-badge.input';
 @Injectable()
 export class BadgeService{
     constructor(
@@ -24,6 +25,22 @@ export class BadgeService{
         console.log(currentUser.club)
         newBadge.createdBy = currentUser.club;
         return await this.badgeRepository.save(newBadge);
+    }
+    
+    async update(badgeInput:UpdateBadgeInput, badgeId:string){
+        var badge:Badge = await this.badgeRepository.findOne({
+            where: {id:badgeId}
+        });
+        if(badgeInput.imageURL){
+            badge.imageURL = badgeInput.imageURL;
+        }
+        if(badgeInput.tier){
+            badge.tier = badgeInput.tier;
+        }
+        if(badgeInput.threshold){
+            badge.threshold = badgeInput.threshold;
+        }
+        return await this.badgeRepository.save(badge);
     }
 
     async findAll(){

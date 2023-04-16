@@ -13,6 +13,7 @@ import { getBadgeOutput } from './type/find-badge-output';
 import { CreateBadgeInput } from './type/create-badge.input';
 import { User } from 'src/user/user.entity';
 import { CreateBadgesInput } from './type/create-badges.input';
+import { UpdateBadgeInput } from './type/update-badge.input';
 
 @Resolver(()=>Badge)
 export class BadgeResolver{
@@ -25,9 +26,13 @@ export class BadgeResolver{
     
     @Query(()=>Badge, {name:'badge'})
     findOne(@Args('id', {type:()=> String}) id:string) {
-        return this.badgeService.findOne(id)
+        return this.badgeService.findOne(id);
     }
 
+    @Mutation(()=>Badge)
+    updateBadge(@Args('badgeId', {type:()=> String}) badgeId:string, @Args('updateBadgeInput', {type: ()=>UpdateBadgeInput}) updateBadgeInput:UpdateBadgeInput){
+        return this.badgeService.update(updateBadgeInput, badgeId);
+    }
     @UseGuards(JwtAuthGuard)
     @Query(()=>getBadgeOutput)
     getMyBadges(@CurrentUser()user:User){
@@ -43,9 +48,10 @@ export class BadgeResolver{
     @UseGuards(JwtAuthGuard)
     @Mutation(()=> Badge)
     createBadge(
-        @Args('createBadgeInput', {type: ()=> CreateBadgeInput}) createBadgeInput: CreateBadgeInput,
-        @CurrentUser() user:User)
-        {
-        return this.badgeService.create(createBadgeInput, user);
-        }
+    @Args('createBadgeInput', {type: ()=> CreateBadgeInput}) createBadgeInput: CreateBadgeInput,
+    @CurrentUser() user:User)
+    {
+    return this.badgeService.create(createBadgeInput, user);
+    }
+
 }
