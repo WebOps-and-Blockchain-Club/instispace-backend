@@ -117,6 +117,11 @@ export class PostResolver {
     let post = await this.postService.findOne(id);
     return await this.postService.toggleIsQRActive(post, points);
   }
+  @Mutation(()=>Post)
+  async updatePoints(@Args('postId') id:string, @Args('points')points:Number){
+    let post = await this.postService.findOne(id);
+    return await this.postService.updatePoints(post, points);
+  }
   @UseGuards(JwtAuthGuard)
   @Mutation(()=>Post)
   async markEventAttendance(
