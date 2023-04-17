@@ -72,14 +72,16 @@ export class BadgeService{
                     pointsMapping.set(e.createdBy, e.pointsValue);
                 }
             });
-
+            
             for(let point of pointsMapping.entries()){
                 let superuser  = await this.userService.getOneById(point[0].id, ['club', 'club.badges']);
-                superuser.club.badges.forEach((badge)=>{
+                let sortedBadges = superuser.club.badges.sort((a,b)=> b.threshold - a.threshold);
+                for(var badge of sortedBadges){
                     if(badge.threshold <= point[1]){
                         badgesForUser.push(badge);
+                        break;
                     }
-                });
+                };
             }
         }
         let total = badgesForUser.length;
