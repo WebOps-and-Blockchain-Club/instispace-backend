@@ -35,8 +35,8 @@ export class BadgeResolver{
     }
     @UseGuards(JwtAuthGuard)
     @Query(()=>getBadgeOutput)
-    getMyBadges(@CurrentUser()user:User){
-        return this.badgeService.getUserBadges(user);
+    getMyBadges(@Args('userId', {type:()=> String}) userId:string, ){
+        return this.badgeService.getUserBadges(userId);
     }
     @UseGuards(JwtAuthGuard)
     @Mutation(()=> Badge)
