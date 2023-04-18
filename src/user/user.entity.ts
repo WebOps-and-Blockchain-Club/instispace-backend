@@ -3,12 +3,15 @@ import { Comments } from 'src/post/comments/comment.entity';
 import { Post } from 'src/post/post.entity';
 import { Report } from 'src/post/reports/report.entity';
 import Tag from 'src/tag/tag.entity';
+import { Club } from 'src/club/club.entity';
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
   ManyToMany,
   OneToMany,
+  OneToOne,
+  JoinColumn,
   ManyToOne,
   Tree,
   TreeChildren,
@@ -130,6 +133,13 @@ export class User {
 
   @TreeChildren()
   accountsCreated: User[];
+
+  @OneToOne(()=>Club, {cascade:true, onUpdate:'CASCADE', onDelete:'CASCADE'})
+  @JoinColumn()
+  club:Club;
+
+  @ManyToMany(()=>Post, (post)=>post.eventAttendees, {nullable:true})
+  attendedEvents:Post[];
 
   @Column({ nullable: true })
   @Field({ nullable: true })

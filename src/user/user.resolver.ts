@@ -109,6 +109,12 @@ export class UserResolver {
     let newUser = await this.userService.getOneById(user.id, ['likedPost']);
     return newUser.likedPost;
   }
+  
+  @ResolveField(()=> [Post], {nullable:true})
+  async attendedEvents(@Parent()user: User){
+    let newUser = await this.userService.getOneById(user.id, ['attendedEvents']);
+    return newUser.attendedEvents;
+  }
 
   @ResolveField(() => [Post], { nullable: true })
   async dislikedPost(@Parent() user: User) {

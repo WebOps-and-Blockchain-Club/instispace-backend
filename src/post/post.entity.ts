@@ -156,4 +156,21 @@ export class Post {
 
   @Field(() => [String])
   actions: string[];
+
+  @Column({nullable:true})
+  @Field(()=> Boolean, {nullable:true})
+  isQRActive:Boolean;
+
+  @Column({nullable:true})
+  @Field({nullable:true})
+  qrText:string;
+
+  @Column({nullable:true})
+  @Field(()=>Number, {nullable:true})
+  pointsValue: Number;
+
+  @ManyToMany(()=> User, (user)=>user.attendedEvents)
+  @Field(()=> [User], {nullable:true})
+  @JoinTable()
+  eventAttendees: User[];
 }

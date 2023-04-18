@@ -375,6 +375,15 @@ export class PostService {
     });
   }
 
+  async findOneWithAttendees(id:string):Promise<Post>{
+    return this.postRepository.findOne({
+      where: { id: id },
+      relations: [
+        'eventAttendees'
+      ],
+    });
+  }
+
   async update(
     updatePostInput: UpdatePostInput,
     postToUpdate: Post,
@@ -473,6 +482,74 @@ export class PostService {
         throw new Error('Invalid post');
       }
     } catch (e) {
+      throw new Error(e.message);
+    }
+  }
+  async markEventAttendance(post:Post, user:User){
+    try{
+      if(post){
+        if(post.isQRActive){
+          if(post.eventAttendees==null)
+            post.eventAttendees = [];
+          if(post.isQRActive==true && post?.eventAttendees.filter((u)=>u.id === user.id)?.length == 0){
+            post?.eventAttendees?.push(user);
+          console.log(post.eventAttendees);
+          return await this.postRepository.save(post);
+          }
+          
+        }
+        else{
+          throw new Error('Post is not an event')
+        }
+      }
+      else{
+        throw new Error('Invalid post');
+      }
+    }
+    catch(e){
+      throw new Error(e.message);
+    }
+  }
+  async updatePoints(post:Post, points:Number){
+    try{
+      if(post){
+        if(post.isQRActive == null){
+          post.isQRActive = true;
+          post.pointsValue = points;
+        }
+        else{
+          //console.log('Changing activity status');
+          post.pointsValue = points;
+        }
+        return await this.postRepository.save(post);
+      }
+      else{
+        throw new Error('Invalid post');
+      }
+    }
+    catch(e){
+      throw new Error(e.message);
+    }
+  }
+  async toggleIsQRActive(post:Post, points:Number){
+    try{
+      if(post){
+        if(post.isQRActive == null){
+          post.isQRActive = true;
+          post.pointsValue = points;
+        }
+        else{
+         // console.log('Changing activity status');
+          post.isQRActive = !post.isQRActive
+          post.pointsValue = points;
+        }
+        return await this.postRepository.save(post);
+      }
+      else{
+        throw new Error('Invalid post');
+      }
+    }
+    catch(e){
       throw new Error(e.message);
     }
   }
