@@ -57,11 +57,8 @@ export class ReportsService {
           : post.status;
         let reportedPost = await this.postService.save(post);
 
-        await this.notifService.notifyReportedPost(
-          reportedPost,
-          report.description,
-        );
-        await this.notifService.reportedPostApproval(post, report.description);
+        this.notifService.notifyReportedPost(reportedPost, report.description);
+        this.notifService.reportedPostApproval(post, report.description);
       }
       if (rReason && comment) {
         comment.status = [PostStatus.POSTED, PostStatus.REPORTED].includes(
@@ -77,14 +74,11 @@ export class ReportsService {
           : comment.status;
         let reportedComment = await this.commentService.save(comment);
 
-        await this.notifService.notifyReportedComment(
+        this.notifService.notifyReportedComment(
           reportedComment,
           report.description,
         );
-        await this.notifService.reportedCommentApproval(
-          comment,
-          report.description,
-        );
+        this.notifService.reportedCommentApproval(comment, report.description);
       }
 
       report.createdBy = user;

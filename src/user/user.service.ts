@@ -26,11 +26,13 @@ import {
   adminPassword,
   accountPassword,
   usersDevList,
+  user_permission,
 } from 'src/utils/config.json';
 import UsersDev from './usersDev.entity';
 import { LdapService } from 'src/ldap/ldap.service';
 import { NotifConfigService } from 'src/notif-config/notif-config.service';
 import { CreateNotifConfigInput } from 'src/notif-config/type/create-notif-config.input';
+import MailService from 'src/utils/mail';
 
 @Injectable()
 export class UserService {
@@ -90,23 +92,22 @@ export class UserService {
         newUser.role = UserRole.USER;
         newUser.ldapName = ldapUser.displayName;
         newUser.isNewUser = true;
+        newUser.permission = await this.permissionService.getOneById(
+          user_permission,
+        );
         let newConfig = new CreateNotifConfigInput();
         newConfig.fcmToken = fmcToken;
-        // TODO: notification
-
         let createdUser = await this.usersRepository.save(newUser);
-        await this.notifService.create(newConfig, createdUser);
+        this.notifService.create(newConfig, createdUser);
         const token = (await this.authService.generateToken(createdUser))
           .accessToken;
         return { isNewUser: createdUser.isNewUser, role: UserRole.USER, token };
       }
       // If user exists
       else {
-        // TODO: notification
-
         let newConfig = new CreateNotifConfigInput();
         newConfig.fcmToken = fmcToken;
-        await this.notifService.create(newConfig, user);
+        this.notifService.create(newConfig, user);
 
         const token = (await this.authService.generateToken(user)).accessToken;
         return {
@@ -132,7 +133,7 @@ export class UserService {
 
           let newConfig = new CreateNotifConfigInput();
           newConfig.fcmToken = fmcToken;
-          await this.notifService.create(newConfig, admin);
+          this.notifService.create(newConfig, admin);
 
           admin.password = bcrypt.hashSync(
             adminPassword,
@@ -150,7 +151,7 @@ export class UserService {
 
         let newConfig = new CreateNotifConfigInput();
         newConfig.fcmToken = fmcToken;
-        await this.notifService.create(newConfig, user);
+        this.notifService.create(newConfig, user);
 
         return {
           isNewUser: user.isNewUser,
@@ -166,6 +167,8 @@ export class UserService {
   }
 
   getOneById(id: string, relations?: string[]): Promise<User> {
+    if (!relations) relations = ['permission'];
+    if (!relations?.includes('permission')) relations.push('permission');
     return this.usersRepository.findOne({
       where: { id: id },
       relations,
@@ -178,9 +181,17 @@ export class UserService {
   ): Promise<User> {
     if (userInput.name) userToUpdate.name = userInput.name;
     if (userInput.mobile) userToUpdate.mobile = userInput.mobile;
-    if (userInput.password) userToUpdate.password = userInput.password;
+    if (userInput.password)
+      userToUpdate.password = bcrypt.hashSync(
+        userInput.password,
+        bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
+      );
     if (userInput.photo) userToUpdate.photo = userInput.photo;
-    if (userInput.interests?.length) {
+    if (userInput.forgotPassword)
+      userToUpdate.forgotPassword = userInput.forgotPassword;
+    if (userInput.forgotPassword == null) userToUpdate.forgotPassword = null;
+
+    if (userInput.interests) {
       let interests: Tag[] = [];
       await Promise.all(
         userInput.interests.map(async (interestId) => {
@@ -191,6 +202,62 @@ export class UserService {
     }
     userToUpdate.isNewUser = false;
     return this.usersRepository.save(userToUpdate);
+  }
+
+  async forgotPassword({ roll, password, newpass }) {
+    let user = await this.usersRepository.findOne({ where: { roll } });
+
+    //if password (new) is provided, validate
+    if (password) {
+      let isvalid = user.forgotPassword
+        ? bcrypt.compareSync(password, user.forgotPassword)
+        : false;
+
+      if (isvalid) {
+        // const pass_hash = bcrypt.hashSync(
+        //   newpass,
+        //   bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
+        // );
+        await this.updateUser(user, {
+          password: newpass,
+          forgotPassword: null,
+        });
+
+        return true;
+      }
+      throw new BadRequestException(`Email or password are invalid`);
+    }
+
+    //else just send a mail with the generated passsword
+    password =
+      process.env.NODE_ENV === 'production' ? autoGenPass(8) : accountPassword;
+    let hash = bcrypt.hashSync(
+      password,
+      bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
+    );
+
+    await this.updateUser(user, {
+      forgotPassword: hash,
+    });
+
+    if (process.env.NODE_ENV === 'production') {
+      MailService.sendAccountCreationMail(user.role, user.roll, password);
+      return true;
+    }
+    return false;
+  }
+
+  async updateRole(roll: string) {
+    try {
+      const user = await this.usersRepository.findOne({ where: { roll } });
+      if (!user) throw new Error("User doesn't exist");
+      if (user.role !== UserRole.USER) throw new Error('Invalid Role');
+      user.role = UserRole.MODERATOR;
+      const updatedUser = await this.usersRepository.save(user);
+      return updatedUser;
+    } catch (e) {
+      throw new Error(`message: ${e}`);
+    }
   }
 
   getOneByRoll(roll: string): Promise<User> {
@@ -234,34 +301,38 @@ export class UserService {
     roll: string,
     permissionInput: PermissionInput,
     role: UserRole,
+    hostelId: string | null,
     ldapName?: string,
-  ): Promise<User> {
+  ) {
+    console.log(hostelId);
+    console.log(ldapName);
     let user = this.usersRepository.create();
+    if (hostelId != null) {
+      var hostel = await this.hostelRepository.findOne({
+        where: { id: hostelId },
+      });
+    }
+
     user.roll = roll;
     user.ldapName = ldapName;
     user.role = role;
+    if (hostel != null || hostel != undefined) user.hostel = hostel;
+
     let password =
-      process.env.NODE_ENV === 'development' ? accountPassword : autoGenPass(8);
-    // TODO: mail this password
+      process.env.NODE_ENV === 'production' ? autoGenPass(8) : accountPassword;
     user.password = bcrypt.hashSync(
       password,
       bcrypt.genSaltSync(Number(process.env.ITERATIONS!)),
     );
-    console.log(password);
-
-    const current_user = await this.usersRepository.findOne({
-      where: { id: currentUser.id },
-      relations: ['permission'],
-    });
-    if (current_user.permission.account.includes(role) === false)
-      throw new Error('Permission Denied');
     let permission = await this.permissionService.getOne(permissionInput);
     if (!permission)
       permission = await this.permissionService.create(permissionInput);
     user.permission = permission;
     user.createdBy = currentUser;
-    console.log(user.createdBy);
-    return this.usersRepository.save(user);
+    let newUser = await this.usersRepository.save(user);
+    if (process.env.NODE_ENV === 'production')
+      MailService.sendAccountCreationMail(newUser.role, newUser.roll, password);
+    return newUser;
   }
 
   async validate(roll: string) {

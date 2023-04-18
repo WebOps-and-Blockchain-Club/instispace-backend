@@ -19,10 +19,16 @@ import findoneOutput from './type/post-output';
 import { OrderInput } from './type/sorting-conditions';
 import { PostStatusInput, UpdatePostInput } from './type/update-post';
 import { PostCategory } from './type/post-category.enum';
+import { PermissionGuard } from 'src/auth/permission.guard';
+import { PermissionEnum } from 'src/auth/permission.enum';
+import { UserService } from 'src/user/user.service';
 
 @Resolver(() => Post)
 export class PostResolver {
-  constructor(private readonly postService: PostService) {}
+  constructor(
+    private readonly postService: PostService,
+    private readonly userServive: UserService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Query(() => findoneOutput)
@@ -42,18 +48,18 @@ export class PostResolver {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Query(() => Post)
   async findOnePost(@Args('Postid') postId: string) {
     return await this.postService.findOne(postId);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, new PermissionGuard(PermissionEnum.CREATE_POST))
   @Mutation(() => Post, { name: 'createPost' })
   async create(
     @Args('postInput') post: CreatePostInput,
     @CurrentUser() user: User,
   ) {
-    console.log(user);
     return await this.postService.create(post, user);
   }
 
@@ -66,7 +72,7 @@ export class PostResolver {
     return await this.postService.update(updatePostInput, postToUpdate);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, new PermissionGuard(PermissionEnum.CHANGE_STATUS))
   @Mutation(() => Post)
   async changePostsStatus(
     @Args('id') id: string,
@@ -186,21 +192,18 @@ export class PostResolver {
   @ResolveField(() => Boolean)
   async isSaved(@Parent() post: Post, @CurrentUser() user: User) {
     let newPost = await this.postService.findOne(post.id);
-    console.log(newPost.savedBy.filter((u) => u.id === user.id));
     if (newPost.savedBy.filter((u) => u.id === user.id)?.length)
       newPost.isSaved = true;
     else newPost.isSaved = false;
     return newPost.isSaved;
   }
 
-  @UseGuards(JwtAuthGuard)
   @ResolveField(() => Boolean)
-  async isLiked(@Parent() post: Post, @CurrentUser() user: User) {
-    let newPost = await this.postService.findOne(post.id);
-    if (newPost.likedBy.filter((u) => u.id === user.id).length)
-      newPost.isLiked = true;
-    else newPost.isLiked = false;
-    return newPost.isLiked;
+  @UseGuards(JwtAuthGuard)
+  async isLiked(@CurrentUser() user: User, @Parent() post: Post) {
+    let newPost = await this.postService.findOne(post?.id);
+    if (newPost.likedBy?.filter((u) => u?.id === user?.id).length) return true;
+    else return false;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -239,9 +242,17 @@ export class PostResolver {
     try {
       let permissions = ['Comment', 'Save'];
       let newPost = await this.postService.findOne(post?.id);
+      let newUser = await this.userServive.getOneById(user?.id);
       if (user?.id === newPost?.createdBy?.id) permissions.push('Edit');
       else permissions.push('Report');
       // view reported, approve post
+      // if (
+      //   newUser.permission.approvePosts &&
+      //   newUser.accountsCreated.includes(newPost.createdBy) &&
+      //   !newPost.createdBy.permission.createPost?.includes(newPost.category)
+      // )
+      //   permissions.push('APPROVE_POST');
+      // if (newUser.permission.handleReports) permissions.push('MODERATE_REPORT');
       return permissions;
     } catch (error) {
       throw new Error(`message : ${error}`);

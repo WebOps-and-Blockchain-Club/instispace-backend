@@ -4,17 +4,20 @@ import { UserRole } from './role.enum';
 @InputType()
 export class UpdateUserInput {
   @Field({ nullable: true })
-  name: string;
+  name?: string;
 
   @Field({ nullable: true })
-  mobile: string;
+  mobile?: string;
 
   @Field({ nullable: true })
-  password: string;
+  password?: string;
 
   @Field({ nullable: true })
-  photo: string;
+  photo?: string;
 
   @Field(() => [String], { nullable: true })
-  interests: string[];
+  interests?: string[];
+
+  @Field({ nullable: true })
+  forgotPassword?: string;
 }

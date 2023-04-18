@@ -20,7 +20,7 @@ class HostelService {
     private amenityRepository: Repository<Amenity>,
     @InjectRepository(HostelContact)
     private contactRepository: Repository<HostelContact>,
-  ) { }
+  ) {}
 
   create(name: string): Promise<Hostel> {
     let hostel = this.hostelRepository.create();
@@ -52,14 +52,6 @@ class HostelService {
       relations: ['users'],
     });
   }
-  // async announcements(id): Promise<HostelAnnouncement[]> {
-  //   let hostel = await this.announcementRepository.findOne({
-  //     where: {hostels.id},
-  //     relations: ['hostels'],
-  //   });
-
-  //   return hostel;
-  // }
 
   async amenities(hostel): Promise<Amenity[]> {
     let list = await this.amenityRepository.find({

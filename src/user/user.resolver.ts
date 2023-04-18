@@ -7,7 +7,8 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { AuthGuard } from '@nestjs/passport';
+import { PermissionEnum } from 'src/auth/permission.enum';
+import { PermissionGuard } from 'src/auth/permission.guard';
 import Hostel from 'src/hostel/hostel.entity';
 import { LdapListService } from 'src/ldapList/ldapList.service';
 import { Comments } from 'src/post/comments/comment.entity';
@@ -18,7 +19,11 @@ import Tag from '../tag/tag.entity';
 import Permission from './permission/permission.entity';
 import { PermissionInput } from './permission/type/permission.input';
 import { UserRole } from './type/role.enum';
-import { CreateUserInput, LoginInput } from './type/user.input';
+import {
+  CreateUserInput,
+  ForgotPasswordInput,
+  LoginInput,
+} from './type/user.input';
 import { LoginOutput } from './type/user.object';
 import { UpdateUserInput } from './type/user.update';
 import { User } from './user.entity';
@@ -36,14 +41,12 @@ export class UserResolver {
     @Args('loginInput') loginInput: LoginInput,
     @Args('fcmToken') fcmToken: string,
   ) {
-    console.log(fcmToken);
     return this.userService.login(loginInput, fcmToken);
   }
 
   @Query(() => User, { nullable: true })
   @UseGuards(JwtAuthGuard)
   async getMe(@CurrentUser() user: User) {
-    console.log(user);
     return user;
   }
 
@@ -53,17 +56,19 @@ export class UserResolver {
   }
 
   @Mutation(() => User)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, new PermissionGuard(PermissionEnum.CREATE_ACCOUNT))
   async createUser(
     @CurrentUser() currUser: User,
     @Args('user') user: CreateUserInput,
     @Args('permission') permissionInput: PermissionInput,
+    @Args('hostelId', { nullable: true }) hostelId: string,
   ) {
     return await this.userService.create(
       currUser,
       user.roll,
       permissionInput,
       user.role,
+      hostelId,
     );
   }
 
@@ -77,6 +82,17 @@ export class UserResolver {
     return !!userUpdated;
   }
 
+  @Mutation(() => Boolean)
+  async forgotPassword(
+    @Args('forgotPasswordInput') forgotPassInp: ForgotPasswordInput,
+  ) {
+    return await this.userService.forgotPassword(forgotPassInp);
+  }
+
+  @Mutation(() => Boolean)
+  async updateRole(@Args('roll') roll: string) {
+    return await this.userService.updateRole(roll);
+  }
   @ResolveField(() => [Tag], { nullable: true })
   async interests(@Parent() { id, interests }: User) {
     try {
