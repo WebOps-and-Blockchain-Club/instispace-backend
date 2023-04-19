@@ -22,6 +22,7 @@ import { PostCategory } from './type/post-category.enum';
 import { PermissionGuard } from 'src/auth/permission.guard';
 import { PermissionEnum } from 'src/auth/permission.enum';
 import { UserService } from 'src/user/user.service';
+import { UserRole } from 'old-code/src/utils';
 
 @Resolver(() => Post)
 export class PostResolver {
@@ -117,31 +118,6 @@ export class PostResolver {
   ) {
     let post = await this.postService.findOne(postId);
     return await this.postService.toggleSave(post, user);
-  }
-  @Mutation(()=>Post)
-  async toggleIsQRActive(@Args('postId') id:string, @Args('points') points:Number){
-    let post = await this.postService.findOne(id);
-    return await this.postService.toggleIsQRActive(post, points);
-  }
-  @Mutation(()=>Post)
-  async updatePoints(@Args('postId') id:string, @Args('points')points:Number){
-    let post = await this.postService.findOne(id);
-    return await this.postService.updatePoints(post, points);
-  }
-  @UseGuards(JwtAuthGuard)
-  @Mutation(()=>Post)
-  async markEventAttendance(
-    @Args('postId') postId: string,
-    @CurrentUser() user:User,
-  ){
-    let post = await this.postService.findOneWithAttendees(postId);
-    return await this.postService.markEventAttendance(post, user);
-  }
-
-  @ResolveField(()=>[User])
-  async attendedBy(@Parent() post: Post){
-    let newPost = await this.postService.findOneWithAttendees(post.id);
-    return newPost.eventAttendees;
   }
 
   @ResolveField(() => [User])
@@ -245,6 +221,10 @@ export class PostResolver {
       let newUser = await this.userServive.getOneById(user?.id);
       if (user?.id === newPost?.createdBy?.id) permissions.push('Edit');
       else permissions.push('Report');
+      if((newPost.category === PostCategory.Competition || newPost.category === PostCategory.Event || newPost.category === PostCategory.Recruitment)
+      && user?.id === newPost?.createdBy?.id
+      &&(newUser?.role === UserRole.ADMIN || newUser?.role === UserRole.LEADS || newUser?.role === UserRole.SECRETARY || newUser?.role === UserRole.MODERATOR || newUser?.role === UserRole.HOSTEL_SEC) )
+     permissions.push('ShowQR');
       // view reported, approve post
       // if (
       //   newUser.permission.approvePosts &&
