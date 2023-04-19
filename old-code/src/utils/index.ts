@@ -1,4 +1,4 @@
-import bcryptjs from "bcryptjs";
+import * as bcryptjs from 'bcryptjs';
 
 
 export enum UserRole {
