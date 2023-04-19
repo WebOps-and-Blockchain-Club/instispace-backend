@@ -22,7 +22,7 @@ import { PostCategory } from './type/post-category.enum';
 import { PermissionGuard } from 'src/auth/permission.guard';
 import { PermissionEnum } from 'src/auth/permission.enum';
 import { UserService } from 'src/user/user.service';
-import { UserRole } from 'old-code/src/utils';
+import { UserRole } from 'src/user/type/role.enum';
 
 @Resolver(() => Post)
 export class PostResolver {
