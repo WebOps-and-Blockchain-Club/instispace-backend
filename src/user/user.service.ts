@@ -207,6 +207,9 @@ export class UserService {
   async forgotPassword({ roll, password, newpass }) {
     let user = await this.usersRepository.findOne({ where: { roll } });
 
+    if (user == null)
+      throw new BadRequestException(`Email or password are invalid`);
+
     //if password (new) is provided, validate
     if (password) {
       let isvalid = user.forgotPassword
