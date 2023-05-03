@@ -26,6 +26,7 @@ import {
   adminPassword,
   accountPassword,
   usersDevList,
+  user_permission,
 } from 'src/utils/config.json';
 import UsersDev from './usersDev.entity';
 import { LdapService } from 'src/ldap/ldap.service';
