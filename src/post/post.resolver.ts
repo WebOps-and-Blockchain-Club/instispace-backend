@@ -119,28 +119,34 @@ export class PostResolver {
     let post = await this.postService.findOne(postId);
     return await this.postService.toggleSave(post, user);
   }
-  @Mutation(()=>Post)
-  async toggleIsQRActive(@Args('postId') id:string, @Args('points') points:Number){
+  @Mutation(() => Post)
+  async toggleIsQRActive(
+    @Args('postId') id: string,
+    @Args('points') points: Number,
+  ) {
     let post = await this.postService.findOne(id);
     return await this.postService.toggleIsQRActive(post, points);
   }
-  @Mutation(()=>Post)
-  async updatePoints(@Args('postId') id:string, @Args('points')points:Number){
+  @Mutation(() => Post)
+  async updatePoints(
+    @Args('postId') id: string,
+    @Args('points') points: Number,
+  ) {
     let post = await this.postService.findOne(id);
     return await this.postService.updatePoints(post, points);
   }
   @UseGuards(JwtAuthGuard)
-  @Mutation(()=>Post)
+  @Mutation(() => Post)
   async markEventAttendance(
     @Args('postId') postId: string,
-    @CurrentUser() user:User,
-  ){
+    @CurrentUser() user: User,
+  ) {
     let post = await this.postService.findOneWithAttendees(postId);
     return await this.postService.markEventAttendance(post, user);
   }
 
-  @ResolveField(()=>[User])
-  async attendedBy(@Parent() post: Post){
+  @ResolveField(() => [User])
+  async attendedBy(@Parent() post: Post) {
     let newPost = await this.postService.findOneWithAttendees(post.id);
     return newPost.eventAttendees;
   }
@@ -242,21 +248,31 @@ export class PostResolver {
     try {
       let permissions = ['Comment', 'Save'];
       let newPost = await this.postService.findOne(post?.id);
-      let newUser = await this.userServive.getOneById(user?.id);
+      let newUser = await this.userServive.getOneById(user?.id, [
+        'accountsCreated',
+      ]);
       if (user?.id === newPost?.createdBy?.id) permissions.push('Edit');
       else permissions.push('Report');
-      if((newPost.category === PostCategory.Competition || newPost.category === PostCategory.Event || newPost.category === PostCategory.Recruitment)
-      && user?.id === newPost?.createdBy?.id
-      &&(newUser?.role === UserRole.ADMIN || newUser?.role === UserRole.LEADS || newUser?.role === UserRole.SECRETARY || newUser?.role === UserRole.MODERATOR || newUser?.role === UserRole.HOSTEL_SEC) )
-     permissions.push('ShowQR');
+      if (
+        (newPost.category === PostCategory.Competition ||
+          newPost.category === PostCategory.Event ||
+          newPost.category === PostCategory.Recruitment) &&
+        user?.id === newPost?.createdBy?.id &&
+        (newUser?.role === UserRole.ADMIN ||
+          newUser?.role === UserRole.LEADS ||
+          newUser?.role === UserRole.SECRETARY ||
+          newUser?.role === UserRole.MODERATOR ||
+          newUser?.role === UserRole.HOSTEL_SEC)
+      )
+        permissions.push('ShowQR');
       // view reported, approve post
-      // if (
-      //   newUser.permission.approvePosts &&
-      //   newUser.accountsCreated.includes(newPost.createdBy) &&
-      //   !newPost.createdBy.permission.createPost?.includes(newPost.category)
-      // )
-      //   permissions.push('APPROVE_POST');
-      // if (newUser.permission.handleReports) permissions.push('MODERATE_REPORT');
+      if (
+        newUser.permission.approvePosts &&
+        newUser.accountsCreated.includes(newPost.createdBy) &&
+        !newPost.createdBy.permission.createPost?.includes(newPost.category)
+      )
+        permissions.push('APPROVE_POST');
+      if (newUser.permission.handleReports) permissions.push('MODERATE_REPORT');
       return permissions;
     } catch (error) {
       throw new Error(`message : ${error}`);

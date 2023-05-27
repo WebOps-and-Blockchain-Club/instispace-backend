@@ -266,7 +266,7 @@ export class UserService {
   getOneByRoll(roll: string): Promise<User> {
     return this.usersRepository.findOne({
       where: { roll },
-      relations: ['hostel', 'interests'],
+      relations: ['hostel', 'interests', 'accountsCreated'],
     });
   }
 
