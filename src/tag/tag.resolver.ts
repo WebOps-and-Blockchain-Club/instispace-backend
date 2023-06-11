@@ -40,7 +40,13 @@ export class TagResolver {
 
   @Query(() => [String])
   async getCategories() {
-    const categories = ['Sports', 'Cultural', 'Academics', 'Technical'];
+    const categories = [
+      'Sports',
+      'Cultural',
+      'Academics',
+      'Technical',
+      'IITM Students’ Government',
+    ];
     return categories;
   }
 
