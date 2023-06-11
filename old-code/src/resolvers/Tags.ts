@@ -7,20 +7,20 @@ import {
   FieldResolver,
   Root,
   Ctx,
-} from "type-graphql";
-import TagInput from "../types/inputs/tags";
-import Tag from "../entities/Tag";
-import User from "../entities/User";
-import { PostStatus, UserRole } from "../utils";
-import Netop from "../entities/Netop";
-import Event from "../entities/Event";
-import MyContext from "../utils/context";
-import { ILike } from "typeorm";
+} from 'type-graphql';
+import TagInput from '../types/inputs/tags';
+import Tag from '../entities/Tag';
+import User from '../entities/User';
+import { PostStatus, UserRole } from '../utils';
+import Netop from '../entities/Netop';
+import Event from '../entities/Event';
+import MyContext from '../utils/context';
+import { ILike } from 'typeorm';
 
 @Resolver((_type) => Tag)
 class TagsResolver {
   @Mutation(() => Boolean, {
-    description: "Mutation to Create Tags, Restrictions : {Admin}",
+    description: 'Mutation to Create Tags, Restrictions : {Admin}',
   })
   @Authorized([
     UserRole.ADMIN,
@@ -28,7 +28,7 @@ class TagsResolver {
     UserRole.HAS,
     UserRole.LEADS,
   ])
-  async createTag(@Arg("TagInput") { title, category }: TagInput) {
+  async createTag(@Arg('TagInput') { title, category }: TagInput) {
     try {
       const existingTag = await Tag.findOne({ where: { title: ILike(title) } });
       if (existingTag) throw new Error(`Tag already exists`);
@@ -44,7 +44,7 @@ class TagsResolver {
 
   @Query(() => [Tag], {
     description:
-      "Query to Fetch all the tags, Restrictions : {anyone who is authorized}",
+      'Query to Fetch all the tags, Restrictions : {anyone who is authorized}',
   })
   @Authorized()
   async getTags() {
@@ -57,10 +57,10 @@ class TagsResolver {
 
   @Query(() => Tag, {
     description:
-      "Query to Fetch the tag, Restrictions : {anyone who is authorized}",
+      'Query to Fetch the tag, Restrictions : {anyone who is authorized}',
   })
   @Authorized()
-  async getTag(@Arg("Tag") tagId: string) {
+  async getTag(@Arg('Tag') tagId: string) {
     try {
       return await Tag.findOne(tagId);
     } catch (e) {
@@ -70,18 +70,24 @@ class TagsResolver {
 
   @Query(() => [String], {
     description:
-      "Query to return the tag categories, Restrictions : {anyone who is authorized}",
+      'Query to return the tag categories, Restrictions : {anyone who is authorized}',
   })
   @Authorized()
   async getCategories() {
-    const categories = ["Sports", "Cultural", "Academics", "Technical"];
+    const categories = [
+      'Sports',
+      'Cultural',
+      'Academics',
+      'Technical',
+      'IITM Students’ Government',
+    ];
     return categories;
   }
 
   @FieldResolver(() => [User])
   async users(@Root() { id }: Tag) {
     try {
-      const tag = await Tag.findOne({ where: { id }, relations: ["users"] });
+      const tag = await Tag.findOne({ where: { id }, relations: ['users'] });
       return tag?.users;
     } catch (e) {
       throw new Error(`message : ${e}`);
@@ -101,13 +107,13 @@ class TagsResolver {
             PostStatus.POSTED,
             PostStatus.REPORTED,
             PostStatus.REPORT_REJECTED,
-          ].includes(n.status)
+          ].includes(n.status),
       );
       return ns;
     }
 
     const tag = await Tag.findOne(id, {
-      relations: ["netops", "netops.reports", "netops.reports.createdBy"],
+      relations: ['netops', 'netops.reports', 'netops.reports.createdBy'],
     });
     if (tag?.netops) {
       const ns = tag.netops.filter(
@@ -119,7 +125,7 @@ class TagsResolver {
             PostStatus.POSTED,
             PostStatus.REPORTED,
             PostStatus.REPORT_REJECTED,
-          ].includes(n.status)
+          ].includes(n.status),
       );
       return ns;
     }
@@ -133,15 +139,15 @@ class TagsResolver {
 
     if (event) {
       const ns = event.filter(
-        (n) => !n.isHidden && new Date(n.time).getTime() > d.getTime()
+        (n) => !n.isHidden && new Date(n.time).getTime() > d.getTime(),
       );
       return ns;
     }
 
-    const tag = await Tag.findOne(id, { relations: ["event"] });
+    const tag = await Tag.findOne(id, { relations: ['event'] });
     if (tag?.event) {
       const ns = tag.event.filter(
-        (n) => !n.isHidden && new Date(n.time).getTime() > d.getTime()
+        (n) => !n.isHidden && new Date(n.time).getTime() > d.getTime(),
       );
       return ns;
     }
