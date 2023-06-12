@@ -28,6 +28,8 @@ import { LoginOutput } from './type/user.object';
 import { UpdateUserInput } from './type/user.update';
 import { User } from './user.entity';
 import { UserService } from './user.service';
+import { NotifConfig } from 'src/notif-config/notif-config.entity';
+import { CreateNotifConfigInput } from 'src/notif-config/type/create-notif-config.input';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -89,6 +91,14 @@ export class UserResolver {
     return await this.userService.forgotPassword(forgotPassInp);
   }
 
+  @Mutation(() => NotifConfig)
+  @UseGuards(JwtAuthGuard)
+  async addNewToken(fcmToken: string, @CurrentUser() user: User) {
+    let notifInput = new CreateNotifConfigInput();
+    notifInput.fcmToken = fcmToken;
+    return await this.userService.getNewToken(notifInput, user);
+  }
+
   @Mutation(() => Boolean)
   async updateRole(@Args('roll') roll: string) {
     return await this.userService.updateRole(roll);
@@ -109,10 +119,12 @@ export class UserResolver {
     let newUser = await this.userService.getOneById(user.id, ['likedPost']);
     return newUser.likedPost;
   }
-  
-  @ResolveField(()=> [Post], {nullable:true})
-  async attendedEvents(@Parent()user: User){
-    let newUser = await this.userService.getOneById(user.id, ['attendedEvents']);
+
+  @ResolveField(() => [Post], { nullable: true })
+  async attendedEvents(@Parent() user: User) {
+    let newUser = await this.userService.getOneById(user.id, [
+      'attendedEvents',
+    ]);
     return newUser.attendedEvents;
   }
 

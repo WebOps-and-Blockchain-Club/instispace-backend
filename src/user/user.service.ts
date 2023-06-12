@@ -270,6 +270,14 @@ export class UserService {
     });
   }
 
+  async getNewToken(createNotif: CreateNotifConfigInput, user: User) {
+    try {
+      await this.notifService.create(createNotif, user);
+    } catch (error) {
+      throw new Error(`message : ${error}`);
+    }
+  }
+
   async getParents(child: User): Promise<User[]> {
     const parents = await this.usersRepository.findAncestors(child, {
       relations: ['permission'],

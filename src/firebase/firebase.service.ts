@@ -40,4 +40,8 @@ export class FirebaseService {
         .catch((e) => console.log(e));
     }
   }
+
+  checkTokenValidity(token: string) {
+    return this.admin.messaging().send({ token: token }, true);
+  }
 }

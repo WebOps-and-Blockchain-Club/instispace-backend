@@ -61,6 +61,15 @@ export class NotifConfigService {
 
     if (updateNotifConfigInput.nonePost)
       notif.nonePost = updateNotifConfigInput.nonePost;
+    return await this.notifRepository.save(notif);
+  }
+
+  async deleteOneById(token: string) {
+    let notif = await this.notifRepository.findOne({
+      where: { fcmToken: token },
+      relations: ['createdBy'],
+    });
+    return await this.notifRepository.delete(notif.id);
   }
 
   async forAllNotifInputs(post: Post) {
