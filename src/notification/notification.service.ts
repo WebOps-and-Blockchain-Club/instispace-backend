@@ -20,7 +20,7 @@ export class NotificationService {
   //TODO: change the type to Post
   async notifyPost(post: any) {
     let tokensForAll = await this.notifService.forAllNotifInputs(post);
-    let tokens = await this.verifyAndRemove(tokensForAll);
+    let tokens = tokensForAll;
 
     // let tokens = tokensFollowedTags.concat(tokensForAll);
     if (tokens) {
@@ -40,8 +40,8 @@ export class NotificationService {
   async notifyComment(post: Post, description: string) {
     // let tokens = post.createdBy.fcmToken.split(' AND ');
     // tokens = tokens.filter((_t: string) => _t !== '' && _t !== null);
-    let temp = await this.notifService.notifComment(post);
-    let tokens = await this.verifyAndRemove(temp);
+    let tokens = await this.notifService.notifComment(post);
+
     if (tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
@@ -59,8 +59,7 @@ export class NotificationService {
     // let tokens = post.createdBy.fcmToken.split(' AND ');
     // tokens = tokens.filter((_t) => _t !== '' && _t !== null);
 
-    let temp = await this.notifService.reportedPost(post);
-    let tokens = await this.verifyAndRemove(temp);
+    let tokens = await this.notifService.reportedPost(post);
     if (tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
@@ -79,8 +78,7 @@ export class NotificationService {
 
     // let tokens = await this.notifService.reportedPost(comment);
 
-    let temp = await this.notifService.reportedComment(comment);
-    let tokens = await this.verifyAndRemove(temp);
+    let tokens = await this.notifService.reportedComment(comment);
     if (tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
@@ -117,8 +115,7 @@ export class NotificationService {
   }
 
   async likedPost(post: Post) {
-    let temp = await this.notifService.likedPost(post);
-    let tokens = await this.verifyAndRemove(temp);
+    let tokens = await this.notifService.likedPost(post);
     this.firebase.sendMessage(tokens, {
       data: {
         id: `${Math.floor(Math.random() * 100)}`,
@@ -130,8 +127,7 @@ export class NotificationService {
     });
   }
   async likedComment(comment: Comments) {
-    let temp = await this.notifService.likedComment(comment);
-    let tokens = await this.verifyAndRemove(temp);
+    let tokens = await this.notifService.likedComment(comment);
     this.firebase.sendMessage(tokens, {
       data: {
         id: `${Math.floor(Math.random() * 100)}`,
@@ -144,8 +140,7 @@ export class NotificationService {
   }
 
   async reportedPostApproval(post: Post, report: string) {
-    let temp = await this.notifService.reportApproval();
-    let tokens = await this.verifyAndRemove(temp);
+    let tokens = await this.notifService.reportApproval();
 
     this.firebase.sendMessage(tokens, {
       data: {
@@ -159,8 +154,7 @@ export class NotificationService {
   }
 
   async reportedCommentApproval(comment: Comments, report: string) {
-    let temp = await this.notifService.reportApproval();
-    let tokens = await this.verifyAndRemove(temp);
+    let tokens = await this.notifService.reportApproval();
 
     this.firebase.sendMessage(tokens, {
       data: {
@@ -173,19 +167,19 @@ export class NotificationService {
     });
   }
 
-  async verifyAndRemove(tokens: string | string[]) {
-    let finalList;
-    for (let i = 0; i < tokens.length; i++) {
-      this.firebase
-        .checkTokenValidity(tokens[i])
-        .then(async () => {
-          await finalList.push(tokens[i]);
-        })
-        .catch(async () => {
-          await this.notifService.deleteOneById(tokens[i]);
-        });
-    }
-    return finalList;
-  }
+  // async verifyAndRemove(tokens: string | string[]) {
+  //   let finalList;
+  //   for (let i = 0; i < tokens.length; i++) {
+  //     this.firebase
+  //       .checkTokenValidity(tokens[i])
+  //       .then(async () => {
+  //         await finalList.push(tokens[i]);
+  //       })
+  //       .catch(async () => {
+  //         await this.notifService.deleteOneById(tokens[i]);
+  //       });
+  //   }
+  //   return finalList;
+  // }
   //TODO: logic for notify all in other post types
 }

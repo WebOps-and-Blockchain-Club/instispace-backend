@@ -1,12 +1,14 @@
 import { Injectable, Scope } from '@nestjs/common';
 import * as firebaseAdmin from 'firebase-admin';
 import * as serviceAccount from './serviceAccountKey.json';
+import { NotifConfigService } from 'src/notif-config/notif-config.service';
 
 //scope: Request scope creates an instance when injected and deletes it when the request is done
 @Injectable()
 export class FirebaseService {
   private admin: firebaseAdmin.app.App | null;
-  constructor() {
+
+  constructor(private readonly notifService: NotifConfigService) {
     this.admin = null;
     if (this.admin === null) {
       this.admin = firebaseAdmin.initializeApp({
@@ -17,11 +19,12 @@ export class FirebaseService {
     }
   }
 
-  sendMessage(
+  async sendMessage(
     registrationTokenOrTokens: string | string[],
     payload: firebaseAdmin.messaging.MessagingPayload,
   ) {
     const limit = 999;
+    let arr;
     for (
       let index = 0;
       index < registrationTokenOrTokens.length;
@@ -36,8 +39,19 @@ export class FirebaseService {
           priority: 'high',
           timeToLive: 60 * 60 * 24,
         })
-        .then((a) => console.log(a))
+        .then((e) => {
+          arr = e.results.map((t) => {
+            if (t.error) return 0;
+            else return 1;
+          });
+        })
         .catch((e) => console.log(e));
+
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i] == 0) {
+          await this.notifService.deleteOneById(tokens[i]);
+        }
+      }
     }
   }
 
