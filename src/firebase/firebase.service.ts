@@ -32,7 +32,7 @@ export class FirebaseService {
     ) {
       const tokens = registrationTokenOrTokens.slice(index, index + limit);
 
-      this.admin
+      await this.admin
         ?.messaging()
         .sendToDevice(tokens, payload, {
           contentAvailable: true,
