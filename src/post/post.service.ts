@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NotificationService } from 'src/notification/notification.service';
 import Tag from 'src/tag/tag.entity';
@@ -375,12 +375,10 @@ export class PostService {
     });
   }
 
-  async findOneWithAttendees(id:string):Promise<Post>{
+  async findOneWithAttendees(id: string): Promise<Post> {
     return this.postRepository.findOne({
       where: { id: id },
-      relations: [
-        'eventAttendees'
-      ],
+      relations: ['eventAttendees'],
     });
   }
 
@@ -424,9 +422,15 @@ export class PostService {
     return this.postRepository.save(postToUpdate);
   }
 
-  async remove(post: Post) {
-    post.isHidden = true;
-    return await this.postRepository.save(post);
+  async remove(post: Post, user: User) {
+    if (post.createdBy == user) {
+      post.isHidden = true;
+      return await this.postRepository.save(post);
+    } else {
+      throw new UnauthorizedException(
+        'You are not authorized to delete this post',
+      );
+    }
   }
 
   async save(post: Post) {
@@ -485,71 +489,63 @@ export class PostService {
       throw new Error(e.message);
     }
   }
-  async markEventAttendance(post:Post, user:User){
-    try{
-      if(post){
-        if(post.isQRActive){
-          if(post.eventAttendees==null)
-            post.eventAttendees = [];
-          if(post.isQRActive==true && post?.eventAttendees.filter((u)=>u.id === user.id)?.length == 0){
+  async markEventAttendance(post: Post, user: User) {
+    try {
+      if (post) {
+        if (post.isQRActive) {
+          if (post.eventAttendees == null) post.eventAttendees = [];
+          if (
+            post.isQRActive == true &&
+            post?.eventAttendees.filter((u) => u.id === user.id)?.length == 0
+          ) {
             post?.eventAttendees?.push(user);
-          console.log(post.eventAttendees);
-          return await this.postRepository.save(post);
+            console.log(post.eventAttendees);
+            return await this.postRepository.save(post);
           }
-          
+        } else {
+          throw new Error('Post is not an event');
         }
-        else{
-          throw new Error('Post is not an event')
-        }
-      }
-      else{
+      } else {
         throw new Error('Invalid post');
       }
-    }
-    catch(e){
+    } catch (e) {
       throw new Error(e.message);
     }
   }
-  async updatePoints(post:Post, points:Number){
-    try{
-      if(post){
-        if(post.isQRActive == null){
+  async updatePoints(post: Post, points: Number) {
+    try {
+      if (post) {
+        if (post.isQRActive == null) {
           post.isQRActive = true;
           post.pointsValue = points;
-        }
-        else{
+        } else {
           //console.log('Changing activity status');
           post.pointsValue = points;
         }
         return await this.postRepository.save(post);
-      }
-      else{
+      } else {
         throw new Error('Invalid post');
       }
-    }
-    catch(e){
+    } catch (e) {
       throw new Error(e.message);
     }
   }
-  async toggleIsQRActive(post:Post, points:Number){
-    try{
-      if(post){
-        if(post.isQRActive == null){
+  async toggleIsQRActive(post: Post, points: Number) {
+    try {
+      if (post) {
+        if (post.isQRActive == null) {
           post.isQRActive = true;
           post.pointsValue = points;
-        }
-        else{
-         // console.log('Changing activity status');
-          post.isQRActive = !post.isQRActive
+        } else {
+          // console.log('Changing activity status');
+          post.isQRActive = !post.isQRActive;
           post.pointsValue = points;
         }
         return await this.postRepository.save(post);
-      }
-      else{
+      } else {
         throw new Error('Invalid post');
       }
-    }
-    catch(e){
+    } catch (e) {
       throw new Error(e.message);
     }
   }

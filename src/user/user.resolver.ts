@@ -93,7 +93,10 @@ export class UserResolver {
 
   @Mutation(() => NotifConfig)
   @UseGuards(JwtAuthGuard)
-  async addNewToken(fcmToken: string, @CurrentUser() user: User) {
+  async addNewToken(
+    @Args('fcmToken') fcmToken: string,
+    @CurrentUser() user: User,
+  ) {
     let notifInput = new CreateNotifConfigInput();
     notifInput.fcmToken = fcmToken;
     return await this.userService.getNewToken(notifInput, user);

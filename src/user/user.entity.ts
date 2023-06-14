@@ -134,12 +134,16 @@ export class User {
   @TreeChildren()
   accountsCreated: User[];
 
-  @OneToOne(()=>Club, {cascade:true, onUpdate:'CASCADE', onDelete:'CASCADE'})
+  @OneToOne(() => Club, {
+    cascade: true,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
-  club:Club;
+  club: Club;
 
-  @ManyToMany(()=>Post, (post)=>post.eventAttendees, {nullable:true})
-  attendedEvents:Post[];
+  @ManyToMany(() => Post, (post) => post.eventAttendees, { nullable: true })
+  attendedEvents: Post[];
 
   @Column({ nullable: true })
   @Field({ nullable: true })
@@ -152,7 +156,8 @@ export class User {
   @OneToMany(
     () => NotifConfig,
     (notificationConfig) => notificationConfig.createdBy,
+    { nullable: true },
   )
-  @Field(() => [NotifConfig])
+  @Field(() => [NotifConfig], { nullable: true })
   notifConfig: NotifConfig[];
 }

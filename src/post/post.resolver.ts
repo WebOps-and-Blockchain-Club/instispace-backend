@@ -84,12 +84,6 @@ export class PostResolver {
     return await this.postService.changeStatus(postToUpdate, user, status);
   }
 
-  @Mutation(() => Post)
-  async removePost(@Args('id') id: string) {
-    let post = await this.postService.findOne(id);
-    return await this.postService.remove(post);
-  }
-
   @UseGuards(JwtAuthGuard)
   @Mutation(() => Post)
   async toggleLikePost(
@@ -143,6 +137,13 @@ export class PostResolver {
   ) {
     let post = await this.postService.findOneWithAttendees(postId);
     return await this.postService.markEventAttendance(post, user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => Post)
+  async removePost(@Args('postId') postId: string, @CurrentUser() user: User) {
+    let post = await this.postService.findOne(postId);
+    return this.postService.remove(post, user);
   }
 
   @ResolveField(() => [User])
@@ -251,7 +252,8 @@ export class PostResolver {
       let newUser = await this.userServive.getOneById(user?.id, [
         'accountsCreated',
       ]);
-      if (user?.id === newPost?.createdBy?.id) permissions.push('Edit');
+      if (user?.id === newPost?.createdBy?.id)
+        permissions.push('Edit', 'Delete');
       else permissions.push('Report');
       if (
         (newPost.category === PostCategory.Competition ||
