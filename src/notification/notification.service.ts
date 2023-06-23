@@ -22,17 +22,13 @@ export class NotificationService {
   async customNotif(notifInput: NotificationInput) {
     let tokens;
     if (notifInput.rolls && notifInput.rolls.length) {
-      await Promise.all(
-        notifInput.rolls.map(async (r) => {
-          let x = await this.userServce.getOneByRoll(r);
-          await Promise.all(
-            x.notifConfig.map((f) => {
-              tokens.push(f.fcmToken);
-            }),
-          );
-        }),
-      );
-      tokens = tokens.filter((_t: string) => _t !== '' && _t !== null);
+      notifInput.rolls.map(async (r) => {
+        let x = await this.userServce.getOneByRoll(r);
+        x.notifConfig.map((f) => {
+          tokens.push(f.fcmToken);
+        });
+      }),
+        (tokens = tokens.filter((_t: string) => _t !== '' && _t !== null));
       if (tokens && tokens.length !== 0)
         this.firebase.sendMessage(tokens, {
           data: {
@@ -48,9 +44,11 @@ export class NotificationService {
   }
   async notifyPost(post: any) {
     let tokensForAll = await this.notifService.forAllNotifInputs(post);
-    let tokens = tokensForAll;
+    let tokensFollowedTags = await this.notifService.followedTagsNotifInput(
+      post,
+    );
+    let tokens = tokensFollowedTags.concat(tokensForAll);
     tokens = tokens.filter((_t: string) => _t !== '' && _t !== null);
-    // let tokens = tokensFollowedTags.concat(tokensForAll);
     if (tokens && tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
