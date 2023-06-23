@@ -1,4 +1,12 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Int,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { NotifConfigService } from './notif-config.service';
 import { NotifConfig } from './notif-config.entity';
 import { CreateNotifConfigInput } from './type/create-notif-config.input';
@@ -28,9 +36,10 @@ export class NotifConfigResolver {
     return this.notifConfigService.findAll();
   }
 
-  @Query(() => NotifConfig, { name: 'notifConfig' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.notifConfigService.findOne(id);
+  @ResolveField(() => User)
+  async createdBy(@Parent() notif: NotifConfig) {
+    const notifConfig = await this.notifConfigService.findOne(notif.id);
+    return notifConfig.createdBy;
   }
 
   @Mutation(() => NotifConfig)

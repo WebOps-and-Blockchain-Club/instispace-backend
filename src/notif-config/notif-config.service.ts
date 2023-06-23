@@ -41,8 +41,11 @@ export class NotifConfigService {
     return `This action returns all notifConfig`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} notifConfig`;
+  async findOne(id: string) {
+    return await this.notifRepository.findOne({
+      where: { id: id },
+      relations: ['createdBy'],
+    });
   }
 
   async update(
