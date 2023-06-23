@@ -7,6 +7,7 @@ import { CommentsService } from 'src/post/comments/comments.service';
 import { Post } from 'src/post/post.entity';
 import { PostService } from 'src/post/post.service';
 import { UserService } from 'src/user/user.service';
+import NotificationInput from './type/notification.input';
 
 @Injectable()
 export class NotificationService {
@@ -18,12 +19,39 @@ export class NotificationService {
   ) {}
 
   //TODO: change the type to Post
+  async customNotif(notifInput: NotificationInput) {
+    let tokens;
+    if (notifInput.rolls && notifInput.rolls.length) {
+      await Promise.all(
+        notifInput.rolls.map(async (r) => {
+          let x = await this.userServce.getOneByRoll(r);
+          await Promise.all(
+            x.notifConfig.map((f) => {
+              tokens.push(f.fcmToken);
+            }),
+          );
+        }),
+      );
+      tokens = tokens.filter((_t: string) => _t !== '' && _t !== null);
+      if (tokens && tokens.length !== 0)
+        this.firebase.sendMessage(tokens, {
+          data: {
+            id: `${Math.floor(Math.random() * 100)}`,
+            click_action: 'FLUTTER_NOTIFICATION_CLICK',
+            title: notifInput.title,
+            body: notifInput.body,
+            image: notifInput.imageUrl?.split(' AND ')[0] ?? '',
+            route: ``,
+          },
+        });
+    }
+  }
   async notifyPost(post: any) {
     let tokensForAll = await this.notifService.forAllNotifInputs(post);
     let tokens = tokensForAll;
-
+    tokens = tokens.filter((_t: string) => _t !== '' && _t !== null);
     // let tokens = tokensFollowedTags.concat(tokensForAll);
-    if (tokens) {
+    if (tokens && tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
           id: `${Math.floor(Math.random() * 100)}`,
@@ -39,8 +67,8 @@ export class NotificationService {
   //TODO: change the type to Post
   async notifyComment(post: Post, description: string) {
     // let tokens = post.createdBy.fcmToken.split(' AND ');
-    // tokens = tokens.filter((_t: string) => _t !== '' && _t !== null);
     let tokens = await this.notifService.notifComment(post);
+    tokens = tokens.filter((_t: string) => _t !== '' && _t !== null);
 
     if (tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
@@ -60,6 +88,7 @@ export class NotificationService {
     // tokens = tokens.filter((_t) => _t !== '' && _t !== null);
 
     let tokens = await this.notifService.reportedPost(post);
+    tokens = tokens.filter((_t: string) => _t !== '' && _t !== null);
     if (tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
@@ -79,6 +108,7 @@ export class NotificationService {
     // let tokens = await this.notifService.reportedPost(comment);
 
     let tokens = await this.notifService.reportedComment(comment);
+    tokens = tokens.filter((_t: string) => _t !== '' && _t !== null);
     if (tokens.length !== 0) {
       this.firebase.sendMessage(tokens, {
         data: {
@@ -116,55 +146,61 @@ export class NotificationService {
 
   async likedPost(post: Post) {
     let tokens = await this.notifService.likedPost(post);
-    this.firebase.sendMessage(tokens, {
-      data: {
-        id: `${Math.floor(Math.random() * 100)}`,
-        click_action: 'FLUTTER_NOTIFICATION_CLICK',
-        title: `${post.title} got liked `,
-        body: post.content,
-        route: `post/${post.id}`,
-      },
-    });
+    tokens = tokens.filter((_t: string) => _t !== '' && _t !== null);
+    if (tokens && tokens.length !== 0)
+      this.firebase.sendMessage(tokens, {
+        data: {
+          id: `${Math.floor(Math.random() * 100)}`,
+          click_action: 'FLUTTER_NOTIFICATION_CLICK',
+          title: `${post.title} got liked `,
+          body: post.content,
+          route: `post/${post.id}`,
+        },
+      });
   }
   async likedComment(comment: Comments) {
     let tokens = await this.notifService.likedComment(comment);
-    this.firebase.sendMessage(tokens, {
-      data: {
-        id: `${Math.floor(Math.random() * 100)}`,
-        click_action: 'FLUTTER_NOTIFICATION_CLICK',
-        title: `${comment.content} got liked `,
-        body: '',
-        route: `comment/${comment.id}`,
-      },
-    });
+    tokens = tokens.filter((_t: string) => _t !== '' && _t !== null);
+    if (tokens && tokens.length !== 0)
+      this.firebase.sendMessage(tokens, {
+        data: {
+          id: `${Math.floor(Math.random() * 100)}`,
+          click_action: 'FLUTTER_NOTIFICATION_CLICK',
+          title: `${comment.content} got liked `,
+          body: '',
+          route: `comment/${comment.id}`,
+        },
+      });
   }
 
   async reportedPostApproval(post: Post, report: string) {
     let tokens = await this.notifService.reportApproval();
-
-    this.firebase.sendMessage(tokens, {
-      data: {
-        id: `${Math.floor(Math.random() * 100)}`,
-        click_action: 'FLUTTER_NOTIFICATION_CLICK',
-        title: `${post.title} got reported`,
-        body: report,
-        route: `post/${post.id}`,
-      },
-    });
+    tokens = tokens.filter((_t: string) => _t !== '' && _t !== null);
+    if (tokens && tokens.length !== 0)
+      this.firebase.sendMessage(tokens, {
+        data: {
+          id: `${Math.floor(Math.random() * 100)}`,
+          click_action: 'FLUTTER_NOTIFICATION_CLICK',
+          title: `${post.title} got reported`,
+          body: report,
+          route: `post/${post.id}`,
+        },
+      });
   }
 
   async reportedCommentApproval(comment: Comments, report: string) {
     let tokens = await this.notifService.reportApproval();
-
-    this.firebase.sendMessage(tokens, {
-      data: {
-        id: `${Math.floor(Math.random() * 100)}`,
-        click_action: 'FLUTTER_NOTIFICATION_CLICK',
-        title: `${comment.content} got reported`,
-        body: report,
-        route: `comment/${comment.id}`,
-      },
-    });
+    tokens = tokens.filter((_t: string) => _t !== '' && _t !== null);
+    if (tokens && tokens.length !== 0)
+      this.firebase.sendMessage(tokens, {
+        data: {
+          id: `${Math.floor(Math.random() * 100)}`,
+          click_action: 'FLUTTER_NOTIFICATION_CLICK',
+          title: `${comment.content} got reported`,
+          body: report,
+          route: `comment/${comment.id}`,
+        },
+      });
   }
 
   // async verifyAndRemove(tokens: string | string[]) {

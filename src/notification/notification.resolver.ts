@@ -9,8 +9,7 @@ export class NotificationResolver {
   async createNotification(
     @Args('NotificationData') notificationData: NotificationInput,
   ) {
-    // sending custom notification
-    // await this.notificationService.customNotif(notificationData);
+    await this.notificationService.customNotif(notificationData);
     return true;
   }
 }
