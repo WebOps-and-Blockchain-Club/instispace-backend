@@ -166,6 +166,12 @@ export class UserResolver {
     else return parents[parents.length - 2];
   }
 
+  @ResolveField(() => [NotifConfig])
+  async notifConfig(@Parent() user: User) {
+    const newUser = await this.userService.getOneById(user.id, ['notifConfig']);
+    return newUser.notifConfig;
+  }
+
   @ResolveField(() => [User])
   async accountsCreated(@Parent() { id, accountsCreated }: User) {
     if (accountsCreated) return accountsCreated;
