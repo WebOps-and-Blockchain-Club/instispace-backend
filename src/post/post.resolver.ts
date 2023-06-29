@@ -241,7 +241,7 @@ export class PostResolver {
     return newPost.reportCount;
   }
 
-  // Permissions: edit, report, comment, save
+  // Permissions: edit, report, comment, save, delete
   // Actions: like/upvotes & downvotes, share, setRemider
   @UseGuards(JwtAuthGuard)
   @ResolveField(() => [String])

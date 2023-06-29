@@ -29,6 +29,7 @@ export class PostService {
     private readonly tagService: TagService,
     private readonly userService: UserService,
     private readonly notificationService: NotificationService,
+    private readonly postService: PostService,
   ) {}
   async findAll(
     lastpostId: string,
@@ -361,6 +362,7 @@ export class PostService {
     return this.postRepository.findOne({
       where: { id: id },
       relations: [
+        'users',
         'postComments',
         'postComments.createdBy',
         'postReports',
@@ -423,9 +425,10 @@ export class PostService {
   }
 
   async remove(post: Post, user: User) {
-    if (post.createdBy == user) {
-      post.isHidden = true;
-      return await this.postRepository.save(post);
+    let newPost = await this.postService.findOne(post?.id);
+    if (newPost.createdBy?.id === user.id) {
+      newPost.isHidden = true;
+      return await this.postRepository.save(newPost);
     } else {
       throw new UnauthorizedException(
         'You are not authorized to delete this post',
