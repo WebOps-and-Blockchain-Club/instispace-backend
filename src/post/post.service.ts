@@ -29,7 +29,6 @@ export class PostService {
     private readonly tagService: TagService,
     private readonly userService: UserService,
     private readonly notificationService: NotificationService,
-    private readonly postService: PostService,
   ) {}
   async findAll(
     lastpostId: string,
@@ -425,7 +424,7 @@ export class PostService {
   }
 
   async remove(post: Post, user: User) {
-    let newPost = await this.postService.findOne(post?.id);
+    let newPost = await this.findOne(post?.id);
     if (newPost.createdBy?.id === user.id) {
       newPost.isHidden = true;
       return await this.postRepository.save(newPost);
