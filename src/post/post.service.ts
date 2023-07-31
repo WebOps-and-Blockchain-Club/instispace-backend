@@ -361,7 +361,6 @@ export class PostService {
     return this.postRepository.findOne({
       where: { id: id },
       relations: [
-        'users',
         'postComments',
         'postComments.createdBy',
         'postReports',
