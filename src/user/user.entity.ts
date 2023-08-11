@@ -23,6 +23,8 @@ import Hostel from 'src/hostel/hostel.entity';
 import HostelAnnouncement from 'src/hostelAnnouncement/hostelAnnouncement.entity';
 import { Notification } from 'src/utils';
 import { NotifConfig } from 'src/notif-config/notif-config.entity';
+import { Group } from 'src/treasure-hunt/group/group.entity';
+import { Submission } from 'src/treasure-hunt/submissions/submission.entity';
 
 @ObjectType()
 @Entity('User')
@@ -81,6 +83,22 @@ export class User {
     description: 'Announcements Created by User',
   })
   hostelannouncements: HostelAnnouncement[];
+
+  @ManyToOne((_type) => Group, (group) => group.users, { nullable: true })
+  @Field((_type) => Group, {
+    nullable: true,
+    description: "Group of Treasure Hunt of User",
+  })
+  group: Group;
+
+  @OneToMany((_type) => Submission, (submissions) => submissions.submittedBy, {
+    nullable: true,
+  })
+  @Field((_type) => [Submission], {
+    nullable: true,
+    description: "Submission of Tresure Hunt",
+  })
+  submissions: Submission[];
 
   @ManyToMany((type) => Tag, (interests) => interests.users, { nullable: true })
   interests: Tag[];
