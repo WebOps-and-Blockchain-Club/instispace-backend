@@ -17,10 +17,9 @@ export class GroupResolver {
     ) {}
   
   @UseGuards(JwtAuthGuard)
-  @Mutation(()=>Group)
+  @Mutation(()=>User)
   async addUser(@CurrentUser()user: User,@Args('maxMembers') maxMembers : number){
     
-    let newUser=await this.userServive.getOneById(user.id,['group'])
     let groupList = await this.groupService.findGroups(maxMembers);
     if(groupList===null || groupList.length===0){
     //create 5 more groups
@@ -31,8 +30,8 @@ export class GroupResolver {
   } 
     
       let group=groupList[Math.floor(Math.random() * groupList.length)];
-      console.log(group);
-     return await this.groupService.addUser(user,group?.id);
+      // console.log(group);
+     return await this.userServive.addGroup(user,group);
     
   }
 }

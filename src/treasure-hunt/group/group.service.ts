@@ -29,14 +29,6 @@ export class GroupService {
       return await this.groupRepository.findOne({where:{id:groupId},relations:['users']});
   }
 
-  async addUser(user:User,groupId:string){
-    
-    let newgroup= await this.findGroup(groupId);
-    user.group=newgroup;
-    // newgroup.users=list;
-    console.log(user);
-    return await this.groupRepository?.save(newgroup);
-  }
 
   async findGroups(maxMembers:number){
     let group= await this.groupRepository.find({relations:['users']});

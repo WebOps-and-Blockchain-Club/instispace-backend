@@ -33,6 +33,7 @@ import { LdapService } from 'src/ldap/ldap.service';
 import { NotifConfigService } from 'src/notif-config/notif-config.service';
 import { CreateNotifConfigInput } from 'src/notif-config/type/create-notif-config.input';
 import MailService from 'src/utils/mail';
+import { Group } from 'src/treasure-hunt/group/group.entity';
 
 @Injectable()
 export class UserService {
@@ -204,6 +205,11 @@ export class UserService {
     return this.usersRepository.save(userToUpdate);
   }
 
+  async addGroup(user:User,group:Group){
+    console.log(user);
+    user.group=group;
+    return await this.usersRepository.save(user); 
+  }
   async forgotPassword({ roll, password, newpass }) {
     let user = await this.usersRepository.findOne({ where: { roll } });
 
