@@ -30,11 +30,11 @@ export class GroupService {
   }
 
   async addUser(user:User,groupId:string){
+    
     let newgroup= await this.findGroup(groupId);
-    let list=newgroup.users;
-    list = [...newgroup.users, user]
-    newgroup.users=list;
-    console.log(newgroup);
+    user.group=newgroup;
+    // newgroup.users=list;
+    console.log(user);
     return await this.groupRepository?.save(newgroup);
   }
 

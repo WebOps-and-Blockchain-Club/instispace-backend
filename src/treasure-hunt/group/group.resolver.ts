@@ -5,16 +5,22 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/current_user';
 import { User } from 'src/user/user.entity';
+import { UserService } from 'src/user/user.service';
 
 
 
 @Resolver(() => Group)
 export class GroupResolver {
-  constructor(private readonly groupService: GroupService) {}
+  constructor(
+    private readonly userServive: UserService,
+    private readonly groupService: GroupService
+    ) {}
   
   @UseGuards(JwtAuthGuard)
   @Mutation(()=>Group)
   async addUser(@CurrentUser()user: User,@Args('maxMembers') maxMembers : number){
+    
+    let newUser=await this.userServive.getOneById(user.id,['group'])
     let groupList = await this.groupService.findGroups(maxMembers);
     if(groupList===null || groupList.length===0){
     //create 5 more groups
