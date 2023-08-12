@@ -272,7 +272,7 @@ export class UserService {
   getOneByRoll(roll: string): Promise<User> {
     return this.usersRepository.findOne({
       where: { roll },
-      relations: ['hostel', 'interests', 'accountsCreated', 'notifConfig'],
+      relations: ['hostel', 'interests', 'accountsCreated', 'notifConfig',"group", "group.users"],
     });
   }
 
@@ -370,6 +370,16 @@ export class UserService {
     currUser.hostel = hostel;
     this.usersRepository.save(currUser);
     return hostel;
+  }
+
+  async leaveGroup(roll:string){
+    try {
+      let user=await this.getOneByRoll(roll);
+      user.group=null;
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async usersForNotif() {
