@@ -22,7 +22,7 @@ export class Group {
 
   @Field({nullable:true})
   @Column({nullable:true})
-  // @Generated('increment')
+  @Generated('increment')
   code:string
 
 

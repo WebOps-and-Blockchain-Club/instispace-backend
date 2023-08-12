@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int, ResolveField, Parent } from '@nestjs/graphql';
 import { GroupService } from './group.service';
 import { Group } from './group.entity';
 import { UseGuards } from '@nestjs/common';
@@ -18,12 +18,13 @@ export class GroupResolver {
   
   @UseGuards(JwtAuthGuard)
   @Mutation(()=>User)
-  async addUser(@CurrentUser()user: User,@Args('maxMembers') maxMembers : number){
-    
+  async addUserToGroup(@CurrentUser()user: User,@Args('maxMembers') maxMembers : number,@Args("numberOfGroup") numberOfGroup : number){
+    let newUser= await this.userServive.getOneById(user.id,['group']);
+    if(newUser.group) throw new Error("user is already in a group");
     let groupList = await this.groupService.findGroups(maxMembers);
     if(groupList===null || groupList.length===0){
     //create 5 more groups
-    for(let i=0;i<10;i++){
+    for(let i=0;i<numberOfGroup;i++){
       await this.groupService.createGroup();
     }
     groupList=await this.groupService.findGroups(maxMembers);
@@ -33,5 +34,25 @@ export class GroupResolver {
       // console.log(group);
      return await this.userServive.addGroup(user,group);
     
+  }
+
+  @Query(()=>Group)
+  async GetOneGroupByid(@Args('id') id:string){
+    await this.groupService.findGroup(id);
+  }
+
+  @Query(()=>[Group])
+  async GetAllGroups(){
+    return await this.groupService.FindAllGroup();
+  }
+
+  @ResolveField(() => [User])
+  async users(@Parent() group:Group) {
+    try {
+      let newGroup= await this.groupService.findGroup(group.id);
+      return newGroup.users;
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 }

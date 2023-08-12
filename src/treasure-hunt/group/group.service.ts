@@ -29,9 +29,11 @@ export class GroupService {
       return await this.groupRepository.findOne({where:{id:groupId},relations:['users']});
   }
 
-
+  async FindAllGroup(){
+    return await this.groupRepository.find({relations:['users']});
+  }
   async findGroups(maxMembers:number){
-    let group= await this.groupRepository.find({relations:['users']});
+    let group=await this.FindAllGroup();
     let finalGroup=group.filter((g)=>g.users?.length<maxMembers);
     return finalGroup;
   }
