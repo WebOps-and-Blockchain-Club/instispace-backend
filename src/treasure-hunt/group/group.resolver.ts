@@ -46,6 +46,11 @@ export class GroupResolver {
     return await this.groupService.FindAllGroup();
   }
 
+  @Mutation(()=>User)
+  async RemoveUserFromGroup(@Args('roll') roll:string){
+    return await this.userServive.leaveGroup(roll);
+  }
+
   @ResolveField(() => [User])
   async users(@Parent() group:Group) {
     try {
@@ -55,4 +60,6 @@ export class GroupResolver {
       throw new Error(error);
     }
   }
+
+  
 }
