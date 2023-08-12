@@ -20,13 +20,21 @@ export class QuestionsService {
       //   description: questionInput.description,
       //   images: images === "" ? null : images,
       // }).save();
-      const questionCreated=await this.questionRepository.save({
-        description: questionInput.description,
-        images: images === "" ? null : images
-      })
-      return questionCreated;
+      let questionCreated= new Question();
+      questionCreated.images=images==="" ? null : images;
+      questionCreated.description=questionInput.description;
+     
+      return await this.questionRepository.save(questionCreated);
     } catch (e) {
       throw new Error(e.message);
     }
+  }
+
+  async findQuestionById(questionId:string){
+    return await this.questionRepository.findOne({where:{id:questionId},relations:['submissions',"submissions.submittedBy","submissions.group",]})
+  }
+
+  async findAllQuestion(){
+    return await this.questionRepository.find({relations:['submissions']});
   }
 }

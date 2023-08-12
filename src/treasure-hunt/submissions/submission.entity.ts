@@ -32,4 +32,6 @@ export class Submission {
   @Column({ type: "text", nullable: true })
   @Field((_type) => String, { nullable: true })
   images?: string | null;
+
+  
 }

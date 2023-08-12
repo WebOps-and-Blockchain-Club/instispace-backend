@@ -3,6 +3,9 @@ import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
 
 @InputType()
 export class UpdateSubmissionInput extends PartialType(CreateSubmissionInput) {
-  @Field(() => Int)
-  id: number;
+  @Field()
+  description: string;
+
+  @Field((_type) => [String], { nullable: true })
+  imageUrls?: string[];
 }
