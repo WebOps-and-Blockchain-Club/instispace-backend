@@ -7,6 +7,7 @@ import { CreateLdapListInput } from './types/create-ldap-list.input';
 import { Gender } from './types/gender-enum';
 import { LdapFilteringConditions } from './types/ldap-filteringConditions';
 import { UpdateLdapListInput } from './types/update-ldap-list.input';
+import * as fs from 'fs';
 
 @Injectable()
 export class LdapListService {
@@ -110,13 +111,15 @@ export class LdapListService {
 
   async populateUser(csvUrl: string, program: string) {
     try {
-      let x;
-      try {
-        x = await axios.get(csvUrl);
-      } catch (error) {
-        throw new Error(`message : ${error}`);
-      }
-      let data = x.data;
+      // let x;
+      // try {
+      //   x = await axios.get(csvUrl);
+      // } catch (error) {
+      //   throw new Error(`message : ${error}`);
+      // }
+      let data;
+
+      data = fs.readFileSync('src/ldapList/2023-btech.csv', 'utf-8');
       const list = data.split('\n');
       var final: string[][] = [];
       await Promise.all(
