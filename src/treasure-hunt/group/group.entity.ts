@@ -14,6 +14,9 @@ export class Group {
   @Column({nullable:true})
   name: string;
 
+  @Column({ type: "text", array: true })
+  order: string[];
+
   // @Column({ unique: true })
   // @Generated('increment')
   // @PrimaryColumn()
@@ -22,7 +25,7 @@ export class Group {
 
   @Field({nullable:true})
   @Column({nullable:true})
-  @Generated('increment')
+ // @Generated('increment')
   code:string
 
 

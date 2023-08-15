@@ -7,10 +7,13 @@ import { CreateSubmissionInput } from './types/create-submission.input';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { QuestionsService } from '../questions/questions.service';
+import { ConfigService } from '../config/config.service';
+// import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class SubmissionsService {
   constructor(
+    private readonly configService : ConfigService,
     private readonly userServive: UserService,  
     private readonly questionService:QuestionsService,
     @InjectRepository(Submission) private submissionRepository: Repository<Submission>
@@ -21,26 +24,50 @@ export class SubmissionsService {
     submissionInput:CreateSubmissionInput,
     questionId:string
   ){
-    let newUser=await this.userServive.getOneById(user.id,['group','group.users']);
-    const group=user.group;
-    if(!group) throw new Error("Unregistered");
-    const question=await this.questionService.findQuestionById(questionId);
-    if (question?.submissions.filter((s) => s.group.id === group.id).length) {
-        throw new Error("Already answered");
-      }
-    
-      let images;
-      if (submissionInput.imageUrls) {
-        images = submissionInput.imageUrls.join(" AND ");
-      }
-      let submission=new Submission()
-      submission.description=submissionInput.description;
-      submission.images=images;
-      submission.group=group;
-      submission.question=question;
-      submission.submittedBy=user;
+    try {
+      
+      // contraints
+    const startTime=await this.configService.findItemBYKey('startTime');
+    const endTime=await this.configService.findItemBYKey('endTime');
+    // const maxMembers=await this.configService.findItemBYKey('maxMembers');
+    const minMembers=await this.configService.findItemBYKey('minMembers');
 
-      return await this.submissionRepository.save(submission);
+  const d = new Date();
+  if (
+    d.getTime() < new Date(startTime!.value).getTime() ||
+    d.getTime() > new Date(endTime!.value).getTime()
+  ) {
+    throw new Error("Invalid Time");
+  }
+
+  let newUser=await this.userServive.getOneById(user.id,['group','group.users']);
+  const group=newUser.group;
+  if(!group) throw new Error("Unregistered");
+
+  //finding question
+  const question=await this.questionService.findQuestionById(questionId);
+  if (question?.submissions.filter((s) => s.group.id === group.id).length) {
+      throw new Error("Already answered");
+    }
+  
+    let images;
+    if (submissionInput.imageUrls) {
+      images = submissionInput.imageUrls.join(" AND ");
+    }
+    let submission=new Submission()
+    submission.description=submissionInput.description;
+    submission.images=images;
+    submission.group=group;
+    submission.question=question;
+    submission.submittedBy=user;
+
+    return await this.submissionRepository.save(submission);
+    
+    } catch (error) {
+      throw new Error(error);
+    }
+
+    
   }
 
 }

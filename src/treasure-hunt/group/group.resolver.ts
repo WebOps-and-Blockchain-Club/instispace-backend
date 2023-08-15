@@ -6,6 +6,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/current_user';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
+import GetGroupOutput from './getGroupOutput';
 
 
 
@@ -36,18 +37,16 @@ export class GroupResolver {
     
   }
 
-  @Query(()=>Group)
-  async GetOneGroupByid(@Args('id') id:string){
-    await this.groupService.findGroup(id);
+  @UseGuards(JwtAuthGuard)
+  @Query(()=>GetGroupOutput,{nullable:true})
+  async getGroup(@CurrentUser() user:User){
+    return await this.groupService.getGroups(user);
   }
 
-  @Query(()=>[Group])
-  async GetAllGroups(){
-    return await this.groupService.FindAllGroup();
-  }
+
 
   @Mutation(()=>User)
-  async RemoveUserFromGroup(@Args('roll') roll:string){
+  async removeUserFromGroup(@Args('roll') roll:string){
     return await this.userServive.leaveGroup(roll);
   }
 

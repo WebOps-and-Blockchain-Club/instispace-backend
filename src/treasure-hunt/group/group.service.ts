@@ -4,6 +4,12 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
+import { ConfigService } from '../config/config.service';
+import { Question } from '../questions/question.entity';
+import { QuestionsService } from '../questions/questions.service';
+import { shuffle } from 'src/utils/treasureHuntFunctions';
+import { autoGenPass } from 'src/utils';
+// import { shuffle } from 'old-code/src/utils';
 
 
 @Injectable()
@@ -11,10 +17,19 @@ export class GroupService {
   constructor(
     @InjectRepository(Group) private groupRepository: Repository<Group>,
     private readonly userServive: UserService,
+    private readonly configService: ConfigService,
+    private readonly questionSerice: QuestionsService
   ){}
   async createGroup(){
     let newGroup=new Group();
-    // newGroup.code=code;
+
+    const questions = await this.questionSerice.findAllQuestion();
+      let questionIds: string[] = [];
+      questions.map((question) => questionIds.push(question.id));
+      questionIds = shuffle(questionIds);
+
+      newGroup.order=questionIds;
+    newGroup.code=autoGenPass(8);
     return await this.groupRepository.save(newGroup);
   }
 
@@ -38,6 +53,47 @@ export class GroupService {
     return finalGroup;
   }
 
-  
+  async getGroups(user:User ){
+    try {
+      const newUser=await this.userServive.getOneById(user.id,["group", "group.users"]);
+      //constrints
+      const startTime=await this.configService.findItemBYKey('startTime');
+      const endTime=await this.configService.findItemBYKey('endTime');
+      const maxMembers=await this.configService.findItemBYKey('maxMembers');
+      const minMembers=await this.configService.findItemBYKey('minMembers');
+
+
+      const group=user.group;
+      if (!group) return null;
+
+      let questions: Question[] | null = null;
+      const d = new Date();
+      if (
+        d.getTime() >= new Date(startTime!.value).getTime() &&
+        d.getTime() <= new Date(endTime!.value).getTime() &&
+        group.users.length >= parseInt(minMembers!.value)
+      ) {
+        let questionIds = group.order;
+        const questionsN = await this.questionSerice.findAllQuestion();
+        questions = [];
+        for (let i in questionIds) {
+          questions.push(questionsN.filter((q) => q.id === questionIds[i])[0]);
+        }
+      }
+
+      return {
+        group: group,
+        questions: questions,
+        startTime: startTime!.value,
+        endTime: endTime!.value,
+        minMembers: parseInt(minMembers!.value),
+        maxMembers: parseInt(maxMembers!.value),
+      };
+
+      
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
 
 }
