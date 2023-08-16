@@ -24,7 +24,7 @@ export class Group {
   // code: string;
 
   @Field({nullable:true})
-  @Column({nullable:true})
+  @Column({nullable:true,unique:true},)
  // @Generated('increment')
   code:string
 
