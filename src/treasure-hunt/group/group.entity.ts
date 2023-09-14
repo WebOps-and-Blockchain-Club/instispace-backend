@@ -14,7 +14,7 @@ export class Group {
   @Column({nullable:true})
   name: string;
 
-  @Column({ type: "text", array: true })
+  @Column({ type: "text", array: true, nullable:true })
   order: string[];
 
   // @Column({ unique: true })
