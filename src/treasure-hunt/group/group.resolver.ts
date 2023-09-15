@@ -64,7 +64,7 @@ export class GroupResolver {
   @UseGuards(JwtAuthGuard)
   @Mutation(() => Boolean)
   async leaveGroup(@CurrentUser() user: User) {
-    return await this.groupService.leaveGroup(user);
+    return await this.userServive.leaveGroup(user.roll);
   }
 
   @ResolveField(() => [User])
