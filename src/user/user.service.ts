@@ -205,10 +205,10 @@ export class UserService {
     return this.usersRepository.save(userToUpdate);
   }
 
-  async addGroup(user:User,group:Group){
+  async addGroup(user: User, group: Group) {
     console.log(user);
-    user.group=group;
-    return await this.usersRepository.save(user); 
+    user.group = group;
+    return await this.usersRepository.save(user);
   }
   async forgotPassword({ roll, password, newpass }) {
     let user = await this.usersRepository.findOne({ where: { roll } });
@@ -272,7 +272,14 @@ export class UserService {
   getOneByRoll(roll: string): Promise<User> {
     return this.usersRepository.findOne({
       where: { roll },
-      relations: ['hostel', 'interests', 'accountsCreated', 'notifConfig',"group", "group.users"],
+      relations: [
+        'hostel',
+        'interests',
+        'accountsCreated',
+        'notifConfig',
+        'group',
+        'group.users',
+      ],
     });
   }
 
@@ -370,16 +377,6 @@ export class UserService {
     currUser.hostel = hostel;
     this.usersRepository.save(currUser);
     return hostel;
-  }
-
-  async leaveGroup(roll:string){
-    try {
-      let user=await this.getOneByRoll(roll);
-      user.group=null;
-      return await this.usersRepository.save(user);
-    } catch (error) {
-      throw new Error(error);
-    }
   }
 
   async usersForNotif() {
