@@ -6,10 +6,16 @@ import { Submission } from './submission.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { QuestionsModule } from '../questions/questions.module';
 import { ConfigModule } from '../config/config.module';
-
+import { GroupModule } from '../group/group.module';
 
 @Module({
   providers: [SubmissionsResolver, SubmissionsService],
-  imports:[ TypeOrmModule.forFeature([Submission]),UserModule,QuestionsModule,ConfigModule]
+  imports: [
+    TypeOrmModule.forFeature([Submission]),
+    UserModule,
+    QuestionsModule,
+    ConfigModule,
+    GroupModule,
+  ],
 })
 export class SubmissionsModule {}

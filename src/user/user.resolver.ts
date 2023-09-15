@@ -30,6 +30,7 @@ import { User } from './user.entity';
 import { UserService } from './user.service';
 import { NotifConfig } from 'src/notif-config/notif-config.entity';
 import { CreateNotifConfigInput } from 'src/notif-config/type/create-notif-config.input';
+import { use } from 'passport';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -183,6 +184,7 @@ export class UserResolver {
   async permission(@Parent() { id, permission }: User) {
     if (permission) return permission;
     const user = await this.userService.getOneById(id, ['permission']);
+    console.log(user.permission);
     return user.permission;
   }
 
@@ -239,5 +241,12 @@ export class UserResolver {
     if (userId)
       return await this.userService.getOneById(userId, ['hostel', 'interests']);
     if (roll) return await this.userService.getOneByRoll(roll);
+  }
+
+  @ResolveField(() => Boolean)
+  async isFreshie(@Parent() user: User) {
+    if (user.roll.substring(2, 5).toLowerCase() === '21b') {
+      return true;
+    } else return false;
   }
 }

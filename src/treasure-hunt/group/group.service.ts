@@ -44,7 +44,7 @@ export class GroupService {
   async findGroup(groupId: string) {
     return await this.groupRepository.findOne({
       where: { id: groupId },
-      relations: ['users'],
+      relations: ['users', 'submissions', 'submissions.question'],
     });
   }
 
@@ -75,6 +75,7 @@ export class GroupService {
 
       let questions: Question[] | null = [];
       const d = new Date();
+      console.log(d);
       if (
         d.getTime() >= new Date(startTime!.value).getTime() &&
         d.getTime() <= new Date(endTime!.value).getTime() &&
@@ -82,6 +83,7 @@ export class GroupService {
       ) {
         let questionIds = group.order;
         const questionsN = await this.questionSerice.findAllQuestion();
+        console.log(questionsN);
         questions = [];
         for (let i in questionIds) {
           questions.push(questionsN.filter((q) => q.id === questionIds[i])[0]);
@@ -129,5 +131,13 @@ export class GroupService {
     } catch (e) {
       throw new Error(e);
     }
+  }
+
+  async editGroup(groupData: Group) {
+    let group = await this.findGroup(groupData.id);
+
+    group = groupData;
+
+    return await this.groupRepository.save(group);
   }
 }

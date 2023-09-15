@@ -87,7 +87,7 @@ export class User {
   @ManyToOne((_type) => Group, (group) => group.users, { nullable: true })
   @Field((_type) => Group, {
     nullable: true,
-    description: "Group of Treasure Hunt of User",
+    description: 'Group of Treasure Hunt of User',
   })
   group: Group;
 
@@ -96,7 +96,7 @@ export class User {
   })
   @Field((_type) => [Submission], {
     nullable: true,
-    description: "Submission of Tresure Hunt",
+    description: 'Submission of Tresure Hunt',
   })
   submissions: Submission[];
 
@@ -178,4 +178,7 @@ export class User {
   )
   @Field(() => [NotifConfig], { nullable: true })
   notifConfig: NotifConfig[];
+
+  @Field(() => Boolean, { defaultValue: false, nullable: true })
+  isFreshie: boolean;
 }
