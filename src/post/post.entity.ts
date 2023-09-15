@@ -169,6 +169,10 @@ export class Post {
   @Field(()=>Number, {nullable:true})
   pointsValue: Number;
 
+  @Column({nullable:true})
+  @Field(()=>Boolean,{nullable:true})
+  isVisibleToAll:Boolean;
+
   @ManyToMany(()=> User, (user)=>user.attendedEvents)
   @Field(()=> [User], {nullable:true})
   @JoinTable()

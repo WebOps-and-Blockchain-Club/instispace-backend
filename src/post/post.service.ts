@@ -323,6 +323,7 @@ export class PostService {
 
     let newPost = new Post();
     newPost.Link = post.link;
+    post.isVisibleToAll ? newPost.isVisibleToAll=post.isVisibleToAll  : newPost.isVisibleToAll=true;
     newPost.category = post.category;
     newPost.content = post.content;
     newPost.linkName = post.linkName;

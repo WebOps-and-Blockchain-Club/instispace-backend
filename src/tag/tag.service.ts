@@ -19,6 +19,10 @@ export class TagService {
     return this.tagRepository.findOne({ where: { id }, relations });
   }
 
+  getOneByName(name: string, relations?: [string]): Promise<Tag> {
+    return this.tagRepository.findOne({ where: { title: name }, relations });
+  }
+
   create(title: string, category: string): Promise<Tag> {
     const tag = this.tagRepository.create({ title: title, category: category });
     return this.tagRepository.save(tag);

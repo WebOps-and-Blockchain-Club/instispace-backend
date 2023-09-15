@@ -27,6 +27,9 @@ export class CreatePostInput {
   @Field()
   category: string;
 
+  @Field({nullable:true})
+  isVisibleToAll:boolean;
+
   @Field({ nullable: true })
   location: string;
 

@@ -38,6 +38,15 @@ export class TagResolver {
     }
   }
 
+  @Query(() => Tag)
+  async getTagByName(@Args('name') name: string) {
+    try {
+      return await this.tagService.getOneByName(name, null);
+    } catch (e) {
+      throw new Error(`message : ${e}`);
+    }
+  }
+
   @Query(() => [String])
   async getCategories() {
     const categories = [
