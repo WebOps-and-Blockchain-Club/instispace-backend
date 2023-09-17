@@ -91,6 +91,9 @@ export class GroupService {
       }
 
       if (group.name == null) group.name = 'Group Name';
+      if (group.code == null) group.code = autoGenPass(8);
+
+      await this.groupRepository.save(group)
       // console.log({
       //   group: group,
       //   questions: questions,

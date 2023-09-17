@@ -32,7 +32,7 @@ export class GroupResolver {
   ) {
     let newUser = await this.userServive.getOneById(user.id, ['group']);
     if (newUser.group) throw new Error('user is already in a group');
-    let groupList = await this.groupService.findGroups(maxMembers);
+    let groupList = await this.groupService.findGroups(6);
     if (groupList === null || groupList.length === 0) {
       //create 5 more groups
       for (let i = 0; i < numberOfGroup; i++) {
