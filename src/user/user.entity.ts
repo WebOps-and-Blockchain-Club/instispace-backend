@@ -25,6 +25,7 @@ import { Notification } from 'src/utils';
 import { NotifConfig } from 'src/notif-config/notif-config.entity';
 import { Group } from 'src/treasure-hunt/group/group.entity';
 import { Submission } from 'src/treasure-hunt/submissions/submission.entity';
+import { Ticket } from 'src/ticket/ticket.entity';
 
 @ObjectType()
 @Entity('User')
@@ -148,6 +149,14 @@ export class User {
   @Column('enum', { enum: UserRole, default: UserRole.USER })
   @Field(() => UserRole, { description: "User's role" })
   role: UserRole;
+
+  @OneToMany(() => Ticket, (ticket) => ticket.createdBy)
+  @Field(() => [Ticket])
+  createdTickets: Ticket[];
+
+  @OneToMany(() => Ticket, (ticket) => ticket.resolvedBy)
+  @Field(() => [Ticket])
+  resolvedTickets: Ticket[];
 
   @TreeChildren()
   accountsCreated: User[];

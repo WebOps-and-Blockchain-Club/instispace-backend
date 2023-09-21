@@ -11,6 +11,7 @@ import UsersDev from './usersDev.entity';
 import { LdapModule } from 'src/ldap/ldap.module';
 import { NotifConfigModule } from 'src/notif-config/notif-config.module';
 import { LdapListModule } from 'src/ldapList/ldapList.module';
+import { TicketModule } from 'src/ticket/ticket.module';
 
 @Module({
   imports: [

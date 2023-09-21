@@ -4,6 +4,12 @@ export enum Notification {
   NONE = 'NONE',
 }
 
+export enum TicketStatus {
+  PENDING = 'PENDING',
+  ASSIGNED = 'ASSIGNED',
+  RESOLVED = 'RESOLVED',
+}
+
 export const emailExpresion =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 

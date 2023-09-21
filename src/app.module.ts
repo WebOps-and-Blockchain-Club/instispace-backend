@@ -18,6 +18,7 @@ import { CalendarModule } from './calendar/calendar.module';
 import { ClubModule } from './club/club.module';
 import { BadgesModule } from './badges/badges.module';
 import { TreasureHuntModule } from './treasure-hunt/treasure-hunt.module';
+import { TicketModule } from './ticket/ticket.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { TreasureHuntModule } from './treasure-hunt/treasure-hunt.module';
     ClubModule,
     BadgesModule,
     TreasureHuntModule,
+    TicketModule,
   ],
 })
 export class AppModule {}
