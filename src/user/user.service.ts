@@ -389,6 +389,18 @@ export class UserService {
     });
   }
 
+  async leaveGroup(roll: string) {
+    try {
+      let user = await this.getOneByRoll(roll);
+      user.group = null;
+      let new_user = await this.usersRepository.save(user);
+
+      return !!new_user;
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
   getprogramme = (roll: string) => {
     try {
       let roll_number = roll.toUpperCase();

@@ -9,6 +9,12 @@ import { QuestionsModule } from '../questions/questions.module';
 
 @Module({
   providers: [GroupResolver, GroupService],
-  imports:[ TypeOrmModule.forFeature([Group]),UserModule,ConfigModule,QuestionsModule]
+  imports: [
+    TypeOrmModule.forFeature([Group]),
+    UserModule,
+    ConfigModule,
+    QuestionsModule,
+  ],
+  exports: [GroupService],
 })
 export class GroupModule {}
