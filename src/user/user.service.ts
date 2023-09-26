@@ -206,7 +206,7 @@ export class UserService {
   }
 
   async addGroup(user: User, group: Group) {
-    console.log(user);
+    // console.log(user);
     user.group = group;
     return await this.usersRepository.save(user);
   }

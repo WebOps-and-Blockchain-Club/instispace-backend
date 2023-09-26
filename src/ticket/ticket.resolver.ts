@@ -33,11 +33,13 @@ export class TicketResolver {
     return await this.ticketService.create(createTicketInput, user);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Query(() => [Ticket])
   async getAllTickets() {
     return await this.ticketService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Query(() => Ticket)
   async getOneTicket(@Args('id') id: string) {
     return await this.ticketService.findOne(id);
@@ -54,7 +56,7 @@ export class TicketResolver {
   @UseGuards(JwtAuthGuard)
   async canResolve(@CurrentUser() user: User, @Parent() ticket: Ticket) {
     let ticketN = await this.ticketService.findOne(ticket.id);
-    console.log(user);
+    // console.log(user);
 
     if (user.id === ticketN.createdBy.id) return true;
 

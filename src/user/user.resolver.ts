@@ -184,7 +184,7 @@ export class UserResolver {
   async permission(@Parent() { id, permission }: User) {
     if (permission) return permission;
     const user = await this.userService.getOneById(id, ['permission']);
-    console.log(user.permission);
+    // console.log(user.permission);
     return user.permission;
   }
 
