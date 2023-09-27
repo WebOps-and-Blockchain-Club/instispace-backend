@@ -32,8 +32,8 @@ export class CourseResolver {
   }
 
   @Query(() => Course, { name: 'course' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.courseService.findOne(id);
+  findOne(@Args('code') code: string) {
+    return this.courseService.findOneByCode(code);
   }
 
   @Mutation(() => Course)

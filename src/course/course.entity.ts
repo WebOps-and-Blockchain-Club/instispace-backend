@@ -3,8 +3,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Feedback } from './feedback/feedback.entity';
 
 @ObjectType()
 @Entity('Course')
@@ -44,4 +46,8 @@ export class Course {
   @Column({ nullable: true })
   @Field(() => Date, { nullable: true })
   to: Date;
+
+  @OneToMany(() => Feedback, (feedbacks) => feedbacks.course)
+  @Field(() => [Feedback])
+  feedbacks: Feedback[];
 }

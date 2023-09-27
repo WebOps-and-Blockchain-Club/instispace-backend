@@ -101,8 +101,11 @@ export class CourseService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} course`;
+  async findOneByCode(code: string) {
+    return await this.courseRepository.findOne({
+      where: { code },
+      relations: ['feedbacks'],
+    });
   }
 
   update(id: string, updateCourseInput: UpdateCourseInput) {
