@@ -10,4 +10,8 @@ export class CreateTicketInput {
 
   @Field({ nullable: true })
   imageUrls?: string;
+
+  @Field({ nullable: true })
+  link?: string;
+  
 }

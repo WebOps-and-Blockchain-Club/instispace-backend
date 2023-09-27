@@ -27,6 +27,10 @@ export class Ticket {
   @Field()
   description: string;
 
+  @Column({nullable:true})
+  @Field({nullable:true})
+  link:string;
+
   @Column({ nullable: true })
   @Field({ nullable: true })
   imageUrls?: string;
