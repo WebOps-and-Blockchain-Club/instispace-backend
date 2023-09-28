@@ -1,26 +1,27 @@
-import { Injectable } from '@nestjs/common';
+ import { Injectable } from '@nestjs/common';
 import { CreateFeedbackInput } from './type/create-feedback.input';
 import { UpdateFeedbackInput } from './type/update-feedback.input';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
 import { Feedback } from './feedback.entity';
-import { CourseService } from '../course.service';
+import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class FeedbackService {
   constructor(
     @InjectRepository(Feedback)
     private feedbackRepository: Repository<Feedback>,
-    private readonly courseService: CourseService,
+    // private readonly courseService: CourseService,
   ) {}
-  async create(createFeedbackInput: CreateFeedbackInput) {
+  async create(createFeedbackInput: CreateFeedbackInput , user:User) {
     let feedback = this.feedbackRepository.create({ ...createFeedbackInput });
-    let course = await this.courseService.findOneByCode(
-      createFeedbackInput.courseCode,
-    );
-    console.log(course);
-    feedback.course = course;
+    feedback.createdBy=user;
+    // let course = await this.courseService.findOneByCode(
+    //   createFeedbackInput.courseCode,
+    // );
+    // console.log(course);
+    // feedback.course = course;
     return await this.feedbackRepository.save(feedback);
   }
 
@@ -31,7 +32,7 @@ export class FeedbackService {
   async findOne(id: string) {
     return await this.feedbackRepository.findOne({
       where: { id },
-      relations: ['course'],
+      relations: ['createdBy'],
     });
   }
 

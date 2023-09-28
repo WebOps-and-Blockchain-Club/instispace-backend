@@ -3,7 +3,6 @@ import {
   Query,
   Mutation,
   Args,
-  Int,
   ResolveField,
   Parent,
 } from '@nestjs/graphql';
@@ -11,22 +10,31 @@ import { FeedbackService } from './feedback.service';
 import { Feedback } from './feedback.entity';
 import { CreateFeedbackInput } from './type/create-feedback.input';
 import { UpdateFeedbackInput } from './type/update-feedback.input';
-import { Course } from '../course.entity';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { CurrentUser } from 'src/auth/current_user';
+import { User } from 'src/user/user.entity';
+import { UserService } from 'src/user/user.service';
 
 @Resolver(() => Feedback)
 export class FeedbackResolver {
-  constructor(private readonly feedbackService: FeedbackService) {}
+  constructor(private readonly feedbackService: FeedbackService,private readonly userService : UserService
+    ) {}
 
+
+  @UseGuards(JwtAuthGuard)
   @Mutation(() => Feedback)
-  addFeedback(
+  async addFeedback(
     @Args('createFeedbackInput') createFeedbackInput: CreateFeedbackInput,
+    @CurrentUser() user:User,
   ) {
-    return this.feedbackService.create(createFeedbackInput);
+    let newUser=await this.userService.getOneById(user.id,['courseFeedback'])
+    return await this.feedbackService.create(createFeedbackInput,user);
   }
 
   @Query(() => [Feedback])
-  findAll() {
-    return this.feedbackService.findAll();
+  async findAll() {
+    return await  this.feedbackService.findAll();
   }
 
   @Query(() => Feedback)
@@ -44,9 +52,15 @@ export class FeedbackResolver {
     );
   }
 
-  @ResolveField(() => Course)
-  async course(@Parent() feedback: Feedback) {
-    let courseN = await this.feedbackService.findOne(feedback.id);
-    return feedback.course;
+  @ResolveField(() => User)
+  async createdBy(@Parent() feedback:Feedback) {
+    let newFeedback = await this.feedbackService.findOne(feedback.id);
+    return newFeedback.createdBy;
   }
+
+  // @ResolveField(() => Course)
+  // async course(@Parent() feedback: Feedback) {
+  //   let courseN = await this.feedbackService.findOne(feedback.id);
+  //   return feedback.course;
+  // }
 }

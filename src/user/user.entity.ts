@@ -26,6 +26,7 @@ import { NotifConfig } from 'src/notif-config/notif-config.entity';
 import { Group } from 'src/treasure-hunt/group/group.entity';
 import { Submission } from 'src/treasure-hunt/submissions/submission.entity';
 import { Ticket } from 'src/ticket/ticket.entity';
+import { Feedback } from 'src/course/feedback/feedback.entity';
 
 @ObjectType()
 @Entity('User')
@@ -107,6 +108,10 @@ export class User {
   @OneToMany(() => Post, (post) => post.createdBy, { nullable: true })
   @Field(() => [Post], { nullable: true })
   post: Post[];
+
+  @OneToMany(() => Feedback, (Feedback) => Feedback.createdBy, { nullable: true })
+  @Field(() => [Feedback], { nullable: true })
+  courseFeedback: Feedback[];
 
   @Field()
   department: string;

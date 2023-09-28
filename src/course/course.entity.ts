@@ -47,7 +47,7 @@ export class Course {
   @Field(() => Date, { nullable: true })
   to: Date;
 
-  @OneToMany(() => Feedback, (feedbacks) => feedbacks.course)
-  @Field(() => [Feedback])
-  feedbacks: Feedback[];
+  // @OneToMany(() => Feedback, (feedbacks) => feedbacks.course)
+  // @Field(() => [Feedback])
+  // feedbacks: Feedback[];
 }

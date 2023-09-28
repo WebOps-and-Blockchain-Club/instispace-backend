@@ -13,4 +13,11 @@ export class CreateFeedbackInput {
 
   @Field()
   courseCode: string;
+
+  @Field()
+  courseName: string;
+
+  
+
+
 }
