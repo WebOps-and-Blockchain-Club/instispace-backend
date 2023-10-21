@@ -33,12 +33,12 @@ export class FeedbackResolver {
   }
 
   @Query(() => [Feedback])
-  async findAll() {
+  async findAllFeedback() {
     return await  this.feedbackService.findAll();
   }
 
   @Query(() => Feedback)
-  async findOne(@Args('id') id: string) {
+  async findOneFeedback(@Args('id') id: string) {
     return await this.feedbackService.findOne(id);
   }
 
