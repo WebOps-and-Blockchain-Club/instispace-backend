@@ -29,7 +29,7 @@ export class FeedbackResolver {
     @CurrentUser() user:User,
   ) {
     let newUser=await this.userService.getOneById(user.id,['courseFeedback'])
-    return await this.feedbackService.create(createFeedbackInput,user);
+    return await this.feedbackService.create(createFeedbackInput,newUser);
   }
 
   @Query(() => [Feedback])
