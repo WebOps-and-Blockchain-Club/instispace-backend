@@ -26,7 +26,7 @@ export class FeedbackService {
   }
 
   async findAll() {
-    return await this.feedbackRepository.find({order: { createdAt:"ASC" },relations:['createdBy']});
+    return await this.feedbackRepository.find({order: { createdAt:"DESC" },relations:['createdBy']});
   }
 
   async findOne(id: string) {
