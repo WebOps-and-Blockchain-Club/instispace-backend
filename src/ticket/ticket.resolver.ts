@@ -17,6 +17,7 @@ import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { CurrentUser } from 'src/auth/current_user';
 
+@UseGuards(JwtAuthGuard)
 @Resolver(() => Ticket)
 export class TicketResolver {
   constructor(
@@ -71,8 +72,8 @@ export class TicketResolver {
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => Ticket)
-  resolveTicket(@CurrentUser() user: User, @Args('id') id: string) {
-    return this.ticketService.resolveTicket(id, user);
+  resolveTicket(@CurrentUser() user: User, @Args('id') id: string,@Args("resolveDescription") resolveDescription:string) {
+    return this.ticketService.resolveTicket(id, user,resolveDescription);
   }
 
   @ResolveField(() => User)

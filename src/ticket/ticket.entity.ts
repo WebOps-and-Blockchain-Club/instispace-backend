@@ -35,6 +35,10 @@ export class Ticket {
   @Field({ nullable: true })
   imageUrls?: string;
 
+  @Column({nullable:true})
+  @Field({nullable:true})
+  resolveDescription:string
+
   @ManyToOne(() => User, (user) => user.createdTickets)
   @Field(() => User)
   createdBy: User;

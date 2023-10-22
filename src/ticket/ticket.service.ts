@@ -41,7 +41,7 @@ export class TicketService {
     return `This action updates a #${id} ticket`;
   }
 
-  async resolveTicket(id: string, user: User) {
+  async resolveTicket(id: string, user: User,resolveDescription:string) {
     try {
       let userN = await this.userServive.getOneById(user.id, [
         'resolvedTickets',
@@ -54,9 +54,10 @@ export class TicketService {
         );
 
       ticketN.status = TicketStatus.RESOLVED;
+      ticketN.resolveDescription=resolveDescription;
       ticketN.resolvedBy = userN;
 
-      this.ticketRepository.save(ticketN);
+     return await this.ticketRepository.save(ticketN);
     } catch (e) {
       throw new Error(e.message);
     }
