@@ -26,6 +26,7 @@ export class TicketService {
   async findAll() {
     return await this.ticketRepository.find({
       relations: ['createdBy', 'resolvedBy'],
+      order:{createdAt:"DESC"}
     });
   }
 
