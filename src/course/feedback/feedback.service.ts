@@ -25,8 +25,13 @@ export class FeedbackService {
     return await this.feedbackRepository.save(feedback);
   }
 
-  async findAll() {
-    return await this.feedbackRepository.find({order: { createdAt:"DESC" },relations:['createdBy']});
+  async findAll(search:string) {
+    let list= await this.feedbackRepository.find({order: { createdAt:"DESC" },relations:['createdBy']});
+    if(search && search.length)
+    list= list.filter((e)=>JSON.stringify(e)
+    .toLowerCase()
+    .includes(search?.toLowerCase()!))
+    return list;
   }
 
   async findOne(id: string) {
