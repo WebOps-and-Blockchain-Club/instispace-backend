@@ -72,19 +72,21 @@ export class TicketResolver {
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => Ticket)
-  resolveTicket(@CurrentUser() user: User, @Args('id') id: string,@Args("resolveDescription") resolveDescription:string) {
-    return this.ticketService.resolveTicket(id, user,resolveDescription);
+  async resolveTicket(@CurrentUser() user: User, @Args('id') id: string,@Args("resolveDescription") resolveDescription:string) {
+    let ticket = await this.getOneTicket(id);
+    return await this.ticketService.resolveTicket(ticket, user,resolveDescription);
   }
+
 
   @ResolveField(() => User)
   async createdBy(@Parent() ticket: Ticket) {
-    let ticketN = await this.ticketService.findOne(ticket.id);
-    return ticket.createdBy;
+    let ticketN = await this.ticketService.findOne(ticket.id,);
+    return ticketN.createdBy;
   }
 
   @ResolveField(() => User)
   async resolvedBy(@Parent() ticket: Ticket) {
     let ticketN = await this.ticketService.findOne(ticket.id);
-    return ticket.resolvedBy;
+    return ticketN.resolvedBy;
   }
 }

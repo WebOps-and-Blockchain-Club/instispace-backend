@@ -12,7 +12,7 @@ import { TicketStatus } from 'src/utils';
 export class TicketService {
   constructor(
     @InjectRepository(Ticket) private ticketRepository: Repository<Ticket>,
-    private readonly userServive: UserService,
+    private readonly userService: UserService,
   ) {}
 
   async create(createTicketInput: CreateTicketInput, user: User) {
@@ -41,23 +41,25 @@ export class TicketService {
     return `This action updates a #${id} ticket`;
   }
 
-  async resolveTicket(id: string, user: User,resolveDescription:string) {
+  async resolveTicket(ticket:Ticket, user: User,resolveDescription:string) {
     try {
-      let userN = await this.userServive.getOneById(user.id, [
+      let userN = await this.userService.getOneById(user.id, [
         'resolvedTickets',
       ]);
-      let ticketN = await this.findOne(id);
-      console.log(ticketN.canResolve);
-      if (!ticketN.canResolve)
+      let Parent = await this.userService.getParents(user);
+      let check = Parent.filter(
+        (p) => p.roll === 'instispace_cfi@smail.iitm.ac.in',
+      );
+      if(check.length!==1 && ticket.createdBy.id!==userN.id)
         throw new UnauthorizedException(
           'You are not allowed to resolve this ticket',
         );
 
-      ticketN.status = TicketStatus.RESOLVED;
-      ticketN.resolveDescription=resolveDescription;
-      ticketN.resolvedBy = userN;
+      ticket.status = TicketStatus.RESOLVED;
+      ticket.resolveDescription=resolveDescription;
+      ticket.resolvedBy = userN;
 
-     return await this.ticketRepository.save(ticketN);
+     return await this.ticketRepository.save(ticket);
     } catch (e) {
       throw new Error(e.message);
     }
