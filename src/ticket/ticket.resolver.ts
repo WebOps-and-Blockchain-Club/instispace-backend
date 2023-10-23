@@ -66,7 +66,7 @@ export class TicketResolver {
     let check = Parent.filter(
       (p) => p.roll === 'instispace_cfi@smail.iitm.ac.in',
     );
-    if (check.length) return true;
+    if (check.length) return  true;
     return false;
   }
 
