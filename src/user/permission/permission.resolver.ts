@@ -29,6 +29,7 @@ class PermissionResolver {
           PostCategory.Lost,
           PostCategory.Found,
           PostCategory.Opportunity,
+          PostCategory.StudyResources,
         ];
       } else {
         return [
