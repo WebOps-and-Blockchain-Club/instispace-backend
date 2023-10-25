@@ -11,4 +11,5 @@ export enum PostCategory {
   RandomThought = 'Random Thought',
   Lost = 'Lost',
   Found = 'Found',
+  StudyResources = 'Study Resources',
 }
