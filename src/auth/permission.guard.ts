@@ -28,6 +28,7 @@ export class PermissionGuard implements CanActivate {
           PostCategory.RandomThought,
           PostCategory.Recruitment,
           PostCategory.Review,
+          PostCategory.StudyResources
         ].includes(ctx.getArgs().postInput.category)
       )
         return true;
