@@ -29,7 +29,7 @@ export class PostResolver {
   constructor(
     private readonly postService: PostService,
     private readonly userServive: UserService,
-  ) {}
+  ) { }
 
   @UseGuards(JwtAuthGuard)
   @Query(() => findoneOutput)
@@ -63,7 +63,7 @@ export class PostResolver {
   ) {
     return await this.postService.create(post, user);
   }
-  
+
 
   @Mutation(() => Post)
   async updatePost(
@@ -254,7 +254,7 @@ export class PostResolver {
         'accountsCreated',
       ]);
       if (user?.id === newPost?.createdBy?.id)
-        permissions.push('Edit', 'Delete','SeeMentalHelp');
+        permissions.push('Edit', 'Delete', 'SeeMentalHelp');
       else permissions.push('Report');
       if (
         (newPost.category === PostCategory.Competition ||
@@ -276,11 +276,10 @@ export class PostResolver {
       )
         permissions.push('APPROVE_POST');
       if (newUser.permission.handleReports) permissions.push('MODERATE_REPORT');
-      if(post.isVisibleToAll===false) 
-      {
-        if(user.role==="ADMIN") permissions.push('SeeMentalHelp')
+      if (post.isVisibleToAll === false) {
+        if (user.role === "ADMIN") permissions.push('SeeMentalHelp')
       }
-      else{
+      else {
         permissions.push("SeeMentalHelp")
       }
       return permissions;

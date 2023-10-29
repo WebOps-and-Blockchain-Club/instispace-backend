@@ -1,4 +1,4 @@
- import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateFeedbackInput } from './type/create-feedback.input';
 import { UpdateFeedbackInput } from './type/update-feedback.input';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,10 +13,10 @@ export class FeedbackService {
     @InjectRepository(Feedback)
     private feedbackRepository: Repository<Feedback>,
     // private readonly courseService: CourseService,
-  ) {}
-  async create(createFeedbackInput: CreateFeedbackInput , user:User) {
+  ) { }
+  async create(createFeedbackInput: CreateFeedbackInput, user: User) {
     let feedback = this.feedbackRepository.create({ ...createFeedbackInput });
-    feedback.createdBy=user;
+    feedback.createdBy = user;
     // let course = await this.courseService.findOneByCode(
     //   createFeedbackInput.courseCode,
     // );
@@ -25,13 +25,33 @@ export class FeedbackService {
     return await this.feedbackRepository.save(feedback);
   }
 
-  async findAll(search : string) {
-    let list= await this.feedbackRepository.find({order: { createdAt:"DESC" },relations:['createdBy']});
-    if(search && search.length)
-    list= list.filter((e)=>JSON.stringify(e)
-    .toLowerCase()
-    .includes(search?.toLowerCase()!))
-    return list;
+  async findAll(search: string,
+    lastpostId: string,
+    take: number
+  ) {
+    try {
+
+
+      let list = await this.feedbackRepository.find({ order: { createdAt: "DESC" }, relations: ['createdBy'] });
+      if (search && search.length) {
+        list = list.filter((e) => JSON.stringify(e)
+          .toLowerCase()
+          .includes(search?.toLowerCase()!))
+      }
+      const total = list.length;
+      let finalList;
+      if (lastpostId) {
+        const index = list.map((n) => n.id).indexOf(lastpostId);
+        finalList = list.splice(index + 1, take);
+      } else {
+        finalList = list.splice(0, take);
+      }
+      return { list: finalList, total };
+    } catch (error) {
+      throw new Error(error.message)
+    }
+    // return list;
+    //hish
   }
 
   async findOne(id: string) {

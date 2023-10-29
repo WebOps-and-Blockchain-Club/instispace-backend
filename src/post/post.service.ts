@@ -29,7 +29,7 @@ export class PostService {
     private readonly tagService: TagService,
     private readonly userService: UserService,
     private readonly notificationService: NotificationService,
-  ) {}
+  ) { }
   async findAll(
     lastpostId: string,
     take: number,
@@ -156,16 +156,16 @@ export class PostService {
             let _tmpFilterOptions: FindOptionsWhere<Post>[] = [];
             filterOptions.map(
               (e) =>
-                (_tmpFilterOptions = _tmpFilterOptions.concat([
-                  {
-                    ...e,
-                    title: ILike(`%${filteringConditions.search}%`),
-                  },
-                  {
-                    ...e,
-                    content: ILike(`%${filteringConditions.search}%`),
-                  },
-                ])),
+              (_tmpFilterOptions = _tmpFilterOptions.concat([
+                {
+                  ...e,
+                  title: ILike(`%${filteringConditions.search}%`),
+                },
+                {
+                  ...e,
+                  content: ILike(`%${filteringConditions.search}%`),
+                },
+              ])),
             );
             filterOptions = _tmpFilterOptions;
           } else {
@@ -197,22 +197,22 @@ export class PostService {
         let _tmpFilterOptions: FindOptionsWhere<Post>[] = [];
         filterOptions.map(
           (e) =>
-            (_tmpFilterOptions = _tmpFilterOptions.concat([
-              {
-                ...e,
-                postReports: {
-                  id: IsNull(),
+          (_tmpFilterOptions = _tmpFilterOptions.concat([
+            {
+              ...e,
+              postReports: {
+                id: IsNull(),
+              },
+            },
+            {
+              ...e,
+              postReports: {
+                createdBy: {
+                  id: Not(user.id),
                 },
               },
-              {
-                ...e,
-                postReports: {
-                  createdBy: {
-                    id: Not(user.id),
-                  },
-                },
-              },
-            ])),
+            },
+          ])),
         );
         filterOptions = _tmpFilterOptions;
       } else {
@@ -263,16 +263,16 @@ export class PostService {
             a.likedBy.length > b.likedBy.length
               ? -1
               : a.likedBy.length < b.likedBy.length
-              ? 1
-              : 0,
+                ? 1
+                : 0,
           );
         } else if (orderInput.byLikes == false) {
           posts.sort((a, b) =>
             a.likedBy.length < b.likedBy.length
               ? -1
               : a.likedBy.length > b.likedBy.length
-              ? 1
-              : 0,
+                ? 1
+                : 0,
           );
         }
       }
@@ -323,7 +323,7 @@ export class PostService {
 
     let newPost = new Post();
     newPost.Link = post.link;
-    post.isVisibleToAll ? newPost.isVisibleToAll=post.isVisibleToAll  : newPost.isVisibleToAll=true;
+    post.isVisibleToAll ? newPost.isVisibleToAll = post.isVisibleToAll : newPost.isVisibleToAll = true;
     newPost.category = post.category;
     newPost.content = post.content;
     newPost.linkName = post.linkName;

@@ -5,6 +5,7 @@ import {
   Args,
   ResolveField,
   Parent,
+  Int,
 } from '@nestjs/graphql';
 import { FeedbackService } from './feedback.service';
 import { Feedback } from './feedback.entity';
@@ -15,26 +16,29 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/current_user';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
+import getallfeedback from './type/feedback.output';
 
 @Resolver(() => Feedback)
 export class FeedbackResolver {
-  constructor(private readonly feedbackService: FeedbackService,private readonly userService : UserService
-    ) {}
+  constructor(private readonly feedbackService: FeedbackService, private readonly userService: UserService
+  ) { }
 
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => Feedback)
   async addFeedback(
     @Args('createFeedbackInput') createFeedbackInput: CreateFeedbackInput,
-    @CurrentUser() user:User,
+    @CurrentUser() user: User,
   ) {
-    let newUser=await this.userService.getOneById(user.id,['courseFeedback'])
-    return await this.feedbackService.create(createFeedbackInput,newUser);
+    let newUser = await this.userService.getOneById(user.id, ['courseFeedback'])
+    return await this.feedbackService.create(createFeedbackInput, newUser);
   }
 
-  @Query(() => [Feedback])
-  async findAllFeedback(@Args('search') search : string) {
-    return await  this.feedbackService.findAll(search);
+  @Query(() => getallfeedback)
+  async findAllFeedback(@Args('search') search: string,
+    @Args('lastpostId') lastpostId: string,
+    @Args('take') take: number) {
+    return await this.feedbackService.findAll(search, lastpostId, take);
   }
 
   @Query(() => Feedback)
@@ -53,7 +57,7 @@ export class FeedbackResolver {
   }
 
   @ResolveField(() => User)
-  async createdBy(@Parent() feedback:Feedback) {
+  async createdBy(@Parent() feedback: Feedback) {
     let newFeedback = await this.feedbackService.findOne(feedback.id);
     return newFeedback.createdBy;
   }
