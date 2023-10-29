@@ -20,6 +20,7 @@ import { BadgesModule } from './badges/badges.module';
 import { TreasureHuntModule } from './treasure-hunt/treasure-hunt.module';
 import { TicketModule } from './ticket/ticket.module';
 import { FeedbackModule } from './course/feedback/feedback.module';
+import { MenuModule } from './menu/menu.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { FeedbackModule } from './course/feedback/feedback.module';
     TreasureHuntModule,
     TicketModule,
     FeedbackModule,
+    MenuModule,
   ],
 })
 export class AppModule {}
