@@ -37,7 +37,7 @@ export class UserResolver {
   constructor(
     private readonly userService: UserService,
     private readonly ldapListService: LdapListService,
-  ) {}
+  ) { }
 
   @Mutation(() => LoginOutput)
   async login(
@@ -248,5 +248,10 @@ export class UserResolver {
     if (user.roll.substring(2, 5).toLowerCase() === '21b') {
       return true;
     } else return false;
+  }
+
+  @Query(() => User, { nullable: true })
+  async getSuperUser() {
+    return await this.userService.getLeads()
   }
 }

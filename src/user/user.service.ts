@@ -54,7 +54,7 @@ export class UserService {
     private hostelRepository: Repository<Hostel>,
     @Inject(forwardRef(() => NotifConfigService))
     private notifService: NotifConfigService,
-  ) {}
+  ) { }
 
   async login({ roll, pass }: LoginInput, fmcToken: string) {
     if (emailExpresion.test(roll) === false) {
@@ -455,4 +455,11 @@ export class UserService {
       throw new Error(`message : ${error}`);
     }
   };
+  async getLeads(): Promise<User[]> {
+    return await this.usersRepository.find({
+      where: {
+        role: UserRole.LEADS
+      }
+    })
+  }
 }
