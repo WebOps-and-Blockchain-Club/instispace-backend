@@ -342,6 +342,10 @@ export class PostService {
     }
     if (post.endTime) newPost.endTime = post.endTime;
     newPost.createdBy = user;
+    if (post.leadId) {
+      let user = await this.userService.getOneById(post.leadId)
+      newPost.onBehalfOf = user;
+    }
     let createdPost = await this.postRepository.save(newPost);
     this.notificationService.notifyPost(createdPost);
     return createdPost;
@@ -551,4 +555,5 @@ export class PostService {
       throw new Error(e.message);
     }
   }
+
 }

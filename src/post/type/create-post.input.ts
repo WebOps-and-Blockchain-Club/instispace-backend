@@ -4,6 +4,9 @@ import Tag from 'src/tag/tag.entity';
 @InputType()
 export class CreatePostInput {
   @Field({ nullable: true })
+  leadId: string;
+
+  @Field({ nullable: true })
   title: string;
 
   @Field()
@@ -27,8 +30,8 @@ export class CreatePostInput {
   @Field()
   category: string;
 
-  @Field({nullable:true})
-  isVisibleToAll:boolean;
+  @Field({ nullable: true })
+  isVisibleToAll: boolean;
 
   @Field({ nullable: true })
   location: string;
@@ -36,9 +39,9 @@ export class CreatePostInput {
   @Field(() => [String], { nullable: true })
   photoList: string[];
 
-  @Field(()=>Number, {nullable: true})
+  @Field(() => Number, { nullable: true })
   pointsValue: Number;
-  
+
 
   tags?: Tag[];
 }

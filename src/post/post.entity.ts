@@ -45,8 +45,8 @@ export class Post {
   @Index()
   @Field()
   category: string;
- 
-  @Field({ nullable: true})
+
+  @Field({ nullable: true })
   attachment: string;
 
   @Column({ type: 'text', nullable: true })
@@ -157,24 +157,33 @@ export class Post {
   @Field(() => [String])
   actions: string[];
 
-  @Column({nullable:true})
-  @Field(()=> Boolean, {nullable:true})
-  isQRActive:Boolean;
+  @Column({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
+  isQRActive: Boolean;
 
-  @Column({nullable:true})
-  @Field({nullable:true})
-  qrText:string;
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  qrText: string;
 
-  @Column({nullable:true})
-  @Field(()=>Number, {nullable:true})
+  @Column({ nullable: true })
+  @Field(() => Number, { nullable: true })
   pointsValue: Number;
 
-  @Column({nullable:true})
-  @Field(()=>Boolean,{nullable:true})
-  isVisibleToAll:Boolean;
+  @Column({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
+  isVisibleToAll: Boolean;
 
-  @ManyToMany(()=> User, (user)=>user.attendedEvents)
-  @Field(()=> [User], {nullable:true})
+  @ManyToMany(() => User, (user) => user.attendedEvents)
+  @Field(() => [User], { nullable: true })
   @JoinTable()
   eventAttendees: User[];
+
+  @ManyToOne(() => User, (user) => user.post, {
+    cascade: true
+  })
+  // @Column({ nullable: true })
+  @Field(() => User, { nullable: true })
+  onBehalfOf: User;
+
+
 }
