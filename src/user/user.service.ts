@@ -456,10 +456,16 @@ export class UserService {
     }
   };
   async getLeads(): Promise<User[]> {
-    return await this.usersRepository.find({
+    let Leads = await this.usersRepository.find({
       where: {
         role: UserRole.LEADS
       }
     })
+    let Admin = await this.usersRepository.find({
+      where: {
+        role: UserRole.ADMIN
+      }
+    })
+    return Leads.concat(Admin)
   }
 }
