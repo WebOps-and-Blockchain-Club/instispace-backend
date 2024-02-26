@@ -179,7 +179,8 @@ export class Post {
   eventAttendees: User[];
 
   @ManyToOne(() => User, (user) => user.onBehalfOfPost, {
-    cascade: true
+    cascade: true,
+    nullable:true
   })
   // @Column({ nullable: true })
   @Field(() => User, { nullable: true })
