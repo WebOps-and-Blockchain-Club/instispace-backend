@@ -178,7 +178,7 @@ export class Post {
   @JoinTable()
   eventAttendees: User[];
 
-  @ManyToOne(() => User, (user) => user.post, {
+  @ManyToOne(() => User, (user) => user.onBehalfOfPost, {
     cascade: true
   })
   // @Column({ nullable: true })

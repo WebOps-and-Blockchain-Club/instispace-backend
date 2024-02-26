@@ -1,6 +1,6 @@
 import { Injectable, Scope } from '@nestjs/common';
 import * as firebaseAdmin from 'firebase-admin';
-import * as serviceAccount from './serviceAccountKey.json';
+import * as serviceAccount from './../../serviceAccountKey.json';
 import { NotifConfigService } from 'src/notif-config/notif-config.service';
 
 //scope: Request scope creates an instance when injected and deletes it when the request is done

@@ -195,4 +195,9 @@ export class User {
 
   @Field(() => Boolean, { defaultValue: false, nullable: true })
   isFreshie: boolean;
+
+  @OneToMany(() => Post, (post) => post.onBehalfOf, { nullable: true })
+  @Field(() => [Post], { nullable: true })
+  onBehalfOfPost: Post[]
 }
+
