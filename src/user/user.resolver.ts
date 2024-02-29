@@ -250,7 +250,7 @@ export class UserResolver {
     } else return false;
   }
 
-  @Query(() => User, { nullable: true })
+  @Query(() => [User], { nullable: true })
   async getSuperUser() {
     return await this.userService.getLeads()
   }

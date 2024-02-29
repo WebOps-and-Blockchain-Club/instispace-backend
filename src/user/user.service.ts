@@ -455,7 +455,7 @@ export class UserService {
       throw new Error(`message : ${error}`);
     }
   };
-  async getLeads(): Promise<User[]> {
+  async getLeads(){
     let Leads = await this.usersRepository.find({
       where: {
         role: UserRole.LEADS
