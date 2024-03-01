@@ -3,6 +3,8 @@
 /node_modules
 /old-code/node_modules
 /src/utils/config.json
+/src/main.ts
+/src/index.ts
 
 # Logs
 logs

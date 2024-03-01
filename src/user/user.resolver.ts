@@ -37,7 +37,7 @@ export class UserResolver {
   constructor(
     private readonly userService: UserService,
     private readonly ldapListService: LdapListService,
-  ) { }
+  ) {}
 
   @Mutation(() => LoginOutput)
   async login(
@@ -245,13 +245,11 @@ export class UserResolver {
 
   @ResolveField(() => Boolean)
   async isFreshie(@Parent() user: User) {
-    if (user.roll.substring(2, 5).toLowerCase() === '21b') {
-      return true;
-    } else return false;
+    return false;
   }
 
   @Query(() => [User], { nullable: true })
   async getSuperUser() {
-    return await this.userService.getLeads()
+    return await this.userService.getLeads();
   }
 }
