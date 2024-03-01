@@ -180,11 +180,14 @@ export class Post {
 
   @ManyToOne(() => User, (user) => user.onBehalfOfPost, {
     cascade: true,
-    nullable:true
+    nullable: true
   })
   // @Column({ nullable: true })
   @Field(() => User, { nullable: true })
   onBehalfOf: User;
 
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  onBehalf: String;
 
 }

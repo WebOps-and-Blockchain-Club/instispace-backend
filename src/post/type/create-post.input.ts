@@ -4,7 +4,7 @@ import Tag from 'src/tag/tag.entity';
 @InputType()
 export class CreatePostInput {
   @Field({ nullable: true })
-  leadId: string;
+  onBehalfName: string;
 
   @Field({ nullable: true })
   title: string;

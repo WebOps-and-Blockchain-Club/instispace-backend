@@ -6,6 +6,7 @@ dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  console.log("App started at http://localhost:8005")
   await app.listen(8005);
 }
 bootstrap();
